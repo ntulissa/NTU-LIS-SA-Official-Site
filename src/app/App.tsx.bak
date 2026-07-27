@@ -1,0 +1,1636 @@
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight } from "lucide-react";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+
+import imgBuilding from "@/imports/HomePage-1/de7749452570d864c1f5c584765f093ab16a6d89.png";
+import imgBuildingBento from "@/imports/BentoGrid/de7749452570d864c1f5c584765f093ab16a6d89.png";
+import imgBentoBuilding1 from "@/imports/BentoGrid-1/de7749452570d864c1f5c584765f093ab16a6d89.png";
+import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
+import svgHistoryPaths from "@/imports/OurHistory/svg-qfpi1b2b0n";
+import imgBuildingHistory from "@/imports/OurHistory/de7749452570d864c1f5c584765f093ab16a6d89.png";
+import imgMeiji from "@/imports/CurrentTeam/ec7393ec630e93b1f986ef8fe7dd4a9ffc5f9745.png";
+import imgHongLingYa from "@/imports/___2026-07-22_15.31.56-removebg-preview.png";
+import svgTeamPaths from "@/imports/CurrentTeam/svg-75tsnwzvfd";
+import imgBuildingResources from "@/imports/AcademicResources/de7749452570d864c1f5c584765f093ab16a6d89.png";
+import imgRect7 from "@/imports/AcademicResources/aeb41d7034b1b48d5fc9df0a580281ac376ad0f1.png";
+import imgRect8 from "@/imports/AcademicResources/1f59199eb1196007561b8c8c386714d53fbb3e21.png";
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+function pad(n: number) {
+  return String(n).padStart(3, "0");
+}
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function useCountdown(target: Date) {
+  const [time, setTime] = useState({ d: 0, h: 0, m: 0, s: 0 });
+  useEffect(() => {
+    const tick = () => {
+      const diff = Math.max(0, target.getTime() - Date.now());
+      const totalSec = Math.floor(diff / 1000);
+      setTime({
+        d: Math.floor(totalSec / 86400),
+        h: Math.floor((totalSec % 86400) / 3600),
+        m: Math.floor((totalSec % 3600) / 60),
+        s: totalSec % 60,
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [target]);
+  return time;
+}
+
+function useScrollReveal(threshold = 0.12) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
+function Reveal({ children, delay = 0, className = "" }: {
+  children: React.ReactNode; delay?: number; className?: string;
+}) {
+  const { ref, visible } = useScrollReveal();
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      } ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ── card base style ───────────────────────────────────────────────────────────
+const cardBase =
+  "rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.04)] hover:border-white/20 transition-colors duration-200 cursor-pointer";
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 1. HERO — HomePage-1
+// ═══════════════════════════════════════════════════════════════════════════
+function HeroSection() {
+  const [scrollY, setScrollY] = useState(0);
+  useEffect(() => {
+    const h = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", h, { passive: true });
+    return () => window.removeEventListener("scroll", h);
+  }, []);
+
+  return (
+    <section className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-end pb-20 pt-[100px]">
+      {/* Giant LISSA oval — clipped strictly to section bounds */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          style={{
+            position: "absolute",
+            width: "115vw",
+            height: "162vw",
+            left: "-2.3vw",
+            top: "-57vw",
+            transform: `translateY(${scrollY * 0.1}px)`,
+            willChange: "transform",
+          }}
+        >
+          {/* Building photo at 20% opacity inside oval */}
+          <div
+            className="absolute inset-0 overflow-hidden opacity-20"
+            style={{ borderRadius: "50%" }}
+          >
+            <img
+              src={imgBuilding}
+              alt=""
+              className="absolute max-w-none"
+              style={{ width: "220.8%", height: "102.77%", left: "-60.09%", top: "-2.77%" }}
+            />
+          </div>
+          {/* Teal border ring — inset 0 so it stays inside the oval container */}
+          <div
+            className="absolute inset-0"
+            style={{
+              border: "1.85vw solid #2F9EBD",
+              borderRadius: "50%",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Faint grid */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+          backgroundSize: "80px 80px",
+        }}
+      />
+
+      {/* Text content */}
+      <div className="relative px-6 md:px-14 max-w-[1400px] mx-auto w-full">
+        {/* → LISSA, on LIVE. */}
+        <p
+          className="text-white text-sm md:text-base mb-4 tracking-[2px]"
+          style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 700 }}
+        >
+          → LISSA, on LIVE.
+        </p>
+
+        {/* 系學會 — gradient */}
+        <h1
+          className="leading-none select-none mb-10 bg-clip-text text-transparent"
+          style={{
+            fontFamily: "'Noto Sans TC', sans-serif",
+            fontWeight: 900,
+            fontSize: "clamp(3.5rem, 13vw, 15rem)",
+            backgroundImage: "linear-gradient(to right, #D14B4B 0%, #2F9EBD 100%)",
+          }}
+        >
+          系學會
+        </h1>
+
+        {/* 可以這樣「玩」？ */}
+        <h2
+          className="text-white leading-tight mb-10"
+          style={{
+            fontFamily: "'Noto Sans TC', sans-serif",
+            fontWeight: 700,
+            fontSize: "clamp(2rem, 9.5vw, 11rem)",
+          }}
+        >
+          可以這樣「玩」？
+        </h2>
+
+        {/* Announcement pill */}
+        <a
+          href="#"
+          className="inline-flex items-center gap-3 bg-white text-black px-7 py-3 rounded-full hover:bg-white/90 transition-all duration-200 group"
+          style={{
+            fontFamily: "'Noto Sans TC', sans-serif",
+            fontWeight: 700,
+            fontSize: "clamp(0.85rem, 1.5vw, 1.1rem)",
+            letterSpacing: "0.06em",
+          }}
+        >
+          第 53 屆系學會上任公告
+          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
+        </a>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 2. BENTO GRID
+// ═══════════════════════════════════════════════════════════════════════════
+// ── 後台活動設定：修改此處即可更新倒數目標 ───────────────────────────────────
+const NEXT_EVENT = {
+  name: "B14~15 系學會發表會",
+  time: new Date("2026-09-07T14:30:00+08:00"), // 台灣時間 2026/9/7 14:30
+};
+const COUNTDOWN_TARGET = NEXT_EVENT.time;
+
+const BENTO_CARD =
+  "relative overflow-hidden rounded-[14px] border-4 border-[rgba(255,255,255,0.31)] flex flex-col cursor-pointer hover:opacity-90 transition-opacity duration-200";
+const BENTO_BG: React.CSSProperties = {
+  background: "linear-gradient(to bottom, rgba(47,158,189,0.44), rgba(209,75,75,0.44))",
+};
+const MONO_SEMI: React.CSSProperties = { fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 600 };
+const MONO_MED: React.CSSProperties = { fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 500 };
+const MONO_BOLD: React.CSSProperties = { fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 700 };
+
+function BentoSection() {
+  const time = useCountdown(COUNTDOWN_TARGET);
+
+  return (
+    <section className="bg-black px-4 md:px-6 xl:px-8 py-10 md:py-16">
+      {/* ── Label + Title ── */}
+      <div className="max-w-[1680px] mx-auto mb-6">
+        <Reveal>
+          <p
+            className="text-[13px] md:text-[15px] tracking-[2.4px] mb-4"
+            style={{
+              ...MONO_MED,
+              background: "linear-gradient(to right, #ffffff, #999999)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            －OVERVIEW 資訊總覽
+          </p>
+          <div style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 700, letterSpacing: "0.6px" }}>
+            <p className="text-white leading-none mb-[20px]" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)" }}>
+              YOUR
+            </p>
+            <p className="text-[#2f9ebd] leading-none mb-8" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)" }}>
+              CAMPUS PORTAL
+            </p>
+          </div>
+        </Reveal>
+      </div>
+
+      {/* ── Bento Grid ── */}
+      <div className="max-w-[1680px] mx-auto flex flex-col lg:flex-row gap-3 lg:gap-4 lg:h-[680px]">
+
+        {/* ──────── LEFT COLUMN ──────── */}
+        <div className="flex flex-col gap-3 lg:gap-4 lg:w-[49.8%] shrink-0">
+
+          {/* UP NEXT */}
+          <Reveal className="flex-[427] flex flex-col min-h-[280px]">
+            <div className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8`} style={BENTO_BG}>
+              {/* Label */}
+              <p
+                className="text-white tracking-[3.04px] whitespace-nowrap"
+                style={{ ...MONO_SEMI, fontSize: "clamp(11px, 1.2vw, 19px)" }}
+              >
+                UP NEXT
+              </p>
+
+              {/* Countdown digits — D : H : M : S */}
+              <div className="flex items-end gap-1 lg:gap-2 my-auto py-6">
+                {([
+                  { label: "D", value: pad(time.d) },
+                  { label: "H", value: pad2(time.h) },
+                  { label: "M", value: pad2(time.m) },
+                  { label: "S", value: pad2(time.s) },
+                ] as const).map(({ label, value }, i, arr) => (
+                  <div key={label} className="contents">
+                    <div className="flex flex-col items-center gap-2 flex-1">
+                      <div className="bg-[rgba(0,0,0,0.47)] rounded-[17px] w-full flex items-center justify-center py-2 lg:py-3">
+                        <span
+                          className="text-white tabular-nums"
+                          style={{ ...MONO_SEMI, fontWeight: 500, fontSize: "clamp(1.1rem, 3vw, 4rem)", letterSpacing: "0.16em" }}
+                        >
+                          {value}
+                        </span>
+                      </div>
+                      <span
+                        className="text-[rgba(255,255,255,0.4)] tracking-[3.04px]"
+                        style={{ ...MONO_SEMI, fontSize: "clamp(10px, 1vw, 16px)" }}
+                      >
+                        {label}
+                      </span>
+                    </div>
+                    {i < arr.length - 1 && (
+                      <span
+                        className="text-white mb-[30px] shrink-0"
+                        style={{ ...MONO_MED, fontSize: "clamp(1.1rem, 3vw, 4rem)" }}
+                      >
+                        :
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Bottom event info — pulled from NEXT_EVENT config */}
+              <div>
+                <p
+                  className="text-[rgba(255,255,255,0.62)] tracking-[3.04px] mb-1 whitespace-nowrap"
+                  style={{ ...MONO_MED, fontSize: "clamp(11px, 1.2vw, 19px)" }}
+                >
+                  下一場活動
+                </p>
+                <p
+                  className="text-white whitespace-nowrap overflow-hidden text-ellipsis"
+                  style={{ ...MONO_SEMI, fontSize: "clamp(0.85rem, 2.4vw, 2.5rem)", letterSpacing: "6.56px" }}
+                >
+                  {NEXT_EVENT.name}
+                </p>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* ABOUT US */}
+          <Reveal delay={60} className="flex-[257] flex flex-col min-h-[160px]">
+            <div className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8`} style={BENTO_BG}>
+              <p
+                className="text-white tracking-[3.04px] whitespace-nowrap"
+                style={{ ...MONO_SEMI, fontSize: "clamp(11px, 1.2vw, 19px)" }}
+              >
+                ABOUT US
+              </p>
+
+              {/* Building oval image — right side */}
+              <div className="absolute top-4 bottom-4 right-4" style={{ width: "clamp(60px, 11%, 110px)" }}>
+                <div className="relative w-full h-full overflow-hidden" style={{ borderRadius: "57px" }}>
+                  <img
+                    src={imgBentoBuilding1}
+                    alt=""
+                    className="absolute max-w-none"
+                    style={{ width: "220.8%", height: "102.77%", left: "-60.09%", top: "-2.77%" }}
+                  />
+                </div>
+                <div
+                  className="absolute border-2 border-[rgba(255,255,255,0.15)]"
+                  style={{ inset: "-2px", borderRadius: "59px" }}
+                />
+              </div>
+
+              {/* Bottom text — padded to clear image */}
+              <div className="mt-auto" style={{ paddingRight: "clamp(70px, 14%, 130px)" }}>
+                <p
+                  className="text-[rgba(255,255,255,0.62)] tracking-[3.04px] mb-1 whitespace-nowrap overflow-hidden text-ellipsis"
+                  style={{ ...MONO_MED, fontSize: "clamp(10px, 0.85vw, 15px)" }}
+                >
+                  探索臺大圖資系學會的歷史脈絡、組織架構與現任幹部陣容
+                </p>
+                <p
+                  className="text-white whitespace-nowrap overflow-hidden text-ellipsis"
+                  style={{ ...MONO_SEMI, fontSize: "clamp(0.8rem, 2vw, 2rem)", letterSpacing: "6.56px" }}
+                >
+                  B14~15 臺大圖資系學會
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* ──────── RIGHT COLUMN ──────── */}
+        <div className="flex-1 flex flex-col gap-3 lg:gap-4">
+
+          {/* Row 1 — NEWS + RESOURCES (260 units) */}
+          <div className="flex-[260] flex gap-3 lg:gap-4 min-h-[150px]">
+            <Reveal delay={80} className="flex-1 flex flex-col">
+              <div className={`${BENTO_CARD} flex-1 p-5 md:p-6 justify-between`} style={BENTO_BG}>
+                <p
+                  className="text-white tracking-[3.04px]"
+                  style={{ ...MONO_SEMI, fontSize: "clamp(11px, 1.2vw, 19px)" }}
+                >
+                  NEWS
+                </p>
+                <p
+                  className="text-white"
+                  style={{ ...MONO_BOLD, fontSize: "clamp(1rem, 2vw, 2.1rem)", letterSpacing: "5.6px" }}
+                >
+                  最新動態
+                </p>
+              </div>
+            </Reveal>
+            <Reveal delay={100} className="flex-1 flex flex-col">
+              <div className={`${BENTO_CARD} flex-1 p-5 md:p-6 justify-between`} style={BENTO_BG}>
+                <p
+                  className="text-white tracking-[3.04px]"
+                  style={{ ...MONO_SEMI, fontSize: "clamp(11px, 1.2vw, 19px)" }}
+                >
+                  RESOURCES
+                </p>
+                <p
+                  className="text-white"
+                  style={{ ...MONO_BOLD, fontSize: "clamp(1rem, 2vw, 2.1rem)", letterSpacing: "5.6px" }}
+                >
+                  學習資源
+                </p>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* Row 2 — MEMBERS + SUPPORT US (260 units) */}
+          <div className="flex-[260] flex gap-3 lg:gap-4 min-h-[150px]">
+            <Reveal delay={120} className="flex-1 flex flex-col">
+              <div className={`${BENTO_CARD} flex-1 p-5 md:p-6 justify-between`} style={BENTO_BG}>
+                <p
+                  className="text-white tracking-[3.04px]"
+                  style={{ ...MONO_SEMI, fontSize: "clamp(11px, 1.2vw, 19px)" }}
+                >
+                  MEMBERS
+                </p>
+                <div className="flex items-end justify-between">
+                  <p
+                    className="text-[rgba(255,255,255,0.82)] leading-none"
+                    style={{
+                      ...MONO_BOLD,
+                      fontSize: "clamp(2.5rem, 7.5vw, 6.5rem)",
+                      letterSpacing: "0.16em",
+                      textShadow: "4px 6px 7.7px black",
+                    }}
+                  >
+                    40
+                  </p>
+                  <p
+                    className="text-[rgba(255,255,255,0.62)] tracking-[3.04px] text-right"
+                    style={{ ...MONO_MED, fontSize: "clamp(10px, 0.85vw, 15px)" }}
+                  >
+                    工作<br />團隊人數
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+            <Reveal delay={140} className="flex-1 flex flex-col">
+              <div className={`${BENTO_CARD} flex-1 p-5 md:p-6 justify-between`} style={BENTO_BG}>
+                <p
+                  className="text-white tracking-[3.04px]"
+                  style={{ ...MONO_SEMI, fontSize: "clamp(11px, 1.2vw, 19px)" }}
+                >
+                  SUPPORT US
+                </p>
+                {/* Money SVG — rotated, right side */}
+                <div className="absolute inset-[8%_2%_38%_50%]">
+                  <svg
+                    className="w-full h-full"
+                    fill="none"
+                    viewBox="0 0 105.001 102.962"
+                    style={{ transform: "rotate(22deg)" }}
+                  >
+                    <path d={svgPaths.p23be10c0} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.59" strokeWidth="4" />
+                    <path d={svgPaths.p2b207700} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.59" strokeWidth="4" />
+                    <path d={svgPaths.p208a4580} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.59" strokeWidth="4" />
+                  </svg>
+                </div>
+                <p
+                  className="text-white"
+                  style={{ ...MONO_BOLD, fontSize: "clamp(0.8rem, 1.7vw, 1.8rem)", letterSpacing: "5.6px" }}
+                >
+                  系學會費專區
+                </p>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* Row 3 — INSTAGRAM + FACEBOOK + THREADS (154 units) */}
+          <div className="flex-[154] flex gap-3 lg:gap-4 min-h-[90px]">
+            {(
+              [
+                { label: "INSTAGRAM", path: svgPaths.p372aef00, vb: "0 0 64 64", delay: 160, href: "https://www.instagram.com/ntu_lis_sa?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+                { label: "FACEBOOK",  path: svgPaths.p1c5aa00,  vb: "0 0 64 64", delay: 180, href: "https://www.facebook.com/ntulislis" },
+                { label: "THREADS",   path: svgPaths.p3455000,  vb: "0 0 55 64", delay: 200, href: "https://www.threads.com/@ntu_lis_sa" },
+              ] as const
+            ).map(({ label, path, vb, delay, href }) => (
+              <Reveal key={label} delay={delay} className="flex-1 flex flex-col">
+                <a href={href} target="_blank" rel="noopener noreferrer" className={`${BENTO_CARD} flex-1 p-4 md:p-5 justify-between`} style={BENTO_BG}>
+                  <p
+                    className="text-white tracking-[3.04px] whitespace-nowrap"
+                    style={{ ...MONO_SEMI, fontSize: "clamp(9px, 0.9vw, 15px)" }}
+                  >
+                    {label}
+                  </p>
+                  <div
+                    className="self-end"
+                    style={{ width: "clamp(26px, 3.5vw, 44px)", height: "clamp(26px, 3.5vw, 44px)" }}
+                  >
+                    <svg className="block w-full h-full" fill="none" viewBox={vb}>
+                      <path d={path} fill="white" fillOpacity="0.59" />
+                    </svg>
+                  </div>
+                </a>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. SLOGAN PAGE
+// ═══════════════════════════════════════════════════════════════════════════
+function SloganSection() {
+  return (
+    <section className="bg-black min-h-screen flex flex-col items-center justify-center px-6 py-28">
+      <Reveal>
+        <h2
+          className="text-white text-center mb-8"
+          style={{
+            fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif",
+            fontWeight: 900,
+            fontSize: "48px",
+            letterSpacing: "5.53px",
+            lineHeight: "normal",
+          }}
+        >
+          在繁重的大學日常裡，做你四年的避風港。
+        </h2>
+      </Reveal>
+      <Reveal delay={160}>
+        <p
+          className="text-center"
+          style={{
+            fontFamily: "'Ubuntu Sans Mono', monospace",
+            fontWeight: 500,
+            fontSize: "clamp(1rem, 3.7vw, 53px)",
+            letterSpacing: "3.71px",
+            lineHeight: "normal",
+            background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          HOME IS WHERE NTU LIS SA IS.
+        </p>
+      </Reveal>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 4. OUR HISTORY
+// ═══════════════════════════════════════════════════════════════════════════
+// Oldest → newest (index 0 = oldest, last = newest)
+const HISTORY_EVENTS = [
+  {
+    date: "1974",
+    title: "圖書資訊學系正式創立",
+    tag: "建系紀念 1974",
+    link: "#",
+  },
+  {
+    date: "1990s",
+    title: "學生自治雛型萌芽",
+    tag: "自治萌芽期",
+    link: "#",
+  },
+  {
+    date: "2022.09.01",
+    title: "系學會正式成立暨創立大會",
+    tag: "創會紀念 2022",
+    link: "#",
+  },
+  {
+    date: "2023.03.18",
+    title: "學術交流座談：AI 與圖書館",
+    tag: "學術交流 2023",
+    link: "#",
+  },
+  {
+    date: "2024.05.01",
+    title: "小圖盃首屆系際運動會",
+    tag: "圖資運動會 2024",
+    link: "#",
+  },
+  {
+    date: "2025.10.15",
+    title: "系學會年度成果展暨頒獎典禮",
+    tag: "年度成果展 2025",
+    link: "#",
+  },
+  {
+    date: "2026.04.29",
+    title: "圖資之夜睽違四年再次舉辦",
+    tag: '圖資之夜 2026 "Vellichor"',
+    link: "#",
+  },
+];
+
+function HistorySection() {
+  const total = HISTORY_EVENTS.length;
+  // Start at newest (last index)
+  const [activeIdx, setActiveIdx] = useState(total - 1);
+  const [animPhase, setAnimPhase] = useState<"shown" | "hiding" | "showing">("shown");
+  const [animDir, setAnimDir] = useState<"up" | "down">("down");
+
+  // up = older event (earlier in time), down = newer event (later in time)
+  function goTo(nextIdx: number, dir: "up" | "down") {
+    if (animPhase !== "shown" || nextIdx < 0 || nextIdx >= total) return;
+    setAnimDir(dir);
+    setAnimPhase("hiding");
+    setTimeout(() => {
+      setActiveIdx(nextIdx);
+      setAnimPhase("showing");
+      requestAnimationFrame(() => requestAnimationFrame(() => setAnimPhase("shown")));
+    }, 220);
+  }
+
+  const ev = HISTORY_EVENTS[activeIdx];
+
+  // Slide: going down/newer → old exits up, new enters from below
+  //        going up/older  → old exits down, new enters from top
+  const contentStyle: React.CSSProperties = (() => {
+    const ease = "opacity 220ms ease, transform 220ms ease";
+    if (animPhase === "shown")  return { opacity: 1, transform: "translateY(0)", transition: ease };
+    if (animPhase === "hiding") return { opacity: 0, transform: `translateY(${animDir === "down" ? "-28px" : "28px"})`, transition: ease };
+    return { opacity: 0, transform: `translateY(${animDir === "down" ? "28px" : "-28px"})`, transition: "none" };
+  })();
+
+  // Metro line: show prev/current/next dots
+  const showPrev = activeIdx > 0;
+  const showNext = activeIdx < total - 1;
+
+  return (
+    <section id="about" className="bg-black overflow-hidden min-h-screen">
+      <div className="relative w-full flex min-h-screen">
+
+        {/* Building image behind right 70% of section */}
+        <img
+          src={imgBuildingHistory}
+          alt=""
+          aria-hidden="true"
+          className="absolute object-cover pointer-events-none select-none"
+          style={{ top: "clamp(40px,11.4vw,197px)", right: 0, height: "clamp(300px,46.1vw,796px)", width: "auto", opacity: 0.15 }}
+        />
+
+        {/* ── LEFT COLUMN ── */}
+        <div
+          className="flex flex-col justify-between py-[clamp(60px,11.4vw,197px)] px-[clamp(24px,4.3vw,74px)] shrink-0 relative z-10"
+          style={{ width: "clamp(320px,48vw,820px)" }}
+        >
+          <div>
+            <Reveal>
+              <h2 className="leading-none mb-[clamp(20px,2.5vw,42px)]"
+                style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 700, fontSize: "clamp(2.5rem,3.5vw,60px)" }}>
+                <span className="text-white">OUR</span><br />
+                <span style={{ color: "#d14b4b" }}>HISTORY</span>
+              </h2>
+            </Reveal>
+
+            <Reveal delay={70}>
+              <div style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(0.72rem,0.95vw,16px)", letterSpacing: "0.16em", lineHeight: 2.1, color: "white" }}>
+                <p className="mb-[1.6em]">
+                  臺大圖資系學會創立於 1974 年（民國 63 年），是國立臺灣大學圖書資訊學系的學生自治核心。我們不僅是系上活動與學術的推手，更是每一位圖資人在臺大四年的堅實後盾與避風港。
+                </p>
+                <p className="mb-[1.6em]">
+                  從迎新宿營到小圖盃的熱血揮汗，從系友講座的職涯啟蒙，再到系館學輔室的空間維護，我們致力於凝聚系上向心力，扮演學生與系辦、教師間的橋樑。
+                </p>
+                <p className="mb-[0.6em]">我們持續在課業、體育系隊與生活事務中，探索</p>
+                <p
+                  className="font-black mb-[0.6em]"
+                  style={{
+                    fontSize: "clamp(1rem,1.5vw,24px)",
+                    letterSpacing: "0.08em",
+                    background: "linear-gradient(to right, #d14b4b, #2f9ebd)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    color: "transparent",
+                  }}
+                >
+                  「系學會可以這樣玩？」
+                </p>
+                <p>的無限可能。</p>
+              </div>
+            </Reveal>
+          </div>
+
+          <Reveal delay={200} className="pt-[clamp(24px,3.5vw,56px)]">
+            <a
+              href="#"
+              className="inline-flex items-center gap-3 bg-white text-black hover:bg-white/90 transition-colors duration-200 group w-fit"
+              style={{ borderRadius: "49px", fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "clamp(0.72rem,0.95vw,16px)", padding: "clamp(12px,1.2vw,20px) clamp(20px,2vw,32px)" }}
+            >
+              探索更多圖資系學會歷史
+              <svg viewBox="0 0 30 24" fill="none" className="shrink-0 group-hover:translate-x-1 transition-transform duration-200" style={{ width: "clamp(16px,1.4vw,22px)", height: "auto" }}>
+                <path d={svgHistoryPaths.p8ea180} fill="black" />
+              </svg>
+            </a>
+          </Reveal>
+        </div>
+
+        {/* ── CENTER METRO TIMELINE ── */}
+        <div
+          className="relative shrink-0 flex flex-col items-center"
+          style={{ width: "clamp(60px,8vw,140px)" }}
+        >
+          {/* Full-height gradient line */}
+          <div className="absolute inset-x-0 flex justify-center" style={{ top: "clamp(60px,11.4vw,197px)", bottom: "clamp(60px,11.4vw,197px)" }}>
+            <div className="w-[3px] h-full" style={{ background: "linear-gradient(to bottom, rgba(209,75,75,0.6) 0%, rgba(209,75,75,1) 50%, rgba(47,158,189,1) 50%, rgba(47,158,189,0.6) 100%)" }} />
+          </div>
+
+          {/* Year label — 1974 (top) */}
+          <div
+            className="absolute text-white/40"
+            style={{
+              top: "clamp(60px,11.4vw,197px)",
+              left: "calc(50% + 10px)",
+              fontFamily: "'Ubuntu Sans Mono', monospace",
+              fontWeight: 700,
+              fontSize: "clamp(9px,1vw,17px)",
+              letterSpacing: "3px",
+              whiteSpace: "nowrap",
+            }}
+          >1974</div>
+
+          {/* Year label — 2026 (bottom) */}
+          <div
+            className="absolute text-white"
+            style={{
+              bottom: "clamp(60px,11.4vw,197px)",
+              left: "calc(50% + 10px)",
+              fontFamily: "'Ubuntu Sans Mono', monospace",
+              fontWeight: 700,
+              fontSize: "clamp(9px,1vw,17px)",
+              letterSpacing: "3px",
+              whiteSpace: "nowrap",
+            }}
+          >2026</div>
+
+          {/* Metro dots — prev (smaller, faded above) */}
+          {showPrev && (
+            <div className="absolute rounded-full bg-white/30" style={{
+              top: "calc(50% - clamp(52px,6vw,100px))",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "clamp(8px,0.8vw,12px)",
+              height: "clamp(8px,0.8vw,12px)",
+            }} />
+          )}
+
+          {/* Metro dot — current (large open circle) */}
+          <div className="absolute rounded-full border-[3px] border-white" style={{
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "clamp(28px,3vw,50px)",
+            height: "clamp(28px,3vw,50px)",
+            background: "black",
+            zIndex: 2,
+          }} />
+
+          {/* Metro dot — next (smaller, faded below) */}
+          {showNext && (
+            <div className="absolute rounded-full bg-white/30" style={{
+              top: "calc(50% + clamp(52px,6vw,100px))",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "clamp(8px,0.8vw,12px)",
+              height: "clamp(8px,0.8vw,12px)",
+            }} />
+          )}
+        </div>
+
+        {/* ── RIGHT EVENT PANEL ── */}
+        <div className="flex-1 relative flex flex-col items-start justify-center py-[clamp(60px,11.4vw,197px)] px-[clamp(20px,3.5vw,60px)]">
+
+          {/* Up arrow — older event (up the timeline) */}
+          <button
+            onClick={() => goTo(activeIdx - 1, "up")}
+            disabled={animPhase !== "shown" || activeIdx === 0}
+            className="mb-[clamp(16px,2.5vw,40px)] transition-opacity duration-150 hover:opacity-70 disabled:opacity-20 disabled:cursor-default"
+            aria-label="上一站：較早的事件"
+          >
+            <svg viewBox="0 0 41 25" fill="none" style={{ width: "clamp(22px,2.4vw,38px)", height: "auto", transform: "rotate(180deg)" }}>
+              <path d={svgHistoryPaths.p16919e00} fill="white" />
+            </svg>
+          </button>
+
+          {/* Event content block */}
+          <div style={contentStyle}>
+            {/* Date */}
+            <p style={{
+              fontFamily: "'Ubuntu Sans Mono', monospace",
+              fontWeight: 700,
+              fontSize: "clamp(1rem,2vw,36px)",
+              letterSpacing: "6.4px",
+              color: "rgba(255,255,255,0.5)",
+              marginBottom: "clamp(6px,1vw,16px)",
+            }}>{ev.date}</p>
+
+            {/* Title */}
+            <p style={{
+              fontFamily: "'Ubuntu Sans Mono', monospace",
+              fontWeight: 700,
+              fontSize: "clamp(1.1rem,2.3vw,40px)",
+              letterSpacing: "4px",
+              color: "white",
+              marginBottom: "clamp(16px,2.5vw,42px)",
+              lineHeight: 1.3,
+            }}>{ev.title}</p>
+
+            {/* Tag — IS the clickable event button */}
+            <a
+              href={ev.link}
+              className="inline-flex items-center gap-3 group hover:bg-[#bfbfbf] transition-colors duration-200"
+              style={{
+                background: "#d9d9d9",
+                borderRadius: "999px",
+                fontFamily: "'Noto Sans TC', sans-serif",
+                fontWeight: 500,
+                fontSize: "clamp(0.65rem,0.87vw,15px)",
+                letterSpacing: "2.4px",
+                color: "#000",
+                padding: "clamp(6px,0.7vw,10px) clamp(14px,1.4vw,22px)",
+              }}
+            >
+              {ev.tag}
+              <svg viewBox="0 0 18 14" fill="none" className="shrink-0 group-hover:translate-x-0.5 transition-transform duration-200" style={{ width: "14px", height: "auto" }}>
+                <path d={svgHistoryPaths.p2c5e9200} fill="black" />
+              </svg>
+            </a>
+          </div>
+
+          {/* Down arrow — newer event (down the timeline) */}
+          <button
+            onClick={() => goTo(activeIdx + 1, "down")}
+            disabled={animPhase !== "shown" || activeIdx === total - 1}
+            className="mt-[clamp(16px,2.5vw,40px)] transition-opacity duration-150 hover:opacity-70 disabled:opacity-20 disabled:cursor-default"
+            aria-label="下一站：較新的事件"
+          >
+            <svg viewBox="0 0 41 25" fill="none" style={{ width: "clamp(22px,2.4vw,38px)", height: "auto" }}>
+              <path d={svgHistoryPaths.p16919e00} fill="white" />
+            </svg>
+          </button>
+        </div>
+
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 5. CURRENT TEAM
+// ═══════════════════════════════════════════════════════════════════════════
+type DeptDef = {
+  name: string;
+  abbr: string;
+  hoverBg: string;
+  icon: React.ReactNode;
+};
+
+const ICON_SIZE: React.CSSProperties = { width: "clamp(36px,3.5vw,54px)", height: "auto" };
+
+const DEPTS: DeptDef[] = [
+  {
+    name: "行政部",
+    abbr: "GEN.",
+    hoverBg: "#915E3E",
+    icon: (
+      <svg viewBox="0 0 113 102" fill="none" style={ICON_SIZE}>
+        <path d={svgTeamPaths.p1a21b8c0} fill="white" />
+      </svg>
+    ),
+  },
+  {
+    name: "活動部",
+    abbr: "EVE.",
+    hoverBg: "#9F353A",
+    icon: (
+      <svg viewBox="0 0 102 102" fill="none" style={ICON_SIZE}>
+        <path d={svgTeamPaths.p69aaf00} fill="white" />
+        <path d={svgTeamPaths.p33873100} fill="white" />
+      </svg>
+    ),
+  },
+  {
+    name: "學術部",
+    abbr: "ACA.",
+    hoverBg: "#42602D",
+    icon: (
+      <svg viewBox="0 0 75 93" fill="none" style={ICON_SIZE}>
+        <path d={svgTeamPaths.p27314300} fill="white" />
+      </svg>
+    ),
+  },
+  {
+    name: "形象宣傳部",
+    abbr: "IMA.",
+    hoverBg: "#572A3F",
+    icon: (
+      <svg viewBox="0 0 121 110" fill="none" style={ICON_SIZE}>
+        {/* outline/stroke version — no fill */}
+        <path d={svgTeamPaths.p209bcf80} fill="none" stroke="white" strokeWidth="5" strokeLinejoin="round" />
+        <path d={svgTeamPaths.p68b8000} fill="none" stroke="white" strokeWidth="5" />
+      </svg>
+    ),
+  },
+  {
+    name: "體育部",
+    abbr: "SP.",
+    hoverBg: "#554236",
+    icon: (
+      <svg viewBox="0 0 69 104" fill="none" style={ICON_SIZE}>
+        <path d={svgTeamPaths.p2b1ed5c0} fill="white" />
+      </svg>
+    ),
+  },
+];
+
+// President / Vice-president data
+const LEADERS = [
+  {
+    title: "會長",
+    name: "黃子芸",
+    roman: "TZU-YUN, HUANG",
+    year: "圖資三",
+    img: imgMeiji as string,
+  },
+  {
+    title: "副會長",
+    name: "洪聆雅",
+    roman: "LING-YA, HUNG",
+    year: "圖資三",
+    img: imgHongLingYa as string,
+  },
+];
+
+function DeptCard({ dept }: { dept: DeptDef }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div className="flex flex-col items-center gap-[clamp(5px,0.6vw,9px)]">
+      {/* Card cell — icon only inside */}
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="relative rounded-[14px] aspect-square w-full overflow-hidden cursor-pointer border transition-all duration-300"
+        style={{
+          background: hovered ? dept.hoverBg : "rgba(255,255,255,0.03)",
+          borderColor: hovered ? "transparent" : "rgba(255,255,255,0.2)",
+        }}
+      >
+        {/* Icon — always centered, dims on hover so abbr reads clearly */}
+        <div
+          className="absolute inset-0 flex items-center justify-center transition-opacity duration-300"
+          style={{ opacity: hovered ? 0.14 : 1 }}
+        >
+          {dept.icon}
+        </div>
+
+        {/* Abbreviation — appears on hover */}
+        <div
+          className="absolute inset-0 flex items-center justify-center transition-all duration-300"
+          style={{ opacity: hovered ? 1 : 0, transform: hovered ? "translateY(0)" : "translateY(7px)" }}
+        >
+          <span
+            style={{
+              fontFamily: "'Ubuntu Sans Mono', monospace",
+              fontWeight: 700,
+              fontSize: "clamp(1.1rem,2vw,34px)",
+              color: "white",
+              letterSpacing: "0.04em",
+            }}
+          >
+            {dept.abbr}
+          </span>
+        </div>
+      </div>
+
+      {/* Department name — BELOW the card */}
+      <span
+        className="text-white text-center leading-tight"
+        style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(0.65rem,0.82vw,13px)" }}
+      >
+        {dept.name}
+      </span>
+    </div>
+  );
+}
+
+function TeamSection() {
+  const [leaderIdx, setLeaderIdx] = useState(0);
+  return (
+    <section id="team" className="bg-black min-h-screen overflow-hidden">
+      <div className="relative w-full min-h-screen flex flex-col lg:flex-row">
+
+        {/* ── LEFT — title + dept cards ── */}
+        <div
+          className="flex flex-col justify-center px-[clamp(24px,4.3vw,74px)] py-[clamp(60px,11.4vw,197px)]"
+          style={{ width: "clamp(300px,54vw,920px)", flexShrink: 0 }}
+        >
+          <div>
+            <Reveal>
+              <p
+                className="text-white/30 text-xs tracking-widest mb-5"
+                style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}
+              >
+                — ABOUT US 關於我們
+              </p>
+            </Reveal>
+
+            <Reveal delay={50}>
+              <h2
+                className="font-bold leading-none mb-6"
+                style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "clamp(2.8rem,3.5vw,60px)" }}
+              >
+                <span className="text-white">CURRENT</span><br />
+                <span style={{ color: "#2f9ebd" }}>TEAM</span>
+              </h2>
+            </Reveal>
+
+            <Reveal delay={90}>
+              <p
+                className="text-white mb-10"
+                style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(0.75rem,0.95vw,16px)", lineHeight: 2, letterSpacing: "0.1em", maxWidth: "520px" }}
+              >
+                臺大圖資系學會目前由正副會長統領，下轄行政、活動、學術、形象宣傳、體育等五個常設部門（第 52 屆始）：
+              </p>
+            </Reveal>
+
+            {/* Dept cards — 3 上 + 2 下 */}
+            <div
+              className="flex flex-col gap-[clamp(8px,1vw,14px)]"
+              style={{ maxWidth: "clamp(280px,42vw,700px)" }}
+            >
+              <div className="grid grid-cols-3 gap-[clamp(8px,1vw,14px)]">
+                {DEPTS.slice(0, 3).map((dept, i) => (
+                  <Reveal key={dept.name} delay={100 + i * 40}>
+                    <DeptCard dept={dept} />
+                  </Reveal>
+                ))}
+              </div>
+              <div className="grid grid-cols-3 gap-[clamp(8px,1vw,14px)]">
+                {DEPTS.slice(3).map((dept, i) => (
+                  <Reveal key={dept.name} delay={220 + i * 40}>
+                    <DeptCard dept={dept} />
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── RIGHT — both leaders rendered simultaneously, crossfade on opacity ── */}
+        <div className="flex-1 relative overflow-hidden min-h-[600px]">
+
+          {/* Building bg */}
+          <img
+            src={imgBuildingHistory}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+            style={{ opacity: 0.06 }}
+          />
+
+          {/* Content area — same vertical bounds as left panel content */}
+          <div
+            className="absolute left-0 right-0"
+            style={{
+              top: "clamp(60px,11.4vw,197px)",
+              bottom: "clamp(60px,11.4vw,197px)",
+            }}
+          >
+            {LEADERS.map((l, i) => {
+              const active = i === leaderIdx;
+              return (
+                <div
+                  key={l.title}
+                  className="absolute inset-0 flex items-end"
+                  style={{
+                    opacity: active ? 1 : 0,
+                    transition: "opacity 350ms ease",
+                    pointerEvents: active ? "auto" : "none",
+                  }}
+                >
+                  {/* Photo */}
+                  <div className="h-full flex-shrink-0 flex items-end pointer-events-none select-none">
+                    <img
+                      src={l.img}
+                      alt={l.name}
+                      className="h-full w-auto object-contain object-bottom"
+                    />
+                  </div>
+
+                  {/* Info block — top-right */}
+                  <div className="absolute top-0 right-[clamp(16px,3vw,52px)] flex flex-col items-start">
+                    {/* Badge — black fill + red→blue gradient stroke */}
+                    <div
+                      style={{
+                        padding: "1.5px",
+                        background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)",
+                        borderRadius: "999px",
+                        marginBottom: "clamp(10px,1.4vw,20px)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          background: "#000",
+                          borderRadius: "999px",
+                          padding: "6px 24px",
+                          color: "white",
+                          fontFamily: "'Noto Sans TC', sans-serif",
+                          fontWeight: 500,
+                          fontSize: "clamp(13px,1.2vw,19px)",
+                          letterSpacing: "0.18em",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        第 53 屆{l.title}
+                      </div>
+                    </div>
+
+                    {/* Name */}
+                    <p
+                      className="text-white leading-none"
+                      style={{
+                        fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif",
+                        fontWeight: 900,
+                        fontSize: "clamp(2.6rem,4.8vw,5rem)",
+                        letterSpacing: "0.05em",
+                        marginBottom: "clamp(10px,1.2vw,18px)",
+                      }}
+                    >
+                      {l.name}
+                    </p>
+
+                    {/* English name */}
+                    <p
+                      style={{
+                        fontFamily: "'Ubuntu Sans Mono', monospace",
+                        fontWeight: 400,
+                        fontSize: "clamp(0.8rem,1.2vw,18px)",
+                        letterSpacing: "0.24em",
+                        background: "linear-gradient(90deg, #FFF 0%, #999 100%)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                        marginBottom: "clamp(12px,1.4vw,20px)",
+                      }}
+                    >
+                      {l.roman}
+                    </p>
+
+                    {/* Year tag */}
+                    <div
+                      style={{
+                        background: "linear-gradient(90deg, #FFF 0%, #999 100%)",
+                        borderRadius: "5px",
+                        padding: "6px 22px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "'Noto Sans TC', sans-serif",
+                          fontWeight: 700,
+                          fontSize: "clamp(13px,1.1vw,18px)",
+                          color: "#000",
+                          letterSpacing: "0.14em",
+                        }}
+                      >
+                        {l.year}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Sliding pill toggle — bottom right */}
+          <div
+            className="absolute rounded-full border border-white/20 p-[3px]"
+            style={{
+              bottom: "clamp(60px,11.4vw,197px)",
+              right: "clamp(16px,3vw,52px)",
+            }}
+          >
+            {/* Sliding white indicator */}
+            <div
+              className="absolute top-[3px] bottom-[3px] rounded-full bg-white"
+              style={{
+                width: "calc(50% - 3px)",
+                left: leaderIdx === 0 ? "3px" : "calc(50%)",
+                transition: "left 300ms cubic-bezier(0.4,0,0.2,1)",
+              }}
+            />
+            <div className="relative flex">
+              {LEADERS.map((l, i) => (
+                <button
+                  key={l.title}
+                  onClick={() => setLeaderIdx(i)}
+                  className="relative z-10 px-5 py-2 rounded-full text-center"
+                  style={{
+                    fontFamily: "'Noto Sans TC', sans-serif",
+                    fontWeight: leaderIdx === i ? 700 : 400,
+                    fontSize: "clamp(0.7rem,0.85vw,14px)",
+                    color: leaderIdx === i ? "black" : "rgba(255,255,255,0.35)",
+                    transition: "color 300ms ease",
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  {l.title}
+                </button>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 6. SLOGAN PAGE 2 — "掌握系上脈動"
+// ═══════════════════════════════════════════════════════════════════════════
+function SloganPage2Section() {
+  return (
+    <section className="bg-black min-h-screen flex flex-col items-center justify-center px-6 py-28">
+      <Reveal>
+        <h2
+          className="text-white text-center mb-8"
+          style={{
+            fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif",
+            fontWeight: 900,
+            fontSize: "48px",
+            letterSpacing: "5.53px",
+            lineHeight: "normal",
+          }}
+        >
+          掌握系上脈動，不漏接任何一次精彩。
+        </h2>
+      </Reveal>
+      <Reveal delay={160}>
+        <p
+          className="text-center"
+          style={{
+            fontFamily: "'Ubuntu Sans Mono', monospace",
+            fontWeight: 500,
+            fontSize: "clamp(1rem, 3.7vw, 53px)",
+            letterSpacing: "3.71px",
+            lineHeight: "normal",
+            background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          STAY TUNED. LIS SA ON LIVE.
+        </p>
+      </Reveal>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 7. LATEST UPDATES
+// ═══════════════════════════════════════════════════════════════════════════
+const NEWS_ITEMS = [
+  {
+    title: "B14~15 系學會發表會",
+    body: "系學會將在開學日舉辦發表會。將帶你快速熟悉系上資源、找到專屬夥伴與「大學生活避風港」的快速通關指南",
+    date: "2026.08.12",
+  },
+  {
+    title: "第 52 屆系學會卸任公告",
+    body: "親愛的圖資系同學們、老師與系友們：超過一半的大學生涯，四百多個日夜。第 52 屆系學會團隊的旅程，在今天正式劃下圓滿的句點。",
+    date: "2026.07.30",
+  },
+  {
+    title: "第53屆正副會長選舉開票結果",
+    body: "本會於本月 1 日進行正副會長改選。本次選舉由圖資二黃子芸、圖資二洪聆雅當選。",
+    date: "2026.06.01",
+  },
+  {
+    title: "系學會獲得社團評鑑自治組優等",
+    body: "在剛落幕的 114 學年度臺大全校社團評鑑中，臺大圖資系學會在全校眾多自治組織中脫穎而出，勇奪「自治性社團組 — 優等」的殊榮",
+    date: "2026.05.20",
+  },
+];
+
+function LatestUpdatesSection() {
+  return (
+    <section id="news" className="bg-black px-6 md:px-14 py-24">
+      <div className="max-w-[1400px] mx-auto">
+        <Reveal>
+          <p
+            className="text-white/30 text-xs tracking-widest mb-4"
+            style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}
+          >
+            — NEWS 最新動態
+          </p>
+          <h2
+            className="font-bold leading-none mb-12"
+            style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "clamp(2.5rem, 6vw, 5rem)" }}
+          >
+            <span className="text-white block">LATEST</span>
+            <span style={{ color: "#D14B4B" }} className="block">UPDATES</span>
+          </h2>
+        </Reveal>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {NEWS_ITEMS.map((item, i) => (
+            <Reveal key={item.title} delay={i * 60}>
+              <div
+                className="rounded-2xl border border-white/10 p-6 md:p-8 flex flex-col justify-between gap-6 hover:border-white/20 transition-colors duration-200"
+                style={{ background: "rgba(255,255,255,0.04)", minHeight: "220px" }}
+              >
+                {/* Top */}
+                <div>
+                  <div className="flex items-center gap-3 mb-4 flex-wrap">
+                    <p
+                      className="text-white"
+                      style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "clamp(1rem, 2vw, 1.3rem)" }}
+                    >
+                      {item.title}
+                    </p>
+                    <span
+                      className="shrink-0 text-white/70 text-xs px-3 py-0.5"
+                      style={{
+                        fontFamily: "'Noto Sans TC', sans-serif",
+                        fontWeight: 400,
+                        letterSpacing: "0.1em",
+                        border: "1px solid transparent",
+                        borderRadius: "41px",
+                        background: "linear-gradient(#0d0d0d, #0d0d0d) padding-box, linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%) border-box",
+                      }}
+                    >
+                      公告
+                    </span>
+                  </div>
+                  <p
+                    className="text-white/35 leading-relaxed"
+                    style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "0.88rem" }}
+                  >
+                    {item.body}
+                  </p>
+                </div>
+
+                {/* Bottom */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {/* Clock icon */}
+                    <svg viewBox="0 0 16 16" fill="none" stroke="white" strokeOpacity="0.35" strokeWidth="1.5" className="w-3.5 h-3.5">
+                      <circle cx="8" cy="8" r="6.5" />
+                      <path d="M8 4.5V8l2.5 2" strokeLinecap="round" />
+                    </svg>
+                    <span
+                      className="text-white/35 text-xs"
+                      style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}
+                    >
+                      {item.date}
+                    </span>
+                  </div>
+                  <a
+                    href="#"
+                    className="inline-flex items-center gap-2 bg-white text-black px-5 py-2 rounded-full text-sm hover:bg-white/90 transition-all duration-200 group"
+                    style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, letterSpacing: "0.08em" }}
+                  >
+                    閱讀全文
+                    <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+                  </a>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 8. ACADEMIC RESOURCES
+// ═══════════════════════════════════════════════════════════════════════════
+const EXTERNAL_LINKS = [
+  { title: "臺大圖資系官網", sub: "國立臺灣大學圖書資訊學系", img: imgBuildingResources, href: "https://lis.ntu.edu.tw" },
+  { title: "臺大圖資課程地圖", sub: "國立臺灣大學大學部課程地圖查詢", img: imgBuildingResources, href: "#" },
+  { title: "課程筆記資料庫", sub: "系學會整理之課程筆記共享資源", img: null, href: "#" },
+  { title: "必修科目及應修學分資料查詢網站", sub: "國立臺灣大學學務處", img: null, href: "#" },
+];
+
+const DOWNLOAD_LINKS = [
+  { title: "書府 2023", sub: "系學會學術部製作", img: imgRect7, href: "#" },
+  { title: "新生選課指南", sub: "系學會學術部製作", img: imgRect8, href: "#" },
+];
+
+function ResourceRow({ title, sub, img, href }: { title: string; sub: string; img: string | null; href: string }) {
+  return (
+    <a
+      href={href}
+      className="flex items-center justify-between gap-4 border border-white/10 rounded-xl p-4 hover:border-white/25 hover:bg-white/3 transition-all duration-200 group"
+    >
+      <div className="flex items-center gap-4 min-w-0">
+        {img && (
+          <div className="w-14 h-10 rounded-lg overflow-hidden shrink-0 opacity-60">
+            <img src={img} alt="" className="w-full h-full object-cover" />
+          </div>
+        )}
+        <div className="min-w-0">
+          <p
+            className="text-white truncate"
+            style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "clamp(0.85rem, 1.5vw, 1.05rem)" }}
+          >
+            {title}
+          </p>
+          {sub && (
+            <p className="text-white/35 text-xs truncate" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500 }}>
+              {sub}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center shrink-0 group-hover:border-white/50 transition-colors">
+        <ArrowRight size={13} className="text-white/60" />
+      </div>
+    </a>
+  );
+}
+
+function AcademicResourcesSection() {
+  return (
+    <section id="resources" className="bg-black px-6 md:px-14 py-24">
+      <div className="max-w-[1400px] mx-auto">
+        <Reveal>
+          <p
+            className="text-white/30 text-xs tracking-widest mb-4"
+            style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}
+          >
+            — RESOURCES 學術資源
+          </p>
+          <h2
+            className="font-bold leading-none mb-12"
+            style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "clamp(2.5rem, 6vw, 5rem)" }}
+          >
+            <span className="text-white block">ACADEMIC</span>
+            <span style={{ color: "#D14B4B" }} className="block">RESOURCES</span>
+          </h2>
+        </Reveal>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+          {/* Left — External Links */}
+          <div>
+            <Reveal>
+              <p
+                className="mb-5 text-xs tracking-widest font-bold"
+                style={{
+                  fontFamily: "'Ubuntu Sans Mono', monospace",
+                  background: "linear-gradient(to right, #2F9EBD, #ffffff)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                各式網址 EXTERNAL LINKS
+              </p>
+            </Reveal>
+            <div className="flex flex-col gap-3">
+              {EXTERNAL_LINKS.map((link, i) => (
+                <Reveal key={link.title} delay={i * 50}>
+                  <ResourceRow {...link} />
+                </Reveal>
+              ))}
+            </div>
+          </div>
+
+          {/* Right — Downloads */}
+          <div>
+            <Reveal delay={60}>
+              <p
+                className="mb-5 text-xs tracking-widest font-bold"
+                style={{
+                  fontFamily: "'Ubuntu Sans Mono', monospace",
+                  background: "linear-gradient(to right, #D14B4B, #ffffff)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                檔案下載 DOWNLOADS
+              </p>
+            </Reveal>
+            <div className="flex flex-col gap-3">
+              {DOWNLOAD_LINKS.map((link, i) => (
+                <Reveal key={link.title} delay={i * 50 + 60}>
+                  <ResourceRow {...link} />
+                </Reveal>
+              ))}
+
+              {/* Contact card */}
+              <Reveal delay={160}>
+                <div className="border border-white/10 rounded-xl p-5 bg-white/[0.03]">
+                  <p
+                    className="text-white mb-2"
+                    style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "1rem" }}
+                  >
+                    找不到你需要的資源？
+                  </p>
+                  <p
+                    className="text-white/50 text-sm mb-5 leading-relaxed"
+                    style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500 }}
+                  >
+                    歡迎聯絡系學會學術部，我們將協助提供相關資料。
+                  </p>
+                  <a
+                    href="mailto:ntulissa1060@gmail.com"
+                    className="inline-flex items-center gap-2 bg-white text-black px-5 py-2 rounded-full text-sm hover:bg-white/90 transition-all group"
+                    style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, letterSpacing: "0.08em" }}
+                  >
+                    聯絡我們
+                    <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+                  </a>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 9. JOIN US
+// ═══════════════════════════════════════════════════════════════════════════
+function JoinUsSection() {
+  return (
+    <section id="join" className="bg-black min-h-screen flex flex-col items-center justify-center px-6 py-28 text-center">
+      <Reveal>
+        <h2
+          className="text-white leading-tight mb-8"
+          style={{
+            fontFamily: "'Noto Sans TC', sans-serif",
+            fontWeight: 900,
+            fontSize: "clamp(1.8rem, 4.5vw, 4.5rem)",
+          }}
+        >
+          成為{" "}
+          <span
+            style={{
+              background: "linear-gradient(to right, #D14B4B, #2F9EBD)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            臺大圖資系學會
+          </span>{" "}
+          的一員
+        </h2>
+      </Reveal>
+
+      <Reveal delay={80}>
+        <div
+          className="text-white/60 leading-loose mb-10 max-w-2xl"
+          style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(0.85rem, 1.5vw, 1rem)" }}
+        >
+          <p>你將有機會親手策劃屬於圖資人的舞台，參與一次又一次影響全系的決策與行動。</p>
+          <p>你投入的不是單純的公共事務，而是一段能讓你累積經驗、結識夥伴、發揮影響力的旅程。</p>
+          <p>成就不一樣的圖資系，需要的就是你</p>
+        </div>
+      </Reveal>
+
+      <Reveal delay={140}>
+        <p
+          className="mb-12 tracking-[0.5em]"
+          style={{
+            fontFamily: "'Ubuntu Sans Mono', monospace",
+            fontWeight: 500,
+            fontSize: "clamp(2rem, 5vw, 3.5rem)",
+            background: "linear-gradient(to right, #D14B4B, #2F9EBD)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
+          JOIN&nbsp;&nbsp;US
+        </p>
+      </Reveal>
+
+      <Reveal delay={200}>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="#"
+            className="inline-flex items-center justify-center px-8 py-3 rounded-full hover:opacity-80 transition-all duration-200"
+            style={{
+              background: "linear-gradient(to right, #D14B4B, #2F9EBD)",
+              fontFamily: "'Noto Sans TC', sans-serif",
+              fontWeight: 900,
+              fontSize: "1rem",
+              letterSpacing: "0.2em",
+              color: "white",
+            }}
+          >
+            加 入 我 們
+          </a>
+          <a
+            href="#"
+            className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-white/50 text-white hover:bg-white/5 transition-all duration-200"
+            style={{
+              fontFamily: "'Noto Sans TC', sans-serif",
+              fontWeight: 500,
+              fontSize: "1rem",
+              letterSpacing: "0.12em",
+            }}
+          >
+            追 蹤 我 們 的 社 群
+          </a>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ROOT
+// ═══════════════════════════════════════════════════════════════════════════
+export default function App() {
+  return (
+    <div className="bg-black text-white overflow-x-hidden">
+      <Header />
+      <HeroSection />
+      <BentoSection />
+      <SloganSection />
+      <HistorySection />
+      <TeamSection />
+      <SloganPage2Section />
+      <LatestUpdatesSection />
+      <AcademicResourcesSection />
+      <JoinUsSection />
+      <Footer />
+    </div>
+  );
+}

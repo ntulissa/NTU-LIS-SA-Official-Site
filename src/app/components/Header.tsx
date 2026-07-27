@@ -1,0 +1,202 @@
+import { useState, useEffect } from "react";
+import { Menu, X, ChevronDown } from "lucide-react";
+import imgLissaLogo from "@/imports/LISSA_Logo.png";
+
+// Chiron Hei HK Text is a commercial font not available on Google Fonts.
+// Noto Sans TC is used as the closest available substitute for Chinese display text.
+const zhFont = "'Noto Sans TC', sans-serif";
+
+const NAV_ITEMS = [
+  {
+    label: "關於我們",
+    labelEn: "ABOUT",
+    sub: ["系學會歷史", "歷任會長", "現任團隊", "正副會長選舉專區"],
+  },
+  {
+    label: "最新動態",
+    labelEn: "NEWS",
+    sub: ["近期活動", "公告事項"],
+  },
+  {
+    label: "學術資源",
+    labelEn: "RESOURCES",
+    sub: ["學習連結", "資料下載"],
+  },
+];
+
+export default function Header() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-[#090909]/90 backdrop-blur-xl border-b border-white/8"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="max-w-[1400px] mx-auto pl-4 pr-6 md:pl-6 md:pr-10 h-[80px] flex items-center justify-between">
+
+        {/* ── Logo ─────────────────────────────────────────────────────── */}
+        <a href="#" className="flex items-center gap-3 group shrink-0">
+          {/* LISSA pill-shaped building logo */}
+          <div
+            className="relative overflow-hidden shrink-0"
+            style={{
+              width: "48px",
+              height: "68px",
+              borderRadius: "24px",
+              border: "1.5px solid rgba(255,255,255,0.4)",
+            }}
+          >
+            <img
+              src={imgLissaLogo}
+              alt="LISSA Logo"
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Wordmark */}
+          <div className="leading-none">
+            <p
+              className="text-white"
+              style={{
+                fontFamily: "'Josefin Sans', sans-serif",
+                fontWeight: 700,
+                fontSize: "1.05rem",
+                letterSpacing: "0.13em",
+                lineHeight: 1.2,
+              }}
+            >
+              NTU<br />LIS SA
+            </p>
+            <p
+              className="text-white mt-1"
+              style={{
+                fontFamily: zhFont,
+                fontWeight: 900,
+                fontSize: "0.55rem",
+                letterSpacing: "0.52em",
+              }}
+            >
+              臺大圖資系學會
+            </p>
+          </div>
+        </a>
+
+        {/* ── Desktop Nav ───────────────────────────────────────────────── */}
+        <nav className="hidden md:flex items-center gap-2">
+          {NAV_ITEMS.map((item, i) => (
+            <div
+              key={i}
+              className="relative"
+              onMouseEnter={() => setOpenDropdown(i)}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <button
+                className="flex items-center gap-1 px-4 py-2.5 text-white/80 hover:text-white transition-colors duration-200 rounded-md hover:bg-white/5"
+                style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.32em" }}
+              >
+                {item.label}
+                <ChevronDown
+                  size={11}
+                  className={`opacity-50 transition-transform duration-200 ${openDropdown === i ? "rotate-180 opacity-80" : ""}`}
+                />
+              </button>
+
+              {openDropdown === i && (
+                <div className="absolute top-full left-0 mt-1 w-40 bg-[#111]/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl shadow-black/60">
+                  {item.sub.map((s, j) => (
+                    <a
+                      key={j}
+                      href="#"
+                      className="block px-4 py-2.5 text-white/55 hover:text-white hover:bg-white/5 transition-colors duration-150"
+                      style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.12em" }}
+                    >
+                      {s}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* 加入我們 — red→teal gradient pill */}
+          <a
+            href="#join"
+            className="ml-3 px-6 py-2.5 rounded-full text-white hover:opacity-85 transition-opacity duration-200 shrink-0"
+            style={{
+              fontFamily: zhFont,
+              fontWeight: 900,
+              fontSize: "0.9rem",
+              letterSpacing: "0.32em",
+              background: "linear-gradient(to right, #D14B4B, #2F9EBD)",
+            }}
+          >
+            加入我們
+          </a>
+        </nav>
+
+        {/* ── Mobile toggle ─────────────────────────────────────────────── */}
+        <button
+          className="md:hidden text-white/70 hover:text-white"
+          onClick={() => setMobileOpen(!mobileOpen)}
+        >
+          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+      </div>
+
+      {/* ── Mobile menu ───────────────────────────────────────────────── */}
+      {mobileOpen && (
+        <div className="md:hidden bg-[#090909]/98 backdrop-blur-xl border-t border-white/8 px-6 py-5 space-y-5">
+          {NAV_ITEMS.map((item, i) => (
+            <div key={i}>
+              <p
+                className="text-[10px] tracking-[0.3em] mb-2"
+                style={{
+                  fontFamily: "'Ubuntu Sans Mono', monospace",
+                  background: "linear-gradient(to right, #D14B4B, #2F9EBD)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                {item.labelEn}
+              </p>
+              {item.sub.map((s, j) => (
+                <a
+                  key={j}
+                  href="#"
+                  className="block py-1.5 text-white/65 hover:text-white transition-colors"
+                  style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.9rem", letterSpacing: "0.12em" }}
+                >
+                  {s}
+                </a>
+              ))}
+            </div>
+          ))}
+          <a
+            href="#join"
+            className="inline-block px-6 py-2.5 rounded-full text-white text-sm"
+            style={{
+              fontFamily: zhFont,
+              fontWeight: 900,
+              letterSpacing: "0.3em",
+              background: "linear-gradient(to right, #D14B4B, #2F9EBD)",
+            }}
+          >
+            加入我們
+          </a>
+        </div>
+      )}
+    </header>
+  );
+}
