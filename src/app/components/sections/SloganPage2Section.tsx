@@ -30,6 +30,8 @@ export default function SloganPage2Section() {
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
+            backgroundSize: "220% 100%",
+            animation: "sloganFlow 6s linear infinite",
           }}
         >
           STAY TUNED. LIS SA ON LIVE.

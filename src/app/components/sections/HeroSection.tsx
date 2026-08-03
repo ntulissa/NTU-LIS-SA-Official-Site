@@ -4,11 +4,28 @@ import imgBuilding from "@/imports/HomePage-1/de7749452570d864c1f5c584765f093ab1
 
 export default function HeroSection() {
   const [scrollY, setScrollY] = useState(0);
+  const [displayText, setDisplayText] = useState("");
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const fullText = "→ LISSA, on LIVE.";
+    let index = 0;
+
+    const timer = window.setInterval(() => {
+      setDisplayText(fullText.slice(0, index + 1));
+      index += 1;
+
+      if (index >= fullText.length) {
+        window.clearInterval(timer);
+      }
+    }, 90);
+
+    return () => window.clearInterval(timer);
   }, []);
 
   return (
@@ -25,15 +42,14 @@ export default function HeroSection() {
             willChange: "transform",
           }}
         >
-          <div className="absolute inset-0 overflow-hidden opacity-20" style={{ borderRadius: "50%" }}>
+          <div className="absolute inset-0 overflow-hidden opacity-30">
             <img
               src={imgBuilding}
               alt=""
               className="absolute max-w-none"
-              style={{ width: "220.8%", height: "102.77%", left: "-60.09%", top: "-2.77%" }}
+              style={{ width: "280%", height: "140%", left: "-90%", top: "-20%", objectFit: "contain", objectPosition: "center" }}
             />
           </div>
-          <div className="absolute inset-0" style={{ border: "1.85vw solid #2F9EBD", borderRadius: "50%" }} />
         </div>
       </div>
 
@@ -48,7 +64,8 @@ export default function HeroSection() {
 
       <div className="relative px-5 sm:px-8 md:px-14 max-w-[1400px] mx-auto w-full">
         <p className="text-white text-sm sm:text-base mb-4 tracking-[2px]" style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 700 }}>
-          → LISSA, on LIVE.
+          {displayText}
+          <span className="ml-1 inline-block h-4 w-[0.6ch] align-middle border-r border-white/80 animate-pulse" aria-hidden="true" />
         </p>
         <h1
           className="leading-none select-none mb-10 bg-clip-text text-transparent"

@@ -133,16 +133,41 @@ export default function Header() {
           {/* 加入我們 — red→teal gradient pill */}
           <a
             href="#join"
-            className="ml-1 px-6 py-2.5 rounded-full text-white hover:opacity-85 transition-opacity duration-200 shrink-0"
+            className="ml-1 shrink-0 relative inline-flex items-center justify-center px-6 py-2.5 rounded-full overflow-hidden"
             style={{
               fontFamily: zhFont,
               fontWeight: 900,
               fontSize: "0.9rem",
               letterSpacing: "0.32em",
-              background: "linear-gradient(to right, #D14B4B, #2F9EBD)",
+              color: "white",
+              background: "#000",
+              border: "1.5px solid transparent",
+              backgroundClip: "padding-box",
+              boxShadow: "inset 0 0 0 1.5px transparent",
+              position: "relative",
             }}
           >
-            加入我們
+            <span
+              className="absolute inset-0 rounded-full"
+              style={{
+                padding: "1.5px",
+                border: "1.5px solid transparent",
+                background: "linear-gradient(#000, #000) padding-box, linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%) border-box",
+              }}
+            />
+            <span
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: "conic-gradient(from 0deg, #D14B4B 0deg, #2F9EBD 180deg, #D14B4B 360deg)",
+                WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                WebkitMaskComposite: "xor",
+                maskComposite: "exclude",
+                animation: "buttonRotate 8s linear infinite",
+                transformOrigin: "center",
+                opacity: 0.95,
+              }}
+            />
+            <span className="relative z-10">加入我們</span>
           </a>
         </nav>
 
@@ -186,15 +211,37 @@ export default function Header() {
           ))}
           <a
             href="#join"
-            className="inline-block px-6 py-2.5 rounded-full text-white text-sm"
+            className="relative inline-flex items-center justify-center px-6 py-2.5 rounded-full overflow-hidden text-white text-sm"
             style={{
               fontFamily: zhFont,
               fontWeight: 900,
               letterSpacing: "0.3em",
-              background: "linear-gradient(to right, #D14B4B, #2F9EBD)",
+              background: "#000",
+              border: "1.5px solid transparent",
+              backgroundClip: "padding-box",
             }}
           >
-            加入我們
+            <span
+              className="absolute inset-0 rounded-full"
+              style={{
+                padding: "1.5px",
+                border: "1.5px solid transparent",
+                background: "linear-gradient(#000, #000) padding-box, linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%) border-box",
+              }}
+            />
+            <span
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: "conic-gradient(from 0deg, #D14B4B 0deg, #2F9EBD 180deg, #D14B4B 360deg)",
+                WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                WebkitMaskComposite: "xor",
+                maskComposite: "exclude",
+                animation: "buttonRotate 8s linear infinite",
+                transformOrigin: "center",
+                opacity: 0.95,
+              }}
+            />
+            <span className="relative z-10">加入我們</span>
           </a>
         </div>
       )}

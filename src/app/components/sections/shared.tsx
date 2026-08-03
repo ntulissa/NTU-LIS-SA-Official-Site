@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 export function pad(n: number) {
-  return String(n).padStart(3, "0");
+  return String(n);
 }
 
 export function pad2(n: number) {
-  return String(n).padStart(2, "0");
+  return String(n);
 }
 
 export function useCountdown(target: Date) {

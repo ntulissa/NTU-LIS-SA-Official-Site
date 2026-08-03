@@ -150,7 +150,7 @@ export default function TeamSection() {
                   {activeLeader.roman}
                 </p>
                 <div style={{ background: "linear-gradient(90deg, #FFF 0%, #999 100%)", borderRadius: "5px", padding: "4px 14px" }}>
-                  <span style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: YEAR_FONT_SIZE, color: "#000", letterSpacing: "0.12em" }}>
+                  <span style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: YEAR_FONT_SIZE, color: "#000", letterSpacing: "0.12em" }}>
                     {activeLeader.year}
                   </span>
                 </div>

@@ -30,6 +30,8 @@ export default function SloganSection() {
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
+            backgroundSize: "220% 100%",
+            animation: "sloganFlow 6s linear infinite",
           }}
         >
           HOME IS WHERE NTU LIS SA IS.

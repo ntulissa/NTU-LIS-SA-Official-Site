@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import imgBentoBuilding1 from "@/imports/BentoGrid-1/de7749452570d864c1f5c584765f093ab16a6d89.png";
+import imgLissaLogo from "@/imports/LISSA_Logo.png";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
 import { Reveal, cardBase, monoBold, monoMed, monoSemi, pad, pad2, useCountdown } from "./shared";
 
@@ -9,8 +9,12 @@ const NEXT_EVENT = {
 };
 const COUNTDOWN_TARGET = NEXT_EVENT.time;
 
-const BENTO_CARD = "relative overflow-hidden rounded-[14px] border-4 border-[rgba(255,255,255,0.31)] flex flex-col cursor-pointer hover:opacity-90 transition-opacity duration-200";
+// Bento 卡片共用樣式：控制每個格子的外觀、圓角與互動效果。
+// 若要手動調整卡片大小或間距，可修改 rounded-[14px]、p-5 / p-6 / lg:p-8、gap-3 / lg:gap-4 等 class。
+const BENTO_CARD = "relative overflow-hidden rounded-[14px] flex flex-col cursor-pointer hover:opacity-90 transition-opacity duration-200";
 const BENTO_BG: React.CSSProperties = {
+  // 背景漸層，等於這個區塊的主要視覺底色。
+  // 若要改顏色，可直接修改這裡的 linear-gradient 參數。
   background: "linear-gradient(to bottom, rgba(47,158,189,0.44), rgba(209,75,75,0.44))",
 };
 
@@ -44,14 +48,18 @@ export default function BentoSection() {
         </Reveal>
       </div>
 
-      <div className="max-w-[1680px] mx-auto flex flex-col lg:flex-row gap-3 lg:gap-4 lg:h-[680px]">
+      <div className="max-w-[1680px] mx-auto flex flex-col lg:flex-row gap-3 lg:gap-4 lg:min-h-[560px] xl:min-h-[620px]">
         <div className="flex flex-col gap-3 lg:gap-4 lg:w-[49.8%] shrink-0">
-          <Reveal className="flex-[427] flex flex-col min-h-[280px]">
+          {/* UP NEXT 倒數區塊：這是一個主要 CTA 卡片，顯示下一場活動倒數。 */}
+          {/* 若要調整整體卡片高度，可改 flex-[1]、min-h-[240px]、lg:min-h-[0]；若要調整內距，改 p-5 / md:p-6 / lg:p-8。 */}
+          <Reveal className="flex-[1] flex flex-col min-h-[240px] lg:min-h-[0]">
             <div className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8`} style={BENTO_BG}>
               <p className="text-white tracking-[3.04px] whitespace-nowrap" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)" }}>
                 UP NEXT
               </p>
-              <div className="flex items-end gap-1 lg:gap-2 my-auto py-6">
+              {/* 倒數數字區塊：每個單位都是一個小格子，包含數字與 label。 */}
+              {/* 手動調整方法：修改 gap-1 / lg:gap-2 控制欄位間距，py-4 / md:py-5 調整上下留白，字體大小用 clamp(...) 來微調。 */}
+              <div className="flex items-end gap-1 lg:gap-9 my-auto py-4 md:py-2">
                 {([
                   { label: "D", value: pad(time.d) },
                   { label: "H", value: pad2(time.h) },
@@ -60,17 +68,18 @@ export default function BentoSection() {
                 ] as const).map(({ label, value }, i, arr) => (
                   <div key={label} className="contents">
                     <div className="flex flex-col items-center gap-2 flex-1">
-                      <div className="bg-[rgba(0,0,0,0.47)] rounded-[17px] w-full flex items-center justify-center py-2 lg:py-3">
-                        <span className="text-white tabular-nums" style={{ ...monoSemi, fontWeight: 500, fontSize: "clamp(1.1rem, 3vw, 4rem)", letterSpacing: "0.16em" }}>
+                      {/* 每個倒數單位的數字方塊：可手動調整 rounded-[14px]、py-1.5 / lg:py-2.5、字體大小與寬高。 */}
+                      <div className="bg-[rgba(0,0,0,0.47)] rounded-[14px] w-full flex items-center justify-center py-1.5 lg:py-2.5">
+                        <span className="text-white tabular-nums" style={{ ...monoSemi, fontWeight: 500, fontSize: "clamp(0.95rem, 2.4vw, 3.2rem)", letterSpacing: "0.16em" }}>
                           {value}
                         </span>
                       </div>
-                      <span className="text-[rgba(255,255,255,0.4)] tracking-[3.04px]" style={{ ...monoSemi, fontSize: "clamp(10px, 1vw, 16px)" }}>
+                      <span className="text-[rgba(255,255,255,0.4)] tracking-[3.04px]" style={{ ...monoSemi, fontSize: "clamp(9px, 0.9vw, 13px)" }}>
                         {label}
                       </span>
                     </div>
                     {i < arr.length - 1 && (
-                      <span className="text-white mb-[30px] shrink-0" style={{ ...monoMed, fontSize: "clamp(1.1rem, 3vw, 4rem)" }}>
+                      <span className="text-white mb-[24px] shrink-0" style={{ ...monoMed, fontSize: "clamp(0.95rem, 2.4vw, 3.2rem)" }}>
                         :
                       </span>
                     )}
@@ -88,16 +97,19 @@ export default function BentoSection() {
             </div>
           </Reveal>
 
-          <Reveal delay={60} className="flex-[257] flex flex-col min-h-[160px]">
+          {/* ABOUT US 介紹卡片：右側放置系學會 Logo，左側顯示簡介文字。 */}
+          {/* 若要調整 Logo 位置，修改 absolute top-4 bottom-4 right-4 與內層 width；若要調整文字區域寬度，改 paddingRight。 */}
+          <Reveal delay={60} className="flex-[0.9] flex flex-col min-h-[140px] lg:min-h-[0]">
             <div className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8`} style={BENTO_BG}>
               <p className="text-white tracking-[3.04px] whitespace-nowrap" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)" }}>
                 ABOUT US
               </p>
+              {/* Logo 容器：這裡是放置系學會 Logo 的區域。 */}
+              {/* 手動調整方法：改 width 的 clamp()、top/bottom/right 的數值，或直接替換 imgLissaLogo。 */}
               <div className="absolute top-4 bottom-4 right-4" style={{ width: "clamp(60px, 11%, 110px)" }}>
-                <div className="relative w-full h-full overflow-hidden" style={{ borderRadius: "57px" }}>
-                  <img src={imgBentoBuilding1} alt="" className="absolute max-w-none" style={{ width: "220.8%", height: "102.77%", left: "-60.09%", top: "-2.77%" }} />
+                <div className="relative w-full h-full overflow-hidden rounded-[57px]">
+                  <img src={imgLissaLogo} alt="LISSA Logo" className="absolute inset-0 w-full h-full object-contain" />
                 </div>
-                <div className="absolute border-2 border-[rgba(255,255,255,0.15)]" style={{ inset: "-2px", borderRadius: "59px" }} />
               </div>
               <div className="mt-auto" style={{ paddingRight: "clamp(70px, 14%, 130px)" }}>
                 <p className="text-[rgba(255,255,255,0.62)] tracking-[3.04px] mb-1 whitespace-nowrap overflow-hidden text-ellipsis" style={{ ...monoMed, fontSize: "clamp(10px, 0.85vw, 15px)" }}>
@@ -111,8 +123,10 @@ export default function BentoSection() {
           </Reveal>
         </div>
 
+        {/* 右側欄位：這一欄由多個小卡片組成，包含最新動態、學習資源、成員數量與支持我們。 */}
+        {/* 若要調整右欄整體間距，修改 gap-3 / lg:gap-4。 */}
         <div className="flex-1 flex flex-col gap-3 lg:gap-4">
-          <div className="flex-[260] flex gap-3 lg:gap-4 min-h-[150px]">
+          <div className="flex-[1] flex gap-3 lg:gap-4 min-h-[120px] lg:min-h-[0]">
             <Reveal delay={80} className="flex-1 flex flex-col">
               <div className={`${BENTO_CARD} flex-1 p-5 md:p-6 justify-between`} style={BENTO_BG}>
                 <p className="text-white tracking-[3.04px]" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)" }}>
@@ -135,7 +149,7 @@ export default function BentoSection() {
             </Reveal>
           </div>
 
-          <div className="flex-[260] flex gap-3 lg:gap-4 min-h-[150px]">
+          <div className="flex-[1] flex gap-3 lg:gap-4 min-h-[120px] lg:min-h-[0]">
             <Reveal delay={120} className="flex-1 flex flex-col">
               <div className={`${BENTO_CARD} flex-1 p-5 md:p-6 justify-between`} style={BENTO_BG}>
                 <p className="text-white tracking-[3.04px]" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)" }}>
@@ -170,7 +184,9 @@ export default function BentoSection() {
             </Reveal>
           </div>
 
-          <div className="flex-[154] flex gap-3 lg:gap-4 min-h-[90px]">
+          {/* 下排社群連結卡片：INSTAGRAM / FACEBOOK / THREADS。 */}
+          {/* 手動調整方法：改 flex-[0.8]、gap-3 / lg:gap-4、min-h-[90px] 來控制這排的整體佈局。 */}
+          <div className="flex-[0.8] flex gap-3 lg:gap-4 min-h-[90px] lg:min-h-[0]">
             {(
               [
                 { label: "INSTAGRAM", path: svgPaths.p372aef00, vb: "0 0 64 64", delay: 160, href: "https://www.instagram.com/ntu_lis_sa?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },

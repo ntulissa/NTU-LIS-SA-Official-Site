@@ -29,8 +29,28 @@ export default function JoinUsSection() {
 
       <Reveal delay={200}>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="#" className="inline-flex items-center justify-center px-8 py-3 rounded-full hover:opacity-80 transition-all duration-200" style={{ background: "linear-gradient(to right, #D14B4B, #2F9EBD)", fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "1rem", letterSpacing: "0.2em", color: "white" }}>
-            加 入 我 們
+          <a href="#" className="relative inline-flex items-center justify-center px-8 py-3 rounded-full overflow-hidden hover:opacity-90 transition-all duration-200" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "1rem", letterSpacing: "0.2em", color: "white", background: "#000" }}>
+            <span
+              className="absolute inset-0 rounded-full"
+              style={{
+                padding: "1.5px",
+                border: "1.5px solid transparent",
+                background: "linear-gradient(#000, #000) padding-box, linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%) border-box",
+              }}
+            />
+            <span
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: "conic-gradient(from 0deg, #D14B4B 0deg, #2F9EBD 180deg, #D14B4B 360deg)",
+                WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                WebkitMaskComposite: "xor",
+                maskComposite: "exclude",
+                animation: "buttonRotate 8s linear infinite",
+                transformOrigin: "center",
+                opacity: 0.95,
+              }}
+            />
+            <span className="relative z-10">加 入 我 們</span>
           </a>
           <a href="#" className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-white/50 text-white hover:bg-white/5 transition-all duration-200" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "1rem", letterSpacing: "0.12em" }}>
             追 蹤 我 們 的 社 群

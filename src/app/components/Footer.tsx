@@ -62,10 +62,10 @@ export default function Footer() {
       <style>{`
         @keyframes footerFlow {
           0% {
-            background-position: -100% 50%;
+            background-position: 300% 50%;
           }
           100% {
-            background-position: 300% 50%;
+            background-position: -100% 50%;
           }
         }
         .footer-flow-text {
@@ -75,7 +75,7 @@ export default function Footer() {
           -webkit-text-fill-color: transparent;
           background-clip: text;
           color: transparent;
-          animation: footerFlow 2.6s linear infinite;
+          animation: footerFlow 6s linear infinite;
         }
       `}</style>
       <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-14">
