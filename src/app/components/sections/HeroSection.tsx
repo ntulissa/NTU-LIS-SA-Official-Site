@@ -12,7 +12,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-end pb-20 pt-[100px]">
+    <section className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-end pb-16 pt-24 sm:pt-28 sm:pb-20 md:pt-[100px] md:pb-20">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           style={{
@@ -46,8 +46,8 @@ export default function HeroSection() {
         }}
       />
 
-      <div className="relative px-6 md:px-14 max-w-[1400px] mx-auto w-full">
-        <p className="text-white text-sm md:text-base mb-4 tracking-[2px]" style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 700 }}>
+      <div className="relative px-5 sm:px-8 md:px-14 max-w-[1400px] mx-auto w-full">
+        <p className="text-white text-sm sm:text-base mb-4 tracking-[2px]" style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 700 }}>
           → LISSA, on LIVE.
         </p>
         <h1
@@ -73,7 +73,7 @@ export default function HeroSection() {
         </h2>
         <a
           href="#"
-          className="inline-flex items-center gap-3 bg-white text-black px-7 py-3 rounded-full hover:bg-white/90 transition-all duration-200 group"
+          className="inline-flex items-center gap-3 bg-white text-black px-6 sm:px-7 py-3 rounded-full hover:bg-white/90 transition-all duration-200 group w-fit max-w-full"
           style={{
             fontFamily: "'Noto Sans TC', sans-serif",
             fontWeight: 700,

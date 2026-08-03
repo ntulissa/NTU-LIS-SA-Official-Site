@@ -70,7 +70,7 @@ export default function TeamSection() {
   return (
     <section id="team" className="bg-black min-h-screen overflow-hidden">
       <div className="relative w-full min-h-screen flex flex-col lg:flex-row">
-        <div className="flex flex-col justify-center px-[clamp(24px,4.3vw,74px)] py-[clamp(60px,11.4vw,197px)]" style={{ width: "clamp(300px,54vw,920px)", flexShrink: 0 }}>
+        <div className="flex flex-col justify-center px-5 sm:px-8 md:px-[clamp(24px,4.3vw,74px)] py-16 sm:py-20 lg:py-[clamp(60px,11.4vw,197px)] w-full lg:w-[clamp(300px,54vw,920px)] lg:flex-shrink-0">
           <div>
             <Reveal>
               <p className="text-white/30 text-xs tracking-widest mb-5" style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}>
@@ -89,7 +89,7 @@ export default function TeamSection() {
               </p>
             </Reveal>
 
-            <div className="flex flex-col gap-[clamp(8px,1vw,14px)]" style={{ maxWidth: "clamp(280px,42vw,700px)" }}>
+            <div className="flex flex-col gap-[clamp(8px,1vw,14px)] max-w-full lg:max-w-[clamp(280px,42vw,700px)]">
               <div className="grid grid-cols-3 gap-[clamp(8px,1vw,14px)]">
                 {DEPTS.slice(0, 3).map((dept, i) => (
                   <Reveal key={dept.name} delay={100 + i * 40}>
@@ -108,7 +108,7 @@ export default function TeamSection() {
           </div>
         </div>
 
-        <div className="flex-1 relative overflow-hidden min-h-[600px]">
+        <div className="relative overflow-hidden min-h-[360px] sm:min-h-[460px] lg:flex-1 lg:min-h-[600px] mt-4 lg:mt-0">
           <img src={imgBuildingHistory} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none" style={{ opacity: 0.06 }} />
           <div className="absolute left-0 right-0" style={{ top: "clamp(20px,3.5vw,74px)", bottom: "clamp(20px,3.5vw,74px)" }}>
             <div className="absolute inset-0 flex items-end">
@@ -137,7 +137,7 @@ export default function TeamSection() {
                   );
                 })}
               </div>
-              <div className="absolute flex flex-col items-start" style={{ maxWidth: INFO_MAX_WIDTH, top: INFO_TOP_OFFSET, right: INFO_RIGHT_OFFSET, left: "auto", bottom: "auto" }}>
+              <div className="absolute left-4 right-4 top-auto bottom-6 sm:left-6 sm:right-6 lg:left-auto lg:right-[4vw] lg:top-[40vh] lg:bottom-auto flex flex-col items-start max-w-[min(100%,320px)] lg:max-w-[22vw]">
                 <div style={{ padding: "1.5px", background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)", borderRadius: "999px", marginBottom: ROLE_MARGIN_BOTTOM }}>
                   <div style={{ background: "#000", borderRadius: "999px", padding: "4px 14px", color: "white", fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: ROLE_FONT_SIZE, letterSpacing: "0.16em", whiteSpace: "nowrap" }}>
                     第 53 屆{activeLeader.title}
@@ -158,7 +158,7 @@ export default function TeamSection() {
             </div>
           </div>
 
-          <div className="absolute rounded-full border border-white/20 p-[3px]" style={{ bottom: TOGGLE_BOTTOM_OFFSET, right: TOGGLE_RIGHT_OFFSET }}>
+          <div className="absolute left-4 right-4 bottom-4 sm:left-auto sm:right-6 lg:left-auto lg:right-[4vw] lg:bottom-[20vh] rounded-full border border-white/20 p-[3px]">
             <div className="absolute top-[3px] bottom-[3px] rounded-full bg-white" style={{ width: "calc(50% - 3px)", left: leaderIdx === 0 ? "3px" : "calc(50%)", transition: "left 300ms cubic-bezier(0.4,0,0.2,1)" }} />
             <div className="relative flex">
               {LEADERS.map((l, i) => (

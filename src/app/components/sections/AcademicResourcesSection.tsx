@@ -18,7 +18,7 @@ const DOWNLOAD_LINKS = [
 
 function ResourceRow({ title, sub, img, href }: { title: string; sub: string; img: string | null; href: string }) {
   return (
-    <a href={href} className="flex items-center justify-between gap-4 border border-white/10 rounded-xl p-4 hover:border-white/25 hover:bg-white/3 transition-all duration-200 group">
+    <a href={href} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 border border-white/10 rounded-xl p-4 hover:border-white/25 hover:bg-white/3 transition-all duration-200 group">
       <div className="flex items-center gap-4 min-w-0">
         {img && (
           <div className="w-14 h-10 rounded-lg overflow-hidden shrink-0 opacity-60">
@@ -32,7 +32,7 @@ function ResourceRow({ title, sub, img, href }: { title: string; sub: string; im
           {sub && <p className="text-white/35 text-xs truncate" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500 }}>{sub}</p>}
         </div>
       </div>
-      <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center shrink-0 group-hover:border-white/50 transition-colors">
+      <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center shrink-0 group-hover:border-white/50 transition-colors self-end sm:self-auto">
         <ArrowRight size={13} className="text-white/60" />
       </div>
     </a>
@@ -41,7 +41,7 @@ function ResourceRow({ title, sub, img, href }: { title: string; sub: string; im
 
 export default function AcademicResourcesSection() {
   return (
-    <section id="resources" className="bg-black px-6 md:px-14 py-24">
+    <section id="resources" className="bg-black px-5 sm:px-8 md:px-14 py-16 sm:py-20 md:py-24">
       <div className="max-w-[1400px] mx-auto">
         <Reveal>
           <p className="text-white/30 text-xs tracking-widest mb-4" style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}>
@@ -53,7 +53,7 @@ export default function AcademicResourcesSection() {
           </h2>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10">
           <div>
             <Reveal>
               <p className="mb-5 text-xs tracking-widest font-bold" style={{ fontFamily: "'Ubuntu Sans Mono', monospace", background: "linear-gradient(to right, #2F9EBD, #ffffff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>

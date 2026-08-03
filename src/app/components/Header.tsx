@@ -44,7 +44,7 @@ export default function Header() {
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-[1400px] mx-auto pl-4 pr-4 md:pl-6 md:pr-6 h-[80px] flex items-center justify-between">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-6 min-h-[80px] flex items-center justify-between">
 
         {/* ── Logo ─────────────────────────────────────────────────────── */}
         <a href="#" className="flex items-center gap-3 group shrink-0">
@@ -148,7 +148,7 @@ export default function Header() {
 
         {/* ── Mobile toggle ─────────────────────────────────────────────── */}
         <button
-          className="md:hidden text-white/70 hover:text-white"
+          className="md:hidden text-white/70 hover:text-white p-2"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
           {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -157,7 +157,7 @@ export default function Header() {
 
       {/* ── Mobile menu ───────────────────────────────────────────────── */}
       {mobileOpen && (
-        <div className="md:hidden bg-[#090909]/98 backdrop-blur-xl border-t border-white/8 px-6 py-5 space-y-5">
+        <div className="md:hidden bg-[#090909]/98 backdrop-blur-xl border-t border-white/8 px-4 sm:px-6 py-4 sm:py-5 space-y-4 max-h-[calc(100vh-80px)] overflow-y-auto">
           {NAV_ITEMS.map((item, i) => (
             <div key={i}>
               <p
