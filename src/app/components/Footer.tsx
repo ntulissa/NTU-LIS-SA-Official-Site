@@ -59,10 +59,31 @@ const SOCIAL_ICONS = [
 export default function Footer() {
   return (
     <footer className="bg-[#060606] border-t border-white/8 pt-14 pb-8">
-      <div className="max-w-[1400px] mx-auto px-6 md:px-14">
-        <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_1fr_1fr] gap-10 md:gap-16 mb-10">
+      <style>{`
+        @keyframes footerFlow {
+          0% {
+            background-position: -100% 50%;
+          }
+          100% {
+            background-position: 300% 50%;
+          }
+        }
+        .footer-flow-text {
+          background: linear-gradient(90deg, #ff6b6b 0%, #ff8a8a 18%, #2f9ebd 45%, #7dd3fc 72%, #ff6b6b 100%);
+          background-size: 200% 200%;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          color: transparent;
+          animation: footerFlow 2.6s linear infinite;
+        }
+      `}</style>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-14">
+        <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-8 md:gap-10 lg:gap-20 mb-10">
+          {/* 右側選單區塊可手動調整：lg:gap-14 / md:gap-10 這兩個數字；數字越大，三排之間距離越寬 */}
           {/* Brand */}
-          <div className="md:max-w-[220px]">
+          <div className="md:max-w-[220px] md:mr-6 lg:mr-30">
+            {/* 左側 Logo 區塊向右推的距離：md:mr-8 / lg:mr-12；數字越大，Logo 會離右邊選單更遠 */}
             {/* Logo — matches Header exactly */}
             <div className="flex items-center gap-3 mb-5">
               <div
@@ -111,16 +132,13 @@ export default function Footer() {
           </div>
 
           {/* Nav columns */}
-          {NAV_COLS.map((col) => (
-            <div key={col.en}>
+          {NAV_COLS.map((col, index) => (
+            <div key={col.en} className={index === NAV_COLS.length - 1 ? "md:pl-10 lg:pl-14" : "md:pl-6 lg:pl-8"}>
+              {/* 右側選單欄位的內距：最右欄用 md:pl-10 / lg:pl-14，其他欄用 md:pl-6 / lg:pl-8；數字越大，欄位會更往右偏 */}
               <p
-                className="text-sm font-bold mb-6"
+                className="footer-flow-text text-sm font-bold mb-6"
                 style={{
                   fontFamily: "'Ubuntu Sans Mono', monospace",
-                  background: "linear-gradient(to right, #D14B4B, #2F9EBD)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
                   letterSpacing: "0.07em",
                 }}
               >

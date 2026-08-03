@@ -15,12 +15,13 @@ const NAV_ITEMS = [
   {
     label: "最新動態",
     labelEn: "NEWS",
-    sub: ["近期活動", "公告事項"],
+    sub: ["近期活動公告", "活動紀錄", "系學會行事曆"
+    ],
   },
   {
-    label: "學術資源",
+    label: "各種資源",
     labelEn: "RESOURCES",
-    sub: ["學習連結", "資料下載"],
+    sub: ["學習連結", "資料下載區"],
   },
 ];
 
@@ -43,7 +44,7 @@ export default function Header() {
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-[1400px] mx-auto pl-4 pr-6 md:pl-6 md:pr-10 h-[80px] flex items-center justify-between">
+      <div className="max-w-[1400px] mx-auto pl-4 pr-4 md:pl-6 md:pr-6 h-[80px] flex items-center justify-between">
 
         {/* ── Logo ─────────────────────────────────────────────────────── */}
         <a href="#" className="flex items-center gap-3 group shrink-0">
@@ -93,7 +94,7 @@ export default function Header() {
         </a>
 
         {/* ── Desktop Nav ───────────────────────────────────────────────── */}
-        <nav className="hidden md:flex items-center gap-2">
+        <nav className="hidden md:flex items-center gap-3 ml-auto mr-0 md:mr-0">
           {NAV_ITEMS.map((item, i) => (
             <div
               key={i}
@@ -132,7 +133,7 @@ export default function Header() {
           {/* 加入我們 — red→teal gradient pill */}
           <a
             href="#join"
-            className="ml-3 px-6 py-2.5 rounded-full text-white hover:opacity-85 transition-opacity duration-200 shrink-0"
+            className="ml-1 px-6 py-2.5 rounded-full text-white hover:opacity-85 transition-opacity duration-200 shrink-0"
             style={{
               fontFamily: zhFont,
               fontWeight: 900,
