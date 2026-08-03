@@ -18,10 +18,10 @@ const FIGURE_TOP_PADDING = "-12vh";
 const INFO_TOP_OFFSET = "40vh";
 const INFO_RIGHT_OFFSET = "4vw";
 const INFO_MAX_WIDTH = "22vw";
-const ROLE_FONT_SIZE = "1.3vw";
-const NAME_FONT_SIZE = "5vw";
-const ROMAN_FONT_SIZE = "1.3vw";
-const YEAR_FONT_SIZE = "0.95vw";
+const ROLE_FONT_SIZE = "clamp(0.72rem, 2.4vw, 1.3vw)";
+const NAME_FONT_SIZE = "clamp(2rem, 8vw, 5vw)";
+const ROMAN_FONT_SIZE = "clamp(0.8rem, 2.8vw, 1.3vw)";
+const YEAR_FONT_SIZE = "clamp(0.72rem, 2.4vw, 0.95vw)";
 const ROLE_MARGIN_BOTTOM = "5vh";
 const NAME_MARGIN_BOTTOM = "3vh";
 const ROMAN_MARGIN_BOTTOM = "3vh";
@@ -108,7 +108,7 @@ export default function TeamSection() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden min-h-[360px] sm:min-h-[460px] lg:flex-1 lg:min-h-[600px] mt-4 lg:mt-0">
+        <div className="relative overflow-hidden min-h-[320px] sm:min-h-[460px] lg:flex-1 lg:min-h-[600px] mt-4 lg:mt-0 rounded-[24px] lg:rounded-none">
           <img src={imgBuildingHistory} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none" style={{ opacity: 0.06 }} />
           <div className="absolute left-0 right-0" style={{ top: "clamp(20px,3.5vw,74px)", bottom: "clamp(20px,3.5vw,74px)" }}>
             <div className="absolute inset-0 flex items-end">
@@ -125,19 +125,19 @@ export default function TeamSection() {
                         pointerEvents: "none",
                       }}
                     >
-                      <div className="h-full flex-shrink-0 flex items-end">
+                      <div className="h-full flex-shrink-0 flex items-end justify-center lg:justify-start w-full">
                         <img
                           src={leader.img}
                           alt={leader.name}
-                          className="w-auto object-contain object-bottom max-w-none"
-                          style={{ height: FIGURE_IMAGE_HEIGHT, opacity: isActive ? 1 : 0 }}
+                          className="w-auto max-w-full object-contain object-bottom"
+                          style={{ height: "clamp(280px, 70vh, 620px)", opacity: isActive ? 1 : 0 }}
                         />
                       </div>
                     </div>
                   );
                 })}
               </div>
-              <div className="absolute left-4 right-4 top-auto bottom-6 sm:left-6 sm:right-6 lg:left-auto lg:right-[4vw] lg:top-[40vh] lg:bottom-auto flex flex-col items-start max-w-[min(100%,320px)] lg:max-w-[22vw]">
+              <div className="absolute left-4 right-4 top-4 sm:left-6 sm:right-6 lg:left-auto lg:right-[4vw] lg:top-[40vh] lg:bottom-auto flex flex-col items-start max-w-[min(100%,320px)] lg:max-w-[22vw]">
                 <div style={{ padding: "1.5px", background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)", borderRadius: "999px", marginBottom: ROLE_MARGIN_BOTTOM }}>
                   <div style={{ background: "#000", borderRadius: "999px", padding: "4px 14px", color: "white", fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: ROLE_FONT_SIZE, letterSpacing: "0.16em", whiteSpace: "nowrap" }}>
                     第 53 屆{activeLeader.title}
@@ -158,7 +158,7 @@ export default function TeamSection() {
             </div>
           </div>
 
-          <div className="absolute left-4 right-4 bottom-4 sm:left-auto sm:right-6 lg:left-auto lg:right-[4vw] lg:bottom-[20vh] rounded-full border border-white/20 p-[3px]">
+          <div className="absolute left-4 right-4 bottom-4 sm:left-auto sm:right-6 lg:left-auto lg:right-[4vw] lg:bottom-[20vh] rounded-full border border-white/20 p-[3px] max-w-fit">
             <div className="absolute top-[3px] bottom-[3px] rounded-full bg-white" style={{ width: "calc(50% - 3px)", left: leaderIdx === 0 ? "3px" : "calc(50%)", transition: "left 300ms cubic-bezier(0.4,0,0.2,1)" }} />
             <div className="relative flex">
               {LEADERS.map((l, i) => (

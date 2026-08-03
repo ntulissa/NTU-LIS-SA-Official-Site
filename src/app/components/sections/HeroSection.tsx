@@ -55,7 +55,7 @@ export default function HeroSection() {
           style={{
             fontFamily: "'Noto Sans TC', sans-serif",
             fontWeight: 900,
-            fontSize: "clamp(3.5rem, 13vw, 15rem)",
+            fontSize: "clamp(2.6rem, 10vw, 15rem)",
             backgroundImage: "linear-gradient(to right, #D14B4B 0%, #2F9EBD 100%)",
           }}
         >
@@ -66,7 +66,7 @@ export default function HeroSection() {
           style={{
             fontFamily: "'Noto Sans TC', sans-serif",
             fontWeight: 700,
-            fontSize: "clamp(2rem, 9.5vw, 11rem)",
+            fontSize: "clamp(1.6rem, 7vw, 11rem)",
           }}
         >
           可以這樣「玩」？
