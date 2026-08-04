@@ -1,5 +1,6 @@
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import ScrollIndicator from "./components/ScrollIndicator";
 import HeroSection from "./components/sections/HeroSection";
 import BentoSection from "./components/sections/BentoSection";
 import SloganSection from "./components/sections/SloganSection";
@@ -24,6 +25,8 @@ export default function App() {
       <AcademicResourcesSection />
       <JoinUsSection />
       <Footer />
+      {/* 固定於畫面下方的捲動提示；滑到 Footer 會自動淡出 */}
+      <ScrollIndicator />
     </div>
   );
 }

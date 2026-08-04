@@ -5,11 +5,11 @@ export default function JoinUsSection() {
     <section id="join" className="bg-black min-h-screen flex flex-col items-center justify-center px-6 py-28 text-center">
       <Reveal>
         <h2 className="text-white leading-tight mb-8" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "clamp(1.8rem, 4.5vw, 4.5rem)" }}>
-          成為{" "}
+          成 為{" "}
           <span style={{ background: "linear-gradient(to right, #D14B4B, #2F9EBD)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
             臺大圖資系學會
           </span>{" "}
-          的一員
+          的 一 員
         </h2>
       </Reveal>
 

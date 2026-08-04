@@ -114,17 +114,22 @@ export default function Header() {
               </button>
 
               {openDropdown === i && (
-                <div className="absolute top-full left-0 mt-1 w-40 bg-[#111]/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl shadow-black/60">
-                  {item.sub.map((s, j) => (
-                    <a
-                      key={j}
-                      href="#"
-                      className="block px-4 py-2.5 text-white/55 hover:text-white hover:bg-white/5 transition-colors duration-150"
-                      style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.12em" }}
-                    >
-                      {s}
-                    </a>
-                  ))}
+                // 外層絕對定位容器：緊貼按鈕底部（top-full，無縫），
+                // 用 pt-2 當作「透明橋接區」取代原本的 mt-1 空隙，
+                // 讓可 hover 的範圍從按鈕一路連到整個面板，滑過去不會斷掉。
+                <div className="absolute top-full left-0 pt-2 w-40">
+                  <div className="bg-[#111]/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl shadow-black/60">
+                    {item.sub.map((s, j) => (
+                      <a
+                        key={j}
+                        href="#"
+                        className="block px-4 py-2.5 text-white/55 hover:text-white hover:bg-white/5 transition-colors duration-150"
+                        style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.12em" }}
+                      >
+                        {s}
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

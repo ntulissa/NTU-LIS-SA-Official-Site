@@ -29,7 +29,28 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-end pb-16 pt-24 sm:pt-28 sm:pb-20 md:pt-[100px] md:pb-20">
+    <section className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-end pb-24 pt-24 sm:pt-28 sm:pb-32 md:pt-[100px] md:pb-40">
+      {/* 內容整塊往上：加大 pb（padding-bottom）把 justify-end 的內容往上推；
+          想再往上就把 md:pb-40 調更大，想回原本改回 md:pb-20。 */}
+      {/* 「系學會」紅藍漸層流動動畫（參考 Footer 的 footerFlow，速度放慢） */}
+      {/* 想調流動速度：改 animation 的秒數（現在 12s，數字越大越慢）。 */}
+      {/* 想調顏色：改 linear-gradient 裡的 #D14B4B / #2F9EBD。 */}
+      <style>{`
+        @keyframes heroFlow {
+          0%   { background-position: 200% 50%; }
+          100% { background-position: -200% 50%; }
+        }
+        .hero-flow-text {
+          background: linear-gradient(90deg, #D14B4B 0%, #2F9EBD 25%, #D14B4B 50%, #2F9EBD 75%, #D14B4B 100%);
+          background-size: 200% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          color: transparent;
+          animation: heroFlow 12s linear infinite;
+        }
+      `}</style>
+
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           style={{
@@ -62,18 +83,74 @@ export default function HeroSection() {
         }}
       />
 
+      {/* ── 背景大數字「53」 ─────────────────────────────────────────────
+          黑色填滿（蓋住建築圖）+ 紅藍漸層外框（stroke 2px）。
+          用 SVG 是因為 CSS text-stroke 不支援漸層；SVG stroke 可指向 linearGradient。
+          位置：靠右、垂直置中（可改下方 right / height）。
+          大小：height 用 clamp 讓它隨畫面縮放，最大 1000px（對應你的 font-size:1000px）。 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden="true">
+        {/* 53 往下移：top:50% 置中後，再用 translateY 加 +67px 往下推，
+            讓 53 頂端大約與「系學會」頂端切齊。想再往下就把 67px 調大，往上就調小。 */}
+        <svg
+          className="absolute"
+          style={{ right: "-4%", top: "50%", transform: "translateY(calc(-50% + 67px))", height: "clamp(360px, 82vh, 1000px)", width: "auto" }}
+          viewBox="0 0 1200 1000"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <defs>
+            <linearGradient id="stroke53Gradient" gradientUnits="userSpaceOnUse" x1="150" y1="120" x2="1050" y2="880">
+              <stop offset="0" stopColor="#D14B4B" />
+              <stop offset="1" stopColor="#2F9EBD" />
+            </linearGradient>
+            {/* Safari 安全做法：外框用 mask 讓漸層矩形只在字的邊框露出，
+                而不是用「文字漸層 stroke」（Safari 不支援，會把整個字填滿變實心）。
+                遮罩文字只用白色實色描邊，Safari 完全支援。
+                想調外框粗細：改下面遮罩文字的 strokeWidth。 */}
+            <mask id="mask53" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="1000">
+              <rect x="0" y="0" width="1200" height="1000" fill="black" />
+              <text
+                x="600"
+                y="560"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill="black"
+                stroke="white"
+                strokeWidth="4"
+                style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 400, fontSize: "1000px" }}
+              >
+                53
+              </text>
+            </mask>
+          </defs>
+
+          {/* 1) 純黑字身：蓋住建築圖 */}
+          <text
+            x="600"
+            y="560"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#000000"
+            style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 400, fontSize: "1000px" }}
+          >
+            53
+          </text>
+
+          {/* 2) 紅藍漸層外框：漸層塗在矩形上，透過 mask 只在字的邊框露出 */}
+          <rect x="0" y="0" width="1200" height="1000" fill="url(#stroke53Gradient)" mask="url(#mask53)" />
+        </svg>
+      </div>
+
       <div className="relative px-5 sm:px-8 md:px-14 max-w-[1400px] mx-auto w-full">
         <p className="text-white text-sm sm:text-base mb-4 tracking-[2px]" style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 700 }}>
           {displayText}
           <span className="ml-1 inline-block h-4 w-[0.6ch] align-middle border-r border-white/80 animate-pulse" aria-hidden="true" />
         </p>
         <h1
-          className="leading-none select-none mb-10 bg-clip-text text-transparent"
+          className="hero-flow-text leading-none select-none mb-10"
           style={{
             fontFamily: "'Noto Sans TC', sans-serif",
             fontWeight: 900,
             fontSize: "clamp(2.6rem, 10vw, 15rem)",
-            backgroundImage: "linear-gradient(to right, #D14B4B 0%, #2F9EBD 100%)",
           }}
         >
           系學會
@@ -84,6 +161,7 @@ export default function HeroSection() {
             fontFamily: "'Noto Sans TC', sans-serif",
             fontWeight: 700,
             fontSize: "clamp(1.6rem, 7vw, 11rem)",
+            letterSpacing: "0.09em",
           }}
         >
           可以這樣「玩」？
