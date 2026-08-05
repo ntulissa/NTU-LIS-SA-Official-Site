@@ -46,7 +46,7 @@ export default defineConfig({
 
   preview: {
     host: '0.0.0.0',
-    port: 4173,
+    port: 3000,
     strictPort: true,
     allowedHosts: ['.app.github.dev', '.preview.app.github.dev', 'localhost', '127.0.0.1'],
   },

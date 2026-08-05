@@ -79,7 +79,7 @@ export default function HistorySection() {
           </div>
 
           <Reveal delay={200} className="pt-[clamp(24px,3.5vw,56px)]">
-            <a href="#" className="inline-flex items-center gap-3 bg-white text-black hover:bg-white/90 transition-colors duration-200 group w-fit" style={{ borderRadius: "49px", fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "clamp(0.72rem,0.95vw,16px)", padding: "clamp(12px,1.2vw,20px) clamp(20px,2vw,32px)" }}>
+            <a href="#" className="inline-flex items-center gap-3 bg-white text-black hover:bg-white/90 transition-colors duration-200 group w-fit" style={{ borderRadius: "49px", fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "clamp(0.85rem, 1.5vw, 1.1rem)", padding: "clamp(12px,1.2vw,20px) clamp(20px,2vw,32px)", letterSpacing:"0.2rem" }}>
               探索更多圖資系學會歷史
               <svg viewBox="0 0 30 24" fill="none" className="shrink-0 group-hover:translate-x-1 transition-transform duration-200" style={{ width: "clamp(16px,1.4vw,22px)", height: "auto" }}>
                 <path d={svgHistoryPaths.p8ea180} fill="black" />

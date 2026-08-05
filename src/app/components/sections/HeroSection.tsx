@@ -1,10 +1,69 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { ArrowRight } from "lucide-react";
 import imgBuilding from "@/imports/HomePage-1/de7749452570d864c1f5c584765f093ab16a6d89.png";
 
 export default function HeroSection() {
   const [scrollY, setScrollY] = useState(0);
   const [displayText, setDisplayText] = useState("");
+  const [num53Hover, setNum53Hover] = useState(false); // 滑鼠是否在「53」數字上
+  const svg53Ref = useRef<SVGSVGElement>(null);
+  const hit53Ref = useRef<{ ctx: CanvasRenderingContext2D; w: number; h: number } | null>(null);
+  const num53HoverRef = useRef(false);
+
+  // 字型載入完成或視窗尺寸改變時，讓命中用的 canvas 失效、下次重建
+  // （確保 canvas 用的是 Josefin 而非 fallback，命中形狀才會跟畫面一致）
+  useEffect(() => {
+    const invalidate = () => { hit53Ref.current = null; };
+    const anyDoc = document as unknown as { fonts?: { ready?: Promise<unknown> } };
+    if (anyDoc.fonts?.ready) anyDoc.fonts.ready.then(invalidate);
+    window.addEventListener("resize", invalidate);
+    return () => window.removeEventListener("resize", invalidate);
+  }, []);
+
+  // 用隱藏 canvas 畫出「53」，以像素透明度判斷滑鼠是否落在「數字形狀」上（精準貼合字形，
+  // 避開 SVG 文字只用方框感應、以及 clip-path 會讓元素收不到事件的問題）
+  const isOver53 = (clientX: number, clientY: number) => {
+    const svg = svg53Ref.current;
+    if (!svg) return false;
+    const rect = svg.getBoundingClientRect();
+    const w = Math.max(1, Math.round(rect.width));
+    const h = Math.max(1, Math.round(rect.height));
+    let hit = hit53Ref.current;
+    if (!hit || hit.w !== w || hit.h !== h) {
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return false;
+      const scale = h / 1000; // viewBox 高 1000 對應到 rect 高 h
+      ctx.fillStyle = "#000";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = `400 ${1000 * scale}px 'Josefin Sans', sans-serif`;
+      ctx.fillText("53", 600 * scale, 560 * scale); // 對應 SVG text 的 x=600 y=560
+      hit = { ctx, w, h };
+      hit53Ref.current = hit;
+    }
+    const x = Math.round(clientX - rect.left);
+    const y = Math.round(clientY - rect.top);
+    if (x < 0 || y < 0 || x >= w || y >= h) return false;
+    return hit.ctx.getImageData(x, y, 1, 1).data[3] > 10;
+  };
+
+  const handleHeroMouseMove = (e: ReactMouseEvent) => {
+    const over = isOver53(e.clientX, e.clientY);
+    if (over !== num53HoverRef.current) {
+      num53HoverRef.current = over;
+      setNum53Hover(over);
+    }
+  };
+
+  const handleHeroMouseLeave = () => {
+    if (num53HoverRef.current) {
+      num53HoverRef.current = false;
+      setNum53Hover(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -12,24 +71,57 @@ export default function HeroSection() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // 打字機動畫：兩句輪流。打完一句停留約 7 秒 → 逐字刪掉 → 換下一句重打，
+  // 整段循環大約每 10 秒重打一次。
   useEffect(() => {
-    const fullText = "→ LISSA, on LIVE.";
-    let index = 0;
+    const PHRASES = ["→ LISSA, on LIVE.", "→ 真的可以這樣玩。"];
+    const TYPE_SPEED = 90; // 打字速度（每字 ms）
+    const DELETE_SPEED = 45; // 刪字速度（每字 ms）
+    const HOLD_AFTER_TYPE = 7000; // 打完停留多久再重打（ms）← 調這個控制「大約十秒」
+    const PAUSE_BEFORE_NEXT = 500; // 刪完到下一句開始的間隔（ms）
 
-    const timer = window.setInterval(() => {
-      setDisplayText(fullText.slice(0, index + 1));
-      index += 1;
+    let phraseIdx = 0;
+    let charIdx = 0;
+    let deleting = false;
+    let timer: number;
 
-      if (index >= fullText.length) {
-        window.clearInterval(timer);
+    const tick = () => {
+      const full = PHRASES[phraseIdx];
+      if (!deleting) {
+        charIdx += 1;
+        setDisplayText(full.slice(0, charIdx));
+        if (charIdx >= full.length) {
+          // 打完整句 → 停留後開始刪
+          deleting = true;
+          timer = window.setTimeout(tick, HOLD_AFTER_TYPE);
+          return;
+        }
+        timer = window.setTimeout(tick, TYPE_SPEED);
+      } else {
+        charIdx -= 1;
+        setDisplayText(full.slice(0, Math.max(0, charIdx)));
+        if (charIdx <= 0) {
+          // 刪完 → 換下一句
+          deleting = false;
+          phraseIdx = (phraseIdx + 1) % PHRASES.length;
+          timer = window.setTimeout(tick, PAUSE_BEFORE_NEXT);
+          return;
+        }
+        timer = window.setTimeout(tick, DELETE_SPEED);
       }
-    }, 90);
+    };
 
-    return () => window.clearInterval(timer);
+    timer = window.setTimeout(tick, TYPE_SPEED);
+    return () => window.clearTimeout(timer);
   }, []);
 
   return (
-    <section className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-end pb-24 pt-24 sm:pt-28 sm:pb-32 md:pt-[100px] md:pb-40">
+    <section
+      className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-end pb-24 pt-24 sm:pt-28 sm:pb-32 md:pt-[100px] md:pb-40"
+      onMouseMove={handleHeroMouseMove}
+      onMouseLeave={handleHeroMouseLeave}
+      style={{ cursor: num53Hover ? "pointer" : undefined }}
+    >
       {/* 內容整塊往上：加大 pb（padding-bottom）把 justify-end 的內容往上推；
           想再往上就把 md:pb-40 調更大，想回原本改回 md:pb-20。 */}
       {/* 「系學會」紅藍漸層流動動畫（參考 Footer 的 footerFlow，速度放慢） */}
@@ -48,6 +140,14 @@ export default function HeroSection() {
           -webkit-text-fill-color: transparent;
           color: transparent;
           animation: heroFlow 12s linear infinite;
+        }
+        /* 「53」外框流動：平移一條寬的重複漸層矩形。想調速度改 dur（現在 4s）。 */
+        @keyframes num53Flow {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-600px); }
+        }
+        .num53-flow-rect {
+          animation: num53Flow 4s linear infinite;
         }
       `}</style>
 
@@ -92,15 +192,24 @@ export default function HeroSection() {
         {/* 53 往下移：top:50% 置中後，再用 translateY 加 +67px 往下推，
             讓 53 頂端大約與「系學會」頂端切齊。想再往下就把 67px 調大，往上就調小。 */}
         <svg
+          ref={svg53Ref}
           className="absolute"
           style={{ right: "-4%", top: "50%", transform: "translateY(calc(-50% + 67px))", height: "clamp(360px, 82vh, 1000px)", width: "auto" }}
           viewBox="0 0 1200 1000"
           preserveAspectRatio="xMidYMid meet"
         >
           <defs>
+            {/* 靜態漸層（平常沒 hover 時的外框顏色） */}
             <linearGradient id="stroke53Gradient" gradientUnits="userSpaceOnUse" x1="150" y1="120" x2="1050" y2="880">
               <stop offset="0" stopColor="#D14B4B" />
               <stop offset="1" stopColor="#2F9EBD" />
+            </linearGradient>
+            {/* 流動漸層：紅-藍-紅 重複（objectBoundingBox，隨矩形移動）。
+                實際流動是靠 CSS 平移矩形（.num53-flow-rect）產生，Safari 也會動。 */}
+            <linearGradient id="stroke53Flow" x1="0" y1="0" x2="0.2" y2="0" spreadMethod="repeat">
+              <stop offset="0" stopColor="#D14B4B" />
+              <stop offset="0.5" stopColor="#2F9EBD" />
+              <stop offset="1" stopColor="#D14B4B" />
             </linearGradient>
             {/* Safari 安全做法：外框用 mask 讓漸層矩形只在字的邊框露出，
                 而不是用「文字漸層 stroke」（Safari 不支援，會把整個字填滿變實心）。
@@ -123,7 +232,8 @@ export default function HeroSection() {
             </mask>
           </defs>
 
-          {/* 1) 純黑字身：蓋住建築圖 */}
+          {/* 1) 純黑字身：純視覺，蓋住建築圖。
+                （hover 感應改用 section 上的 canvas 取樣，見上方 isOver53，能精準貼合字形） */}
           <text
             x="600"
             y="560"
@@ -135,13 +245,28 @@ export default function HeroSection() {
             53
           </text>
 
-          {/* 2) 紅藍漸層外框：漸層塗在矩形上，透過 mask 只在字的邊框露出 */}
-          <rect x="0" y="0" width="1200" height="1000" fill="url(#stroke53Gradient)" mask="url(#mask53)" />
+          {/* 2) 漸層外框：平常靜態漸層；hover 在數字上時淡入切換成流動漸層 */}
+          <g mask="url(#mask53)">
+            {/* 靜態外框 */}
+            <rect
+              x="0" y="0" width="1200" height="1000"
+              fill="url(#stroke53Gradient)"
+              style={{ opacity: num53Hover ? 0 : 1, transition: "opacity 300ms ease" }}
+            />
+            {/* 流動外框：寬矩形 + 重複漸層，用 CSS 平移 (num53-flow-rect) 產生流動；hover 才淡入 */}
+            <rect
+              className="num53-flow-rect"
+              x="-900" y="0" width="3000" height="1000"
+              fill="url(#stroke53Flow)"
+              style={{ opacity: num53Hover ? 1 : 0, transition: "opacity 300ms ease" }}
+            />
+          </g>
+
         </svg>
       </div>
 
       <div className="relative px-5 sm:px-8 md:px-14 max-w-[1400px] mx-auto w-full">
-        <p className="text-white text-sm sm:text-base mb-4 tracking-[2px]" style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 700 }}>
+        <p className="text-white text-sm sm:text-base mb-4 tracking-[2px]" style={{ fontFamily: "'Ubuntu Sans Mono', 'Noto Sans TC', monospace", fontWeight: 700 }}>
           {displayText}
           <span className="ml-1 inline-block h-4 w-[0.6ch] align-middle border-r border-white/80 animate-pulse" aria-hidden="true" />
         </p>
@@ -161,7 +286,6 @@ export default function HeroSection() {
             fontFamily: "'Noto Sans TC', sans-serif",
             fontWeight: 700,
             fontSize: "clamp(1.6rem, 7vw, 11rem)",
-            letterSpacing: "0.09em",
           }}
         >
           可以這樣「玩」？
