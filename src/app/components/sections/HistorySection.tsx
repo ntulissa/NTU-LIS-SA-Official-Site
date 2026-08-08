@@ -55,6 +55,11 @@ export default function HistorySection() {
         <div className="flex flex-col justify-between py-[clamp(60px,11.4vw,197px)] px-[clamp(24px,4.3vw,74px)] shrink-0 relative z-10" style={{ width: "clamp(320px,48vw,820px)" }}>
           <div>
             <Reveal>
+                          <p className="text-white/30 text-xs tracking-widest mb-5" style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}>
+                            — ABOUT US 關於我們
+                          </p>
+                        </Reveal>
+            <Reveal>
               <h2 className="leading-none mb-[clamp(20px,2.5vw,42px)]" style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 700, fontSize: "clamp(2.5rem,3.5vw,60px)" }}>
                 <span className="text-white">OUR</span><br />
                 <span style={{ color: "#d14b4b" }}>HISTORY</span>

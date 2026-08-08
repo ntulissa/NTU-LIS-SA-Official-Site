@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   {
     label: "關於我們",
     labelEn: "ABOUT",
-    sub: ["系學會歷史", "歷任會長", "現任團隊", "正副會長選舉專區"],
+    sub: ["現任團隊", "學會發展歷程", "歷任會長", "正副會長選舉專區"],
   },
   {
     label: "最新動態",
@@ -19,8 +19,8 @@ const NAV_ITEMS = [
     ],
   },
   {
-    label: "各種資源",
-    labelEn: "RESOURCES",
+    label: "各種服務",
+    labelEn: "SERVICES",
     sub: ["學習連結", "資料下載區"],
   },
 ];

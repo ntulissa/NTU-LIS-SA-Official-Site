@@ -10,7 +10,7 @@ type DeptDef = {
   renderIcon: (playing: boolean) => React.ReactNode; // playing=true 時播放動畫
 };
 
-const ICON_SIZE: React.CSSProperties = { width: "clamp(48px,5vw,78px)", height: "auto" }; // 放大 icon
+const ICON_SIZE: React.CSSProperties = { width: "clamp(64px,6.6vw,104px)", height: "auto" }; // icon 尺寸（再放大）
 const FIGURE_IMAGE_HEIGHT = "85vh";
 const FIGURE_TOP_PADDING = "-12vh";
 const INFO_TOP_OFFSET = "40vh";
@@ -223,21 +223,23 @@ function BasketballIcon({ playing }: { playing: boolean }) {
     <svg viewBox="0 0 100 100" style={ICON_SIZE} className={playing ? "bkt bkt-play" : "bkt"}>
       <style>{`
         .bkt .bkt-ball { transform-box: fill-box; transform-origin: center; }
-        /* 等時間間隔 + 位置值上升遞減、下墜遞增 → 上升減速、下墜加速（重力感） */
+        /* 水平等速前進；上升減速、下墜加速。起點/終點都在畫面外→重置看不到，全程不透明、不閃 */
         @keyframes bktShoot {
-          0%,8%{transform:translate(0,0);opacity:1}
-          20%{transform:translate(9px,-28px)}
-          32%{transform:translate(19px,-50px)}
-          42%{transform:translate(28px,-58px)}
-          54%{transform:translate(35px,-48px)}
-          64%{transform:translate(39px,-32px)}
-          74%{transform:translate(41px,-14px)}
-          84%{transform:translate(42px,6px);opacity:0}
-          100%{transform:translate(42px,6px);opacity:0}
+          0%  { transform: translate(0,0); }
+          10% { transform: translate(7.6px,-31.6px); }
+          20% { transform: translate(15.2px,-55.3px); }
+          30% { transform: translate(22.8px,-71.1px); }
+          40% { transform: translate(30.4px,-79px); }
+          50% { transform: translate(38px,-79px); }
+          60% { transform: translate(45.6px,-71.1px); }
+          70% { transform: translate(53.2px,-55.3px); }
+          80% { transform: translate(60.8px,-31.6px); }
+          90% { transform: translate(68.4px,0); }
+          100%{ transform: translate(76px,39.5px); }
         }
         .bkt-play .bkt-ball { animation: bktShoot 2.4s linear infinite; }
         .bkt .bkt-net { transform-box: fill-box; transform-origin: 58px 44px; }
-        @keyframes bktSwish { 0%,60%{transform:scaleY(1)} 70%{transform:scaleY(1.28)} 84%{transform:scaleY(1)} 100%{transform:scaleY(1)} }
+        @keyframes bktSwish { 0%,72%{transform:scaleY(1)} 80%{transform:scaleY(1.26)} 92%{transform:scaleY(1)} 100%{transform:scaleY(1)} }
         .bkt-play .bkt-net { animation: bktSwish 2.4s linear infinite; }
       `}</style>
       {/* 籃板（右側直立） */}
@@ -249,11 +251,11 @@ function BasketballIcon({ playing }: { playing: boolean }) {
       </g>
       {/* 籃框（側面：一條水平直線） */}
       <path d="M43 44 L76 44" stroke="#fff" strokeWidth={3.4} strokeLinecap="round" fill="none" />
-      {/* 籃球（左下拋出） */}
+      {/* 籃球（從畫面外左下拋入；全程不透明，加淡色邊避免糊在白網上） */}
       <g className="bkt-ball">
-        <circle cx={20} cy={72} r={7.5} fill="#fff" />
-        <path d="M20 64.5 L20 79.5 M12.5 72 L27.5 72" stroke="#0b0b0b" strokeWidth={1.2} fill="none" />
-        <path d="M15 66 Q 18.5 72 15 78 M25 66 Q 21.5 72 25 78" stroke="#0b0b0b" strokeWidth={1.2} fill="none" />
+        <circle cx={-10} cy={88} r={7.5} fill="#fff" stroke="#0b0b0b" strokeWidth={1} />
+        <path d="M-10 80.5 L-10 95.5 M-17.5 88 L-2.5 88" stroke="#0b0b0b" strokeWidth={1.2} fill="none" />
+        <path d="M-15 82 Q -11.5 88 -15 94 M-5 82 Q -8.5 88 -5 94" stroke="#0b0b0b" strokeWidth={1.2} fill="none" />
       </g>
     </svg>
   );

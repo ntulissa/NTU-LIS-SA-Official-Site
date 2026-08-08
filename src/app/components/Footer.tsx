@@ -14,8 +14,8 @@ const NAV_COLS = [
     links: ["近期活動公告", "活動紀錄", "系學會行事曆"],
   },
   {
-    en: "RESOURCES",
-    zh: "各種資源",
+    en: "SERVICES",
+    zh: "各種服務",
     links: ["學術連結", "資料下載區"],
   },
 ];
