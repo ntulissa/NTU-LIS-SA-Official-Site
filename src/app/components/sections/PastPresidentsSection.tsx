@@ -53,8 +53,11 @@ const C = {
   SP: "#8C7B6B", // 體育部（灰棕）
   ACA: "#5E8C3C", // 學術部（綠）
   EVE: "#C24A4F", // 活動部（紅）
-  IMA: "#9C4A6E", // 形象宣傳部（洋紅）
+  IMA: "#9C4A6E", // 形象宣傳部 / 美宣部（洋紅）
   VP: "#C2A23A", // 副會長（金）
+  SEC: "#4E6E6B", // 執秘（復古 petrol 綠）
+  MKT: "#5B6E8C", // 行宣部（復古 denim 藍）
+  PR: "#A9553F", // 公關部（復古磚紅）
 };
 
 // ── 第 52 屆：完整資料（範例＋目前上任屆）─────────────────────
@@ -132,35 +135,121 @@ const P52: President = {
   ],
 };
 
-// 建立一屆的空白骨架（名單待填）；任期會由屆數自動推算。
-function stub(gen: number): President {
-  return { gen, name: "", roman: "", cls: "", img: "", intro: "", depts: [] };
+// 建立「僅有會長基本資料」的一屆（簡介 intro、團隊名單 depts 日後可再補）。
+// 任期會由屆數自動推算；系級 cls 取自學號前綴（例：B12106050 → B12）。
+// roman＝英文名，格式「GIVEN-NAME, SURNAME」，威妥瑪拼音（與 PO-HAN, TSENG 同式）。
+function pres(gen: number, name: string, cls: string, roman: string): President {
+  return { gen, name, roman, cls, img: "", intro: "", depts: [] };
 }
 
-// ── 全部屆數（新 → 舊）。你手上有 32~52 屆的資料，之後把 stub 換成完整資料即可。──
-// 第 52 屆＝民國114~115（2025.07~2026.07）；每往前一屆減一年，第 32 屆＝民國94~95（2005.07~2006.07）。
+// ── 第 53 屆（現任）：有會長資料與簡介；團隊名單日後可再補（depts）──
+// 副會長洪聆雅（B13, LING-YA, HUNG）已寫入簡介；面板顯示會長黃子芸。
+const P53: President = {
+  gen: 53,
+  name: "黃子芸",
+  roman: "TZU-YUN, HUANG",
+  cls: "B13",
+  img: "", // ← 放入 黃子芸 照片（imports/Presidents/53.jpg，或在此填路徑）
+  intro:
+    "第 53 屆國立臺灣大學圖書資訊學系系學會由會長黃子芸與副會長洪聆雅領軍，於 7 月 30 日完成交接正式上任。正副會長先前皆曾擔任第 52 屆系學會幹部，具備實務運作經驗；新團隊期望承接上一屆的基礎，推出讓系上同學「更有感」的活動與服務，成為圖資系學生大學四年最安心的「避風港」。本屆除了持續維護全新網站平台、整合考古題庫與選課攻略等學術資源外，亦會做各大系隊最堅實的後盾，並持續扮演學生、系辦與教師間的溝通橋樑，為系上帶來實質且貼心的改變。",
+  depts: [],
+};
+
+// ── 第 51 屆：完整團隊名單（顏色比照第 52 屆；新部門用復古色）──
+const P51: President = {
+  gen: 51,
+  name: "周芳綺",
+  roman: "FANG-CHI, CHOU",
+  cls: "B12",
+  img: "", // ← 放入 周芳綺 照片（imports/Presidents/51.jpg）
+  intro: "",
+  depts: [
+    { en: "VP", zh: "副會長", color: C.VP, members: [{ n: "曾柏翰", c: "B12" }] },
+    { en: "SEC", zh: "執秘", color: C.SEC, members: [{ n: "王怡婷", c: "B12" }, { n: "洪思涵", c: "B12" }] },
+    {
+      en: "EVE", zh: "活動部", color: C.EVE, members: [
+        { n: "廖士緯", c: "B12" }, { n: "黃聿瑄", c: "B12" }, { n: "黃聖庭", c: "B12" }, { n: "周芳綺", c: "B12" },
+        { n: "陳亮昕", c: "B13" }, { n: "張瑋庭", c: "B13" }, { n: "林明霖", c: "B13" }, { n: "林庭妤", c: "B13" }, { n: "王海茵", c: "B13" },
+      ],
+    },
+    {
+      en: "ART", zh: "美宣部", color: C.IMA, members: [
+        { n: "紀宇烜", c: "B12" }, { n: "陳歆雅", c: "B12" }, { n: "廖育彣", c: "B12" }, { n: "王意伶", c: "B13" }, { n: "許采芝", c: "B13" },
+      ],
+    },
+    { en: "ACA", zh: "學術部", color: C.ACA, members: [{ n: "詹凱昕", c: "B12" }, { n: "蔡宜軒", c: "B12" }, { n: "洪家棚", c: "B13" }] },
+    {
+      en: "MKT", zh: "行宣部", color: C.MKT, members: [
+        { n: "吳佳紜", c: "B12" }, { n: "洪思涵", c: "B12" }, { n: "簡于秦", c: "B12" }, { n: "林明霖", c: "B13" }, { n: "陳亮昕", c: "B13" },
+      ],
+    },
+    { en: "PR", zh: "公關部", color: C.PR, members: [{ n: "曾柏翰", c: "B12" }] },
+    { en: "SP", zh: "體育部", color: C.SP, members: [{ n: "曾語衡", c: "B12" }, { n: "黃聖庭", c: "B12" }, { n: "林聿平", c: "B13" }] },
+  ],
+};
+
+// ── 第 50 屆：完整團隊名單（配色比照第 51/52 屆）──
+const P50: President = {
+  gen: 50,
+  name: "黃裕媞",
+  roman: "YU-TI, HUANG",
+  cls: "B11",
+  img: "", // ← 放入 黃裕媞 照片（imports/Presidents/50.jpg）
+  intro: "",
+  depts: [
+    { en: "VP", zh: "副會長", color: C.VP, members: [{ n: "張方瑜", c: "B11" }] },
+    { en: "SEC", zh: "執秘", color: C.SEC, members: [{ n: "陳佩玲", c: "B11" }, { n: "黃渝婷", c: "B11" }] },
+    {
+      en: "EVE", zh: "活動部", color: C.EVE, members: [
+        { n: "王可蓁", c: "B11" }, { n: "余品萱", c: "B11" }, { n: "李佳純", c: "B11" }, { n: "蔡怡萱", c: "B11" },
+      ],
+    },
+    {
+      en: "ART", zh: "美宣部", color: C.IMA, members: [
+        { n: "曹祥真", c: "B11" }, { n: "李亮節", c: "B11" }, { n: "胡羽絜", c: "B11" }, { n: "張方瑜", c: "B11" },
+      ],
+    },
+    {
+      en: "ACA", zh: "學術部", color: C.ACA, members: [
+        { n: "李南澐", c: "B11" }, { n: "黃奕欣", c: "B11" }, { n: "岑佳恩", c: "B11" }, { n: "蘇亭蓁", c: "B11" },
+      ],
+    },
+    {
+      en: "MKT", zh: "行宣部", color: C.MKT, members: [
+        { n: "陳昊群", c: "B11" }, { n: "李宏佑", c: "B11" }, { n: "吳優", c: "B11" }, { n: "李亮節", c: "B11" },
+      ],
+    },
+    { en: "PR", zh: "公關部", color: C.PR, members: [{ n: "余品萱", c: "B11" }, { n: "王可蓁", c: "B11" }] },
+    { en: "SP", zh: "體育部", color: C.SP, members: [{ n: "李宏佑", c: "B11" }, { n: "陳秉逸", c: "B11" }, { n: "歐益劭", c: "B11" }] },
+  ],
+};
+
+// ── 全部屆數（新 → 舊）。學年 115＝第 53 屆（現任），學年 114＝第 52 屆，往前每學年一屆，學年 94＝第 32 屆。──
+// 第 53 屆＝民國115~116（2026.07~2027.07）；第 52 屆＝民國114~115（2025.07~2026.07）；第 32 屆＝民國94~95（2005.07~2006.07）。
+// 頁面預設顯示陣列第一個（＝現任第 53 屆）。想補簡介/團隊名單：把該屆改成完整物件（可參考 P52 的寫法）。
 export const PRESIDENTS: President[] = [
-  P52,
-  stub(51), // 民國113~114（2024.07~2025.07）
-  stub(50), // 民國112~113（2023.07~2024.07）
-  stub(49), // 民國111~112（2022.07~2023.07）
-  stub(48), // 民國110~111（2021.07~2022.07）
-  stub(47), // 民國109~110（2020.07~2021.07）
-  stub(46), // 民國108~109（2019.07~2020.07）
-  stub(45), // 民國107~108（2018.07~2019.07）
-  stub(44), // 民國106~107（2017.07~2018.07）
-  stub(43), // 民國105~106（2016.07~2017.07）
-  stub(42), // 民國104~105（2015.07~2016.07）
-  stub(41), // 民國103~104（2014.07~2015.07）
-  stub(40), // 民國102~103（2013.07~2014.07）
-  stub(39), // 民國101~102（2012.07~2013.07）
-  stub(38), // 民國100~101（2011.07~2012.07）
-  stub(37), // 民國99~100（2010.07~2011.07）
-  stub(36), // 民國98~99（2009.07~2010.07）
-  stub(35), // 民國97~98（2008.07~2009.07）
-  stub(34), // 民國96~97（2007.07~2008.07）
-  stub(33), // 民國95~96（2006.07~2007.07）
-  stub(32), // 民國94~95（2005.07~2006.07）
+  P53, //                                        學年115 · 會長 黃子芸（現任）· 副會長 洪聆雅
+  P52, //                                        學年114 · 會長 曾柏翰 · B12106050
+  P51, //                                        學年113 · 社長 周芳綺 · B12106038（含完整團隊名單）
+  P50, //                                        學年112 · 社長 黃裕媞 · B11106020（含完整團隊名單）
+  pres(49, "陳子勻", "B10", "TZU-YUN, CHEN"), //  學年111 · 會長 · B10106046
+  pres(48, "陳亨柔", "B09", "HENG-JOU, CHEN"), // 學年110 · 會長 · B09106011
+  pres(47, "方沛樺", "B08", "PEI-HUA, FANG"), //  學年109 · 會長 · B08106010
+  pres(46, "周示嚴", "B07", "SHIH-YEN, CHOU"), // 學年108 · 會長 · B07106010
+  pres(45, "劉卉馨", "B06", "HUI-HSIN, LIU"), //  學年107 · 會長 · B06106023
+  pres(44, "黃傲天", "B05", "AO-TIEN, HUANG"), // 學年106 · 會長 · B05106008
+  pres(43, "史修竹", "B02", "HSIU-CHU, SHIH"), // 學年105 · 會長 · B02106009
+  pres(42, "楊宜瑄", "B02", "YI-HSUAN, YANG"), // 學年104 · 會長 · B02106004
+  pres(41, "邱祥兒", "B01", "HSIANG-ERH, CHIU"), // 學年103 · 會長 · B01106032
+  pres(40, "王泓琦", "B00", "HUNG-CHI, WANG"), // 學年102 · 會長 · B00106003
+  pres(39, "王翊宇", "B99", "YI-YU, WANG"), //    學年101 · 會長 · B99106043
+  pres(38, "馬中哲", "B98", "CHUNG-CHE, MA"), //  學年100 · 會長 · B98106007
+  pres(37, "楊舒涵", "B97", "SHU-HAN, YANG"), //  學年99 · 會長 · B97106038
+  pres(36, "張震權", "B96", "CHEN-CHUAN, CHANG"), // 學年98 · 會長 · B96106031
+  pres(35, "鄭艾妮", "B95", "AI-NI, CHENG"), //   學年97 · 會長 · B95106002
+  pres(34, "毛昱惟", "B94", "YU-WEI, MAO"), //    學年96 · 會長 · B94106009
+  pres(33, "蔡宗翰", "B93", "TSUNG-HAN, TSAI"), // 學年95 · 會長 · B93106020
+  pres(32, "孫亭芳", "B92", "TING-FANG, SUN"), // 學年94 · 社長 · B92106027
 ];
 
 // 由屆數推算任期（第52屆＝2025.07~2026.07；每屆一年）。
@@ -207,24 +296,24 @@ function NavArrow({
       className="group relative flex items-center justify-center disabled:cursor-default"
       style={{ width: "46px", height: "46px" }}
     >
-      {/* 平常：小圓點 */}
-      <span
-        className="absolute rounded-full transition-all duration-300 ease-out group-hover:opacity-0 group-hover:scale-50"
-        style={{
-          width: "11px",
-          height: "11px",
-          background: color,
-          opacity: disabled ? 0.18 : 1,
-        }}
-      />
-      {/* hover：放大成圓形箭頭按鈕（停用時不出現） */}
-      {!disabled && (
-        <span
-          className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 scale-75 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:scale-100"
-          style={{ background: color, boxShadow: `0 8px 20px -8px ${color}` }}
-        >
-          <Icon size={22} strokeWidth={2.6} className="text-white" />
-        </span>
+      {disabled ? (
+        // 已達最舊/最新：靜態暗點，不脈動、不出現箭頭
+        <span className="absolute rounded-full" style={{ width: "11px", height: "11px", background: color, opacity: 0.18 }} />
+      ) : (
+        <>
+          {/* 平常：持續脈動的同色光暈 + 核心圓點（提示「可點擊」）；hover 時整組淡出 */}
+          <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-out group-hover:opacity-0">
+            <span className="nav-pulse-halo absolute rounded-full" style={{ width: "22px", height: "22px", background: color, filter: "blur(5px)" }} />
+            <span className="nav-pulse-dot absolute rounded-full" style={{ width: "11px", height: "11px", background: color }} />
+          </span>
+          {/* hover：放大成圓形箭頭按鈕 */}
+          <span
+            className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 scale-75 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:scale-100"
+            style={{ background: color, boxShadow: `0 8px 20px -8px ${color}` }}
+          >
+            <Icon size={22} strokeWidth={2.6} className="text-white" />
+          </span>
+        </>
       )}
     </button>
   );
@@ -234,7 +323,7 @@ function NavArrow({
 function DeptCard({ dept }: { dept: Dept }) {
   return (
     <div
-      className="rounded-2xl border p-4 sm:p-5 h-full"
+      className="rounded-2xl border p-4 sm:p-5"
       style={{ borderColor: dept.color, background: "rgba(255,255,255,0.02)" }}
     >
       <p className="mb-4 whitespace-nowrap" style={{ fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.68rem,0.9vw,0.85rem)", letterSpacing: "0.12em" }}>
@@ -258,6 +347,25 @@ function DeptCard({ dept }: { dept: Dept }) {
       </div>
     </div>
   );
+}
+
+// 把部門依「估算高度」分成左右兩欄（保留原順序）。左欄先填、且高度 ≥ 右欄，
+// 讓兩欄各自向下緊貼堆疊、不會因整列對齊而在中間留空；剩餘空白只落在右下角。
+function splitTwoColumns(depts: Dept[]): [Dept[], Dept[]] {
+  const weight = (d: Dept) => 1 + Math.ceil(d.members.length / 2); // 標題列 + 名單列數
+  const half = depts.reduce((s, d) => s + weight(d), 0) / 2;
+  const left: Dept[] = [];
+  const right: Dept[] = [];
+  let acc = 0;
+  for (const d of depts) {
+    if (acc < half) {
+      left.push(d);
+      acc += weight(d);
+    } else {
+      right.push(d);
+    }
+  }
+  return [left, right];
 }
 
 // ── 右半：會長個人資訊面板（照片 → 姓名/系級 → 英文名 → 屆數切換器，全部置中）──
@@ -284,7 +392,8 @@ function ProfilePanel({
   onNewer: () => void;
 }) {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center text-center px-6 sm:px-10 py-16 lg:py-20">
+    // 固定頂端對齊（justify-start + 固定 pt）：照片、姓名、屆數在每一屆都落在同一垂直位置，換屆不位移。
+    <div className="w-full h-full flex flex-col items-center justify-start text-center px-6 sm:px-10 pt-24 lg:pt-[112px] pb-16">
       {/* 會長照片（縮小、完整顯示人物；頭頂大致與左側 ABOUT US 齊高）*/}
       {photo ? (
         <img
@@ -380,6 +489,8 @@ export default function PastPresidentsSection() {
     }
   };
 
+  const [deptLeft, deptRight] = splitTwoColumns(p.depts); // 團隊名單分成左右兩欄（避免整列對齊留空）
+
   const panel = (
     <ProfilePanel
       name={hasData ? p.name : "—"}
@@ -396,6 +507,22 @@ export default function PastPresidentsSection() {
 
   return (
     <section id="presidents" className="relative bg-black">
+      {/* 屆數切換按鈕的「呼吸式」脈動動畫（提示可點擊）；尊重使用者的「減少動態」設定 */}
+      <style>{`
+        @keyframes navPulseHalo {
+          0%, 100% { transform: scale(0.65); opacity: 0.55; }
+          50%      { transform: scale(1.6);  opacity: 0.06; }
+        }
+        @keyframes navPulseDot {
+          0%, 100% { transform: scale(1); }
+          50%      { transform: scale(1.22); }
+        }
+        .nav-pulse-halo { transform-origin: center; animation: navPulseHalo 1.8s ease-in-out infinite; }
+        .nav-pulse-dot  { transform-origin: center; animation: navPulseDot 1.8s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .nav-pulse-halo, .nav-pulse-dot { animation: none; }
+        }
+      `}</style>
       {/* ══════════ 右半：桌機用 fixed 永遠釘在原地（不受左半捲動影響）══════════
           用 fixed 而非 sticky，是因為 App 根層有 overflow-x-hidden 會讓 sticky 失效。
           z-10：讓固定的 Header(z-50) 疊在照片上方；捲到底時 Footer 會蓋過它（Footer 已設 relative z-30）。 */}
@@ -408,8 +535,10 @@ export default function PastPresidentsSection() {
 
       {/* ══════════ 左半：可捲動（右半空間由上面的 fixed 面板佔用）══════════ */}
       <div className="w-full lg:w-1/2 px-5 sm:px-8 md:px-12 lg:px-16">
-        {/* 第一屏：標題 + 第X屆 + 任期 + 簡介（lg:min-h-screen 讓「團隊成員」落到第二屏，需下滑才看到）*/}
-        <div className="lg:min-h-screen flex flex-col justify-center pt-16 sm:pt-20 lg:pt-[120px] pb-16 lg:pb-24">
+        {/* 第一屏：標題 + 第X屆 + 任期 + 簡介
+            用「固定頂端對齊」而非置中：標題/任期永遠釘在同一位置，換屆時不會因簡介長短而位移。
+            lg:min-h-screen 仍讓「團隊成員」落到第二屏，需下滑才看到。 */}
+        <div className="lg:min-h-screen pt-24 sm:pt-28 lg:pt-[128px] pb-16 lg:pb-24">
           <div className="max-w-[640px]">
             <Reveal>
               <p className="text-white/30 text-xs tracking-widest mb-5" style={{ fontFamily: monoFont }}>
@@ -453,10 +582,10 @@ export default function PastPresidentsSection() {
                   fontSize: "clamp(0.85rem,1vw,1rem)",
                   lineHeight: 2.1,
                   letterSpacing: "0.06em",
-                  color: hasData ? "rgba(255,255,255,0.82)" : "rgba(255,255,255,0.35)",
+                  color: p.intro ? "rgba(255,255,255,0.82)" : "rgba(255,255,255,0.4)",
                 }}
               >
-                {hasData ? p.intro : "本屆資料整理中，敬請期待。"}
+                {p.intro ? p.intro : "本屆簡介整理中，敬請期待。"}
               </p>
             </Reveal>
           </div>
@@ -478,13 +607,23 @@ export default function PastPresidentsSection() {
               </div>
             </Reveal>
 
-            {/* 兩欄排列：依 [GEN,SP,ACA,EVE,IMA,VP] 順序自動落成左右兩欄 */}
+            {/* 兩欄各自向下緊貼堆疊（masonry 式）：卡片不會因整列對齊而在中間留空，
+                剩餘空白只會落在較短那欄（右欄）的最底＝右下角。 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 items-start">
-              {p.depts.map((d, i) => (
-                <Reveal key={d.en} delay={i * 50}>
-                  <DeptCard dept={d} />
-                </Reveal>
-              ))}
+              <div className="flex flex-col gap-3 sm:gap-4">
+                {deptLeft.map((d, i) => (
+                  <Reveal key={d.en} delay={i * 50}>
+                    <DeptCard dept={d} />
+                  </Reveal>
+                ))}
+              </div>
+              <div className="flex flex-col gap-3 sm:gap-4">
+                {deptRight.map((d, i) => (
+                  <Reveal key={d.en} delay={(deptLeft.length + i) * 50}>
+                    <DeptCard dept={d} />
+                  </Reveal>
+                ))}
+              </div>
             </div>
           </div>
         )}
