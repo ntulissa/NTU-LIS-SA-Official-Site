@@ -58,7 +58,7 @@ const SOCIAL_ICONS = [
 
 export default function Footer() {
   return (
-    <footer className="bg-[#060606] border-t border-white/8 pt-14 pb-8">
+    <footer className="relative z-30 bg-[#060606] border-t border-white/8 pt-14 pb-8">
       <style>{`
         @keyframes footerFlow {
           0% {

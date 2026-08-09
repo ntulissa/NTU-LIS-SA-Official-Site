@@ -6,22 +6,35 @@ import imgLissaLogo from "@/imports/LISSA_Logo.png";
 // Noto Sans TC is used as the closest available substitute for Chinese display text.
 const zhFont = "'Noto Sans TC', sans-serif";
 
+// 選單子項目改為 { label, href } 物件，讓每一項都能連到對應區塊或分頁。
+// 「歷任會長」連到 #/presidents（App.tsx 的 hash 分頁）；其餘先指向主頁對應錨點。
 const NAV_ITEMS = [
   {
     label: "關於我們",
     labelEn: "ABOUT",
-    sub: ["現任團隊", "學會發展歷程", "歷任會長", "正副會長選舉專區"],
+    sub: [
+      { label: "現任團隊", href: "#team" },
+      { label: "學會發展歷程", href: "#about" },
+      { label: "歷任會長", href: "#/presidents" },
+      { label: "正副會長選舉專區", href: "#" },
+    ],
   },
   {
     label: "最新動態",
     labelEn: "NEWS",
-    sub: ["近期活動公告", "活動紀錄", "系學會行事曆"
+    sub: [
+      { label: "近期活動公告", href: "#news" },
+      { label: "活動紀錄", href: "#news" },
+      { label: "系學會行事曆", href: "#" },
     ],
   },
   {
     label: "各種服務",
     labelEn: "SERVICES",
-    sub: ["學習連結", "資料下載區"],
+    sub: [
+      { label: "學習連結", href: "#resources" },
+      { label: "資料下載區", href: "#resources" },
+    ],
   },
 ];
 
@@ -122,11 +135,11 @@ export default function Header() {
                     {item.sub.map((s, j) => (
                       <a
                         key={j}
-                        href="#"
+                        href={s.href}
                         className="block px-4 py-2.5 text-white/55 hover:text-white hover:bg-white/5 transition-colors duration-150"
                         style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.12em" }}
                       >
-                        {s}
+                        {s.label}
                       </a>
                     ))}
                   </div>
@@ -205,17 +218,19 @@ export default function Header() {
               {item.sub.map((s, j) => (
                 <a
                   key={j}
-                  href="#"
+                  href={s.href}
+                  onClick={() => setMobileOpen(false)}
                   className="block py-1.5 text-white/65 hover:text-white transition-colors"
                   style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.9rem", letterSpacing: "0.12em" }}
                 >
-                  {s}
+                  {s.label}
                 </a>
               ))}
             </div>
           ))}
           <a
             href="#join"
+            onClick={() => setMobileOpen(false)}
             className="relative inline-flex items-center justify-center px-6 py-2.5 rounded-full overflow-hidden text-white text-sm"
             style={{
               fontFamily: zhFont,
