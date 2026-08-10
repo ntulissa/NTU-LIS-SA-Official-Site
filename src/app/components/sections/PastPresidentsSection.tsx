@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Reveal } from "./shared";
 
@@ -407,6 +407,63 @@ function splitTwoColumns(depts: Dept[]): [Dept[], Dept[]] {
   return [left, right];
 }
 
+// ── 會長照片：交叉淡入舞台 ─────────────────────────────────
+// 切換屆時，新照片淡入、舊照片淡出（cross-dissolve），而非硬切；配合下方預先載入避免卡頓。
+const PHOTO_H = "clamp(280px, 50vh, 560px)"; // 照片區高度（與姓名/屆數的固定位置對齊）
+
+function renderPhoto(src: string, name: string) {
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={name}
+        className="absolute inset-0 w-full h-full object-contain object-top select-none pointer-events-none"
+      />
+    );
+  }
+  // 沒有照片：置中「照片待補」佔位框
+  return (
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div
+        className="flex flex-col items-center justify-center gap-3 text-white/25 rounded-2xl border border-white/10"
+        style={{ height: "100%", width: "clamp(220px, 26vw, 380px)", fontFamily: monoFont, letterSpacing: "0.2em" }}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="w-16 h-16">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" strokeLinecap="round" />
+        </svg>
+        <span className="text-xs">照片待補</span>
+      </div>
+    </div>
+  );
+}
+
+function PhotoStage({ src, name }: { src: string; name: string }) {
+  const keyRef = useRef(0);
+  const [layers, setLayers] = useState<{ k: number; src: string }[]>([{ k: 0, src }]);
+
+  useEffect(() => {
+    setLayers((cur) => {
+      const top = cur[cur.length - 1];
+      if (top && top.src === src) return cur; // 沒變就不動作
+      keyRef.current += 1;
+      return [...cur, { k: keyRef.current, src }].slice(-2); // 僅保留「舊 + 新」兩層
+    });
+    const id = window.setTimeout(() => setLayers((cur) => cur.slice(-1)), 650); // 動畫結束移除舊層
+    return () => window.clearTimeout(id);
+  }, [src]);
+
+  return (
+    <div className="relative w-full" style={{ height: PHOTO_H }}>
+      {layers.map((layer, i) => (
+        <div key={layer.k} className={i === layers.length - 1 ? "pp-photo-in" : "pp-photo-out"} style={{ position: "absolute", inset: 0 }}>
+          {renderPhoto(layer.src, name)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── 右半：會長個人資訊面板（照片 → 姓名/系級 → 英文名 → 屆數切換器，全部置中）──
 // 桌機以 fixed 釘在右半、永遠顯示；手機則靜態顯示於頁面上方。
 function ProfilePanel({
@@ -433,26 +490,8 @@ function ProfilePanel({
   return (
     // 固定頂端對齊（justify-start + 固定 pt）：照片、姓名、屆數在每一屆都落在同一垂直位置，換屆不位移。
     <div className="w-full h-full flex flex-col items-center justify-start text-center px-6 sm:px-10 pt-24 lg:pt-[112px] pb-16">
-      {/* 會長照片（縮小、完整顯示人物；頭頂大致與左側 ABOUT US 齊高）*/}
-      {photo ? (
-        <img
-          src={photo}
-          alt={name}
-          className="w-auto max-w-full object-contain object-top select-none pointer-events-none"
-          style={{ height: "clamp(280px, 50vh, 560px)" }}
-        />
-      ) : (
-        <div
-          className="flex flex-col items-center justify-center gap-3 text-white/25 rounded-2xl border border-white/10"
-          style={{ height: "clamp(280px, 50vh, 560px)", width: "clamp(220px, 26vw, 380px)", fontFamily: monoFont, letterSpacing: "0.2em" }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="w-16 h-16">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" strokeLinecap="round" />
-          </svg>
-          <span className="text-xs">照片待補</span>
-        </div>
-      )}
+      {/* 會長照片（交叉淡入；縮小、完整顯示人物；頭頂大致與左側 ABOUT US 齊高）*/}
+      <PhotoStage src={photo} name={name} />
 
       {/* 姓名 + 系級徽章（置中） */}
       <div className="flex items-end justify-center gap-3 mt-7">
@@ -515,18 +554,21 @@ export default function PastPresidentsSection() {
   const canOlder = idx < PRESIDENTS.length - 1;
   const canNewer = idx > 0;
 
-  const goOlder = () => {
-    if (canOlder) {
-      setIdx((v) => v + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-  const goNewer = () => {
-    if (canNewer) {
-      setIdx((v) => v - 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
+  // 切換屆時「不」捲回頂端：讓使用者停在同一位置，例如正在看團隊名單時可直接比較另一屆的名單。
+  const goOlder = () => { if (canOlder) setIdx((v) => v + 1); };
+  const goNewer = () => { if (canNewer) setIdx((v) => v - 1); };
+
+  // 預先載入所有會長照片，切換時就不會有載入卡頓（配合照片的淡入動畫）。
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    PRESIDENTS.forEach((pp) => {
+      const s = pp.img || photoOf(pp.gen);
+      if (s) {
+        const im = new window.Image();
+        im.src = s;
+      }
+    });
+  }, []);
 
   const [deptLeft, deptRight] = splitTwoColumns(p.depts); // 團隊名單分成左右兩欄（避免整列對齊留空）
 
@@ -558,8 +600,16 @@ export default function PastPresidentsSection() {
         }
         .nav-pulse-halo { transform-origin: center; animation: navPulseHalo 1.8s ease-in-out infinite; }
         .nav-pulse-dot  { transform-origin: center; animation: navPulseDot 1.8s ease-in-out infinite; }
+
+        /* 會長照片切換：新照片淡入（略微上浮），舊照片淡出 */
+        @keyframes ppPhotoIn  { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: none; } }
+        @keyframes ppPhotoOut { from { opacity: 1; } to { opacity: 0; } }
+        .pp-photo-in  { animation: ppPhotoIn 600ms cubic-bezier(0.22,1,0.36,1) both; }
+        .pp-photo-out { animation: ppPhotoOut 600ms ease both; }
+
         @media (prefers-reduced-motion: reduce) {
           .nav-pulse-halo, .nav-pulse-dot { animation: none; }
+          .pp-photo-in, .pp-photo-out { animation-duration: 1ms; }
         }
       `}</style>
       {/* ══════════ 右半：桌機用 fixed 永遠釘在原地（不受左半捲動影響）══════════
@@ -633,7 +683,8 @@ export default function PastPresidentsSection() {
         {/* 第二屏起：團隊成員（lg:min-h-screen 讓成員自成一屏，右側面板在瀏覽名單時保持完整顯示）*/}
         {p.depts.length > 0 && (
           <div className="max-w-[720px] pb-20 lg:pb-28 lg:min-h-screen lg:flex lg:flex-col lg:justify-center">
-            <Reveal>
+            {/* key 帶上屆數：切屆時整個團隊區重新掛載，讓進場動畫每次都重播（比照第一次看 52 屆） */}
+            <Reveal key={`pill-${p.gen}`}>
               <div
                 className="inline-flex rounded-full mb-8 lg:mb-10"
                 style={{ padding: "1.5px", background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)" }}
@@ -651,14 +702,14 @@ export default function PastPresidentsSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 items-start">
               <div className="flex flex-col gap-3 sm:gap-4">
                 {deptLeft.map((d, i) => (
-                  <Reveal key={d.en} delay={i * 50}>
+                  <Reveal key={`${p.gen}-${d.en}`} delay={i * 50}>
                     <DeptCard dept={d} />
                   </Reveal>
                 ))}
               </div>
               <div className="flex flex-col gap-3 sm:gap-4">
                 {deptRight.map((d, i) => (
-                  <Reveal key={d.en} delay={(deptLeft.length + i) * 50}>
+                  <Reveal key={`${p.gen}-${d.en}`} delay={(deptLeft.length + i) * 50}>
                     <DeptCard dept={d} />
                   </Reveal>
                 ))}

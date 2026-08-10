@@ -1,7 +1,7 @@
 import { useState } from "react";
 import imgBuildingHistory from "@/imports/OurHistory/de7749452570d864c1f5c584765f093ab16a6d89.png";
-import imgMeiji from "@/imports/CurrentTeam/ec7393ec630e93b1f986ef8fe7dd4a9ffc5f9745.png";
-import imgHongLingYa from "@/imports/___2026-07-22_15.31.56-removebg-preview.png";
+import imgMeiji from "@/imports/Presidents/53.png";
+import imgHongLingYa from "@/imports/CurrentTeam/53vp.png";
 import { Reveal } from "./shared";
 
 type DeptDef = {
@@ -269,9 +269,11 @@ const DEPTS: DeptDef[] = [
   { name: "體育部", color: "#554236", renderIcon: (playing) => <BasketballIcon playing={playing} /> },
 ];
 
+// offset＝該張照片的水平位移（負值往左、正值往右）。
+// 每張照片去背構圖不同，所以各自設定：太靠右會蓋到文字就調更負；被左緣切到就調回接近 0。
 const LEADERS = [
-  { title: "會長", name: "黃子芸", roman: "TZU-YUN, HUANG", year: "圖資三", img: imgMeiji as string },
-  { title: "副會長", name: "洪聆雅", roman: "LING-YA, HUNG", year: "圖資三", img: imgHongLingYa as string },
+  { title: "會長", name: "黃子芸", roman: "TZU-YUN, HUANG", year: "圖資三", img: imgMeiji as string, offset: "-7vw" },
+  { title: "副會長", name: "洪聆雅", roman: "LING-YA, HUNG", year: "圖資三", img: imgHongLingYa as string, offset: "0vw" },
 ];
 
 function DeptCard({ dept }: { dept: DeptDef }) {
@@ -362,7 +364,9 @@ export default function TeamSection() {
                       className="absolute inset-0 flex items-end transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]"
                       style={{
                         opacity: isActive ? 1 : 0,
-                        transform: isActive ? `translateX(0) translateY(${FIGURE_TOP_PADDING})` : `translateX(18px) translateY(${FIGURE_TOP_PADDING})`,
+                        transform: isActive
+                          ? `translateX(${leader.offset}) translateY(${FIGURE_TOP_PADDING})`
+                          : `translateX(calc(${leader.offset} + 18px)) translateY(${FIGURE_TOP_PADDING})`,
                         pointerEvents: "none",
                       }}
                     >
@@ -399,7 +403,14 @@ export default function TeamSection() {
             </div>
           </div>
 
-          <div className="absolute left-4 right-4 bottom-4 sm:left-auto sm:right-6 lg:left-auto lg:right-[4vw] lg:bottom-[20vh] rounded-full border border-white/20 p-[3px] max-w-fit">
+          {/* 左緣黑色漸層：寬版照片被容器左邊裁到時，改用「由黑漸透明」自然收邊，而非硬切。
+              想加寬羽化範圍→調 width；想讓純黑區更多→把 gradient 中間的 18% 調大。桌機才需要，故 lg 才顯示。 */}
+          <div
+            className="hidden lg:block absolute inset-y-0 left-0 pointer-events-none z-[1] select-none"
+            style={{ width: "clamp(80px, 1%, 340px)", background: "linear-gradient(90deg, #000 0%, #000 0%, rgba(0,0,0,0) 100%)" }}
+          />
+
+          <div className="absolute left-4 right-4 bottom-4 sm:left-auto sm:right-6 lg:left-auto lg:right-[4vw] lg:bottom-[20vh] rounded-full border border-white/20 p-[3px] max-w-fit z-[2]">
             <div className="absolute top-[3px] bottom-[3px] rounded-full bg-white" style={{ width: "calc(50% - 3px)", left: leaderIdx === 0 ? "3px" : "calc(50%)", transition: "left 300ms cubic-bezier(0.4,0,0.2,1)" }} />
             <div className="relative flex">
               {LEADERS.map((l, i) => (
