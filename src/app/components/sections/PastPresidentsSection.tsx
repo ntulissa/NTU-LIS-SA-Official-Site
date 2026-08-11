@@ -263,6 +263,43 @@ const P49: President = {
   ],
 };
 
+// ── 第 48 屆：完整團隊名單＋簡介（配色比照第 49~52 屆）──
+const P48: President = {
+  gen: 48,
+  name: "陳亨柔",
+  roman: "HENG-JOU, CHEN",
+  cls: "B09",
+  img: "", // ← 放入 陳亨柔 照片（imports/Presidents/48.jpg）
+  intro:
+    "第 48 屆系學會由會長陳亨柔帶領，正值疫情後百廢待興的關鍵時刻，團隊積極推動系務復甦，首要任務即為重啟並整理學輔室，重新為系上同學打造一處能夠舒適休息、討論與讀書的自治空間。在學術與職涯發展上，本屆同樣專注於圖資系本身的定位推廣，針對選課策略與職涯探索提供系統化的整理與指引，協助同學釐清學習方向；同時，團隊亦舉辦了「2022 圖資之夜」、系烤等多項精彩活動，不僅在學業上給予實質協助，也在後疫情時代為系上重新注入熱絡的活力與向心力。",
+  depts: [
+    { en: "VP", zh: "副會長", color: C.VP, members: [{ n: "廖庭儀", c: "B09" }] },
+    { en: "SEC", zh: "執秘", color: C.SEC, members: [{ n: "高子涵", c: "B09" }, { n: "李沚庭", c: "B09" }] },
+    {
+      en: "EVE", zh: "活動部", color: C.EVE, members: [
+        { n: "劉蕙聿", c: "B09" }, { n: "溫品淳", c: "B09" }, { n: "何幸佳", c: "B09" },
+      ],
+    },
+    {
+      en: "ART", zh: "美宣部", color: C.IMA, members: [
+        { n: "陳南心", c: "B09" }, { n: "李佳耘", c: "B09" }, { n: "蔡沐學", c: "B09" },
+      ],
+    },
+    {
+      en: "ACA", zh: "學術部", color: C.ACA, members: [
+        { n: "邱裕安", c: "B09" }, { n: "賴靖甯", c: "B09" }, { n: "鄭美馨", c: "B09" },
+      ],
+    },
+    { en: "MKT", zh: "行宣部", color: C.MKT, members: [{ n: "張亦涵", c: "B09" }, { n: "陳奕妏", c: "B09" }] },
+    {
+      en: "PR", zh: "公關部", color: C.PR, members: [
+        { n: "何昱穎", c: "B09" }, { n: "史亦君", c: "B09" }, { n: "梁瑀籈", c: "B09" },
+      ],
+    },
+    { en: "SP", zh: "體育部", color: C.SP, members: [{ n: "張瀚元", c: "B09" }, { n: "方乃慎", c: "B09" }] },
+  ],
+};
+
 // ── 全部屆數（新 → 舊）。學年 115＝第 53 屆（現任），學年 114＝第 52 屆，往前每學年一屆，學年 94＝第 32 屆。──
 // 第 53 屆＝民國115~116（2026.07~2027.07）；第 52 屆＝民國114~115（2025.07~2026.07）；第 32 屆＝民國94~95（2005.07~2006.07）。
 // 頁面預設顯示陣列第一個（＝現任第 53 屆）。想補簡介/團隊名單：把該屆改成完整物件（可參考 P52 的寫法）。
@@ -272,7 +309,7 @@ export const PRESIDENTS: President[] = [
   P51, //                                        學年113 · 社長 周芳綺 · B12106038（含完整團隊名單）
   P50, //                                        學年112 · 社長 黃裕媞 · B11106020（含完整團隊名單）
   P49, //                                        學年111 · 會長 陳子勻 · B10106046（含完整團隊名單）
-  pres(48, "陳亨柔", "B09", "HENG-JOU, CHEN"), // 學年110 · 會長 · B09106011
+  P48, //                                        學年110 · 會長 陳亨柔 · B09106011（含完整團隊名單＋簡介）
   pres(47, "方沛樺", "B08", "PEI-HUA, FANG"), //  學年109 · 會長 · B08106010
   pres(46, "周示嚴", "B07", "SHIH-YEN, CHOU"), // 學年108 · 會長 · B07106010
   pres(45, "劉卉馨", "B06", "HUI-HSIN, LIU"), //  學年107 · 會長 · B06106023
@@ -291,9 +328,12 @@ export const PRESIDENTS: President[] = [
   pres(32, "孫亭芳", "B92", "TING-FANG, SUN"), // 學年94 · 社長 · B92106027
 ];
 
-// 由屆數推算任期（第52屆＝2025.07~2026.07；每屆一年）。
+// 現任屆＝陣列第一個（最新）。任期由屆數推算（第52屆＝2025.07~2026.07；每屆一年）；
+// 現任這屆結束改顯示「至今」，讓使用者一眼看出是新上任、任期進行中的會長。
+const CURRENT_GEN = PRESIDENTS[0]?.gen;
 function termOf(gen: number) {
   const start = gen + 1973; // 52 -> 2025
+  if (gen === CURRENT_GEN) return `${start}.07 ～ 至今`;
   return `${start}.07 ～ ${start + 1}.07`;
 }
 
@@ -441,16 +481,44 @@ function renderPhoto(src: string, name: string) {
 function PhotoStage({ src, name }: { src: string; name: string }) {
   const keyRef = useRef(0);
   const [layers, setLayers] = useState<{ k: number; src: string }[]>([{ k: 0, src }]);
+  const removeTimer = useRef<number | null>(null);
 
   useEffect(() => {
-    setLayers((cur) => {
-      const top = cur[cur.length - 1];
-      if (top && top.src === src) return cur; // 沒變就不動作
-      keyRef.current += 1;
-      return [...cur, { k: keyRef.current, src }].slice(-2); // 僅保留「舊 + 新」兩層
-    });
-    const id = window.setTimeout(() => setLayers((cur) => cur.slice(-1)), 650); // 動畫結束移除舊層
-    return () => window.clearTimeout(id);
+    let cancelled = false;
+
+    // 真正把新照片疊上來、開始交叉溶解（舊層在 650ms 後移除）
+    const commit = () => {
+      if (cancelled) return;
+      setLayers((cur) => {
+        const top = cur[cur.length - 1];
+        if (top && top.src === src) return cur; // 沒變就不動作
+        keyRef.current += 1;
+        return [...cur, { k: keyRef.current, src }].slice(-2); // 僅保留「舊 + 新」兩層
+      });
+      if (removeTimer.current) window.clearTimeout(removeTimer.current);
+      removeTimer.current = window.setTimeout(() => setLayers((cur) => cur.slice(-1)), 650);
+    };
+
+    // 先「等新照片解碼完成」再開始動畫：舊照片撐著不移除，避免出現全黑空檔，
+    // 讓每一屆的切換都跟已快取的近幾屆一樣是平順的交叉溶解（而非黑→淡入）。
+    if (!src) {
+      commit(); // 佔位框沒有圖片，直接切
+    } else if (typeof window !== "undefined") {
+      const img = new window.Image();
+      img.src = src;
+      if (img.decode) {
+        img.decode().then(commit).catch(commit); // 解碼好或失敗都照常切
+      } else if (img.complete) {
+        commit();
+      } else {
+        img.onload = commit;
+        img.onerror = commit;
+      }
+    } else {
+      commit();
+    }
+
+    return () => { cancelled = true; };
   }, [src]);
 
   return (

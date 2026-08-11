@@ -328,7 +328,7 @@ export default function TeamSection() {
             </Reveal>
             <Reveal delay={90}>
               <p className="text-white mb-10" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(0.75rem,0.95vw,16px)", lineHeight: 2, letterSpacing: "0.1em", maxWidth: "520px" }}>
-                臺大圖資系學會目前由正副會長統領，下轄行政、活動、學術、形象宣傳、體育等五個常設部門（第 52 屆始）：
+                臺大圖資系學會目前由正副會長統領，下轄行政、活動、學術、形象宣傳、體育等五個常設部門（第 52 屆改編至今）：
               </p>
             </Reveal>
 
@@ -407,7 +407,7 @@ export default function TeamSection() {
               想加寬羽化範圍→調 width；想讓純黑區更多→把 gradient 中間的 18% 調大。桌機才需要，故 lg 才顯示。 */}
           <div
             className="hidden lg:block absolute inset-y-0 left-0 pointer-events-none z-[1] select-none"
-            style={{ width: "clamp(80px, 1%, 340px)", background: "linear-gradient(90deg, #000 0%, #000 0%, rgba(0,0,0,0) 100%)" }}
+            style={{ width: "clamp(1px, 10%, 100px)", background: "linear-gradient(90deg, #000 0%, #000 0%, rgba(0,0,0,0) 100%)" }}
           />
 
           <div className="absolute left-4 right-4 bottom-4 sm:left-auto sm:right-6 lg:left-auto lg:right-[4vw] lg:bottom-[20vh] rounded-full border border-white/20 p-[3px] max-w-fit z-[2]">
