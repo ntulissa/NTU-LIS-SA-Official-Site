@@ -36,8 +36,9 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 3000,
     strictPort: true,
-    // Allow the Codespaces forwarding domain through Vite's host check.
-    allowedHosts: ['.app.github.dev', '.preview.app.github.dev', 'localhost', '127.0.0.1'],
+    // Allow ANY host through Vite's host check (needed for tunnels like
+    // cloudflared / trycloudflare.com, and for Codespaces).
+    allowedHosts: true,
     // Let the HMR (hot-reload) websocket work through the Codespaces HTTPS proxy.
     hmr: {
       clientPort: 443,
@@ -48,7 +49,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 3000,
     strictPort: true,
-    allowedHosts: ['.app.github.dev', '.preview.app.github.dev', 'localhost', '127.0.0.1'],
+    allowedHosts: true,
   },
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.

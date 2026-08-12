@@ -451,6 +451,10 @@ function splitTwoColumns(depts: Dept[]): [Dept[], Dept[]] {
 // 切換屆時，新照片淡入、舊照片淡出（cross-dissolve），而非硬切；配合下方預先載入避免卡頓。
 const PHOTO_H = "clamp(280px, 50vh, 560px)"; // 照片區高度（與姓名/屆數的固定位置對齊）
 
+// 照片底部漸層遮罩：讓每張會長照片的下緣淡出、像漂浮融進黑背景，而非硬切一條黑邊。
+// 想讓淡出範圍更多→把 72% 調小（例如 60%，淡出下方 40%）；想更少→調大（例如 82%）。
+const PHOTO_FADE = "linear-gradient(to bottom, #000 72%, transparent 100%)";
+
 function renderPhoto(src: string, name: string) {
   if (src) {
     return (
@@ -458,6 +462,7 @@ function renderPhoto(src: string, name: string) {
         src={src}
         alt={name}
         className="absolute inset-0 w-full h-full object-contain object-top select-none pointer-events-none"
+        style={{ WebkitMaskImage: PHOTO_FADE, maskImage: PHOTO_FADE }}
       />
     );
   }

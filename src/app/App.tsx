@@ -12,25 +12,34 @@ import LatestUpdatesSection from "./components/sections/LatestUpdatesSection";
 import AcademicResourcesSection from "./components/sections/AcademicResourcesSection";
 import JoinUsSection from "./components/sections/JoinUsSection";
 import PastPresidentsSection from "./components/sections/PastPresidentsSection";
+import DepartmentPage from "./components/pages/DepartmentPage";
 
-// 極輕量的 hash 分頁：#/presidents 顯示「歷任會長」頁，其餘顯示捲動式主頁。
-// （不需安裝 react-router；同時保留原本 #team / #news 等錨點捲動。）
-function getRoute() {
-  return window.location.hash.startsWith("#/presidents") ? "presidents" : "home";
+// 極輕量的 hash 分頁（不需安裝 react-router；同時保留原本 #team / #news 等錨點捲動）：
+//   #/presidents      → 歷任會長頁
+//   #/dept/<slug>     → 部門獨立頁（例：#/dept/general ＝行政部）
+//   其餘              → 捲動式主頁
+type Route = { name: "home" } | { name: "presidents" } | { name: "dept"; slug: string };
+
+function getRoute(): Route {
+  const h = window.location.hash;
+  if (h.startsWith("#/presidents")) return { name: "presidents" };
+  const m = h.match(/^#\/dept\/([\w-]+)/);
+  if (m) return { name: "dept", slug: m[1] };
+  return { name: "home" };
 }
 
 export default function App() {
-  const [route, setRoute] = useState<"home" | "presidents">(getRoute());
+  const [route, setRoute] = useState<Route>(getRoute());
 
   useEffect(() => {
     const onHash = () => {
       const r = getRoute();
       setRoute(r);
-      if (r === "presidents") {
+      if (r.name !== "home") {
         window.scrollTo({ top: 0 });
         return;
       }
-      // 從歷任會長頁點主頁錨點（#team 等）時，等主頁重繪後再捲動。
+      // 從獨立頁點主頁錨點（#team 等）時，等主頁重繪後再捲動。
       const id = window.location.hash.slice(1);
       if (id && !id.startsWith("/")) {
         requestAnimationFrame(() =>
@@ -48,8 +57,10 @@ export default function App() {
     <div className="bg-black text-white overflow-x-hidden">
       <Header />
 
-      {route === "presidents" ? (
+      {route.name === "presidents" ? (
         <PastPresidentsSection />
+      ) : route.name === "dept" ? (
+        <DepartmentPage slug={route.slug} />
       ) : (
         <>
           <HeroSection />

@@ -8,6 +8,7 @@ type DeptDef = {
   name: string;
   color: string; // 部門色（hover 時套用到外框）
   renderIcon: (playing: boolean) => React.ReactNode; // playing=true 時播放動畫
+  href?: string; // 點擊進入的部門獨立頁（有填才可點）
 };
 
 const ICON_SIZE: React.CSSProperties = { width: "clamp(64px,6.6vw,104px)", height: "auto" }; // icon 尺寸（再放大）
@@ -262,29 +263,31 @@ function BasketballIcon({ playing }: { playing: boolean }) {
 }
 
 const DEPTS: DeptDef[] = [
-  { name: "行政部", color: "#915E3E", renderIcon: (playing) => <AbacusIcon playing={playing} /> },
+  // 點行政部格子 → 行政部獨立頁（#/dept/general）。其餘部門頁建立後，把 href 填上即可。
+  { name: "行政部", color: "#915E3E", renderIcon: (playing) => <AbacusIcon playing={playing} />, href: "#/dept/general" },
   { name: "活動部", color: "#9F353A", renderIcon: (playing) => <GuitarIcon playing={playing} /> },
   { name: "學術部", color: "#42602D", renderIcon: (playing) => <QuillIcon playing={playing} /> },
   { name: "形象宣傳部", color: "#572A3F", renderIcon: (playing) => <CameraIcon playing={playing} /> },
   { name: "體育部", color: "#554236", renderIcon: (playing) => <BasketballIcon playing={playing} /> },
 ];
 
-// offset＝該張照片的水平位移（負值往左、正值往右）。
-// 每張照片去背構圖不同，所以各自設定：太靠右會蓋到文字就調更負；被左緣切到就調回接近 0。
 const LEADERS = [
-  { title: "會長", name: "黃子芸", roman: "TZU-YUN, HUANG", year: "圖資三", img: imgMeiji as string, offset: "-7vw" },
-  { title: "副會長", name: "洪聆雅", roman: "LING-YA, HUNG", year: "圖資三", img: imgHongLingYa as string, offset: "0vw" },
+  { title: "會長", name: "黃子芸", roman: "TZU-YUN, HUANG", year: "圖資三", img: imgMeiji as string },
+  { title: "副會長", name: "洪聆雅", roman: "LING-YA, HUNG", year: "圖資三", img: imgHongLingYa as string },
 ];
 
 function DeptCard({ dept }: { dept: DeptDef }) {
   const [hovered, setHovered] = useState(false);
+  // 有 href 就用 <a> 讓格子可點進部門頁；沒有就維持 <div>（不可點）。
+  const Box: React.ElementType = dept.href ? "a" : "div";
 
   return (
     <div className="flex flex-col items-center gap-[clamp(5px,0.6vw,9px)]">
-      <div
+      <Box
+        href={dept.href}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative rounded-[14px] aspect-square w-full overflow-hidden cursor-pointer border transition-all duration-300"
+        className="relative rounded-[14px] aspect-square w-full overflow-hidden cursor-pointer border transition-all duration-300 block"
         style={{
           // 內部維持黑（深色），不再整片變色
           background: "rgba(255,255,255,0.03)",
@@ -298,7 +301,7 @@ function DeptCard({ dept }: { dept: DeptDef }) {
         <div className="absolute inset-0 flex items-center justify-center">
           {dept.renderIcon(hovered)}
         </div>
-      </div>
+      </Box>
       <span className="text-white text-center leading-tight" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(0.65rem,0.82vw,13px)" }}>
         {dept.name}
       </span>
@@ -328,7 +331,7 @@ export default function TeamSection() {
             </Reveal>
             <Reveal delay={90}>
               <p className="text-white mb-10" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(0.75rem,0.95vw,16px)", lineHeight: 2, letterSpacing: "0.1em", maxWidth: "520px" }}>
-                臺大圖資系學會目前由正副會長統領，下轄行政、活動、學術、形象宣傳、體育等五個常設部門（第 52 屆改編至今）：
+                臺大圖資系學會目前由正副會長統領，下轄行政、活動、學術、形象宣傳、體育等五個常設部門（第 52 屆始）：
               </p>
             </Reveal>
 
@@ -364,9 +367,7 @@ export default function TeamSection() {
                       className="absolute inset-0 flex items-end transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]"
                       style={{
                         opacity: isActive ? 1 : 0,
-                        transform: isActive
-                          ? `translateX(${leader.offset}) translateY(${FIGURE_TOP_PADDING})`
-                          : `translateX(calc(${leader.offset} + 18px)) translateY(${FIGURE_TOP_PADDING})`,
+                        transform: isActive ? `translateX(0) translateY(${FIGURE_TOP_PADDING})` : `translateX(18px) translateY(${FIGURE_TOP_PADDING})`,
                         pointerEvents: "none",
                       }}
                     >
@@ -403,14 +404,7 @@ export default function TeamSection() {
             </div>
           </div>
 
-          {/* 左緣黑色漸層：寬版照片被容器左邊裁到時，改用「由黑漸透明」自然收邊，而非硬切。
-              想加寬羽化範圍→調 width；想讓純黑區更多→把 gradient 中間的 18% 調大。桌機才需要，故 lg 才顯示。 */}
-          <div
-            className="hidden lg:block absolute inset-y-0 left-0 pointer-events-none z-[1] select-none"
-            style={{ width: "clamp(1px, 10%, 100px)", background: "linear-gradient(90deg, #000 0%, #000 0%, rgba(0,0,0,0) 100%)" }}
-          />
-
-          <div className="absolute left-4 right-4 bottom-4 sm:left-auto sm:right-6 lg:left-auto lg:right-[4vw] lg:bottom-[20vh] rounded-full border border-white/20 p-[3px] max-w-fit z-[2]">
+          <div className="absolute left-4 right-4 bottom-4 sm:left-auto sm:right-6 lg:left-auto lg:right-[4vw] lg:bottom-[20vh] rounded-full border border-white/20 p-[3px] max-w-fit">
             <div className="absolute top-[3px] bottom-[3px] rounded-full bg-white" style={{ width: "calc(50% - 3px)", left: leaderIdx === 0 ? "3px" : "calc(50%)", transition: "left 300ms cubic-bezier(0.4,0,0.2,1)" }} />
             <div className="relative flex">
               {LEADERS.map((l, i) => (
