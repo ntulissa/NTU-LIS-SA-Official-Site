@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft } from "lucide-react";
 import { Reveal } from "../sections/shared";
 
@@ -36,7 +36,18 @@ type DeptData = {
   members: Member[]; // 部員
 };
 
+// hex → rgba（給脈動光暈用；避免同色高斯模糊把小圓點中心洗成白色）
+function hexToRgba(hex: string, a: number): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
 // ── 屆數切換／服務切換用的「點 → 箭頭」按鈕（比照歷屆會長）──
+// 靜態時是一顆「實心、飽和」的圓點（左紅右藍），外圈是同色柔光；
+// hover 才變成實心箭頭。刻意不用模糊光暈疊在小點上，否則中心會被洗白。
 function NavArrow({ dir, color, disabled, onClick }: { dir: "prev" | "next"; color: string; disabled: boolean; onClick: () => void }) {
   const Icon = dir === "prev" ? ChevronLeft : ChevronRight;
   return (
@@ -49,12 +60,14 @@ function NavArrow({ dir, color, disabled, onClick }: { dir: "prev" | "next"; col
       style={{ width: "42px", height: "42px" }}
     >
       {disabled ? (
-        <span className="absolute rounded-full" style={{ width: "10px", height: "10px", background: color, opacity: 0.18 }} />
+        <span className="absolute rounded-full" style={{ width: "11px", height: "11px", background: color, opacity: 0.32 }} />
       ) : (
         <>
           <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-out group-hover:opacity-0">
-            <span className="dept-pulse-halo absolute rounded-full" style={{ width: "20px", height: "20px", background: color, filter: "blur(5px)" }} />
-            <span className="dept-pulse-dot absolute rounded-full" style={{ width: "10px", height: "10px", background: color }} />
+            <span
+              className="dept-pulse-dot absolute rounded-full"
+              style={{ width: "12px", height: "12px", background: color, ["--dept-glow" as string]: hexToRgba(color, 0.55) } as CSSProperties}
+            />
           </span>
           <span
             className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 scale-75 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:scale-100"
@@ -145,11 +158,6 @@ function ServiceCarousel({ services }: { services: Service[] }) {
       <p className="text-white/40 mt-3" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.16em" }}>
         點擊即可進入服務頁面
       </p>
-      {services.length > 1 && (
-        <p className="text-white/25 mt-1" style={{ fontFamily: monoFont, fontSize: "0.72rem", letterSpacing: "0.2em" }}>
-          {idx + 1} / {services.length}
-        </p>
-      )}
     </div>
   );
 }
@@ -225,11 +233,12 @@ export default function DepartmentPage({ slug }: { slug: string }) {
     <section className="relative bg-black">
       {/* 切換點的脈動動畫（比照歷屆會長） */}
       <style>{`
-        @keyframes deptPulseHalo { 0%,100% { transform: scale(0.65); opacity: 0.55; } 50% { transform: scale(1.6); opacity: 0.06; } }
-        @keyframes deptPulseDot  { 0%,100% { transform: scale(1); } 50% { transform: scale(1.22); } }
-        .dept-pulse-halo { transform-origin: center; animation: deptPulseHalo 1.8s ease-in-out infinite; }
-        .dept-pulse-dot  { transform-origin: center; animation: deptPulseDot 1.8s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) { .dept-pulse-halo, .dept-pulse-dot { animation: none; } }
+        @keyframes deptPulseDot {
+          0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 var(--dept-glow); }
+          50%      { transform: scale(1.18); box-shadow: 0 0 10px 2px var(--dept-glow); }
+        }
+        .dept-pulse-dot { transform-origin: center; animation: deptPulseDot 1.8s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .dept-pulse-dot { animation: none; box-shadow: none; } }
       `}</style>
 
       {/* ══════════ 上半：簡介 + 服務輪播 ══════════ */}
@@ -385,9 +394,9 @@ const GENERAL_AFFAIRS: DeptData = {
   joinBlurb:
     "加入行政部，你將成為全系運作最核心的幕後推手，掌管系館空間、財務與行政決策。這不只是會務，更是累積組織管理經驗、展現影響力的旅程。打造更完善的圖資系，就差你一個！",
   services: [
-    // 服務圖放 imports/services/gen1.png（找不到會顯示佔位框）；href 先用 "#"，之後接服務頁。
+    // 服務圖放 imports/services/gen1.png、gen2.png（找不到會顯示佔位框）；href 先用 "#"，之後接服務頁。
     { name: "系櫃租借", img: svcImg("gen1"), href: "#" },
-    // 之後可再加：{ name: "學輔室預約", img: svcImg("gen2"), href: "#" }, ...
+    { name: "系學會費", img: svcImg("gen2"), href: "#" },
   ],
   heads: [
     // 幹部照放 imports/members/gen1.png、gen2.png、gen3.png（找不到＝照片待補）。

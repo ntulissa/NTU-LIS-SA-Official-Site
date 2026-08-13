@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import imgLissaLogo from "@/imports/LISSA_Logo.png";
 
-// Chiron Hei HK Text is a commercial font not available on Google Fonts.
-// Noto Sans TC is used as the closest available substitute for Chinese display text.
+// 導覽列中文字體（維持原設計：Noto Sans TC）。
+// 若想讓 Header 也吃 Chiron Hei HK Text，改成：
+//   "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif"
 const zhFont = "'Noto Sans TC', sans-serif";
 
 // 選單子項目改為 { label, href } 物件，讓每一項都能連到對應區塊或分頁。
@@ -13,7 +14,7 @@ const NAV_ITEMS = [
     label: "關於我們",
     labelEn: "ABOUT",
     sub: [
-      { label: "現任團隊", href: "#team" },
+      { label: "現任團隊", href: "#/current-team" },
       { label: "學會發展歷程", href: "#about" },
       { label: "歷任會長", href: "#/presidents" },
       { label: "正副會長選舉專區", href: "#" },

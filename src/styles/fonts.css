@@ -1,1 +1,27 @@
+/* ⚠️ @import 一定要放在最前面（CSS 規定），@font-face 放它後面。 */
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Ubuntu+Sans+Mono:wght@400;500;600;700&display=swap');
+
+/* ────────────────────────────────────────────────────────────────
+   Chiron Hei HK Text（自 host TTF）
+   ─ family 名稱必須完全等於 'Chiron Hei HK Text'（對應各元件已寫好的字體）。
+   ─ 只放「Text 光學版」這兩個檔到  src/styles/fonts/  底下：
+       ChironHeiHK-Text-B.ttf   → 700（粗）
+       ChironHeiHK-Text-H.ttf   → 900（特粗；網站中文大標都用這個）
+   ─ ⚠️ 只要有一行 url 指到「不存在的檔名」，Vite 就會整段失效、字全部載不進來。
+     所以這裡只引用你確定存在的檔。若之後要補一般字重，Text 這組的「一般」是
+     -N（Normal）或 -R（若有），確認檔名存在再加。
+   ──────────────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Chiron Hei HK Text';
+  src: url('./fonts/ChironHeiHK-Text-B.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Chiron Hei HK Text';
+  src: url('./fonts/ChironHeiHK-Text-H.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}

@@ -273,7 +273,7 @@ export default function HeroSection() {
         <h1
           className="hero-flow-text leading-none select-none mb-10"
           style={{
-            fontFamily: "'Noto Sans TC', sans-serif",
+            fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif",
             fontWeight: 900,
             fontSize: "clamp(2.6rem, 10vw, 15rem)",
           }}

@@ -2,21 +2,35 @@ import { Mail } from "lucide-react";
 import imgLissaLogo from "@/imports/LISSA_Logo.png";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
 
+// 每個連結改成 { label, href }，讓 Footer 也能連到對應頁面／錨點（與 Header 一致）。
+// 「現任團隊」連到獨立頁 #/current-team；「歷任會長」連到 #/presidents。
 const NAV_COLS = [
   {
     en: "ABOUT",
     zh: "關於我們",
-    links: ["現任團隊", "學會發展歷程", "歷任會長", "正副會長選舉專區"],
+    links: [
+      { label: "現任團隊", href: "#/current-team" },
+      { label: "學會發展歷程", href: "#about" },
+      { label: "歷任會長", href: "#/presidents" },
+      { label: "正副會長選舉專區", href: "#" },
+    ],
   },
   {
     en: "NEWS",
     zh: "最新動態",
-    links: ["近期活動公告", "活動紀錄", "系學會行事曆"],
+    links: [
+      { label: "近期活動公告", href: "#news" },
+      { label: "活動紀錄", href: "#news" },
+      { label: "系學會行事曆", href: "#" },
+    ],
   },
   {
     en: "SERVICES",
     zh: "各種服務",
-    links: ["學術連結", "資料下載區"],
+    links: [
+      { label: "學術連結", href: "#resources" },
+      { label: "資料下載區", href: "#resources" },
+    ],
   },
 ];
 
@@ -146,13 +160,13 @@ export default function Footer() {
               </p>
               <ul className="space-y-4">
                 {col.links.map((link) => (
-                  <li key={link}>
+                  <li key={link.label}>
                     <a
-                      href="#"
+                      href={link.href}
                       className="text-white hover:text-white/50 transition-colors duration-200"
                       style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "0.95rem", letterSpacing: "0.15em" }}
                     >
-                      {link}
+                      {link.label}
                     </a>
                   </li>
                 ))}
