@@ -17,7 +17,6 @@ const NAV_ITEMS = [
       { label: "現任團隊", href: "#/current-team" },
       { label: "學會發展歷程", href: "#about" },
       { label: "歷任會長", href: "#/presidents" },
-      { label: "正副會長選舉專區", href: "#" },
     ],
   },
   {

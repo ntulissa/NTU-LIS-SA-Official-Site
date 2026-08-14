@@ -49,7 +49,7 @@ export default function AcademicResourcesSection() {
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundSize: "220% 100%",}}>
-            — SERVICES 各種服務・學術資源
+            — 各種服務・學術資源
           </p>
           <h2 className="font-bold leading-none mb-12" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>
             <span className="text-white block">ACADEMIC</span>

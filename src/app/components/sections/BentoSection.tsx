@@ -133,7 +133,7 @@ export default function BentoSection() {
             WebkitTextFillColor: "transparent",
             backgroundSize: "220% 100%",}}
           >
-            －ABOUT US 關於我們・資訊總覽
+            －關於我們・資訊總覽
           </p>
           {/* 標題改為與其他頁面（OUR HISTORY / CURRENT TEAM）一致的寫法： */}
           {/* 同樣的字級 clamp(2.5rem,3.5vw,60px)、leading-none 緊貼兩行，避免整塊過高。 */}

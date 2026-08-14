@@ -6,10 +6,10 @@ import { svcImg, memImg, type DeptData } from "./deptShared";
 export const eve: DeptData = {
   slug: "eve", // 網址：#/dept/eve
   zh: "活動部",
-  en: "EVENTS", // 英文名可自行調整
+  en: "EVENTS AFFAIRS", // 英文名可自行調整
   color: "#C24A4F",
-  intro: "（活動部簡介待補——寫法可參考 gen.tsx。）",
-  joinBlurb: "（加入活動部的介紹文案待補。）",
+  intro: "活動部主責系內外各項大中型活動的策劃與執行，並持續推動現有活動的優化與創新活動的開拓。從活動發想、流程設計、場地物資調度到對外拉贊助與廠商洽談，活動部致力於打造多元且具凝聚力的體驗，是創造全系精彩回憶的核心引擎。",
+  joinBlurb: "加入活動部，你將親手策劃系上各大精彩活動，從活動企劃、現場控場到拉贊助談判，全方位解鎖最扎實的實戰技能。這不只是辦活動，更是與夥伴並肩創造共同回憶、點燃全系熱情的絕佳舞台。點亮圖資人的精彩生活，就差你一個！",
   services: [
     // href 先用 "#"，之後接服務頁；找不到圖會顯示佔位框。
     { name: "服務一（待補）", img: svcImg("eve1"), href: "#" },

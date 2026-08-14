@@ -60,7 +60,7 @@ export default function HistorySection() {
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundSize: "220% 100%",}}>
-                            — ABOUT US 關於我們・學會發展歷程
+                            — 關於我們・學會發展歷程
                           </p>
                         </Reveal>
             <Reveal>

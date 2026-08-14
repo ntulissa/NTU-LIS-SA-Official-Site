@@ -29,6 +29,19 @@ type Dept = {
   color: string; // 部門色（卡片外框）
   members: Member[];
 };
+// ── 選舉結果型別 ────────────────────────────────────────────
+// 這一屆的正副會長選舉數字。要調整票數，只要改對應屆物件裡的 election 欄位即可。
+type Candidate = { n: string; c: string }; // 參選人：n=姓名, c=系級（如 B12）
+type Election = {
+  date: string; // 投票日期，如 "2025.05.12"
+  agree: number; // 同意票
+  disagree: number; // 不同意票
+  electorate: number; // 選舉人數（具投票資格的總人數）
+  candidates: Candidate[]; // 參選人名單（同一組正／副會長）
+  source?: string; // 資料來源附註（可省略，預設「臺大圖資系學會選委會」）
+  // 有效票＝同意＋不同意（自動計算）；投票率＝有效票÷選舉人數（自動計算、四捨五入）。
+};
+
 type President = {
   gen: number; // 第幾屆，如 52
   name: string; // 會長中文姓名（留空字串＝資料待補）
@@ -37,6 +50,7 @@ type President = {
   img: string; // 會長照片（見下方「照片怎麼放」；留空字串會顯示佔位框）
   intro: string; // 該屆簡介（留空字串會顯示「資料整理中」）
   depts: Dept[]; // 團隊成員（依 [GEN,SP,ACA,EVE,IMA,VP] 順序＝畫面左右兩欄排列）
+  election?: Election; // 該屆選舉結果（可省略；有填才會在團隊成員下方顯示選舉結果面板）
 };
 
 /* ── 照片怎麼放（兩種做法擇一）────────────────────────────────
@@ -133,6 +147,18 @@ const P52: President = {
       members: [{ n: "詹凱昕", c: "B12" }],
     },
   ],
+  // ↓↓↓ 第 52 屆選舉結果：要改票數就改這裡的數字 ↓↓↓
+  election: {
+    date: "2025.05.12", // 投票日期
+    agree: 68, // 同意票
+    disagree: 0, // 不同意票
+    electorate: 261, // 選舉人數（有效票 68 ÷ 261 ≒ 26% 為投票率，會自動算）
+    candidates: [
+      { n: "曾柏翰", c: "B12" }, // 會長參選人
+      { n: "詹凱昕", c: "B12" }, // 副會長參選人
+    ],
+    // source: "臺大圖資系學會選委會", // 不填就用預設值
+  },
 };
 
 // 建立「僅有會長基本資料」的一屆（簡介 intro、團隊名單 depts 日後可再補）。
@@ -163,7 +189,7 @@ const P51: President = {
   cls: "B12",
   img: "", // ← 放入 周芳綺 照片（imports/Presidents/51.jpg）
   intro:
-    "第 51 屆系學會於任內積極維穩會務運作，並在後期由團隊攜手努力完成交棒。本屆最大亮點為成功復辦睽違三年的系上體育盛事「小圖盃」，重新帶動系上的體育風氣與交流向心力；同時持續維持基礎會務服務，為系學會後續的制度重組與發展奠定基礎。",
+    "第 51 屆系學會於任內積極維穩會務運作，後期由副會長曾柏翰攜手團隊攜手努力完成交棒。本屆最大亮點為成功復辦睽違三年的系上體育盛事「小圖盃」，重新帶動系上的體育風氣與交流向心力；同時持續維持基礎會務服務，為系學會後續的制度重組與發展奠定基礎。",
   depts: [
     { en: "VP", zh: "副會長", color: C.VP, members: [{ n: "曾柏翰", c: "B12" }] },
     { en: "SEC", zh: "執秘", color: C.SEC, members: [{ n: "王怡婷", c: "B12" }, { n: "洪思涵", c: "B12" }] },
@@ -617,6 +643,132 @@ function ProfilePanel({
   );
 }
 
+// ── 選舉結果面板（左半；接在「團隊成員」下方）─────────────────
+// ● 標題徽章：與「團隊成員」完全同款（同字型 zhFont、同尺寸、同內距）。
+// ● 長條：滿格基準＝有效票（同意＋不同意）；所以同意 68/68＝填滿，不同意 0＝只剩紅藍漸層外框。
+// ● 投票率 Donut：大而細的紅藍漸層整圈；中央百分比＝有效票÷選舉人數（自動計算）。
+// 數字（票數、屆數、百分比）用 Josefin Sans（enDisplay）；中文標題用 Chiron Hei（zhDisplay/zhFont）。
+const ELECTION_GRAD = "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)"; // 全站紅→藍
+
+function ElectionResult({ e }: { e: Election }) {
+  const valid = e.agree + e.disagree; // 有效票
+  const turnout = e.electorate > 0 ? Math.round((valid / e.electorate) * 100) : 0; // 投票率 %
+  const base = Math.max(valid, 1); // 長條滿格＝有效票總數（同意＋不同意）
+  const bars = [
+    { label: "同意票", value: e.agree, pct: Math.min(100, (e.agree / base) * 100) },
+    { label: "不同意票", value: e.disagree, pct: Math.min(100, (e.disagree / base) * 100) },
+  ];
+
+  return (
+    <div className="w-full">
+      {/* 標題列：選舉結果徽章（＝團隊成員同款）＋ 投票日期 */}
+      <div className="flex items-center gap-4 mb-10 flex-wrap">
+        <div className="inline-flex rounded-full" style={{ padding: "1.5px", background: ELECTION_GRAD }}>
+          <div className="rounded-full bg-black px-6 py-2">
+            <span className="text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: "0.24em", paddingLeft: "0.24em" }}>
+              選舉結果
+            </span>
+          </div>
+        </div>
+        <span className="text-white/40" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.8rem", letterSpacing: "0.12em" }}>
+          投票日期：{e.date}
+        </span>
+      </div>
+
+      {/* 同意 / 不同意 長條：外框紅藍漸層（1.5px）；填滿部分為紅藍漸層 */}
+      <div className="space-y-7 mb-14">
+        {bars.map((row) => (
+          <div key={row.label}>
+            <p className="text-white mb-3" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.05rem,1.5vw,1.35rem)", letterSpacing: "0.16em" }}>
+              {row.label}
+            </p>
+            <div className="flex items-center gap-5">
+              {/* 外框（漸層 1.5px）→ 內部黑底 → 漸層填滿（寬度＝該票數佔有效票比例） */}
+              <div className="flex-1 rounded-full" style={{ padding: "1.5px", background: ELECTION_GRAD }}>
+                <div className="rounded-full overflow-hidden" style={{ background: "#0a0a0a", height: "16px" }}>
+                  <div className="h-full rounded-full transition-all duration-700 ease-out" style={{ width: `${row.pct}%`, background: ELECTION_GRAD }} />
+                </div>
+              </div>
+              <span className="text-white shrink-0 text-right tabular-nums" style={{ fontFamily: enDisplay, fontWeight: 600, fontSize: "clamp(1.3rem,1.8vw,1.7rem)", letterSpacing: "0.08em", minWidth: "2.4ch" }}>
+                {row.value}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 投票率標題 */}
+      <p className="text-white mb-6" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.05rem,1.5vw,1.35rem)", letterSpacing: "0.16em" }}>
+        投票率
+      </p>
+
+      {/* Donut（左，資料來源接在其下）＋ 中：有效票／選舉人數 ＋ 右下：參選人 */}
+      <div className="flex flex-wrap items-start gap-x-10 sm:gap-x-12 gap-y-8">
+        {/* 左：Donut ＋ 資料來源（緊貼 Donut 下方，版面不再拉長）*/}
+        <div className="flex flex-col shrink-0" style={{ width: "clamp(180px,15vw,220px)" }}>
+          <div className="relative" style={{ width: "100%", aspectRatio: "1" }}>
+            {/* 投票率環：紅色占 turnout%（26%）、藍色占其餘（74%）；交界與頂端接縫都用漸層柔化。
+                比例會自動跟著 turnout 走；想調環粗細改兩處的 9px；想調交界柔化寬度改 ±6。 */}
+            <div
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: `conic-gradient(from 0deg, #D14B4B 0%, #D14B4B ${Math.max(0, turnout - 6)}%, #2F9EBD ${Math.min(100, turnout + 6)}%, #2F9EBD 94%, #D14B4B 100%)`,
+                WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px))",
+                mask: "radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px))",
+              }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-white leading-none" style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(2.6rem,4vw,3.4rem)" }}>
+                {turnout}
+                <span style={{ fontSize: "0.42em", fontWeight: 500 }}>%</span>
+              </span>
+            </div>
+          </div>
+          <p className="text-white/30 mt-4 text-center" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.72rem", letterSpacing: "0.08em" }}>
+            資料來源：{e.source ?? "臺大圖資系學會選委會"}
+          </p>
+        </div>
+
+        {/* 中：有效票（紅）／選舉人數（藍），上下分開貼齊環的上下緣 */}
+        <div className="flex flex-col justify-between self-start py-3" style={{ minHeight: "clamp(180px,15vw,220px)" }}>
+          <div>
+            <p style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.6rem,2.4vw,2.1rem)", color: "#D14B4B", lineHeight: 1, letterSpacing: "0.06em" }}>{valid}</p>
+            <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.1em" }}>有效票</p>
+          </div>
+          <div>
+            <p style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.6rem,2.4vw,2.1rem)", color: "#2F9EBD", lineHeight: 1, letterSpacing: "0.06em" }}>{e.electorate}</p>
+            <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.1em" }}>選舉人數</p>
+          </div>
+        </div>
+
+        {/* 右下：參選人（紅藍漸層外框）；ml-auto 把方塊推到最右，右緣對齊上方票數的個位數 */}
+        <div className="rounded-2xl self-end ml-auto" style={{ padding: "1.5px", background: ELECTION_GRAD }}>
+          <div className="rounded-2xl px-6 py-5" style={{ background: "#0a0a0a" }}>
+            <p className="text-white/60 text-center mb-4" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.24em", paddingLeft: "0.24em" }}>
+              參選人 ①
+            </p>
+            <div className="space-y-3">
+              {e.candidates.map((cd, i) => (
+                <div key={`${cd.n}-${i}`} className="flex items-center gap-2.5">
+                  <span
+                    className="shrink-0 text-white/70 rounded-[4px] px-1.5 py-0.5"
+                    style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.62rem", background: "rgba(255,255,255,0.12)", letterSpacing: "0.04em" }}
+                  >
+                    {cd.c}
+                  </span>
+                  <span className="text-white" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1rem,1.3vw,1.2rem)", letterSpacing: "0.14em" }}>
+                    {cd.n}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PastPresidentsSection() {
   const [idx, setIdx] = useState(0); // 0 = 最新一屆（陣列第一個）
   const p = PRESIDENTS[idx] ?? PRESIDENTS[0];
@@ -708,7 +860,7 @@ export default function PastPresidentsSection() {
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundSize: "220% 100%",}}>
-                — ABOUT US 關於我們・歷任會長
+                — 關於我們・歷任會長
               </p>
             </Reveal>
             <Reveal delay={40}>
@@ -792,6 +944,16 @@ export default function PastPresidentsSection() {
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* 選舉結果：該屆有填 election 才顯示，接在「團隊成員」下方；右側會長面板維持不變 */}
+        {p.election && (
+          <div className="max-w-[720px] pb-20 lg:pb-28 lg:min-h-screen lg:flex lg:flex-col lg:justify-center">
+            {/* key 帶屆數：切屆時重新掛載，讓進場動畫每次重播 */}
+            <Reveal key={`election-${p.gen}`}>
+              <ElectionResult e={p.election} />
+            </Reveal>
           </div>
         )}
       </div>

@@ -34,7 +34,7 @@ export default function LatestUpdatesSection() {
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundSize: "220% 100%",}}>
-            — NEWS 最新動態・近期公告
+            — 最新動態・近期公告
           </p>
           <h2 className="font-bold leading-none mb-12" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>
             <span className="text-white block">LATEST</span>
@@ -48,7 +48,7 @@ export default function LatestUpdatesSection() {
               <div className="rounded-2xl border border-white/10 p-5 sm:p-6 md:p-8 flex flex-col justify-between gap-5 sm:gap-6 hover:border-white/20 transition-colors duration-200" style={{ background: "rgba(255,255,255,0.04)", minHeight: "240px" }}>
                 <div>
                   <div className="flex items-center gap-3 mb-4 flex-wrap">
-                    <p className="text-white" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "clamp(1rem, 2vw, 1.3rem)" }}>
+                    <p className="text-white" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "clamp(1rem, 2vw, 1.3rem)" , letterSpacing: "0.09em"}}>
                       {item.title}
                     </p>
                     <span className="shrink-0 text-white/70 text-xs px-3 py-0.5" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 400, letterSpacing: "0.1em", border: "1px solid transparent", borderRadius: "41px", background: "linear-gradient(#0d0d0d, #0d0d0d) padding-box, linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%) border-box" }}>

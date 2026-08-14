@@ -302,7 +302,7 @@ function DeptCard({ dept }: { dept: DeptDef }) {
           {dept.renderIcon(hovered)}
         </div>
       </Box>
-      <span className="text-white text-center leading-tight" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(0.65rem,0.82vw,13px)" }}>
+      <span className="text-white text-center leading-tight" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "clamp(0.65rem,0.82vw,13px)" }}>
         {dept.name}
       </span>
     </div>
@@ -332,7 +332,7 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundSize: "220% 100%",}}>
-                — ABOUT US 關於我們・現任團隊
+                — 關於我們・現任團隊
               </p>
             </Reveal>
             <Reveal delay={50}>
