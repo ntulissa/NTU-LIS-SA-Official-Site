@@ -127,15 +127,13 @@ export default function BentoSection() {
         <Reveal>
           <p
             className="text-[13px] md:text-[15px] tracking-[2.4px] mb-4"
-            style={{
-              ...monoMed,
-              background: "linear-gradient(to right, #ffffff, #999999)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
+            style={{fontSize: "14px",fontFamily: "'Ubuntu Sans Mono', monospace" ,background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundSize: "220% 100%",}}
           >
-            －OVERVIEW 資訊總覽
+            －ABOUT US 關於我們・資訊總覽
           </p>
           {/* 標題改為與其他頁面（OUR HISTORY / CURRENT TEAM）一致的寫法： */}
           {/* 同樣的字級 clamp(2.5rem,3.5vw,60px)、leading-none 緊貼兩行，避免整塊過高。 */}

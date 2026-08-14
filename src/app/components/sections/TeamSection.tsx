@@ -327,7 +327,11 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
         }`}>
           <div>
             <Reveal>
-              <p className="text-white/30 text-xs tracking-widest mb-5" style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}>
+              <p className="text-white/30 text-xs tracking-widest mb-5" style={{fontSize: "14px",fontFamily: "'Ubuntu Sans Mono', monospace" ,background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundSize: "220% 100%",}}>
                 — ABOUT US 關於我們・現任團隊
               </p>
             </Reveal>

@@ -55,7 +55,11 @@ export default function HistorySection() {
         <div className="flex flex-col justify-between py-[clamp(60px,11.4vw,197px)] px-[clamp(24px,4.3vw,74px)] shrink-0 relative z-10" style={{ width: "clamp(320px,48vw,820px)" }}>
           <div>
             <Reveal>
-                          <p className="text-white/30 text-xs tracking-widest mb-5" style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}>
+                          <p className="text-white/30 text-xs tracking-widest mb-5" style={{ fontSize: "14px",fontFamily: "'Ubuntu Sans Mono', monospace" ,background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundSize: "220% 100%",}}>
                             — ABOUT US 關於我們・學會發展歷程
                           </p>
                         </Reveal>

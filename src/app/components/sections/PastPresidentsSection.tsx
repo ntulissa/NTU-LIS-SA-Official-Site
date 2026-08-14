@@ -703,7 +703,11 @@ export default function PastPresidentsSection() {
         <div className="lg:min-h-screen pt-24 sm:pt-28 lg:pt-[128px] pb-16 lg:pb-24">
           <div className="max-w-[640px]">
             <Reveal>
-              <p className="text-white/30 text-xs tracking-widest mb-5" style={{ fontFamily: monoFont }}>
+              <p className="text-white/30 text-xs tracking-widest mb-5" style={{ fontSize: "14px",fontFamily: "'Ubuntu Sans Mono', monospace" ,background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundSize: "220% 100%",}}>
                 — ABOUT US 關於我們・歷任會長
               </p>
             </Reveal>

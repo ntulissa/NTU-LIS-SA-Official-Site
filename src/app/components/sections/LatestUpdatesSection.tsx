@@ -29,7 +29,11 @@ export default function LatestUpdatesSection() {
     <section id="news" className="bg-black px-5 sm:px-8 md:px-14 py-16 sm:py-20 md:py-24">
       <div className="max-w-[1400px] mx-auto">
         <Reveal>
-          <p className="text-white/30 text-xs tracking-widest mb-4" style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}>
+          <p className="text-white/30 text-xs tracking-widest mb-4" style={{ fontSize: "14px",fontFamily: "'Ubuntu Sans Mono', monospace" ,background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundSize: "220% 100%",}}>
             — NEWS 最新動態・近期公告
           </p>
           <h2 className="font-bold leading-none mb-12" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>
