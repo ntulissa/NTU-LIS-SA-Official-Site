@@ -3,13 +3,13 @@ import imgLissaLogo from "@/imports/LISSA_Logo.png";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
 
 // 每個連結改成 { label, href }，讓 Footer 也能連到對應頁面／錨點（與 Header 一致）。
-// 「現任團隊」連到主頁的 #team 區塊；「歷任會長」連到 #/presidents。
+// 「現任團隊」連到獨立頁 #/current-team；「歷任會長」連到 #/presidents。
 const NAV_COLS = [
   {
     en: "ABOUT",
     zh: "關於我們",
     links: [
-      { label: "現任團隊", href: "#team" },
+      { label: "現任團隊", href: "#/current-team" },
       { label: "學會發展歷程", href: "#about" },
       { label: "歷任會長", href: "#/presidents" },
       { label: "正副會長選舉專區", href: "#" },

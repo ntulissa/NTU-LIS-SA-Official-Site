@@ -15,10 +15,12 @@ export const aca: DeptData = {
     { name: "服務二（待補）", img: svcImg("aca2"), href: "#" },
   ],
   heads: [
-    { name: "待補", cls: "B14", title: "部長", img: memImg("aca1") },
+    { name: "周家禾", cls: "B14", title: "部長", img: memImg("aca1") },
   ],
   members: [
-    { n: "待補", c: "B13" },
+    { n: "許瑞米", c: "B14" },
+    { n: "郭庭妤", c: "B14" },
+    { n: "陳明鈺", c: "B14" },
   ],
 };
 

@@ -17,10 +17,13 @@ export const eve: DeptData = {
   ],
   heads: [
     // 幹部照放 imports/members/eve1.png…（找不到＝照片待補）。
-    { name: "待補", cls: "B14", title: "部長", img: memImg("eve1") },
+    { name: "蕭忻緹", cls: "B14", title: "部長", img: memImg("eve1") },
+    { name: "莊雅雯", cls: "B14", title: "部長", img: memImg("eve2") },
   ],
   members: [
-    { n: "待補", c: "B13" },
+    { n: "張瑄予", c: "B14" },
+    { n: "葛家妤", c: "B14" },
+    { n: "呂程琳", c: "B14" },
   ],
 };
 

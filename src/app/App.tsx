@@ -15,13 +15,15 @@ import PastPresidentsSection from "./components/sections/PastPresidentsSection";
 import DepartmentPage from "./components/department-pages/DepartmentPage";
 
 // 極輕量的 hash 分頁（不需安裝 react-router；同時保留原本 #team / #news 等錨點捲動）：
+//   #/current-team    → 現任團隊獨立頁（只有 Header + TeamSection + Footer）
 //   #/presidents      → 歷任會長頁
 //   #/dept/<slug>     → 部門獨立頁（例：#/dept/gen ＝行政部；slug 同 department-pages/ 檔名）
 //   其餘              → 捲動式主頁
-type Route = { name: "home" } | { name: "presidents" } | { name: "dept"; slug: string };
+type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "dept"; slug: string };
 
 function getRoute(): Route {
   const h = window.location.hash;
+  if (h.startsWith("#/current-team")) return { name: "current-team" };
   if (h.startsWith("#/presidents")) return { name: "presidents" };
   const m = h.match(/^#\/dept\/([\w-]+)/);
   if (m) return { name: "dept", slug: m[1] };
@@ -57,7 +59,13 @@ export default function App() {
     <div className="bg-black text-white overflow-x-hidden">
       <Header />
 
-      {route.name === "presidents" ? (
+      {route.name === "current-team" ? (
+        // 獨立頁：只顯示 TeamSection（Header/Footer 在最外層一定會出現）。
+        // pt-8 lg:pt-0：手機/平板時補一點頂距讓內容不被固定 Header 蓋住；桌機維持 TeamSection 原本的大留白。
+        <div className="pt-8 lg:pt-0">
+          <TeamSection />
+        </div>
+      ) : route.name === "presidents" ? (
         <PastPresidentsSection />
       ) : route.name === "dept" ? (
         <DepartmentPage slug={route.slug} />

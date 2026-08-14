@@ -15,10 +15,11 @@ export const sp: DeptData = {
     { name: "服務二（待補）", img: svcImg("sp2"), href: "#" },
   ],
   heads: [
-    { name: "待補", cls: "B14", title: "部長", img: memImg("sp1") },
+    { name: "葛家妤", cls: "B14", title: "部長", img: memImg("sp1") },
+    { name: "張毓琳", cls: "B14", title: "部長", img: memImg("sp2") },
   ],
   members: [
-    { n: "待補", c: "B13" },
+    { n: "劉以寬", c: "B14" },
   ],
 };
 
