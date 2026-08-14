@@ -704,7 +704,7 @@ export default function PastPresidentsSection() {
           <div className="max-w-[640px]">
             <Reveal>
               <p className="text-white/30 text-xs tracking-widest mb-5" style={{ fontFamily: monoFont }}>
-                — ABOUT US 關於我們
+                — ABOUT US 關於我們・歷任會長
               </p>
             </Reveal>
             <Reveal delay={40}>

@@ -24,7 +24,7 @@ const NAV_ITEMS = [
     label: "最新動態",
     labelEn: "NEWS",
     sub: [
-      { label: "近期活動公告", href: "#news" },
+      { label: "近期公告", href: "#news" },
       { label: "活動紀錄", href: "#news" },
       { label: "系學會行事曆", href: "#" },
     ],
@@ -33,8 +33,7 @@ const NAV_ITEMS = [
     label: "各種服務",
     labelEn: "SERVICES",
     sub: [
-      { label: "學習連結", href: "#resources" },
-      { label: "資料下載區", href: "#resources" },
+      { label: "學術資源", href: "#resources" },
     ],
   },
 ];

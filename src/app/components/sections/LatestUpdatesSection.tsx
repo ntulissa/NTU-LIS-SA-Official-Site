@@ -30,7 +30,7 @@ export default function LatestUpdatesSection() {
       <div className="max-w-[1400px] mx-auto">
         <Reveal>
           <p className="text-white/30 text-xs tracking-widest mb-4" style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}>
-            — NEWS 最新動態
+            — NEWS 最新動態・近期公告
           </p>
           <h2 className="font-bold leading-none mb-12" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>
             <span className="text-white block">LATEST</span>

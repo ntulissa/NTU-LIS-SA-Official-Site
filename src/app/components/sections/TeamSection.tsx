@@ -309,18 +309,26 @@ function DeptCard({ dept }: { dept: DeptDef }) {
   );
 }
 
-export default function TeamSection() {
+// standalone=true：當「現任團隊」獨立頁使用（#/current-team）。此時允許內容長高、往下捲，
+// 不再用 overflow-hidden 把超出一屏的部分裁掉；預設 false 時＝主頁捲動版，呈現完全不變。
+export default function TeamSection({ standalone = false }: { standalone?: boolean } = {}) {
   const [leaderIdx, setLeaderIdx] = useState(0);
   const activeLeader = LEADERS[leaderIdx] ?? LEADERS[0];
 
   return (
-    <section id="team" className="bg-black min-h-screen overflow-hidden">
+    <section id="team" className={`bg-black min-h-screen ${standalone ? "overflow-x-clip" : "overflow-hidden"}`}>
       <div className="relative w-full min-h-screen flex flex-col lg:flex-row">
-        <div className="flex flex-col justify-center px-5 sm:px-8 md:px-[clamp(24px,4.3vw,74px)] py-16 sm:py-20 lg:py-[clamp(60px,11.4vw,197px)] w-full lg:w-[clamp(300px,54vw,920px)] lg:flex-shrink-0">
+        <div className={`flex flex-col px-5 sm:px-8 md:px-[clamp(24px,4.3vw,74px)] w-full lg:w-[clamp(300px,54vw,920px)] lg:flex-shrink-0 ${
+          standalone
+            // 獨立頁：內容從上方開始（justify-start），頂部只留剛好清掉固定 Header 的一點空間，去掉原本一大塊留白。
+            ? "justify-start pt-24 sm:pt-28 lg:pt-28 pb-12 sm:pb-16 lg:pb-20"
+            // 主頁捲動版：維持原本的垂直置中與大留白，呈現不變。
+            : "justify-center py-16 sm:py-20 lg:py-[clamp(60px,11.4vw,197px)]"
+        }`}>
           <div>
             <Reveal>
               <p className="text-white/30 text-xs tracking-widest mb-5" style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}>
-                — ABOUT US 關於我們
+                — ABOUT US 關於我們・現任團隊
               </p>
             </Reveal>
             <Reveal delay={50}>

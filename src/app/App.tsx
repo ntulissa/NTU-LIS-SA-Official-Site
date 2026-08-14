@@ -61,10 +61,8 @@ export default function App() {
 
       {route.name === "current-team" ? (
         // 獨立頁：只顯示 TeamSection（Header/Footer 在最外層一定會出現）。
-        // pt-8 lg:pt-0：手機/平板時補一點頂距讓內容不被固定 Header 蓋住；桌機維持 TeamSection 原本的大留白。
-        <div className="pt-8 lg:pt-0">
-          <TeamSection />
-        </div>
+        // 頂部間距由 TeamSection 的 standalone 模式自己處理（剛好清掉固定 Header）。
+        <TeamSection standalone />
       ) : route.name === "presidents" ? (
         <PastPresidentsSection />
       ) : route.name === "dept" ? (

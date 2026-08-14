@@ -56,7 +56,7 @@ export default function HistorySection() {
           <div>
             <Reveal>
                           <p className="text-white/30 text-xs tracking-widest mb-5" style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}>
-                            — ABOUT US 關於我們
+                            — ABOUT US 關於我們・學會發展歷程
                           </p>
                         </Reveal>
             <Reveal>
