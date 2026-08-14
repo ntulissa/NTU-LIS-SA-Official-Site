@@ -263,12 +263,12 @@ function BasketballIcon({ playing }: { playing: boolean }) {
 }
 
 const DEPTS: DeptDef[] = [
-  // 點行政部格子 → 行政部獨立頁（#/dept/general）。其餘部門頁建立後，把 href 填上即可。
-  { name: "行政部", color: "#915E3E", renderIcon: (playing) => <AbacusIcon playing={playing} />, href: "#/dept/general" },
-  { name: "活動部", color: "#9F353A", renderIcon: (playing) => <GuitarIcon playing={playing} /> },
-  { name: "學術部", color: "#42602D", renderIcon: (playing) => <QuillIcon playing={playing} /> },
-  { name: "形象宣傳部", color: "#572A3F", renderIcon: (playing) => <CameraIcon playing={playing} /> },
-  { name: "體育部", color: "#554236", renderIcon: (playing) => <BasketballIcon playing={playing} /> },
+  // 點格子 → 對應部門獨立頁（#/dept/<slug>）。slug 與 department-pages/ 的檔名一致。
+  { name: "行政部", color: "#915E3E", renderIcon: (playing) => <AbacusIcon playing={playing} />, href: "#/dept/gen" },
+  { name: "活動部", color: "#9F353A", renderIcon: (playing) => <GuitarIcon playing={playing} />, href: "#/dept/eve" },
+  { name: "學術部", color: "#42602D", renderIcon: (playing) => <QuillIcon playing={playing} />, href: "#/dept/aca" },
+  { name: "形象宣傳部", color: "#572A3F", renderIcon: (playing) => <CameraIcon playing={playing} />, href: "#/dept/ima" },
+  { name: "體育部", color: "#554236", renderIcon: (playing) => <BasketballIcon playing={playing} />, href: "#/dept/sp" },
 ];
 
 const LEADERS = [

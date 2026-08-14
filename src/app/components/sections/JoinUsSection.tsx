@@ -3,8 +3,15 @@ import { Reveal } from "./shared";
 export default function JoinUsSection() {
   return (
     <section id="join" className="bg-black min-h-screen flex flex-col items-center justify-center px-6 py-28 text-center">
+      {/* 加入我們按鈕的旋轉描邊動畫（自成一格，不依賴全域 CSS） */}
+      <style>{`
+        @keyframes buttonRotate {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+      `}</style>
       <Reveal>
-        <h2 className="text-white leading-tight mb-8" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "clamp(1.8rem, 4.5vw, 4.5rem)" }}>
+        <h2 className="text-white leading-tight mb-8" style={{ fontFamily: "'Chiron Hei HK Text','Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "clamp(1.8rem, 4.5vw, 4.5rem)" }}>
           成 為{" "}
           <span style={{ background: "linear-gradient(to right, #D14B4B, #2F9EBD)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
             臺大圖資系學會

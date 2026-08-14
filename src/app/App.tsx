@@ -12,11 +12,11 @@ import LatestUpdatesSection from "./components/sections/LatestUpdatesSection";
 import AcademicResourcesSection from "./components/sections/AcademicResourcesSection";
 import JoinUsSection from "./components/sections/JoinUsSection";
 import PastPresidentsSection from "./components/sections/PastPresidentsSection";
-import DepartmentPage from "./components/pages/DepartmentPage";
+import DepartmentPage from "./components/department-pages/DepartmentPage";
 
 // 極輕量的 hash 分頁（不需安裝 react-router；同時保留原本 #team / #news 等錨點捲動）：
 //   #/presidents      → 歷任會長頁
-//   #/dept/<slug>     → 部門獨立頁（例：#/dept/general ＝行政部）
+//   #/dept/<slug>     → 部門獨立頁（例：#/dept/gen ＝行政部；slug 同 department-pages/ 檔名）
 //   其餘              → 捲動式主頁
 type Route = { name: "home" } | { name: "presidents" } | { name: "dept"; slug: string };
 

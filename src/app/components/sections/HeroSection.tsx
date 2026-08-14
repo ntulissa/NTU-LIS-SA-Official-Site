@@ -283,8 +283,8 @@ export default function HeroSection() {
         <h2
           className="text-white leading-tight mb-10"
           style={{
-            fontFamily: "'Noto Sans TC', sans-serif",
-            fontWeight: 700,
+            fontFamily: "'Chiron Hei HK Text','Noto Sans TC', sans-serif",
+            fontWeight: 900,
             fontSize: "clamp(1.6rem, 7vw, 11rem)",
           }}
         >
