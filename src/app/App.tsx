@@ -11,20 +11,25 @@ import SloganPage2Section from "./components/sections/SloganPage2Section";
 import LatestUpdatesSection from "./components/sections/LatestUpdatesSection";
 import AcademicResourcesSection from "./components/sections/AcademicResourcesSection";
 import JoinUsSection from "./components/sections/JoinUsSection";
+import ContactSection from "./components/sections/ContactSection";
 import PastPresidentsSection from "./components/sections/PastPresidentsSection";
 import DepartmentPage from "./components/department-pages/DepartmentPage";
 
 // 極輕量的 hash 分頁（不需安裝 react-router；同時保留原本 #team / #news 等錨點捲動）：
 //   #/current-team    → 現任團隊獨立頁（只有 Header + TeamSection + Footer）
 //   #/presidents      → 歷任會長頁
+//   #/join            → 加入我們獨立頁（只有 Header + JoinUsSection + Footer）
+//   #/contact         → 聯絡我們獨立頁（只有 Header + ContactSection + Footer）
 //   #/dept/<slug>     → 部門獨立頁（例：#/dept/gen ＝行政部；slug 同 department-pages/ 檔名）
 //   其餘              → 捲動式主頁
-type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "dept"; slug: string };
+type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "contact" } | { name: "dept"; slug: string };
 
 function getRoute(): Route {
   const h = window.location.hash;
   if (h.startsWith("#/current-team")) return { name: "current-team" };
   if (h.startsWith("#/presidents")) return { name: "presidents" };
+  if (h.startsWith("#/join")) return { name: "join" };
+  if (h.startsWith("#/contact")) return { name: "contact" };
   const m = h.match(/^#\/dept\/([\w-]+)/);
   if (m) return { name: "dept", slug: m[1] };
   return { name: "home" };
@@ -65,6 +70,12 @@ export default function App() {
         <TeamSection standalone />
       ) : route.name === "presidents" ? (
         <PastPresidentsSection />
+      ) : route.name === "join" ? (
+        // 獨立頁：只顯示 JoinUsSection（Header/Footer 在最外層一定會出現）。
+        <JoinUsSection />
+      ) : route.name === "contact" ? (
+        // 獨立頁：只顯示 ContactSection（Header/Footer 在最外層一定會出現）。
+        <ContactSection />
       ) : route.name === "dept" ? (
         <DepartmentPage slug={route.slug} />
       ) : (
@@ -77,7 +88,6 @@ export default function App() {
           <SloganPage2Section />
           <LatestUpdatesSection />
           <AcademicResourcesSection />
-          <JoinUsSection />
         </>
       )}
 

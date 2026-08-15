@@ -59,7 +59,7 @@ export default function JoinUsSection() {
             />
             <span className="relative z-10">加 入 我 們</span>
           </a>
-          <a href="#" className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-white/50 text-white hover:bg-white/5 transition-all duration-200" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "1rem", letterSpacing: "0.12em" }}>
+          <a href="#/contact" className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-white/50 text-white hover:bg-white/5 transition-all duration-200" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "1rem", letterSpacing: "0.12em" }}>
             追 蹤 我 們 的 社 群
           </a>
         </div>

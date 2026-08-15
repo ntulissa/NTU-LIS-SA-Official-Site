@@ -28,6 +28,7 @@ const NAV_COLS = [
     zh: "各種服務",
     links: [
       { label: "學術資源", href: "#resources" },
+      { label: "聯絡我們", href: "#/contact" },
     ],
   },
 ];

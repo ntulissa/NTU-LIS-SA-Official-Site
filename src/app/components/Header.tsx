@@ -33,6 +33,7 @@ const NAV_ITEMS = [
     labelEn: "SERVICES",
     sub: [
       { label: "學術資源", href: "#resources" },
+      { label: "聯絡我們", href: "#/contact" },
     ],
   },
 ];
@@ -156,7 +157,7 @@ export default function Header() {
 
           {/* 加入我們 — red→teal gradient pill */}
           <a
-            href="#join"
+            href="#/join"
             className="ml-1 shrink-0 relative inline-flex items-center justify-center px-6 py-2.5 rounded-full overflow-hidden"
             style={{
               fontFamily: zhFont,
@@ -235,7 +236,7 @@ export default function Header() {
             </div>
           ))}
           <a
-            href="#join"
+            href="#/join"
             onClick={() => setMobileOpen(false)}
             className="relative inline-flex items-center justify-center px-6 py-2.5 rounded-full overflow-hidden text-white text-sm"
             style={{

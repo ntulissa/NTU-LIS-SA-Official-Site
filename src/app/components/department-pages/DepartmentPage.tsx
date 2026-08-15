@@ -23,6 +23,16 @@ const monoFont = "'Ubuntu Sans Mono', monospace";
 // 幹部照片底部漸層（與歷屆會長一致：下緣淡出、漂浮）
 const PHOTO_FADE = "linear-gradient(to bottom, #000 74%, transparent 100%)";
 
+// 部門名稱統一用「紅→藍漸層文字」（取代原本各部門色，讓全站調性一致）。
+// 想改漸層方向或顏色，改這裡的 linear-gradient 即可，套用處會一起變。
+const GRAD_TEXT: CSSProperties = {
+  background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  color: "transparent",
+};
+
 // hex → rgba（給脈動光暈用；避免同色高斯模糊把小圓點中心洗成白色）
 function hexToRgba(hex: string, a: number): string {
   const h = hex.replace("#", "");
@@ -226,6 +236,28 @@ export default function DepartmentPage({ slug }: { slug: string }) {
         }
         .dept-pulse-dot { transform-origin: center; animation: deptPulseDot 1.8s ease-in-out infinite; }
         @media (prefers-reduced-motion: reduce) { .dept-pulse-dot { animation: none; box-shadow: none; } }
+
+        /* 「成為 XX部 的一員」方塊：紅藍漸層外框，沿著框線流動（旋轉 conic 漸層 + 只露出邊框的遮罩）。
+           想調流動速度改 8s；想調外框粗細改 padding 的 1.5px。 */
+        @property --lissaAngle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+        @keyframes lissaBorderSpin { to { --lissaAngle: 360deg; } }
+        .lissa-flow-border { position: relative; }
+        .lissa-flow-border::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          padding: 1.5px;
+          background: conic-gradient(from var(--lissaAngle), #D14B4B, #2F9EBD, #D14B4B, #2F9EBD, #D14B4B);
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+                  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+                  mask-composite: exclude;
+          animation: lissaBorderSpin 8s linear infinite;
+          pointer-events: none;
+        }
+        /* 不支援 @property 的舊瀏覽器：仍顯示靜態紅藍漸層外框（只是不流動） */
+        @media (prefers-reduced-motion: reduce) { .lissa-flow-border::before { animation: none; } }
       `}</style>
 
       {/* ══════════ 上半：簡介 + 服務輪播 ══════════ */}
@@ -263,15 +295,6 @@ export default function DepartmentPage({ slug }: { slug: string }) {
                 <p style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.85rem,1vw,1rem)", lineHeight: 2.1, letterSpacing: "0.06em", color: "rgba(255,255,255,0.82)" }}>
                   {data.intro}
                 </p>
-              </Reveal>
-              <Reveal delay={120}>
-                <a
-                  href="#join"
-                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 mt-8 transition-colors"
-                  style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "1rem", letterSpacing: "0.16em", color: "#fff", border: `1.5px solid ${data.color}`, background: "transparent" }}
-                >
-                  加入{data.zh}
-                </a>
               </Reveal>
             </div>
 
@@ -327,17 +350,17 @@ export default function DepartmentPage({ slug }: { slug: string }) {
 
           {/* 成為…的一員 */}
           <Reveal delay={80}>
-            <div className="rounded-2xl border border-white/15 p-6 sm:p-8 h-full flex flex-col" style={{ background: "rgba(255,255,255,0.02)" }}>
+            <div className="lissa-flow-border rounded-2xl p-6 sm:p-8 h-full flex flex-col" style={{ background: "rgba(255,255,255,0.02)" }}>
               <h3 className="mb-4" style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "clamp(1.3rem,2vw,1.8rem)", letterSpacing: "0.06em", color: "#fff" }}>
                 成為{" "}
-                <span style={{ color: data.color }}>{data.zh}</span>{" "}
+                <span style={GRAD_TEXT}>{data.zh}</span>{" "}
                 的一員
               </h3>
               <p className="mb-6 flex-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.85rem,1vw,0.98rem)", lineHeight: 2, letterSpacing: "0.04em", color: "rgba(255,255,255,0.6)" }}>
                 {data.joinBlurb}
               </p>
               <a
-                href="#join"
+                href="#/join"
                 className="self-start relative inline-flex items-center gap-2 rounded-full px-7 py-2.5 overflow-hidden text-white"
                 style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "1rem", letterSpacing: "0.16em", background: "#000" }}
               >
