@@ -36,6 +36,7 @@ type Election = {
   date: string; // 投票日期，如 "2025.05.12"
   agree: number; // 同意票
   disagree: number; // 不同意票
+  invalid?: number; // 廢票（可省略，預設 0）；只在投票率環上以「淺灰色」小段呈現，不另外列成長條或數字
   electorate: number; // 選舉人數（具投票資格的總人數）
   candidates: Candidate[]; // 參選人名單（同一組正／副會長）
   source?: string; // 資料來源附註（可省略，預設「臺大圖資系學會選委會」）
@@ -179,6 +180,19 @@ const P53: President = {
   intro:
     "第 53 屆系學會由會長黃子芸領軍，於 2025 年 7 月 30 日完成交接正式上任。本屆正副會長先前皆曾任第 52 屆系學會幹部，具備實務運作經驗；新團隊期望承接上一屆的基礎，推出讓系上同學更有感的活動與服務，成為圖資系學生大學四年最安心的避風港。本屆除了持續舉辦各種活動、學術講座外，亦會做各大系隊最堅實的後盾，並持續扮演學生、系辦與教師間的溝通橋樑，為系上帶來「看得見」的改變。",
   depts: [],
+
+   election: {
+    date: "2026.06.01", // 投票日期
+    agree: 41, // 同意票
+    disagree: 6, // 不同意票
+    invalid: 1, // 廢票（1 張）；只會在投票率環上以淺灰色小段顯示
+    electorate: 245, // 選舉人數（有效票 47 ÷ 245 ≒ 19% 為投票率，會自動算）
+    candidates: [
+      { n: "黃子芸", c: "B13" }, // 會長參選人
+      { n: "洪聆雅", c: "B13" }, // 副會長參選人
+    ],
+    // source: "臺大圖資系學會選委會", // 不填就用預設值
+  },
 };
 
 // ── 第 51 屆：完整團隊名單（顏色比照第 52 屆；新部門用復古色）──
@@ -213,6 +227,18 @@ const P51: President = {
     { en: "PR", zh: "公關部", color: C.PR, members: [{ n: "曾柏翰", c: "B12" }] },
     { en: "SP", zh: "體育部", color: C.SP, members: [{ n: "曾語衡", c: "B12" }, { n: "黃聖庭", c: "B12" }, { n: "林聿平", c: "B13" }] },
   ],
+
+  election: {
+    date: "2024.05.29", // 投票日期
+    agree: 34, // 同意票
+    disagree: 0, // 不同意票
+    electorate: 208, // 選舉人數（有效票 34 ÷ 208 ≒ 16.3% 為投票率，會自動算）
+    candidates: [
+      { n: "周芳綺", c: "B12" }, // 會長參選人
+      { n: "曾柏翰", c: "B12" }, // 副會長參選人
+    ],
+    // source: "臺大圖資系學會選委會", // 不填就用預設值
+  },
 };
 
 // ── 第 50 屆：完整團隊名單（配色比照第 51/52 屆）──
@@ -250,6 +276,18 @@ const P50: President = {
     { en: "PR", zh: "公關部", color: C.PR, members: [{ n: "余品萱", c: "B11" }, { n: "王可蓁", c: "B11" }] },
     { en: "SP", zh: "體育部", color: C.SP, members: [{ n: "李宏佑", c: "B11" }, { n: "陳秉逸", c: "B11" }, { n: "歐益劭", c: "B11" }] },
   ],
+
+  election: {
+    date: "2023.05.29", // 投票日期
+    agree: 40, // 同意票
+    disagree: 0, // 不同意票
+    electorate: 200, // 選舉人數（有效票 40 ÷ 200 = 20% 為投票率，會自動算）
+    candidates: [
+      { n: "黃裕媞", c: "B11" }, // 會長參選人
+      { n: "張方瑜", c: "B11" }, // 副會長參選人
+    ],
+    // source: "臺大圖資系學會選委會", // 不填就用預設值
+  },
 };
 
 // ── 第 49 屆：完整團隊名單（配色比照第 50/51/52 屆）──
@@ -287,6 +325,18 @@ const P49: President = {
     { en: "PR", zh: "公關部", color: C.PR, members: [{ n: "歐禹沛", c: "B10" }, { n: "張豊婕", c: "B10" }] },
     { en: "SP", zh: "體育部", color: C.SP, members: [{ n: "江秝槿", c: "B10" }, { n: "李昱瑨", c: "B10" }] },
   ],
+
+  election: {
+    date: "2022.05.16", // 投票日期
+    agree: 44, // 同意票
+    disagree: 0, // 不同意票
+    electorate: 200, // 選舉人數（有效票 44 ÷ 200 = 22% 為投票率，會自動算）
+    candidates: [
+      { n: "陳子勻", c: "B10" }, // 會長參選人
+      { n: "歐禹沛", c: "B10" }, // 副會長參選人
+    ],
+    // source: "臺大圖資系學會選委會", // 不填就用預設值
+  },
 };
 
 // ── 第 48 屆：完整團隊名單＋簡介（配色比照第 49~52 屆）──
@@ -324,6 +374,18 @@ const P48: President = {
     },
     { en: "SP", zh: "體育部", color: C.SP, members: [{ n: "張瀚元", c: "B09" }, { n: "方乃慎", c: "B09" }] },
   ],
+
+  election: {
+    date: "2021.05.17", // 投票日期
+    agree: 66, // 同意票
+    disagree: 0, // 不同意票
+    electorate: 177, // 選舉人數（有效票 66 ÷ 177 = 37.3% 為投票率，會自動算）
+    candidates: [
+      { n: "陳亨柔", c: "B09" }, // 會長參選人
+      { n: "廖庭儀", c: "B09" }, // 副會長參選人
+    ],
+    // source: "臺大圖資系學會選委會", // 不填就用預設值
+  },
 };
 
 // ── 全部屆數（新 → 舊）。學年 115＝第 53 屆（現任），學年 114＝第 52 屆，往前每學年一屆，學年 94＝第 32 屆。──
@@ -652,12 +714,29 @@ const ELECTION_GRAD = "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)"; // 全
 
 function ElectionResult({ e }: { e: Election }) {
   const valid = e.agree + e.disagree; // 有效票
-  const turnout = e.electorate > 0 ? Math.round((valid / e.electorate) * 100) : 0; // 投票率 %
+  const invalid = e.invalid ?? 0; // 廢票（預設 0）
+  const turnout = e.electorate > 0 ? Math.round(((valid + invalid) / e.electorate) * 100) : 0; // 投票率 %＝(有效票＋無效票)÷選舉人數（四捨五入）
   const base = Math.max(valid, 1); // 長條滿格＝有效票總數（同意＋不同意）
   const bars = [
     { label: "同意票", value: e.agree, pct: Math.min(100, (e.agree / base) * 100) },
     { label: "不同意票", value: e.disagree, pct: Math.min(100, (e.disagree / base) * 100) },
   ];
+
+  // ── 投票率環的漸層字串 ───────────────────────────────────────
+  // 紅＝有效票（＝投票率）、淺灰＝廢票、藍＝其餘（未投票）；三段皆以選舉人數為基準，交界用漸層柔化。
+  // 廢票通常極少（如 1 票），為了看得見給一個最小顯示寬度 GREY_MIN%；實際占比仍是 invalid/選舉人數。
+  const GREY = "#C9C9C9"; // 廢票的淺灰色（想更淺/更深改這裡）
+  const GREY_MIN = 3.5; // 廢票在環上的最小顯示寬度（%）；設 0 則完全照實際比例（1 票會非常細）
+  const D = 1.2; // 交界柔化寬度（%）
+  const validPct = e.electorate > 0 ? (valid / e.electorate) * 100 : 0;
+  const invalidPct = e.electorate > 0 ? (invalid / e.electorate) * 100 : 0;
+  const greyPct = invalid > 0 ? Math.max(invalidPct, GREY_MIN) : 0;
+  const ringBg =
+    greyPct === 0
+      ? // 無廢票：紅（投票率）→ 藍，維持原本柔和漸層
+        `conic-gradient(from 0deg, #D14B4B 0%, #D14B4B ${Math.max(0, turnout - 6)}%, #2F9EBD ${Math.min(100, turnout + 6)}%, #2F9EBD 94%, #D14B4B 100%)`
+      : // 有廢票：紅（有效票）→ 淺灰（廢票）→ 藍（未投票）
+        `conic-gradient(from 0deg, #D14B4B 0%, #D14B4B ${Math.max(0, validPct - D)}%, ${GREY} ${validPct + D}%, ${GREY} ${Math.max(validPct + D, validPct + greyPct - D)}%, #2F9EBD ${validPct + greyPct + D}%, #2F9EBD 94%, #D14B4B 100%)`;
 
   return (
     <div className="w-full">
@@ -670,7 +749,7 @@ function ElectionResult({ e }: { e: Election }) {
             </span>
           </div>
         </div>
-        <span className="text-white/40" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.8rem", letterSpacing: "0.12em" }}>
+        <span className="text-white/40" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.8rem", letterSpacing: "0.12em", color: "#ffffff", opacity: 0.8 }}>
           投票日期：{e.date}
         </span>
       </div>
@@ -707,12 +786,12 @@ function ElectionResult({ e }: { e: Election }) {
         {/* 左：Donut ＋ 資料來源（緊貼 Donut 下方，版面不再拉長）*/}
         <div className="flex flex-col shrink-0" style={{ width: "clamp(180px,15vw,220px)" }}>
           <div className="relative" style={{ width: "100%", aspectRatio: "1" }}>
-            {/* 投票率環：紅色占 turnout%（26%）、藍色占其餘（74%）；交界與頂端接縫都用漸層柔化。
-                比例會自動跟著 turnout 走；想調環粗細改兩處的 9px；想調交界柔化寬度改 ±6。 */}
+            {/* 投票率環：紅＝有效票（投票率）、淺灰＝廢票、藍＝其餘；比例自動跟著資料走。
+                環的漸層字串在上方 ringBg 組好；想調環粗細改兩處的 9px。 */}
             <div
               className="absolute inset-0 rounded-full"
               style={{
-                background: `conic-gradient(from 0deg, #D14B4B 0%, #D14B4B ${Math.max(0, turnout - 6)}%, #2F9EBD ${Math.min(100, turnout + 6)}%, #2F9EBD 94%, #D14B4B 100%)`,
+                background: ringBg,
                 WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px))",
                 mask: "radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px))",
               }}
@@ -724,17 +803,23 @@ function ElectionResult({ e }: { e: Election }) {
               </span>
             </div>
           </div>
-          <p className="text-white/30 mt-4 text-center" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.72rem", letterSpacing: "0.08em" }}>
+          <p className="text-white/30 mt-4 text-center" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.72rem", letterSpacing: "0.08em", color: "#ffffff", opacity: 0.6 }}>
             資料來源：{e.source ?? "臺大圖資系學會選委會"}
           </p>
         </div>
 
-        {/* 中：有效票（紅）／選舉人數（藍），上下分開貼齊環的上下緣 */}
+        {/* 中：有效票（紅）／無效票（淺灰，有廢票才顯示）／選舉人數（藍），上下分開貼齊環的上下緣 */}
         <div className="flex flex-col justify-between self-start py-3" style={{ minHeight: "clamp(180px,15vw,220px)" }}>
           <div>
             <p style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.6rem,2.4vw,2.1rem)", color: "#D14B4B", lineHeight: 1, letterSpacing: "0.06em" }}>{valid}</p>
             <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.1em" }}>有效票</p>
           </div>
+          {invalid > 0 && (
+            <div>
+              <p style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.6rem,2.4vw,2.1rem)", color: GREY, lineHeight: 1, letterSpacing: "0.06em" }}>{invalid}</p>
+              <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.1em" }}>無效票</p>
+            </div>
+          )}
           <div>
             <p style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.6rem,2.4vw,2.1rem)", color: "#2F9EBD", lineHeight: 1, letterSpacing: "0.06em" }}>{e.electorate}</p>
             <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.1em" }}>選舉人數</p>
