@@ -20,9 +20,10 @@ import DepartmentPage from "./components/department-pages/DepartmentPage";
 //   #/presidents      → 歷任會長頁
 //   #/join            → 加入我們獨立頁（只有 Header + JoinUsSection + Footer）
 //   #/contact         → 聯絡我們獨立頁（只有 Header + ContactSection + Footer）
+//   #/overview        → 資訊總覽獨立頁（只有 Header + BentoSection + Footer）
 //   #/dept/<slug>     → 部門獨立頁（例：#/dept/gen ＝行政部；slug 同 department-pages/ 檔名）
 //   其餘              → 捲動式主頁
-type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "contact" } | { name: "dept"; slug: string };
+type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "contact" } | { name: "overview" } | { name: "dept"; slug: string };
 
 function getRoute(): Route {
   const h = window.location.hash;
@@ -30,6 +31,7 @@ function getRoute(): Route {
   if (h.startsWith("#/presidents")) return { name: "presidents" };
   if (h.startsWith("#/join")) return { name: "join" };
   if (h.startsWith("#/contact")) return { name: "contact" };
+  if (h.startsWith("#/overview")) return { name: "overview" };
   const m = h.match(/^#\/dept\/([\w-]+)/);
   if (m) return { name: "dept", slug: m[1] };
   return { name: "home" };
@@ -76,6 +78,9 @@ export default function App() {
       ) : route.name === "contact" ? (
         // 獨立頁：只顯示 ContactSection（Header/Footer 在最外層一定會出現）。
         <ContactSection />
+      ) : route.name === "overview" ? (
+        // 獨立頁：只顯示 BentoSection（standalone＝填滿一屏、底部不被切）。
+        <BentoSection standalone />
       ) : route.name === "dept" ? (
         <DepartmentPage slug={route.slug} />
       ) : (

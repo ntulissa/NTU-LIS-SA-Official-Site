@@ -118,12 +118,21 @@ function SocialHoverFace({ label, path, vb }: { label: string; path: string; vb:
   );
 }
 
-export default function BentoSection() {
+// standalone=true：當成獨立分頁用（#/overview），整頁填滿一屏、Bento 撐滿剩餘高度，
+//   底部不會被切；標題上方留白會清掉固定 Header。首頁捲動版（standalone 省略）維持原樣。
+export default function BentoSection({ standalone = false }: { standalone?: boolean }) {
   const time = useCountdown(COUNTDOWN_TARGET);
 
   return (
-    <section className="bg-black px-4 md:px-6 xl:px-8 py-10 md:py-16">
-      <div className="max-w-[1680px] mx-auto mb-6">
+    <section
+      id="overview"
+      className={
+        standalone
+          ? "bg-black px-4 md:px-6 xl:px-8 pt-24 sm:pt-28 lg:pt-28 pb-6 lg:pb-10 min-h-[100svh] flex flex-col"
+          : "bg-black px-4 md:px-6 xl:px-8 py-10 md:py-16"
+      }
+    >
+      <div className={`max-w-[1680px] w-full mx-auto ${standalone ? "mb-4" : "mb-6"}`}>
         <Reveal>
           <p
             className="text-[13px] md:text-[15px] tracking-[2.4px] mb-4"
@@ -147,7 +156,7 @@ export default function BentoSection() {
         </Reveal>
       </div>
 
-      <div className="max-w-[1680px] mx-auto flex flex-col lg:flex-row gap-3 lg:gap-4 lg:min-h-[560px] xl:min-h-[620px]">
+      <div className={`max-w-[1680px] w-full mx-auto flex flex-col lg:flex-row gap-3 lg:gap-4 ${standalone ? "flex-1 min-h-0" : "lg:min-h-[560px] xl:min-h-[620px]"}`}>
         <div className="flex flex-col gap-3 lg:gap-4 lg:w-[49.8%] shrink-0">
           {/* UP NEXT 倒數區塊：這是一個主要 CTA 卡片，顯示下一場活動倒數。 */}
           {/* Hover 時切換成「下一場活動」簡潔版；點擊跳往系學會行事曆（#calendar，區塊建立後生效）。 */}
