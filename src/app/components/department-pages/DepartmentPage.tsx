@@ -275,7 +275,7 @@ export default function DepartmentPage({ slug }: { slug: string }) {
             </button>
           </Reveal>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start">
             {/* 左：ABOUT + 標題 + 簡介 + 加入鈕 */}
             <div className="max-w-[600px]">
               <Reveal>
@@ -319,9 +319,14 @@ export default function DepartmentPage({ slug }: { slug: string }) {
         </Reveal>
 
         {/* 幹部卡 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 mb-16 lg:mb-20">
+        {/* 用「置中＋換行」的 flex 取代固定三欄格線：三位部長時排滿一列（與原本相近）， */}
+        {/* 一或兩位時自動置中、不再偏左。寬度用行內 flex-basis（不依賴 Tailwind 動態 class，一定生效）： */}
+        {/*   基準 400px、可縮不可長；螢幕不夠寬時自動換行並維持置中。要調卡片大小改下面的 400px 即可。 */}
+        <div className="flex flex-wrap justify-center gap-8 lg:gap-10 mb-16 lg:mb-20">
           {data.heads.map((h, i) => (
-            <HeadCard key={`${h.name}-${i}`} head={h} delay={i * 60} />
+            <div key={`${h.name}-${i}`} style={{ flex: "0 1 400px", maxWidth: "100%" }}>
+              <HeadCard head={h} delay={i * 60} />
+            </div>
           ))}
         </div>
 

@@ -12,13 +12,14 @@ const COUNTDOWN_TARGET = NEXT_EVENT.time;
 // ── 各卡片點擊跳轉目標 ──────────────────────────────────────────────
 // 集中管理，之後要改連結只需改這裡。
 // calendar：行事曆區塊尚未建立，先用 #calendar 佔位，建好對應 id 後即自動生效。
-// support：會費專區尚未決定目標，暫時維持不跳轉（見下方 SUPPORT US 卡片）。
+// fees：系學會費專區獨立頁（App.tsx 的 hash 分頁 #/fees）。
 const LINKS = {
   calendar: "#calendar",
   about: "#about",
   news: "#news",
   resources: "#resources",
   team: "#team",
+  fees: "#/fees",
 };
 
 // Bento 卡片共用樣式：控制每個格子的外觀、圓角與互動效果。
@@ -291,10 +292,9 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                 <HoverFace label="MEMBERS" title="組織架構" padding="p-5 md:p-6" />
               </a>
             </Reveal>
-            {/* SUPPORT US：會費專區。點擊目標尚未決定，暫時維持不跳轉。 */}
-            {/* 之後想好後：把外層 <div> 換成 <a href="你的目標">（站內區塊或外部網址皆可）。 */}
+            {/* SUPPORT US：會費專區，點擊進入 #/fees 獨立頁。 */}
             <Reveal delay={140} className="flex-1 flex flex-col">
-              <div className={`${BENTO_CARD} flex-1 p-5 md:p-6`} style={BENTO_BG}>
+              <a href={LINKS.fees} aria-label="系學會費專區" className={`${BENTO_CARD} flex-1 p-5 md:p-6`} style={BENTO_BG}>
                 <div className={`${FACE_DEFAULT} justify-between`}>
                   <p className="text-white tracking-[3.04px]" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)" }}>
                     SUPPORT US
@@ -311,7 +311,7 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                   </p>
                 </div>
                 <HoverFace label="SUPPORT US" title="會費專區" padding="p-5 md:p-6" />
-              </div>
+              </a>
             </Reveal>
           </div>
 

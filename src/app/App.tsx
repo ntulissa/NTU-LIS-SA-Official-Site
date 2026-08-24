@@ -13,6 +13,8 @@ import AcademicResourcesSection from "./components/sections/AcademicResourcesSec
 import JoinUsSection from "./components/sections/JoinUsSection";
 import ContactSection from "./components/sections/ContactSection";
 import PastPresidentsSection from "./components/sections/PastPresidentsSection";
+import FeesSection from "./components/sections/FeesSection";
+import SponsorSection from "./components/sections/SponsorSection";
 import DepartmentPage from "./components/department-pages/DepartmentPage";
 
 // 極輕量的 hash 分頁（不需安裝 react-router；同時保留原本 #team / #news 等錨點捲動）：
@@ -21,9 +23,11 @@ import DepartmentPage from "./components/department-pages/DepartmentPage";
 //   #/join            → 加入我們獨立頁（只有 Header + JoinUsSection + Footer）
 //   #/contact         → 聯絡我們獨立頁（只有 Header + ContactSection + Footer）
 //   #/overview        → 資訊總覽獨立頁（只有 Header + BentoSection + Footer）
+//   #/fees            → 系學會費專區（捲動式 · Apple 風動畫）
+//   #/sponsor         → 贊助頁（對外招募贊助 · 捲動式）
 //   #/dept/<slug>     → 部門獨立頁（例：#/dept/gen ＝行政部；slug 同 department-pages/ 檔名）
 //   其餘              → 捲動式主頁
-type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "contact" } | { name: "overview" } | { name: "dept"; slug: string };
+type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "contact" } | { name: "overview" } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string };
 
 function getRoute(): Route {
   const h = window.location.hash;
@@ -32,6 +36,8 @@ function getRoute(): Route {
   if (h.startsWith("#/join")) return { name: "join" };
   if (h.startsWith("#/contact")) return { name: "contact" };
   if (h.startsWith("#/overview")) return { name: "overview" };
+  if (h.startsWith("#/fees")) return { name: "fees" };
+  if (h.startsWith("#/sponsor")) return { name: "sponsor" };
   const m = h.match(/^#\/dept\/([\w-]+)/);
   if (m) return { name: "dept", slug: m[1] };
   return { name: "home" };
@@ -81,6 +87,12 @@ export default function App() {
       ) : route.name === "overview" ? (
         // 獨立頁：只顯示 BentoSection（standalone＝填滿一屏、底部不被切）。
         <BentoSection standalone />
+      ) : route.name === "fees" ? (
+        // 系學會費專區（捲動式；Header 於最上方為透明疊在 Hero 上）。
+        <FeesSection />
+      ) : route.name === "sponsor" ? (
+        // 贊助頁（捲動式）。
+        <SponsorSection />
       ) : route.name === "dept" ? (
         <DepartmentPage slug={route.slug} />
       ) : (

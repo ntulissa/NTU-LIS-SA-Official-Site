@@ -18,7 +18,6 @@ export const gen: DeptData = {
   ],
   heads: [
     // 幹部照放 imports/members/gen1.png、gen2.png、gen3.png（找不到＝照片待補）。
-    { name: "賴思瑜", cls: "B14", title: "部長", img: memImg("gen1") },
     { name: "林榮恩", cls: "B14", title: "部長", img: memImg("gen2") },
     { name: "劉以寬", cls: "B14", title: "部長", img: memImg("gen3") },
   ],
