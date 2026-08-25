@@ -1,7 +1,11 @@
 import { useRef, useState } from "react";
-import { ArrowRight, PiggyBank } from "lucide-react";
+import { PiggyBank } from "lucide-react";
 import imgLissaLogo from "@/imports/LISSA_Logo.png";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
+// ── ABOUT 卡（第 53 屆）中間的系學會 Logo（SVG，清晰不糊）──────────
+// 放到  src/imports/BentoGrid/NTULISSAlogo.svg（檔名需一致）。
+// 左右的大數字 5、3 不再用 SVG，改由程式碼「疊三層」堆出立體旋轉效果（見下方 Rotating3DNumber）。
+import aboutLogo from "@/imports/BentoGrid/NTULISSAlogo.svg";
 import { Reveal, monoBold, monoSemi, useCountdown } from "./shared";
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -25,13 +29,43 @@ const COUNTDOWN_TARGET = NEXT_EVENT.time;
 // 倒數圓環的「滿環」對應天數：距離活動 ≥ 這個天數時環是滿的，越接近越空。改這裡調整視覺節奏。
 const RING_FULL_DAYS = 30;
 
-// ABOUT 卡的大字屆數。
+// ── 「下一場活動」卡片：標籤／Donut／標題 的間距、圓環大小、標題大小 ────────────────
+// 這張卡片「首頁捲動版」與「獨立頁（#/overview）」共用同一份排版，改這裡兩邊會一起變。
+//
+// ⚠ 重要觀念（為什麼調大反而更擠）：這三個元素是「一整組、垂直置中」放進固定高度的格子。
+//   把 GAP 或 RING 調大 → 這一組會變高變寬 → 格子大小沒變，四周留白反而更少 = 看起來更擠。
+//   想要「更有呼吸感」→ 反過來把數字調小（讓這一組變小、四周留白變多）。目前刻意收小，讓它在格子裡浮起來。
+const NEXT_LABEL_GAP = 20; // 「UP NEXT 下一場活動」標籤 → Donut 圓環 的距離（px）
+const NEXT_TITLE_GAP = 35; // Donut 圓環 → 活動標題 的距離（px）
+// Donut 圓環直徑：clamp(最小, 隨螢幕縮放, 最大)。整組太高頂到卡片上下 → 先把最大值（140px）往下調。
+const NEXT_RING_SIZE = "clamp(200px, 10vw, 300px)";
+// 活動標題字級：clamp(最小, 隨螢幕縮放, 最大)。標題太寬快貼到卡片左右 → 把最大值（1.85rem）調小就會空出左右留白。
+const NEXT_TITLE_SIZE = "clamp(1rem, 2.2vw, 1.85rem)";
+
+// ── 首頁捲動版最上方的大標題（YOUR CAMPUS PORTAL ＋「－關於我們・資訊總覽」小標）─────
+// false＝整塊隱藏，把上方空間全讓給下面的格子（獨立頁 #/overview 本來就沒有這塊，兩邊更一致）。
+// 想讓標題回來 → 改成 true。
+// ※ 注意：格子高度已改成「兩個版本一致」——整個 section 都佔滿一屏（min-h-[100svh]）、格子用 flex-1 撐滿剩餘高度。
+//   關著（預設 false）時，首頁捲動版與獨立頁的格子大小完全相同；若改成 true 打開標題，
+//   標題會佔掉一點高度，首頁版的格子會比獨立頁「略矮一點點」（想完全一致就維持關閉）。
+const SHOW_HOME_HEADER = false;
+
+// ABOUT 卡的大字屆數（保留備用；5、3 由 Rotating3DNumber 直接以「5」「3」呈現）。
 const SESSION_NO = "53";
+// 中間系學會 Logo 的高度（SVG，用 height 控制、寬度自動）。
+const ABOUT_LOGO_H = "clamp(60px, 10vw, 128px)";
+// ── 左右「立體旋轉數字」（三層堆疊 + 3D rotateY）。想調整全在這裡 ─────────────
+const ABOUT_NUM_SIZE = "clamp(4rem, 11vw, 9rem)"; // 數字字級（整體大小）
+const NUM3D_LAYERS = 3;   // 疊幾層＝你要的「三個一樣的數字」
+const NUM3D_DEPTH = 6;    // 每層之間的厚度（px；越大越立體）
+const NUM3D_BASE = 18;    // 平常轉動的基準角度（deg；讓它「不會轉到正面變平」）
+const NUM3D_SWING = 14;   // 左右來回擺動幅度（deg）
+const NUM3D_SPEED = 6;    // 來回一次的秒數（越大越慢）
 
 // 各卡片點擊目標。support=null 代表暫不連結（會費＋贊助整合後再接）。
 const LINKS = {
   calendar: "#calendar",
-  about: "#about",
+  about: "#about", // ★ 暫時擱置：ABOUT 卡目前「不連結」（等「學會發展歷程」公告頁做好再接）。要接時見下方 ABOUT 卡的 TODO。
   news: "#news",
   resources: "#resources",
   team: "#team",
@@ -62,29 +96,91 @@ const BENTO_BG: React.CSSProperties = {
   background: "#151515",
 };
 
-// 右側小卡的底部置中標籤（英＋中），比照新設計。
-function CardCaption({ en, zh }: { en: string; zh: string }) {
+// ── 「平常隱藏、hover 才平滑展開」的文字（標籤／說明）──────────────────────────
+// 作法：外層 grid 的 grid-template-rows 由 0fr（收合）→ 1fr（展開），高度會平滑變化；
+//       搭配卡片本身的 flex 置中，卡片內其他元素（圖示／圓環／標題）會自動、平順地重新置中。
+// 觸發：hover 由卡片外框的 .group 觸發（BENTO_CARD 已含 group）。
+// ★ 手機／觸控（沒有 hover 的裝置）：用 @media(hover:hover) 包住「隱藏」邏輯 → 這些裝置「一律直接顯示」文字，
+//   不會發生「碰不到 hover 就永遠看不到說明」的問題。
+// ★ 想調動畫速度：改 duration-500（毫秒）。想讓某段文字永遠顯示：就別用這個元件包它。
+// ★ 尊重「減少動態」：motion-reduce 時不做過場（直接切換）。
+function HoverReveal({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className="mt-auto flex items-center justify-center gap-2 pt-3">
-      <span className="text-white/90 tracking-[0.24em] whitespace-nowrap" style={{ ...monoSemi, fontSize: "clamp(10px, 1vw, 15px)" }}>
-        {en}
-      </span>
-      <span className="text-white/90 whitespace-nowrap" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: "clamp(11px, 1.05vw, 16px)", letterSpacing: "0.14em" }}>
-        {zh}
-      </span>
+    <div
+      className={`grid grid-rows-[1fr] opacity-100 transition-all duration-500 ease-out [@media(hover:hover)]:grid-rows-[0fr] [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:grid-rows-[1fr] [@media(hover:hover)]:group-hover:opacity-100 motion-reduce:transition-none ${className}`}
+    >
+      <div className="overflow-hidden min-h-0">{children}</div>
     </div>
   );
 }
 
-// hover 時右下角浮出的箭頭（只有可點的卡片會用）。
-function HoverArrow() {
+// 右側小卡的底部置中標籤（英＋中）。平常隱藏，hover 才平滑展開（見 HoverReveal）；mt-auto 讓它貼在卡片底部。
+function CardCaption({ en, zh }: { en: string; zh: string }) {
   return (
-    <span
-      className="absolute right-3 bottom-3 flex items-center justify-center rounded-full bg-white opacity-0 translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0"
-      style={{ width: "clamp(28px,2.6vw,40px)", height: "clamp(28px,2.6vw,40px)" }}
+    <HoverReveal className="mt-auto">
+      <div className="flex items-center justify-center gap-2 pt-3">
+        <span className="text-white/90 tracking-[0.24em] whitespace-nowrap" style={{ ...monoSemi, fontSize: "clamp(10px, 1vw, 15px)" }}>
+          {en}
+        </span>
+        <span className="text-white/90 whitespace-nowrap" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: "clamp(11px, 1.05vw, 16px)", letterSpacing: "0.14em" }}>
+          {zh}
+        </span>
+      </div>
+    </HoverReveal>
+  );
+}
+
+// ── ABOUT 卡：立體旋轉數字（把同一個數字疊 NUM3D_LAYERS 層做出厚度，再用 rotateY 緩緩轉動）──
+// 字體：Josefin Sans、font-weight 300（light）。前層最亮、往後越暗＝厚度感。
+// 只在一個基準角度附近來回擺（不會轉到正側面變成一條線）；尊重「減少動態」設定。
+// 想調整：ABOUT_NUM_SIZE（大小）、NUM3D_DEPTH（厚度）、NUM3D_BASE/SWING（角度）、NUM3D_SPEED（速度）。
+function Rotating3DNumber({ ch, phase = 0 }: { ch: string; phase?: number }) {
+  const layers = Array.from({ length: NUM3D_LAYERS }, (_, i) => {
+    const t = NUM3D_LAYERS <= 1 ? 0 : i / (NUM3D_LAYERS - 1); // 0（最前）→ 1（最後）
+    const v = Math.round(255 - t * 150); // 亮度 255（白）→ 105（暗灰）
+    return { z: -i * NUM3D_DEPTH, color: `rgb(${v},${v},${v})` };
+  });
+  return (
+    <div
+      className="select-none shrink-0"
+      aria-hidden
+      style={{ perspective: "700px", fontFamily: "'Josefin Sans', sans-serif", fontWeight: 300, fontSize: ABOUT_NUM_SIZE, lineHeight: 1 }}
     >
-      <ArrowRight className="text-black" style={{ width: "clamp(13px,1.2vw,18px)", height: "auto" }} />
-    </span>
+      <style>{`
+        @keyframes num3dSwing {
+          0%, 100% { transform: rotateY(calc((var(--base) + var(--swing)) * 1deg)); }
+          50%      { transform: rotateY(calc((var(--base) - var(--swing)) * 1deg)); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .num3d-inner { animation: none !important; transform: rotateY(calc(var(--base) * 1deg)); }
+        }
+      `}</style>
+      <div
+        className="num3d-inner"
+        style={{
+          display: "grid",
+          transformStyle: "preserve-3d",
+          animation: `num3dSwing ${NUM3D_SPEED}s ease-in-out infinite`,
+          animationDelay: `${phase}s`,
+          "--base": NUM3D_BASE,
+          "--swing": NUM3D_SWING,
+        } as React.CSSProperties}
+      >
+        {layers.map((l, i) => (
+          <span
+            key={i}
+            style={{
+              gridArea: "1 / 1",
+              transform: `translateZ(${l.z}px)`,
+              color: l.color,
+              textShadow: i === 0 ? "0 4px 12px rgba(0,0,0,0.45)" : undefined,
+            }}
+          >
+            {ch}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -97,7 +193,7 @@ function ringPoint(deg: number, r = 42) {
   return { x: 50 + r * Math.sin(rad), y: 50 - r * Math.cos(rad) };
 }
 
-function CountdownRing({ days }: { days: number }) {
+function CountdownRing({ days, size = NEXT_RING_SIZE }: { days: number; size?: string }) {
   const R = 42;
   const dottedFrac = Math.max(0, Math.min(1, days / RING_FULL_DAYS));
   const dottedAngle = dottedFrac * 360;
@@ -125,8 +221,8 @@ function CountdownRing({ days }: { days: number }) {
   }
 
   return (
-    // 圓環尺寸縮小一點，確保「標籤＋圓環＋標題」整組塞得進卡片、標題不被裁。
-    <div className="relative flex items-center justify-center" style={{ width: "clamp(130px, 12vw, 200px)", aspectRatio: "1 / 1" }}>
+    // 圓環尺寸由 NEXT_RING_SIZE（或傳入的 size）控制，確保「標籤＋圓環＋標題」整組塞得進卡片、標題不被裁。
+    <div className="relative flex items-center justify-center" style={{ width: size, aspectRatio: "1 / 1" }}>
       {/* 圓點循環閃現動畫（每顆錯開，形成繞圈的流動波） */}
       <style>{`@keyframes ringDotWave { 0%,100% { opacity: 0.15; } 50% { opacity: 0.9; } }`}</style>
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
@@ -152,10 +248,10 @@ function CountdownRing({ days }: { days: number }) {
       </svg>
       <div className="relative flex flex-col items-center leading-none">
         {/* 倒數天數字體：Apple 裝置用系統內建 SF Pro Rounded（ui-rounded，免安裝）；其餘退回相近字型。 */}
-        <span className="text-white tabular-nums" style={{ fontFamily: "'SF Pro Rounded', ui-rounded, 'Noto Sans TC', sans-serif", fontWeight: 600, fontSize: "clamp(2rem, 4vw, 3.4rem)", letterSpacing: "0.02em" }}>
+        <span className="text-white tabular-nums" style={{ fontFamily: "'SF Pro Rounded', ui-rounded, 'Noto Sans TC', sans-serif", fontWeight: 600, fontSize: "clamp(2rem, 4vw, 3.0rem)", letterSpacing: "0.02em" }}>
           {days}
         </span>
-        <span className="text-white/60 mt-1.5" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(0.7rem, 0.95vw, 0.95rem)", letterSpacing: "0.3em" }}>
+        <span className="text-white/60 mt-1.5" style={{ fontFamily: "'Chiron Hei HK Text'", fontWeight: 700, fontSize: "clamp(0.7rem, 0.95vw, 0.95rem)", letterSpacing: "0.3em" ,color:"#FFFFFF" }}>
           天後
         </span>
       </div>
@@ -227,23 +323,23 @@ function SocialCard({ label, path, vb, href, delay }: { label: string; path: str
   );
 }
 
-// standalone=true：獨立分頁（#/overview），整頁填滿一屏。首頁捲動版維持原樣。
+// standalone=true：獨立分頁（#/overview）。註：兩個版本的版面外框與格子大小現在完全一致；
+// standalone 目前只用來決定「是否套用首頁標題開關」（見下方 SHOW_HOME_HEADER），不再影響格子高度。
 export default function BentoSection({ standalone = false }: { standalone?: boolean }) {
   const time = useCountdown(COUNTDOWN_TARGET);
   // 圓環顯示「天數」；若當天/已過活動，退回顯示 0，避免負數。
   const days = Math.max(0, time.d);
 
   return (
+    // 版面外框：兩個版本（首頁捲動版 & 獨立頁 #/overview）共用同一套 → 整個 section 佔滿一屏（min-h-[100svh]），
+    // 讓下面的格子在兩邊都是「完全相同的高度／大小」。以前首頁版用 py-16 + 固定 min-h[560px]，格子才會比獨立頁矮、看起來不一樣。
+    // ※ pt-28 是留給固定 Header 的空間（避免最上排卡片被 Header 蓋住）；pb 是底部留白。
     <section
       id="overview"
-      className={
-        standalone
-          ? "bg-black px-4 md:px-6 xl:px-8 pt-24 sm:pt-28 lg:pt-28 pb-6 lg:pb-10 min-h-[100svh] flex flex-col"
-          : "bg-black px-4 md:px-6 xl:px-8 py-10 md:py-16"
-      }
+      className="bg-black px-4 md:px-6 xl:px-8 pt-24 sm:pt-28 lg:pt-28 pb-6 lg:pb-10 min-h-[100svh] flex flex-col"
     >
-      {/* 標題區塊：獨立頁（standalone / #/overview）隱藏，把整屏高度讓給格子；首頁捲動版維持顯示。 */}
-      {!standalone && (
+      {/* 標題區塊：獨立頁（standalone / #/overview）本來就不顯示；首頁捲動版由上方 SHOW_HOME_HEADER 開關控制（目前關閉＝隱藏，把空間讓給格子）。 */}
+      {!standalone && SHOW_HOME_HEADER && (
         <div className="max-w-[1680px] w-full mx-auto mb-6">
           <Reveal>
             <p
@@ -260,7 +356,8 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
         </div>
       )}
 
-      <div className={`max-w-[1680px] w-full mx-auto flex flex-col lg:flex-row gap-3 lg:gap-4 ${standalone ? "flex-1 min-h-0" : "lg:min-h-[560px] xl:min-h-[620px]"}`}>
+      {/* 格子容器：flex-1 撐滿 section 剩餘高度（兩個版本一致）。以前首頁版是寫死的 lg:min-h-[560px]，才會比獨立頁矮。 */}
+      <div className="max-w-[1680px] w-full mx-auto flex flex-col lg:flex-row gap-3 lg:gap-4 flex-1 min-h-0">
         {/* ══ 左半：UP NEXT + 漸層條 / ABOUT 53 ══ */}
         <div className="flex flex-col gap-3 lg:gap-4 lg:w-[49.8%] shrink-0">
           {/* 上排：倒數卡（寬）＋ 漸層條（窄） */}
@@ -268,16 +365,20 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
             <Reveal className="flex-1 flex flex-col">
               {/* 標籤＋圓環＋標題當成一個整體置中；卡片不論高矮都長一樣（首頁／獨立頁統一格式）。 */}
               <a href={LINKS.calendar} aria-label="下一場活動 — 系學會行事曆" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8 cursor-pointer items-center justify-center text-center`} style={BENTO_BG}>
-                <p className="text-white tracking-[0.24em]" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)" }}>
-                  UP NEXT&nbsp;&nbsp;下一場活動
-                </p>
-                <div className="my-3 md:my-4">
-                  <CountdownRing days={days} />
-                </div>
-                <p className="text-white whitespace-nowrap overflow-hidden text-ellipsis max-w-full" style={{ fontFamily: "'Chiron Hei HK Text','Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "clamp(1rem, 2.4vw, 2.2rem)", letterSpacing: "0.1em" }}>
+                {/* 「標籤 → Donut → 標題」整組垂直置中於卡片；首頁捲動版與獨立頁排版完全相同。
+                    ▸ 間距/大小：NEXT_LABEL_GAP、NEXT_TITLE_GAP、NEXT_RING_SIZE、NEXT_TITLE_SIZE（都在檔案最上方）。
+                    ▸ 覺得整張卡片太擠 → 把上面那些「調小」讓整組浮起來、四周才有留白（不是調大）。
+                    ▸「UP NEXT 下一場活動」標籤：桌機平常隱藏、hover 才平滑展開（見 HoverReveal），此時整組自動重新置中；觸控裝置一律顯示。 */}
+                <HoverReveal>
+                  <p className="text-white tracking-[0.24em]" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)", marginBottom: NEXT_LABEL_GAP }}>
+                    UP NEXT&nbsp;&nbsp;下一場活動
+                  </p>
+                </HoverReveal>
+                <CountdownRing days={days} size={NEXT_RING_SIZE} />
+                {/* 標題：維持單行（whitespace-nowrap，比照原型）；已移除 text-ellipsis，改由上方縮小圓環＋間距讓它完整顯示、不再被切。 */}
+                <p className="text-white whitespace-nowrap max-w-full" style={{ fontFamily: "'Chiron Hei HK Text','Noto Sans TC', sans-serif", fontWeight: 900, fontSize: NEXT_TITLE_SIZE, letterSpacing: "0.08em", marginTop: NEXT_TITLE_GAP }}>
                   {NEXT_EVENT.name}
                 </p>
-                <HoverArrow />
               </a>
             </Reveal>
             {/* 漸層條解壓玩具（固定窄寬） */}
@@ -288,28 +389,22 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
             </div>
           </div>
 
-          {/* 下排：ABOUT 53 卡 */}
+          {/* 下排：ABOUT 53 卡 —— 中間系學會 Logo（SVG）＋ 左右大數字 5、3（SVG，你的三層堆疊設計）。
+              ★ 連結暫時擱置：等「學會發展歷程」公告頁做好後，把下面外層的 <div> 換回
+                <a href="#你的公告頁路由" aria-label="…" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8 cursor-pointer`} …>
+                （記得加回 cursor-pointer），CardCaption 的 hover 展開不受影響。 */}
           <Reveal delay={60} className="flex-[0.9] flex flex-col min-h-[160px] lg:min-h-[0]">
-            <a href={LINKS.about} aria-label="關於臺大圖資系學會" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8 cursor-pointer`} style={BENTO_BG}>
-              <div className="flex-1 flex items-center justify-center gap-4 md:gap-6">
-                <span className="text-white leading-none select-none" style={{ ...monoBold, fontSize: "clamp(3.5rem, 10vw, 8rem)", textShadow: "4px 6px 8px rgba(0,0,0,0.55)" }}>
-                  5
-                </span>
-                <div className="flex flex-col items-center gap-2 shrink-0">
-                  <div className="overflow-hidden rounded-[40%]" style={{ width: "clamp(48px, 6vw, 90px)", height: "clamp(48px, 6vw, 90px)" }}>
-                    <img src={imgLissaLogo} alt="LISSA Logo" className="w-full h-full object-contain" />
-                  </div>
-                  <p className="text-white text-center leading-tight" style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 700, fontSize: "clamp(0.7rem, 1vw, 1.05rem)", letterSpacing: "0.18em" }}>
-                    NTU<br />LIS SA
-                  </p>
-                </div>
-                <span className="text-white leading-none select-none" style={{ ...monoBold, fontSize: "clamp(3.5rem, 10vw, 8rem)", textShadow: "4px 6px 8px rgba(0,0,0,0.55)" }}>
-                  3
-                </span>
+            <div aria-label="關於臺大圖資系學會 — 第 53 屆" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8`} style={BENTO_BG}>
+              <div className="flex-1 flex items-center justify-center gap-4 md:gap-8">
+                {/* 左：立體旋轉數字 5（三層堆疊，見 Rotating3DNumber） */}
+                <Rotating3DNumber ch="5" />
+                {/* 中：系學會 Logo（SVG）。※ 若這個檔只有中間圖形、沒有「NTU LIS SA／臺大圖資系學會」字樣，跟我說，我再把字樣加回來。 */}
+                <img src={aboutLogo} alt="臺大圖資系學會 NTU LIS SA" className="w-auto select-none shrink-0" style={{ height: ABOUT_LOGO_H }} />
+                {/* 右：立體旋轉數字 3（與 5 反相擺動，phase 給負值錯開） */}
+                <Rotating3DNumber ch="3" phase={-NUM3D_SPEED / 2} />
               </div>
               <CardCaption en="ABOUT US" zh="臺大圖資系學會" />
-              <HoverArrow />
-            </a>
+            </div>
           </Reveal>
         </div>
 
@@ -332,7 +427,6 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                   </div>
                 </div>
                 <CardCaption en="NEWS" zh="最新動態" />
-                <HoverArrow />
               </a>
             </Reveal>
 
@@ -359,7 +453,6 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                   ))}
                 </div>
                 <CardCaption en="RESOURCES" zh="學術資源" />
-                <HoverArrow />
               </a>
             </Reveal>
           </div>
@@ -377,7 +470,6 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                   </div>
                 </div>
                 <CardCaption en="MEMBERS" zh="工作團隊" />
-                <HoverArrow />
               </a>
             </Reveal>
 
