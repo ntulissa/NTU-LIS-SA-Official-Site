@@ -1,11 +1,19 @@
 import { useState, useEffect } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
-import imgLissaLogo from "@/imports/LISSA_Logo.png";
+import imgLissaLogo from "@/imports/Header/NTULISSAlogo.svg";
 
 // 導覽列中文字體（維持原設計：Noto Sans TC）。
 // 若想讓 Header 也吃 Chiron Hei HK Text，改成：
 //   "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif"
 const zhFont = "'Noto Sans TC', sans-serif";
+
+// ── Logo 調整區（可手動修改）─────────────────────────────────
+// LOGO_SIZE：logo 顯示寬度（px），高度會等比例縮放
+// LOGO_OFFSET_X：水平位移，正值往右、負值往左（px）
+// LOGO_OFFSET_Y：垂直位移，正值往下、負值往上（px）
+const LOGO_SIZE = 150;
+const LOGO_OFFSET_X = -30;
+const LOGO_OFFSET_Y = 7;
 
 // 選單子項目改為 { label, href } 物件，讓每一項都能連到對應區塊或分頁。
 // 「歷任會長」連到 #/presidents（App.tsx 的 hash 分頁）；其餘先指向主頁對應錨點。
@@ -69,51 +77,18 @@ export default function Header() {
       `}</style>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-6 min-h-[80px] flex items-center justify-between">
 
-        {/* ── Logo ─────────────────────────────────────────────────────── */}
-        <a href="#" className="flex items-center gap-3 group shrink-0">
-          {/* LISSA pill-shaped building logo */}
-          <div
-            className="relative overflow-hidden shrink-0"
+        {/* ── Logo（只保留上傳的 SVG；大小與位移用上方常數調整）───────── */}
+        <a href="#" className="flex items-center shrink-0">
+          <img
+            src={imgLissaLogo}
+            alt="臺大圖資系學會 Logo"
+            className="object-contain"
             style={{
-              width: "48px",
-              height: "68px",
-              borderRadius: "24px",
-              border: "1.5px solid rgba(255,255,255,0.4)",
+              width: `${LOGO_SIZE}px`,
+              height: "auto",
+              transform: `translate(${LOGO_OFFSET_X}px, ${LOGO_OFFSET_Y}px)`,
             }}
-          >
-            <img
-              src={imgLissaLogo}
-              alt="LISSA Logo"
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Wordmark */}
-          <div className="leading-none">
-            <p
-              className="text-white"
-              style={{
-                fontFamily: "'Josefin Sans', sans-serif",
-                fontWeight: 700,
-                fontSize: "1.05rem",
-                letterSpacing: "0.13em",
-                lineHeight: 1.2,
-              }}
-            >
-              NTU<br />LIS SA
-            </p>
-            <p
-              className="text-white mt-1"
-              style={{
-                fontFamily: zhFont,
-                fontWeight: 900,
-                fontSize: "0.55rem",
-                letterSpacing: "0.52em",
-              }}
-            >
-              臺大圖資系學會
-            </p>
-          </div>
+          />
         </a>
 
         {/* ── Desktop Nav ───────────────────────────────────────────────── */}

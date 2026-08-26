@@ -1,6 +1,14 @@
 import { Mail } from "lucide-react";
-import imgLissaLogo from "@/imports/LISSA_Logo.png";
+import imgLissaLogo from "@/imports/Footer/NTULISSAlogo.svg";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
+
+// ── Logo 調整區（可手動修改）─────────────────────────────────
+// LOGO_SIZE：logo 顯示寬度（px），高度會等比例縮放
+// LOGO_OFFSET_X：水平位移，正值往右、負值往左（px）
+// LOGO_OFFSET_Y：垂直位移，正值往下、負值往上（px）
+const LOGO_SIZE = 180;
+const LOGO_OFFSET_X = -8;
+const LOGO_OFFSET_Y = 0;
 
 // 每個連結改成 { label, href }，讓 Footer 也能連到對應頁面／錨點（與 Header 一致）。
 // 「現任團隊」連到獨立頁 #/current-team；「歷任會長」連到 #/presidents。
@@ -99,27 +107,18 @@ export default function Footer() {
           <div className="md:max-w-[220px] md:mr-6 lg:mr-30">
             {/* 左側 Logo 區塊向右推的距離：md:mr-8 / lg:mr-12；數字越大，Logo 會離右邊選單更遠 */}
             {/* Logo — matches Header exactly */}
-            <div className="flex items-center gap-3 mb-5">
-              <div
-                className="relative overflow-hidden shrink-0"
-                style={{ width: "48px", height: "68px", borderRadius: "24px", border: "1.5px solid rgba(255,255,255,0.4)" }}
-              >
-                <img src={imgLissaLogo} alt="LISSA Logo" className="w-full h-full object-cover" />
-              </div>
-              <div className="leading-none">
-                <p
-                  className="text-white"
-                  style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 700, fontSize: "1.05rem", letterSpacing: "0.13em", lineHeight: 1.2 }}
-                >
-                  NTU<br />LIS SA
-                </p>
-                <p
-                  className="text-white mt-1"
-                  style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "0.55rem", letterSpacing: "0.52em" }}
-                >
-                  臺大圖資系學會
-                </p>
-              </div>
+            {/* Logo（只保留上傳的 SVG；大小與位移用上方常數調整）*/}
+            <div className="mb-5">
+              <img
+                src={imgLissaLogo}
+                alt="臺大圖資系學會 Logo"
+                className="object-contain"
+                style={{
+                  width: `${LOGO_SIZE}px`,
+                  height: "auto",
+                  transform: `translate(${LOGO_OFFSET_X}px, ${LOGO_OFFSET_Y}px)`,
+                }}
+              />
             </div>
 
             <p

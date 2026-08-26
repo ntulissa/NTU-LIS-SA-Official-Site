@@ -1,10 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PiggyBank } from "lucide-react";
-import imgLissaLogo from "@/imports/LISSA_Logo.png";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
-// ── ABOUT 卡（第 53 屆）中間的系學會 Logo（SVG，清晰不糊）──────────
-// 放到  src/imports/BentoGrid/NTULISSAlogo.svg（檔名需一致）。
-// 左右的大數字 5、3 不再用 SVG，改由程式碼「疊三層」堆出假 3D 立體效果（見下方 Fake3DNumber）。
+// ── NEWS 卡（最新動態）：App 圖示中央改放單純「NTU LIS SA」字樣的 SVG（清晰不糊）。
+//   放到 src/imports/BentoGrid/NTULISSAlogo2.svg（檔名需一致；若用別的檔名，改這行路徑即可）。
+import newsLogo from "@/imports/BentoGrid/NTULISSAlogo2.svg";
+// ── ABOUT 卡（第 53 屆）：中間直接放新版系學會 Logo 的 SVG（清晰不糊）。
+//   放到 src/imports/BentoGrid/NTULISSAlogo.svg（檔名需一致；若用別的檔名，改下面這行的路徑即可）。
 import aboutLogo from "@/imports/BentoGrid/NTULISSAlogo.svg";
 import { Reveal, monoBold, monoSemi, useCountdown } from "./shared";
 
@@ -15,7 +16,7 @@ import { Reveal, monoBold, monoSemi, useCountdown } from "./shared";
 // ★ 之後最常改的東西集中在這裡：
 //   NEXT_EVENT：下一場活動名稱與時間（倒數圓環吃這個）。
 //   LINKS：各卡片點擊目標。support 目前為 null＝不連結（會費／贊助整合後再接）。
-//   SESSION_NO：ABOUT 卡的大字屆數（目前 53）。
+//   ABOUT 卡：中間放新版系學會 Logo（含 53）的 SVG，見上方 aboutLogo import。
 //   CHAT_LINES：學術資源卡的聊天泡泡文字。
 //   MEMBER_DOTS：工作團隊卡的彩色圓點顏色序列。
 //   社群卡（IG/FB/Threads）：等 SVG 文字 logo 上傳後，換掉 SocialCard 內的圖示即可。
@@ -38,8 +39,8 @@ const RING_GRADIENT_SPIN = false;
 // ⚠ 重要觀念（為什麼調大反而更擠）：這三個元素是「一整組、垂直置中」放進固定高度的格子。
 //   把 GAP 或 RING 調大 → 這一組會變高變寬 → 格子大小沒變，四周留白反而更少 = 看起來更擠。
 //   想要「更有呼吸感」→ 反過來把數字調小（讓這一組變小、四周留白變多）。目前刻意收小，讓它在格子裡浮起來。
-const NEXT_LABEL_GAP = 20; // 「UP NEXT 下一場活動」標籤 → Donut 圓環 的距離（px）
 const NEXT_TITLE_GAP = 35; // Donut 圓環 → 活動標題 的距離（px）
+// （「UP NEXT」標籤現在絕對定位在卡片頂部；它與頂部距離＝倒數卡 JSX 裡的 top-5/top-7，不再用間距常數。）
 // Donut 圓環直徑：clamp(最小, 隨螢幕縮放, 最大)。整組太高頂到卡片上下 → 先把最大值（140px）往下調。
 const NEXT_RING_SIZE = "clamp(200px, 10vw, 300px)";
 // 活動標題字級：clamp(最小, 隨螢幕縮放, 最大)。標題太寬快貼到卡片左右 → 把最大值（1.85rem）調小就會空出左右留白。
@@ -53,14 +54,16 @@ const NEXT_TITLE_SIZE = "clamp(1rem, 2.2vw, 1.85rem)";
 //   標題會佔掉一點高度，首頁版的格子會比獨立頁「略矮一點點」（想完全一致就維持關閉）。
 const SHOW_HOME_HEADER = false;
 
-// ABOUT 卡的大字屆數（保留備用；5、3 由 Fake3DNumber 直接以「5」「3」呈現）。
-const SESSION_NO = "53";
-// 中間系學會 Logo 的高度（SVG，用 height 控制、寬度自動）。
-const ABOUT_LOGO_H = "clamp(60px, 10vw, 128px)";
-// ── 左右「立體數字」（假 3D：同一個數字疊 NUM3D_LAYERS 層 + 對角偏移堆出厚度；靜態零動畫＝最省效能）──
-const ABOUT_NUM_SIZE = "clamp(4rem, 11vw, 9rem)"; // 數字字級（整體大小）
-const NUM3D_LAYERS = 3; // 疊幾層＝你要的「三個一樣的數字」
-const NUM3D_OFFSET = 5; // 每層對角偏移量（px；越大越厚、立體感越強）
+// ── ABOUT 卡：新版系學會 Logo（含 53）SVG 的最大高度（寬度自動、等比例縮放）。想放大縮小改這裡。
+const ABOUT_LOGO_MAXH = "clamp(90px, 16vw, 220px)";
+
+// ── NEWS 卡（最新動態）：App 圖示中央「NTU LIS SA」文字 Logo（NTULISSAlogo2.svg）調整區。
+//   NEWS_LOGO_SIZE：logo 佔 App 圖示方框的比例（%），數字越大字越大。
+//   NEWS_LOGO_OFFSET_X：左右位移，正值往右、負值往左（px）。
+//   NEWS_LOGO_OFFSET_Y：上下位移，正值往下、負值往上（px）。
+const NEWS_LOGO_SIZE = 62;
+const NEWS_LOGO_OFFSET_X = 0;
+const NEWS_LOGO_OFFSET_Y = 0;
 
 // 各卡片點擊目標。support=null 代表暫不連結（會費＋贊助整合後再接）。
 const LINKS = {
@@ -108,89 +111,50 @@ const MEMBER_DOTS: string[] = (() => {
 const BRAND_GRADIENT = "linear-gradient(to right, #D14B4B, #2F9EBD)";
 const zhBody = "'Noto Sans TC', sans-serif";
 
+// ── SUPPORT US 卡：水龍頭滴錢幣落入小豬撲滿的 hover 動畫（純內嵌 SVG）───────────
+//   SUPPORT_SCENE_SIZE：整組圖示大小。SUPPORT_COIN_DURATION：錢幣「生成→掉落→入豬」一輪的秒數（越大越慢）。
+//   錢幣的起點（水龍頭口）與終點（撲滿投幣口）位置＝下方 SupportScene 內 supportCoinDrop 的 left/top 百分比。
+const SUPPORT_SCENE_SIZE = "clamp(96px, 12vw, 176px)";
+const SUPPORT_COIN_DURATION = 1.5;
+
 // 卡片共用外觀。
 const BENTO_CARD = "group relative overflow-hidden rounded-[14px] flex flex-col";
 // 卡片底色：統一深灰。要整體換色改這一行即可。
+// contain: layout paint —— 效能關鍵：讓每張卡的「排版＋繪製」互相獨立，
+// 一張卡在動（hover 展開、重繪）時不會波及、拖累其他卡（解決「碰了一格、其他格跟著卡」）。
 const BENTO_BG: React.CSSProperties = {
   background: "#151515",
+  contain: "layout paint",
 };
 
-// ── 「平常隱藏、hover 才平滑展開」的文字（標籤／說明）──────────────────────────
-// 作法：外層 grid 的 grid-template-rows 由 0fr（收合）→ 1fr（展開），高度會平滑變化；
-//       搭配卡片本身的 flex 置中，卡片內其他元素（圖示／圓環／標題）會自動、平順地重新置中。
-// 觸發：hover 由卡片外框的 .group 觸發（BENTO_CARD 已含 group）。
-// ★ 手機／觸控（沒有 hover 的裝置）：用 @media(hover:hover) 包住「隱藏」邏輯 → 這些裝置「一律直接顯示」文字，
-//   不會發生「碰不到 hover 就永遠看不到說明」的問題。
-// ★ 想調動畫速度：改 duration-500（毫秒）。想讓某段文字永遠顯示：就別用這個元件包它。
-// ★ 尊重「減少動態」：motion-reduce 時不做過場（直接切換）。
+// ── 「平常隱藏、hover 才淡入＋輕輕滑出」的文字（標籤／說明）──────────────────
+// ★ 只用 opacity + transform（GPU 合成、完全不碰版面）→ 不重排、不卡頓、也不會拖累其他卡片。
+//   （之前用 grid-template-rows 撐高度＝主執行緒重排動畫，那才是卡頓元兇，已移除。）
+// ★ 這個元件「脫離版面」（由呼叫端用 absolute 定位浮在卡片頂/底），所以平常內容照樣在卡片正中央、不留空白。
+//   而「內容在 hover 時滑動讓位」的質感，改由各卡片內容自己的 group-hover transform 完成（一樣是 GPU、不卡）。
+// ★ 觸控（沒有 hover 的裝置）：一律直接顯示文字。尊重「減少動態」。想調速度改 duration-500。
 function HoverReveal({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`grid grid-rows-[1fr] opacity-100 transition-all duration-500 ease-out [@media(hover:hover)]:grid-rows-[0fr] [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:grid-rows-[1fr] [@media(hover:hover)]:group-hover:opacity-100 motion-reduce:transition-none ${className}`}
+      className={`transition-[opacity,transform] duration-500 ease-out opacity-100 translate-y-0 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:translate-y-1.5 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:translate-y-0 motion-reduce:transition-none ${className}`}
     >
-      <div className="overflow-hidden min-h-0">{children}</div>
+      {children}
     </div>
   );
 }
 
-// 右側小卡的底部置中標籤（英＋中）。平常隱藏，hover 才平滑展開（見 HoverReveal）；mt-auto 讓它貼在卡片底部。
+// 右側小卡的底部置中標籤（英＋中）。絕對定位浮在卡片底部中央（脫離版面 → 平常內容照樣置中、不留空白）；
+// 平常隱藏，hover 才淡入＋輕輕上滑。pointer-events-none 避免擋到卡片點擊。
 function CardCaption({ en, zh }: { en: string; zh: string }) {
   return (
-    <HoverReveal className="mt-auto">
-      <div className="flex items-center justify-center gap-2 pt-3">
-        <span className="text-white/90 tracking-[0.24em] whitespace-nowrap" style={{ ...monoSemi, fontSize: "clamp(10px, 1vw, 15px)" }}>
-          {en}
-        </span>
-        <span className="text-white/90 whitespace-nowrap" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: "clamp(11px, 1.05vw, 16px)", letterSpacing: "0.14em" }}>
-          {zh}
-        </span>
-      </div>
+    <HoverReveal className="absolute inset-x-0 bottom-3 md:bottom-4 flex items-center justify-center gap-2 px-3 pointer-events-none">
+      <span className="text-white/90 tracking-[0.24em] whitespace-nowrap" style={{ ...monoSemi, fontSize: "clamp(10px, 1vw, 15px)" }}>
+        {en}
+      </span>
+      <span className="text-white/90 whitespace-nowrap" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: "clamp(11px, 1.05vw, 16px)", letterSpacing: "0.14em" }}>
+        {zh}
+      </span>
     </HoverReveal>
-  );
-}
-
-// ── ABOUT 卡：假 3D 立體數字（同一個數字疊 NUM3D_LAYERS 層，往左下對角偏移堆出厚度）──
-// 字體：Josefin Sans、font-weight 300（light）。最前層是白→灰金屬漸層＋陰影，後面幾層漸暗當「側面」。
-// 完全靜態、沒有任何持續動畫 → 不會造成卡頓（取代原本會卡的 preserve-3d 旋轉）。
-// 想調整：ABOUT_NUM_SIZE（大小）、NUM3D_LAYERS（層數）、NUM3D_OFFSET（厚度／偏移量）。
-function Fake3DNumber({ ch }: { ch: string }) {
-  const n = NUM3D_LAYERS;
-  // 由「最後面 → 最前面」產生各層；DOM 後面的疊在上面，所以最前層放最後 render。
-  const layers = Array.from({ length: n }, (_, i) => {
-    const back = n - 1 - i; // 距離最前層的層數：越大＝越後面（越暗、偏移越多）
-    return { back, dx: -back * NUM3D_OFFSET, dy: back * NUM3D_OFFSET, isFront: back === 0 };
-  });
-  return (
-    <div
-      className="grid select-none shrink-0"
-      aria-hidden
-      style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 300, fontSize: ABOUT_NUM_SIZE, lineHeight: 1 }}
-    >
-      {layers.map((l, i) => {
-        const v = Math.round(60 + (n <= 1 ? 0 : (1 - l.back / (n - 1)) * 70)); // 後層暗(60)→接近前層亮(130)
-        return (
-          <span
-            key={i}
-            style={{
-              gridArea: "1 / 1",
-              transform: `translate(${l.dx}px, ${l.dy}px)`,
-              ...(l.isFront
-                ? {
-                    background: "linear-gradient(160deg, #ffffff 0%, #d6d6d6 45%, #8f8f8f 100%)",
-                    WebkitBackgroundClip: "text",
-                    backgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    color: "transparent",
-                    filter: "drop-shadow(0 3px 7px rgba(0,0,0,0.5))",
-                  }
-                : { color: `rgb(${v},${v},${v})` }),
-            }}
-          >
-            {ch}
-          </span>
-        );
-      })}
-    </div>
   );
 }
 
@@ -276,11 +240,28 @@ function CountdownRing({ days, size = NEXT_RING_SIZE }: { days: number; size?: s
 const PULL_TRACK_W = "clamp(9px, 1vw, 13px)";
 const PULL_DOT_SIZE = "clamp(24px, 2.2vw, 32px)";
 
+// ── 回彈後的「閃光線條」爆點（放開、圓點彈回頂端瞬間觸發）──────────────────
+// SPARK_ANGLES：每條線的方向（deg），0=正上、負=左上、正=右上。想更熱鬧就多加幾個角度。
+// SPARK_LEN／SPARK_THICK：線長／線粗（px）。SPARK_DURATION：爆點動畫秒數。
+// PULL_SPARK_DELAY：放開後延遲多久觸發（ms），對準圓點回到頂端的瞬間；回彈曲線改了就順手調這個。
+// PULL_SPARK_THRESHOLD：至少要拉到軌道的幾成才會噴（避免手滑輕碰也噴）。
+const SPARK_ANGLES = [-38, 0, 38];
+const SPARK_LEN = 9;
+const SPARK_THICK = 2.5;
+const SPARK_DURATION = 0.5;
+const PULL_SPARK_DELAY = 360;
+const PULL_SPARK_THRESHOLD = 0.22;
+
 // ── 可上下拖曳的漸層條（解壓小玩具・放開回彈到頂端）──────────────────────
 function PullBar() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [frac, setFrac] = useState(0); // 0=頂端（休息位）、1=底
   const [dragging, setDragging] = useState(false);
+  const [burstKey, setBurstKey] = useState(0); // 每次噴發 +1 → 重掛載火花元件 → 動畫重播
+  const burstTimer = useRef<number | null>(null);
+
+  // 元件卸載時清掉待觸發的計時器（避免在已卸載元件上 setState）。
+  useEffect(() => () => { if (burstTimer.current) window.clearTimeout(burstTimer.current); }, []);
 
   const onDown = (e: React.PointerEvent) => {
     setDragging(true);
@@ -293,7 +274,13 @@ function PullBar() {
   };
   const onUp = () => {
     setDragging(false);
+    const pulled = frac > PULL_SPARK_THRESHOLD; // 有拉到一定距離才噴火花
     setFrac(0); // 放開＝回彈到頂端
+    if (pulled) {
+      if (burstTimer.current) window.clearTimeout(burstTimer.current);
+      // 延遲到圓點回彈至頂端的瞬間才噴，讓火花跟「歸位」對齊。
+      burstTimer.current = window.setTimeout(() => setBurstKey((k) => k + 1), PULL_SPARK_DELAY);
+    }
   };
 
   return (
@@ -302,7 +289,28 @@ function PullBar() {
       {/* 紅→藍漸層流動動畫（軌道用）。想調流速：改 pullFlow 的 3.5s（越大越慢）。 */}
       <style>{`
         @keyframes pullFlow { from { background-position: 50% 0%; } to { background-position: 50% -200%; } }
-        @media (prefers-reduced-motion: reduce) { .pull-track { animation: none !important; } }
+        /* 回彈後的閃光線條：往上扇形爆開再淡出。角度/線長/粗細/秒數由上方 SPARK_* 常數控制。 */
+        .pull-spark {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          border-radius: 999px;
+          background: #fff;
+          transform-origin: center;
+          animation-name: pullSpark;
+          animation-timing-function: cubic-bezier(0.2, 0.75, 0.3, 1);
+          animation-fill-mode: forwards;
+          will-change: transform, opacity;
+        }
+        @keyframes pullSpark {
+          0%   { opacity: 0; transform: rotate(var(--deg)) translateY(-13px) scaleY(0.2); }
+          30%  { opacity: 1; transform: rotate(var(--deg)) translateY(-19px) scaleY(1); }
+          100% { opacity: 0; transform: rotate(var(--deg)) translateY(-27px) scaleY(0.65); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .pull-track { animation: none !important; }
+          .pull-spark { animation: none !important; opacity: 0 !important; }
+        }
       `}</style>
       {/* 軌道：固定寬度、撐滿卡片高度（maxHeight 留一點上下邊距）。 */}
       <div ref={trackRef} className="relative h-full" style={{ width: PULL_TRACK_W, maxHeight: "86%" }}>
@@ -315,6 +323,31 @@ function PullBar() {
             animation: "pullFlow 3.5s linear infinite",
           }}
         />
+        {/* 回彈後的閃光線條爆點：放開且有拉動時，延遲到圓點回頂端瞬間觸發（key 改變→重播動畫）。
+            定位在軌道頂端中央＝圓點休息位，火花以此為圓心往外放射。 */}
+        {burstKey > 0 && (
+          <div
+            key={burstKey}
+            className="pull-burst absolute left-1/2 top-0 pointer-events-none"
+            style={{ transform: "translate(-50%, -50%)", width: 0, height: 0 }}
+          >
+            {SPARK_ANGLES.map((deg, i) => (
+              <span
+                key={i}
+                className="pull-spark"
+                style={{
+                  width: `${SPARK_THICK}px`,
+                  height: `${SPARK_LEN}px`,
+                  marginLeft: `${-SPARK_THICK / 2}px`,
+                  marginTop: `${-SPARK_LEN / 2}px`,
+                  animationDuration: `${SPARK_DURATION}s`,
+                  "--deg": `${deg}deg`,
+                } as React.CSSProperties}
+              />
+            ))}
+          </div>
+        )}
+
         {/* 拖曳把手：白色圓點。 */}
         <div
           onPointerDown={onDown}
@@ -341,7 +374,7 @@ function SocialCard({ label, path, vb, href, delay }: { label: string; path: str
     <Reveal key={label} delay={delay} className="flex-1 flex flex-col">
       <a href={href} target="_blank" rel="noopener noreferrer" className={`${BENTO_CARD} flex-1 p-4 md:p-5 cursor-pointer transition-[filter] duration-300 hover:brightness-110`} style={BENTO_BG}>
         {/* TODO：拿到文字 logo SVG 後，把下面這個 <svg> 換成品牌文字 logo，並置中即可。 */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
           <div style={{ width: "clamp(34px, 4.5vw, 60px)", height: "clamp(34px, 4.5vw, 60px)" }}>
             <svg className="block w-full h-full" fill="none" viewBox={vb}>
               <path d={path} fill="white" fillOpacity="0.85" />
@@ -351,6 +384,67 @@ function SocialCard({ label, path, vb, href, delay }: { label: string; path: str
         <CardCaption en={label} zh="" />
       </a>
     </Reveal>
+  );
+}
+
+// ── SUPPORT US：水龍頭 + 錢幣 + 小豬撲滿（純內嵌 SVG）。平常只有水龍頭＋小豬；
+//    hover 卡片時錢幣才從水龍頭口生成、斜落、落到小豬背上，並讓小豬「收錢」輕彈一下，循環播放。
+//    小豬沿用 lucide PiggyBank；水龍頭是同款線條風格的內嵌 SVG。
+function SupportScene() {
+  return (
+    <div className="support-scene relative" style={{ width: SUPPORT_SCENE_SIZE, aspectRatio: "1 / 1" }}>
+      <style>{`
+        .support-coin { opacity: 0; }
+        .support-piggy { transform-origin: 50% 100%; }
+        @media (hover: hover) {
+          .group:hover .support-coin {
+            animation: supportCoinDrop ${SUPPORT_COIN_DURATION}s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+          }
+          .group:hover .support-piggy {
+            animation: supportPiggyNudge ${SUPPORT_COIN_DURATION}s ease-in-out infinite;
+          }
+        }
+        /* 錢幣路徑：起點＝水龍頭口(left/top 約 30%/28%)，終點＝小豬背上投幣處(約 66%/46%)。想改落點就調這些百分比。 */
+        @keyframes supportCoinDrop {
+          0%   { left: 30%; top: 28%; opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+          12%  { left: 31%; top: 32%; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+          55%  { left: 62%; top: 42%; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+          66%  { left: 66%; top: 46%; opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+          100% { left: 30%; top: 28%; opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        }
+        /* 小豬收錢：錢幣落下瞬間(約 60%)以底部為基準輕輕壓一下再彈回。 */
+        @keyframes supportPiggyNudge {
+          0%, 52%  { transform: translateY(0) scale(1, 1); }
+          60%      { transform: translateY(2%) scale(1.05, 0.95); }
+          70%      { transform: translateY(0) scale(0.98, 1.02); }
+          80%, 100%{ transform: translateY(0) scale(1, 1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .support-coin { animation: none !important; opacity: 0 !important; }
+          .support-piggy { animation: none !important; }
+        }
+      `}</style>
+
+      {/* 水龍頭（左上，靜態，實心版） */}
+      <svg className="support-faucet absolute text-white/90" viewBox="0 0 100 100" fill="currentColor" style={{ width: "50%", left: "2%", top: "2%" }}>
+        <rect x="2" y="24" width="10" height="22" rx="3" />
+        <rect x="8" y="29" width="54" height="12" rx="4" />
+        <rect x="28" y="16" width="12" height="16" rx="3" />
+        <rect x="20" y="8" width="28" height="9" rx="4.5" />
+        <rect x="50" y="38" width="12" height="17" rx="4" />
+      </svg>
+
+      {/* 錢幣（動畫；left/top 由 keyframes 控制，起始貼在水龍頭口） */}
+      <svg className="support-coin absolute" viewBox="0 0 100 100" style={{ width: "20%", left: "30%", top: "28%" }}>
+        <circle cx="50" cy="50" r="30" fill="white" />
+        <text x="50" y="52" textAnchor="middle" dominantBaseline="central" fontSize="46" fontWeight={800} fill="#151515" fontFamily="'Ubuntu Sans Mono', monospace">$</text>
+      </svg>
+
+      {/* 小豬撲滿（右下，靜態；沿用你喜歡的 lucide PiggyBank 線條版） */}
+      <div className="support-piggy absolute" style={{ width: "62%", right: "3%", bottom: "8%" }}>
+        <PiggyBank className="text-white/85 w-full h-auto" strokeWidth={1.4} />
+      </div>
+    </div>
   );
 }
 
@@ -396,20 +490,21 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
             <Reveal className="flex-1 flex flex-col">
               {/* 標籤＋圓環＋標題當成一個整體置中；卡片不論高矮都長一樣（首頁／獨立頁統一格式）。 */}
               <a href={LINKS.calendar} aria-label="下一場活動 — 系學會行事曆" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8 cursor-pointer items-center justify-center text-center`} style={BENTO_BG}>
-                {/* 「標籤 → Donut → 標題」整組垂直置中於卡片；首頁捲動版與獨立頁排版完全相同。
-                    ▸ 間距/大小：NEXT_LABEL_GAP、NEXT_TITLE_GAP、NEXT_RING_SIZE、NEXT_TITLE_SIZE（都在檔案最上方）。
-                    ▸ 覺得整張卡片太擠 → 把上面那些「調小」讓整組浮起來、四周才有留白（不是調大）。
-                    ▸「UP NEXT 下一場活動」標籤：桌機平常隱藏、hover 才平滑展開（見 HoverReveal），此時整組自動重新置中；觸控裝置一律顯示。 */}
-                <HoverReveal>
-                  <p className="text-white tracking-[0.24em]" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)", marginBottom: NEXT_LABEL_GAP }}>
+                {/* 圓環＋標題整組垂直置中；「UP NEXT」標籤絕對定位浮在卡片頂部（脫離版面 → 平常圓環＋標題照樣正中央）。
+                    ▸ 間距/大小：NEXT_TITLE_GAP、NEXT_RING_SIZE、NEXT_TITLE_SIZE（都在檔案最上方）。標籤與頂部距離＝下面的 top-5/top-7。
+                    ▸ 質感：hover 時標籤在頂部淡入，圓環＋標題整組往下滑一點讓位（GPU transform，不重排、不卡）；觸控裝置一律顯示。 */}
+                <HoverReveal className="absolute inset-x-0 top-5 md:top-7 flex justify-center px-4 pointer-events-none">
+                  <p className="text-white tracking-[0.24em]" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)" }}>
                     UP NEXT&nbsp;&nbsp;下一場活動
                   </p>
                 </HoverReveal>
-                <CountdownRing days={days} size={NEXT_RING_SIZE} />
-                {/* 標題：維持單行（whitespace-nowrap，比照原型）；已移除 text-ellipsis，改由上方縮小圓環＋間距讓它完整顯示、不再被切。 */}
-                <p className="text-white whitespace-nowrap max-w-full" style={{ fontFamily: "'Chiron Hei HK Text','Noto Sans TC', sans-serif", fontWeight: 900, fontSize: NEXT_TITLE_SIZE, letterSpacing: "0.08em", marginTop: NEXT_TITLE_GAP }}>
-                  {NEXT_EVENT.name}
-                </p>
+                <div className="flex flex-col items-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:translate-y-2.5">
+                  <CountdownRing days={days} size={NEXT_RING_SIZE} />
+                  {/* 標題：維持單行（whitespace-nowrap，比照原型）；已移除 text-ellipsis，改由上方縮小圓環＋間距讓它完整顯示、不再被切。 */}
+                  <p className="text-white whitespace-nowrap max-w-full" style={{ fontFamily: "'Chiron Hei HK Text','Noto Sans TC', sans-serif", fontWeight: 900, fontSize: NEXT_TITLE_SIZE, letterSpacing: "0.08em", marginTop: NEXT_TITLE_GAP }}>
+                    {NEXT_EVENT.name}
+                  </p>
+                </div>
               </a>
             </Reveal>
             {/* 漸層條解壓玩具（固定窄寬；PullBar 內部用 h-full 撐滿整欄高度） */}
@@ -424,13 +519,9 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                 （記得加回 cursor-pointer），CardCaption 的 hover 展開不受影響。 */}
           <Reveal delay={60} className="flex-[0.9] flex flex-col min-h-[160px] lg:min-h-[0]">
             <div aria-label="關於臺大圖資系學會 — 第 53 屆" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8`} style={BENTO_BG}>
-              <div className="flex-1 flex items-center justify-center gap-4 md:gap-8">
-                {/* 左：假 3D 立體數字 5（三層堆疊，見 Fake3DNumber） */}
-                <Fake3DNumber ch="5" />
-                {/* 中：系學會 Logo（SVG）。※ 若這個檔只有中間圖形、沒有「NTU LIS SA／臺大圖資系學會」字樣，跟我說，我再把字樣加回來。 */}
-                <img src={aboutLogo} alt="臺大圖資系學會 NTU LIS SA" className="w-auto select-none shrink-0" style={{ height: ABOUT_LOGO_H }} />
-                {/* 右：假 3D 立體數字 3 */}
-                <Fake3DNumber ch="3" />
+              <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
+                {/* 新版系學會 Logo（含 53）SVG，等比例置中。想調大小改 ABOUT_LOGO_MAXH。 */}
+                <img src={aboutLogo} alt="臺大圖資系學會 第 53 屆" className="w-auto max-w-[92%] object-contain select-none" style={{ maxHeight: ABOUT_LOGO_MAXH }} />
               </div>
               <CardCaption en="ABOUT US" zh="臺大圖資系學會" />
             </div>
@@ -444,13 +535,52 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
             {/* NEWS：App 圖示 + 紅點 */}
             <Reveal delay={80} className="flex-1 flex flex-col">
               <a href={LINKS.news} aria-label="最新動態" className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
                   <div className="relative">
                     <div className="rounded-[26%] bg-[#1c1c1e] border border-white/10 flex items-center justify-center" style={{ width: "clamp(64px, 8vw, 120px)", height: "clamp(64px, 8vw, 120px)" }}>
-                      <img src={imgLissaLogo} alt="" className="object-contain opacity-90" style={{ width: "62%", height: "62%" }} />
+                      <img
+                        src={newsLogo}
+                        alt=""
+                        className="object-contain opacity-90"
+                        style={{
+                          width: `${NEWS_LOGO_SIZE}%`,
+                          height: `${NEWS_LOGO_SIZE}%`,
+                          transform: `translate(${NEWS_LOGO_OFFSET_X}px, ${NEWS_LOGO_OFFSET_Y}px)`,
+                        }}
+                      />
                     </div>
-                    {/* 紅色未讀紅點 */}
-                    <span className="absolute -top-1.5 -right-1.5 rounded-full flex items-center justify-center text-white" style={{ width: "clamp(20px, 2.2vw, 30px)", height: "clamp(20px, 2.2vw, 30px)", background: "#E5484D", ...monoBold, fontSize: "clamp(10px, 1.1vw, 15px)" }}>
+                    {/* 紅色未讀紅點：平常隱藏，hover 卡片時像 iOS 通知那樣「從 0 放大、微微過衝再回穩」跳出。
+                        觸控裝置（無 hover）一律顯示，避免看不到訊息數。
+                        想調彈跳：改 newsBadgePop 的 55% 那格（1.18 越大過衝越明顯）與整體秒數（0.45s，越大越慢）。 */}
+                    <style>{`
+                      .news-badge {
+                        transform: scale(0);
+                        opacity: 0;
+                        transition: transform 0.22s ease, opacity 0.22s ease;
+                        will-change: transform, opacity;
+                      }
+                      @media (hover: none) {
+                        .news-badge { transform: none; opacity: 1; }
+                      }
+                      @media (hover: hover) {
+                        .group:hover .news-badge {
+                          animation: newsBadgePop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                        }
+                      }
+                      @keyframes newsBadgePop {
+                        0%   { transform: scale(0);    opacity: 0; }
+                        55%  { transform: scale(1.18); opacity: 1; }
+                        100% { transform: scale(1);    opacity: 1; }
+                      }
+                      @media (prefers-reduced-motion: reduce) {
+                        .news-badge { transition: none; }
+                        .group:hover .news-badge { animation: none; transform: none; opacity: 1; }
+                      }
+                    `}</style>
+                    <span
+                      className="news-badge absolute -top-1.5 -right-1.5 rounded-full flex items-center justify-center text-white"
+                      style={{ width: "clamp(20px, 2.2vw, 30px)", height: "clamp(20px, 2.2vw, 30px)", background: "#E5484D", ...monoBold, fontSize: "clamp(10px, 1.1vw, 15px)", transformOrigin: "center" }}
+                    >
                       5
                     </span>
                   </div>
@@ -462,7 +592,7 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
             {/* RESOURCES：聊天泡泡 */}
             <Reveal delay={100} className="flex-1 flex flex-col">
               <a href={LINKS.resources} aria-label="學術資源" className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
-                <div className="flex-1 flex flex-col justify-center gap-2.5">
+                <div className="flex-1 flex flex-col justify-center gap-2.5 transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
                   {CHAT_LINES.map((c, i) => (
                     <div key={i} className={`flex ${c.side === "in" ? "justify-end" : "justify-start"}`}>
                       <span
@@ -491,7 +621,7 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
             {/* MEMBERS：彩色圓點牆 */}
             <Reveal delay={120} className="flex-1 flex flex-col">
               <a href={LINKS.team} aria-label="工作團隊" className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
                   {/* 10×4 圓點牆：每顆固定大小（TEAM_DOT_SIZE）、間距 TEAM_DOT_GAP，整體置中。 */}
                   <div className="grid" style={{ gridTemplateColumns: `repeat(${TEAM_COLS}, ${TEAM_DOT_SIZE})`, gap: TEAM_DOT_GAP, justifyContent: "center" }}>
                     {MEMBER_DOTS.map((c, i) => (
@@ -503,11 +633,11 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
               </a>
             </Reveal>
 
-            {/* SUPPORT US：小豬撲滿（暫不連結 → 用 div，無 hover 箭頭） */}
+            {/* SUPPORT US：水龍頭滴錢幣進撲滿（暫不連結 → 用 div，無 hover 箭頭） */}
             <Reveal delay={140} className="flex-1 flex flex-col">
               <div className={`${BENTO_CARD} flex-1 p-5 md:p-6`} style={BENTO_BG}>
-                <div className="flex-1 flex items-center justify-center">
-                  <PiggyBank className="text-white/85" strokeWidth={1.4} style={{ width: "clamp(56px, 7vw, 110px)", height: "auto" }} />
+                <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
+                  <SupportScene />
                 </div>
                 <CardCaption en="SUPPORT US" zh="贊助我們" />
               </div>
