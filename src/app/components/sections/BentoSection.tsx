@@ -4,7 +4,7 @@ import imgLissaLogo from "@/imports/LISSA_Logo.png";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
 // ── ABOUT 卡（第 53 屆）中間的系學會 Logo（SVG，清晰不糊）──────────
 // 放到  src/imports/BentoGrid/NTULISSAlogo.svg（檔名需一致）。
-// 左右的大數字 5、3 不再用 SVG，改由程式碼「疊三層」堆出立體旋轉效果（見下方 Rotating3DNumber）。
+// 左右的大數字 5、3 不再用 SVG，改由程式碼「疊三層」堆出假 3D 立體效果（見下方 Fake3DNumber）。
 import aboutLogo from "@/imports/BentoGrid/NTULISSAlogo.svg";
 import { Reveal, monoBold, monoSemi, useCountdown } from "./shared";
 
@@ -28,6 +28,9 @@ const NEXT_EVENT = {
 const COUNTDOWN_TARGET = NEXT_EVENT.time;
 // 倒數圓環的「滿環」對應天數：距離活動 ≥ 這個天數時環是滿的，越接近越空。改這裡調整視覺節奏。
 const RING_FULL_DAYS = 30;
+// 倒數圓環的漸層是否「持續旋轉流動」。預設 false＝靜態漸層（效能較好、比較不卡）。
+// 這個大圓環若讓漸層一直轉，會持續重繪整圈、是這張卡最耗效能的來源；想要流動感再改 true。
+const RING_GRADIENT_SPIN = false;
 
 // ── 「下一場活動」卡片：標籤／Donut／標題 的間距、圓環大小、標題大小 ────────────────
 // 這張卡片「首頁捲動版」與「獨立頁（#/overview）」共用同一份排版，改這裡兩邊會一起變。
@@ -50,17 +53,14 @@ const NEXT_TITLE_SIZE = "clamp(1rem, 2.2vw, 1.85rem)";
 //   標題會佔掉一點高度，首頁版的格子會比獨立頁「略矮一點點」（想完全一致就維持關閉）。
 const SHOW_HOME_HEADER = false;
 
-// ABOUT 卡的大字屆數（保留備用；5、3 由 Rotating3DNumber 直接以「5」「3」呈現）。
+// ABOUT 卡的大字屆數（保留備用；5、3 由 Fake3DNumber 直接以「5」「3」呈現）。
 const SESSION_NO = "53";
 // 中間系學會 Logo 的高度（SVG，用 height 控制、寬度自動）。
 const ABOUT_LOGO_H = "clamp(60px, 10vw, 128px)";
-// ── 左右「立體旋轉數字」（三層堆疊 + 3D rotateY）。想調整全在這裡 ─────────────
+// ── 左右「立體數字」（假 3D：同一個數字疊 NUM3D_LAYERS 層 + 對角偏移堆出厚度；靜態零動畫＝最省效能）──
 const ABOUT_NUM_SIZE = "clamp(4rem, 11vw, 9rem)"; // 數字字級（整體大小）
-const NUM3D_LAYERS = 3;   // 疊幾層＝你要的「三個一樣的數字」
-const NUM3D_DEPTH = 6;    // 每層之間的厚度（px；越大越立體）
-const NUM3D_BASE = 18;    // 平常轉動的基準角度（deg；讓它「不會轉到正面變平」）
-const NUM3D_SWING = 14;   // 左右來回擺動幅度（deg）
-const NUM3D_SPEED = 6;    // 來回一次的秒數（越大越慢）
+const NUM3D_LAYERS = 3; // 疊幾層＝你要的「三個一樣的數字」
+const NUM3D_OFFSET = 5; // 每層對角偏移量（px；越大越厚、立體感越強）
 
 // 各卡片點擊目標。support=null 代表暫不連結（會費＋贊助整合後再接）。
 const LINKS = {
@@ -68,7 +68,7 @@ const LINKS = {
   about: "#about", // ★ 暫時擱置：ABOUT 卡目前「不連結」（等「學會發展歷程」公告頁做好再接）。要接時見下方 ABOUT 卡的 TODO。
   news: "#news",
   resources: "#resources",
-  team: "#team",
+  team: "#/current-team", // 工作團隊卡 → 連到「現任團隊」獨立頁
   support: null as string | null,
 };
 
@@ -78,13 +78,32 @@ const CHAT_LINES = [
   { side: "out" as const, text: "哪一門課？我這裡很多" },
 ];
 
-// 工作團隊卡的彩色圓點（前段用各部門色，後段轉深灰，模擬「已招／待補」的牆面）。
-const DEPT_COLORS = ["#D9A441", "#B07C43", "#5E8C3C", "#C24A4F", "#9C4A6E", "#2F9EBD", "#8C7B6B", "#C24A4F"];
-const MEMBER_DOTS: string[] = Array.from({ length: 40 }, (_, i) => {
-  if (i < 16) return DEPT_COLORS[i % DEPT_COLORS.length];
-  if (i < 24) return "#4A4A4A";
-  return "#2C2C2C";
-});
+// ── 工作團隊卡：圓點牆（10×4＝40 格）───────────────────────────────────────
+// 依「部門順序」把每個部門的人數（count）填成該部門代表色，填不滿的用深灰「待補」點補到 40。
+// ★ 只要改各部門的 count 調人數；人多了會自動往後排；全部加總超過 40（TEAM_COLS×TEAM_ROWS）的會被截掉。
+//   顏色是各部門代表色，請勿更動。
+const TEAM_COLS = 10; // 一排幾顆
+const TEAM_ROWS = 4; // 幾排（10×4＝40）
+const TEAM_EMPTY_COLOR = "#2E2E2E"; // 未填滿的空位（深灰）
+const TEAM_DEPTS = [
+  { name: "正副會長", color: "#A27F00", count: 2 },
+  { name: "行政部", color: "#915E3E", count: 2 },
+  { name: "活動部", color: "#9F353A", count: 5 },
+  { name: "學術部", color: "#42602D", count: 4 },
+  { name: "形象宣傳部", color: "#572A3F", count: 4 },
+  { name: "體育部", color: "#8C7B6B", count: 3 },
+];
+// 圓點大小與間距（覺得太大就把 TEAM_DOT_SIZE 的最大值調小）。
+const TEAM_DOT_SIZE = "clamp(13px, 1.9vw, 24px)";
+const TEAM_DOT_GAP = "clamp(5px, 0.8vw, 11px)";
+// 依上面 TEAM_DEPTS 展開成 40 個顏色：先照部門順序填色，再用深灰補滿。
+const MEMBER_DOTS: string[] = (() => {
+  const total = TEAM_COLS * TEAM_ROWS;
+  const arr: string[] = [];
+  for (const d of TEAM_DEPTS) for (let i = 0; i < d.count; i++) arr.push(d.color);
+  while (arr.length < total) arr.push(TEAM_EMPTY_COLOR);
+  return arr.slice(0, total);
+})();
 
 const BRAND_GRADIENT = "linear-gradient(to right, #D14B4B, #2F9EBD)";
 const zhBody = "'Noto Sans TC', sans-serif";
@@ -130,56 +149,47 @@ function CardCaption({ en, zh }: { en: string; zh: string }) {
   );
 }
 
-// ── ABOUT 卡：立體旋轉數字（把同一個數字疊 NUM3D_LAYERS 層做出厚度，再用 rotateY 緩緩轉動）──
-// 字體：Josefin Sans、font-weight 300（light）。前層最亮、往後越暗＝厚度感。
-// 只在一個基準角度附近來回擺（不會轉到正側面變成一條線）；尊重「減少動態」設定。
-// 想調整：ABOUT_NUM_SIZE（大小）、NUM3D_DEPTH（厚度）、NUM3D_BASE/SWING（角度）、NUM3D_SPEED（速度）。
-function Rotating3DNumber({ ch, phase = 0 }: { ch: string; phase?: number }) {
-  const layers = Array.from({ length: NUM3D_LAYERS }, (_, i) => {
-    const t = NUM3D_LAYERS <= 1 ? 0 : i / (NUM3D_LAYERS - 1); // 0（最前）→ 1（最後）
-    const v = Math.round(255 - t * 150); // 亮度 255（白）→ 105（暗灰）
-    return { z: -i * NUM3D_DEPTH, color: `rgb(${v},${v},${v})` };
+// ── ABOUT 卡：假 3D 立體數字（同一個數字疊 NUM3D_LAYERS 層，往左下對角偏移堆出厚度）──
+// 字體：Josefin Sans、font-weight 300（light）。最前層是白→灰金屬漸層＋陰影，後面幾層漸暗當「側面」。
+// 完全靜態、沒有任何持續動畫 → 不會造成卡頓（取代原本會卡的 preserve-3d 旋轉）。
+// 想調整：ABOUT_NUM_SIZE（大小）、NUM3D_LAYERS（層數）、NUM3D_OFFSET（厚度／偏移量）。
+function Fake3DNumber({ ch }: { ch: string }) {
+  const n = NUM3D_LAYERS;
+  // 由「最後面 → 最前面」產生各層；DOM 後面的疊在上面，所以最前層放最後 render。
+  const layers = Array.from({ length: n }, (_, i) => {
+    const back = n - 1 - i; // 距離最前層的層數：越大＝越後面（越暗、偏移越多）
+    return { back, dx: -back * NUM3D_OFFSET, dy: back * NUM3D_OFFSET, isFront: back === 0 };
   });
   return (
     <div
-      className="select-none shrink-0"
+      className="grid select-none shrink-0"
       aria-hidden
-      style={{ perspective: "700px", fontFamily: "'Josefin Sans', sans-serif", fontWeight: 300, fontSize: ABOUT_NUM_SIZE, lineHeight: 1 }}
+      style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 300, fontSize: ABOUT_NUM_SIZE, lineHeight: 1 }}
     >
-      <style>{`
-        @keyframes num3dSwing {
-          0%, 100% { transform: rotateY(calc((var(--base) + var(--swing)) * 1deg)); }
-          50%      { transform: rotateY(calc((var(--base) - var(--swing)) * 1deg)); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .num3d-inner { animation: none !important; transform: rotateY(calc(var(--base) * 1deg)); }
-        }
-      `}</style>
-      <div
-        className="num3d-inner"
-        style={{
-          display: "grid",
-          transformStyle: "preserve-3d",
-          animation: `num3dSwing ${NUM3D_SPEED}s ease-in-out infinite`,
-          animationDelay: `${phase}s`,
-          "--base": NUM3D_BASE,
-          "--swing": NUM3D_SWING,
-        } as React.CSSProperties}
-      >
-        {layers.map((l, i) => (
+      {layers.map((l, i) => {
+        const v = Math.round(60 + (n <= 1 ? 0 : (1 - l.back / (n - 1)) * 70)); // 後層暗(60)→接近前層亮(130)
+        return (
           <span
             key={i}
             style={{
               gridArea: "1 / 1",
-              transform: `translateZ(${l.z}px)`,
-              color: l.color,
-              textShadow: i === 0 ? "0 4px 12px rgba(0,0,0,0.45)" : undefined,
+              transform: `translate(${l.dx}px, ${l.dy}px)`,
+              ...(l.isFront
+                ? {
+                    background: "linear-gradient(160deg, #ffffff 0%, #d6d6d6 45%, #8f8f8f 100%)",
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    color: "transparent",
+                    filter: "drop-shadow(0 3px 7px rgba(0,0,0,0.5))",
+                  }
+                : { color: `rgb(${v},${v},${v})` }),
             }}
           >
             {ch}
           </span>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }
@@ -231,7 +241,10 @@ function CountdownRing({ days, size = NEXT_RING_SIZE }: { days: number; size?: s
           <linearGradient id="ringGrad" gradientUnits="userSpaceOnUse" x1="50" y1="8" x2="50" y2="92">
             <stop offset="0%" stopColor="#D14B4B" />
             <stop offset="100%" stopColor="#2F9EBD" />
-            <animateTransform attributeName="gradientTransform" type="rotate" from="0 50 50" to="360 50 50" dur="9s" repeatCount="indefinite" />
+            {/* 漸層旋轉：預設關閉（RING_GRADIENT_SPIN=false）以省效能；開啟才會持續重繪整圈。 */}
+            {RING_GRADIENT_SPIN && (
+              <animateTransform attributeName="gradientTransform" type="rotate" from="0 50 50" to="360 50 50" dur="9s" repeatCount="indefinite" />
+            )}
           </linearGradient>
         </defs>
         {solid}
@@ -259,6 +272,10 @@ function CountdownRing({ days, size = NEXT_RING_SIZE }: { days: number; size?: s
   );
 }
 
+// 解壓漸層條（PullBar）尺寸：軌道寬度、白色把手大小。想調就改這裡。
+const PULL_TRACK_W = "clamp(9px, 1vw, 13px)";
+const PULL_DOT_SIZE = "clamp(24px, 2.2vw, 32px)";
+
 // ── 可上下拖曳的漸層條（解壓小玩具・放開回彈到頂端）──────────────────────
 function PullBar() {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -280,19 +297,33 @@ function PullBar() {
   };
 
   return (
-    <div className={`${BENTO_CARD} items-center justify-center py-6`} style={BENTO_BG} aria-hidden>
-      {/* 軌道 */}
-      <div ref={trackRef} className="relative h-full" style={{ width: "6px", maxHeight: "88%" }}>
-        <div className="absolute inset-0 rounded-full" style={{ background: "linear-gradient(to bottom, #D14B4B 0%, #2F9EBD 100%)", opacity: 0.9 }} />
-        {/* 拖曳把手 */}
+    // h-full：整張卡填滿它所在欄位的高度（之前少了這個，卡片才會塌成一顆小藥丸、軌道撐不出來）。
+    <div className={`${BENTO_CARD} h-full items-center justify-center py-6`} style={BENTO_BG} aria-hidden>
+      {/* 紅→藍漸層流動動畫（軌道用）。想調流速：改 pullFlow 的 3.5s（越大越慢）。 */}
+      <style>{`
+        @keyframes pullFlow { from { background-position: 50% 0%; } to { background-position: 50% -200%; } }
+        @media (prefers-reduced-motion: reduce) { .pull-track { animation: none !important; } }
+      `}</style>
+      {/* 軌道：固定寬度、撐滿卡片高度（maxHeight 留一點上下邊距）。 */}
+      <div ref={trackRef} className="relative h-full" style={{ width: PULL_TRACK_W, maxHeight: "86%" }}>
+        <div
+          className="pull-track absolute inset-0 rounded-full"
+          style={{
+            // 三段（紅→藍→紅）＋ 200% 高度，配合背景位移動畫做出無縫上下流動。
+            background: "linear-gradient(180deg, #D14B4B 0%, #2F9EBD 50%, #D14B4B 100%)",
+            backgroundSize: "100% 200%",
+            animation: "pullFlow 3.5s linear infinite",
+          }}
+        />
+        {/* 拖曳把手：白色圓點。 */}
         <div
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}
-          className="absolute left-1/2 rounded-full bg-white shadow-lg cursor-grab active:cursor-grabbing touch-none"
+          className="absolute left-1/2 rounded-full bg-white cursor-grab active:cursor-grabbing touch-none"
           style={{
-            width: "clamp(22px, 2vw, 30px)",
-            height: "clamp(22px, 2vw, 30px)",
+            width: PULL_DOT_SIZE,
+            height: PULL_DOT_SIZE,
             top: `${frac * 100}%`,
             transform: "translate(-50%, -50%)",
             transition: dragging ? "none" : "top 0.55s cubic-bezier(0.34,1.56,0.64,1)",
@@ -381,11 +412,9 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                 </p>
               </a>
             </Reveal>
-            {/* 漸層條解壓玩具（固定窄寬） */}
+            {/* 漸層條解壓玩具（固定窄寬；PullBar 內部用 h-full 撐滿整欄高度） */}
             <div className="shrink-0" style={{ width: "clamp(48px, 5vw, 72px)" }}>
-              <div className="h-full">
-                <PullBar />
-              </div>
+              <PullBar />
             </div>
           </div>
 
@@ -396,12 +425,12 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
           <Reveal delay={60} className="flex-[0.9] flex flex-col min-h-[160px] lg:min-h-[0]">
             <div aria-label="關於臺大圖資系學會 — 第 53 屆" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8`} style={BENTO_BG}>
               <div className="flex-1 flex items-center justify-center gap-4 md:gap-8">
-                {/* 左：立體旋轉數字 5（三層堆疊，見 Rotating3DNumber） */}
-                <Rotating3DNumber ch="5" />
+                {/* 左：假 3D 立體數字 5（三層堆疊，見 Fake3DNumber） */}
+                <Fake3DNumber ch="5" />
                 {/* 中：系學會 Logo（SVG）。※ 若這個檔只有中間圖形、沒有「NTU LIS SA／臺大圖資系學會」字樣，跟我說，我再把字樣加回來。 */}
                 <img src={aboutLogo} alt="臺大圖資系學會 NTU LIS SA" className="w-auto select-none shrink-0" style={{ height: ABOUT_LOGO_H }} />
-                {/* 右：立體旋轉數字 3（與 5 反相擺動，phase 給負值錯開） */}
-                <Rotating3DNumber ch="3" phase={-NUM3D_SPEED / 2} />
+                {/* 右：假 3D 立體數字 3 */}
+                <Fake3DNumber ch="3" />
               </div>
               <CardCaption en="ABOUT US" zh="臺大圖資系學會" />
             </div>
@@ -463,9 +492,10 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
             <Reveal delay={120} className="flex-1 flex flex-col">
               <a href={LINKS.team} aria-label="工作團隊" className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
                 <div className="flex-1 flex items-center justify-center">
-                  <div className="grid gap-1.5 md:gap-2" style={{ gridTemplateColumns: "repeat(8, minmax(0, 1fr))", width: "min(100%, 320px)" }}>
+                  {/* 10×4 圓點牆：每顆固定大小（TEAM_DOT_SIZE）、間距 TEAM_DOT_GAP，整體置中。 */}
+                  <div className="grid" style={{ gridTemplateColumns: `repeat(${TEAM_COLS}, ${TEAM_DOT_SIZE})`, gap: TEAM_DOT_GAP, justifyContent: "center" }}>
                     {MEMBER_DOTS.map((c, i) => (
-                      <span key={i} className="rounded-full aspect-square w-full" style={{ background: c }} />
+                      <span key={i} className="rounded-full" style={{ width: TEAM_DOT_SIZE, height: TEAM_DOT_SIZE, background: c }} />
                     ))}
                   </div>
                 </div>
