@@ -83,11 +83,10 @@ const CHAT_LINES = [
 // ── 學術資源卡：聊天動畫節奏（想改快慢就改這裡；改對話直接改上方 CHAT_LINES 即可，時間會自動調整）──
 //   side："in"＝藍色靠右、"out"＝白色靠左；text＝內容。可自由增減句數、改字。
 const CHAT_TIMING = {
-  typingBase: 800,   // 每則「輸入中…」的基本時間（ms）
-  typingPerChar: 38, // 每多一個字再加多少 ms（字越多、打字越久＝越自然）
-  readGap: 650,      // 一則泡泡出現後、下一則開始輸入前的停頓
-  hold: 1900,        // 全部出現後停留多久再重來
-  restartGap: 550,   // 清空後、重新開始前的空檔
+  typingBase: 700,   // 每則「輸入中…」的基本時間（ms）
+  typingPerChar: 32, // 每多一個字再加多少 ms（字越多、打字越久＝越自然）
+  readGap: 650,      // 一句出現後、換下一句前的停頓
+  leaveBeat: 280,    // 最舊那句「往上收合消失」的時間（要配合 CSS 的 .chat-row transition 0.28s）
 };
 
 // ── 工作團隊卡：圓點牆（10×4＝40 格）───────────────────────────────────────
@@ -167,60 +166,71 @@ function CardCaption({ en, zh }: { en: string; zh: string }) {
   );
 }
 
-// ── 學術資源卡：聊天泡泡「逐則出現」動畫 ──────────────────────────────────
-// 依 CHAT_LINES 自動跑：對方先「輸入中…」（三點跳動），再彈出泡泡；全部出現後停一下 → 清空 → 循環。
-// 句數／字數改了，時間會自動跟著調（見 CHAT_TIMING）。尊重「減少動態」：開啟時直接全部靜態顯示、不跑動畫。
+// ── 學術資源卡：聊天泡泡「滾動視窗」動畫 ──────────────────────────────────
+// 畫面永遠只有兩句（一藍一白）：對方先「輸入中…」（三點跳動）→ 泡泡從底部彈出；
+// 要出下一句時，最舊那句往上收合消失、其餘上移、新句子從底部進來——像跑馬燈一直往下滾，並循環。
+// 改對話直接改上方 CHAT_LINES（可增減句數、改字，時間自動調整）；改快慢改 CHAT_TIMING。
+// 尊重「減少動態」：開啟時直接靜態顯示最後兩句、不跑動畫。
+type ChatRow = { id: number; side: "in" | "out"; text: string; typing: boolean; leaving: boolean };
+
 function ChatBubbles({ lines }: { lines: { side: "in" | "out"; text: string }[] }) {
-  const [revealed, setRevealed] = useState(0);      // 已完整出現的泡泡數（0..N）
-  const [typingIdx, setTypingIdx] = useState<number | null>(null); // 正在「輸入中」的那一則
-  const [clearing, setClearing] = useState(false);  // 循環結束淡出中
+  const [rows, setRows] = useState<ChatRow[]>([]);
+  const idRef = useRef(0);
 
   useEffect(() => {
     const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) { setRevealed(lines.length); setTypingIdx(null); setClearing(false); return; }
+    if (reduce) {
+      setRows(lines.slice(-2).map((l, i) => ({ id: i, side: l.side, text: l.text, typing: false, leaving: false })));
+      return;
+    }
+    if (lines.length === 0) { setRows([]); return; }
 
     let cancelled = false;
     const timers: number[] = [];
     const at = (fn: () => void, t: number) => { timers.push(window.setTimeout(fn, t)); };
+    let p = 0;
+    setRows([]);
+    idRef.current = 0;
 
-    function run() {
+    function advance() {
       if (cancelled) return;
-      setRevealed(0); setTypingIdx(null); setClearing(false);
-      let t = CHAT_TIMING.restartGap;
-      lines.forEach((line, i) => {
-        const typing = CHAT_TIMING.typingBase + line.text.length * CHAT_TIMING.typingPerChar;
-        at(() => setTypingIdx(i), t);
-        t += typing;
-        at(() => { setTypingIdx(null); setRevealed(i + 1); }, t);
-        t += CHAT_TIMING.readGap;
+      const line = lines[p % lines.length];
+      // 已有兩句（不含正在離場的）→ 先把最舊那句標成 leaving（觸發 CSS 收合動畫）。
+      setRows((prev) => {
+        const live = prev.filter((r) => !r.leaving);
+        if (live.length >= 2) {
+          const oldest = live[0].id;
+          return prev.map((r) => (r.id === oldest ? { ...r, leaving: true } : r));
+        }
+        return prev;
       });
-      t += CHAT_TIMING.hold;
-      at(() => setClearing(true), t);                 // 先淡出整組
-      t += 320;
-      at(() => { setRevealed(0); setTypingIdx(null); setClearing(false); }, t); // 淡出後清空
-      t += CHAT_TIMING.restartGap;
-      at(run, t);                                     // 再跑一輪
+      // 收合動畫跑完 → 移除離場的，並在底部加入「輸入中」泡泡。
+      at(() => {
+        const id = ++idRef.current;
+        setRows((prev) => [...prev.filter((r) => !r.leaving), { id, side: line.side, text: line.text, typing: true, leaving: false }]);
+        const typingTime = CHAT_TIMING.typingBase + line.text.length * CHAT_TIMING.typingPerChar;
+        at(() => setRows((prev) => prev.map((r) => (r.id === id ? { ...r, typing: false } : r))), typingTime); // 輸入中 → 真正泡泡
+        at(() => { p += 1; advance(); }, typingTime + CHAT_TIMING.readGap);                                    // 換下一句
+      }, CHAT_TIMING.leaveBeat);
     }
-    run();
+    advance();
     return () => { cancelled = true; timers.forEach(clearTimeout); };
   }, [lines]);
 
   return (
-    <div
-      className="flex-1 flex flex-col justify-center gap-2.5"
-      style={{ opacity: clearing ? 0 : 1, transition: "opacity 300ms ease" }}
-    >
+    <div className="flex-1 flex flex-col justify-center">
       <style>{`
-        @keyframes chatPop {
-          0%   { opacity: 0; transform: translateY(8px) scale(0.9); }
-          60%  { opacity: 1; transform: translateY(0) scale(1.02); }
-          100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        @keyframes chatPop { 0% { opacity: 0; transform: translateY(8px) scale(0.9); } 60% { opacity: 1; transform: translateY(0) scale(1.02); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes chatDot { 0%,60%,100% { opacity: .25; transform: translateY(0); } 30% { opacity: .9; transform: translateY(-2px); } }
-        .chat-bubble { animation: chatPop .38s cubic-bezier(0.22,1,0.36,1) both; transform-origin: bottom; }
+        /* 每一列用 grid 的 1fr→0fr 平滑收合高度；離場時同時淡出、消掉上緣間距。 */
+        .chat-row { display: grid; grid-template-rows: 1fr; opacity: 1; margin-top: 9px; transition: grid-template-rows .28s ease, opacity .26s ease, margin-top .28s ease; }
+        .chat-row:first-child { margin-top: 0; }
+        .chat-row.leaving { grid-template-rows: 0fr; opacity: 0; margin-top: 0; }
+        .chat-inner { overflow: hidden; min-height: 0; display: flex; }
+        .chat-bubble { animation: chatPop .34s cubic-bezier(0.22,1,0.36,1) both; transform-origin: bottom; }
       `}</style>
-      {lines.map((c, i) => {
-        const isIn = c.side === "in";
+      {rows.map((r) => {
+        const isIn = r.side === "in";
         const bubbleStyle: React.CSSProperties = {
           maxWidth: "82%",
           fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(0.7rem, 0.95vw, 0.95rem)", letterSpacing: "0.02em",
@@ -229,30 +239,23 @@ function ChatBubbles({ lines }: { lines: { side: "in" | "out"; text: string }[] 
           borderBottomRightRadius: isIn ? "4px" : undefined,
           borderBottomLeftRadius: !isIn ? "4px" : undefined,
         };
-        // 已出現 → 顯示泡泡
-        if (i < revealed) {
-          return (
-            <div key={`msg-${i}`} className={`flex ${isIn ? "justify-end" : "justify-start"}`}>
-              <span className="chat-bubble inline-block rounded-2xl px-3 py-2 leading-snug" style={bubbleStyle}>
-                {c.text}
-              </span>
+        return (
+          <div key={r.id} className={`chat-row ${r.leaving ? "leaving" : ""}`}>
+            <div className={`chat-inner ${isIn ? "justify-end" : "justify-start"}`}>
+              {r.typing ? (
+                <span key="typing" className="chat-bubble inline-flex items-center gap-1 rounded-2xl px-3.5 py-2.5" style={bubbleStyle}>
+                  {[0, 1, 2].map((d) => (
+                    <span key={d} style={{ width: 5, height: 5, borderRadius: 999, background: isIn ? "rgba(255,255,255,0.9)" : "rgba(26,26,26,0.6)", display: "inline-block", animation: `chatDot 1s ease-in-out ${d * 0.15}s infinite` }} />
+                  ))}
+                </span>
+              ) : (
+                <span key="text" className="chat-bubble inline-block rounded-2xl px-3 py-2 leading-snug" style={bubbleStyle}>
+                  {r.text}
+                </span>
+              )}
             </div>
-          );
-        }
-        // 正在輸入 → 顯示三點跳動泡泡（同側同色）
-        if (i === typingIdx) {
-          const dotColor = isIn ? "rgba(255,255,255,0.9)" : "rgba(26,26,26,0.6)";
-          return (
-            <div key={`typing-${i}`} className={`flex ${isIn ? "justify-end" : "justify-start"}`}>
-              <span className="chat-bubble inline-flex items-center gap-1 rounded-2xl px-3.5 py-2.5" style={bubbleStyle}>
-                {[0, 1, 2].map((d) => (
-                  <span key={d} style={{ width: 5, height: 5, borderRadius: 999, background: dotColor, display: "inline-block", animation: `chatDot 1s ease-in-out ${d * 0.15}s infinite` }} />
-                ))}
-              </span>
-            </div>
-          );
-        }
-        return null; // 還沒輪到 → 不佔位（整組維持垂直置中）
+          </div>
+        );
       })}
     </div>
   );
