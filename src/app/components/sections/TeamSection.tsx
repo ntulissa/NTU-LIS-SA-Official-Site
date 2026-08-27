@@ -12,8 +12,25 @@ type DeptDef = {
 };
 
 const ICON_SIZE: React.CSSProperties = { width: "clamp(64px,6.6vw,104px)", height: "auto" }; // icon 尺寸（再放大）
-const FIGURE_IMAGE_HEIGHT = "85vh";
-const FIGURE_TOP_PADDING = "-12vh";
+
+// ══ 人像位置調整區（正副會長各自獨立，只要改這裡）═══════════════════════════
+// 每個人三個值：size＝大小、x＝左右、y＝上下。單位可用 px / vh / vw / clamp。
+//   size：人像高度，數字越大人越大（例如 "560px" 或 "72vh"）。
+//   x   ：左右位移，正值往右、負值往左（例如 "-3vw" 往左）。
+//   y   ：上下位移，正值往下、負值往上（例如 "-12vh" 往上）。
+// 兩塊互不影響，可各自調成不同大小／位置。
+const FIGURE_ADJUST = {
+  會長: {   // 黃子芸
+    size: "clamp(280px, 70vh, 620px)",
+    x: "-55px",
+    y: "-16vh",
+  },
+  副會長: { // 洪聆雅
+    size: "clamp(650px, 70vh, 720px)",
+    x: "10px",
+    y: "-12vh",
+  },
+};
 const INFO_TOP_OFFSET = "40vh";
 const INFO_RIGHT_OFFSET = "4vw";
 const INFO_MAX_WIDTH = "22vw";
@@ -271,6 +288,7 @@ const DEPTS: DeptDef[] = [
   { name: "體育部", color: "#554236", renderIcon: (playing) => <BasketballIcon playing={playing} />, href: "#/dept/sp" },
 ];
 
+// 純資料：頭銜、姓名、羅馬拼音、系級、照片。大小／位置不寫在這裡，改上方 FIGURE_ADJUST。
 const LEADERS = [
   { title: "會長", name: "黃子芸", roman: "TZU-YUN, HUANG", year: "圖資三", img: imgMeiji as string },
   { title: "副會長", name: "洪聆雅", roman: "LING-YA, HUNG", year: "圖資三", img: imgHongLingYa as string },
@@ -366,20 +384,29 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
           </div>
         </div>
 
-        <div className="relative overflow-hidden min-h-[320px] sm:min-h-[460px] lg:flex-1 lg:min-h-[600px] mt-4 lg:mt-0 rounded-[24px] lg:rounded-none">
-          <img src={imgBuildingHistory} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none" style={{ opacity: 0.06 }} />
+        {/* 右半：人像區。z-10 讓溢出的人像蓋在左半黑底之上；這裡不再用 overflow-hidden，
+            人像往左移才不會被「裁切」。背景建築線條改由內層自己包 overflow-hidden 以保留圓角。 */}
+        <div className="relative min-h-[320px] sm:min-h-[460px] lg:flex-1 lg:min-h-[600px] mt-4 lg:mt-0 z-10">
+          <div className="absolute inset-0 overflow-hidden rounded-[24px] lg:rounded-none">
+            <img src={imgBuildingHistory} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none" style={{ opacity: 0.06 }} />
+          </div>
           <div className="absolute left-0 right-0" style={{ top: "clamp(20px,3.5vw,74px)", bottom: "clamp(20px,3.5vw,74px)" }}>
             <div className="absolute inset-0 flex items-end">
               <div className="absolute inset-0 flex items-end pointer-events-none select-none">
                 {LEADERS.map((leader, i) => {
                   const isActive = i === leaderIdx;
+                  // 這個人的大小／位置：去上方 FIGURE_ADJUST 找同名（會長／副會長）的那塊。
+                  const adj = FIGURE_ADJUST[leader.title as keyof typeof FIGURE_ADJUST] ?? Object.values(FIGURE_ADJUST)[0];
                   return (
                     <div
                       key={leader.title}
                       className="absolute inset-0 flex items-end transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]"
                       style={{
                         opacity: isActive ? 1 : 0,
-                        transform: isActive ? `translateX(0) translateY(${FIGURE_TOP_PADDING})` : `translateX(18px) translateY(${FIGURE_TOP_PADDING})`,
+                        // 位置：這個人的 x / y（未選中時額外 +18px 做橫向滑入效果）。
+                        transform: isActive
+                          ? `translate(${adj.x}, ${adj.y})`
+                          : `translate(calc(${adj.x} + 18px), ${adj.y})`,
                         pointerEvents: "none",
                       }}
                     >
@@ -388,7 +415,7 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
                           src={leader.img}
                           alt={leader.name}
                           className="w-auto max-w-full object-contain object-bottom"
-                          style={{ height: "clamp(280px, 70vh, 620px)", opacity: isActive ? 1 : 0 }}
+                          style={{ height: adj.size, opacity: isActive ? 1 : 0 }}
                         />
                       </div>
                     </div>

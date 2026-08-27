@@ -80,6 +80,15 @@ const CHAT_LINES = [
   { side: "in" as const, text: "學長學姊您好，請問你們有家產可以借我嗎……" },
   { side: "out" as const, text: "哪一門課？我這裡很多" },
 ];
+// ── 學術資源卡：聊天動畫節奏（想改快慢就改這裡；改對話直接改上方 CHAT_LINES 即可，時間會自動調整）──
+//   side："in"＝藍色靠右、"out"＝白色靠左；text＝內容。可自由增減句數、改字。
+const CHAT_TIMING = {
+  typingBase: 800,   // 每則「輸入中…」的基本時間（ms）
+  typingPerChar: 38, // 每多一個字再加多少 ms（字越多、打字越久＝越自然）
+  readGap: 650,      // 一則泡泡出現後、下一則開始輸入前的停頓
+  hold: 1900,        // 全部出現後停留多久再重來
+  restartGap: 550,   // 清空後、重新開始前的空檔
+};
 
 // ── 工作團隊卡：圓點牆（10×4＝40 格）───────────────────────────────────────
 // 依「部門順序」把每個部門的人數（count）填成該部門代表色，填不滿的用深灰「待補」點補到 40。
@@ -155,6 +164,97 @@ function CardCaption({ en, zh }: { en: string; zh: string }) {
         {zh}
       </span>
     </HoverReveal>
+  );
+}
+
+// ── 學術資源卡：聊天泡泡「逐則出現」動畫 ──────────────────────────────────
+// 依 CHAT_LINES 自動跑：對方先「輸入中…」（三點跳動），再彈出泡泡；全部出現後停一下 → 清空 → 循環。
+// 句數／字數改了，時間會自動跟著調（見 CHAT_TIMING）。尊重「減少動態」：開啟時直接全部靜態顯示、不跑動畫。
+function ChatBubbles({ lines }: { lines: { side: "in" | "out"; text: string }[] }) {
+  const [revealed, setRevealed] = useState(0);      // 已完整出現的泡泡數（0..N）
+  const [typingIdx, setTypingIdx] = useState<number | null>(null); // 正在「輸入中」的那一則
+  const [clearing, setClearing] = useState(false);  // 循環結束淡出中
+
+  useEffect(() => {
+    const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) { setRevealed(lines.length); setTypingIdx(null); setClearing(false); return; }
+
+    let cancelled = false;
+    const timers: number[] = [];
+    const at = (fn: () => void, t: number) => { timers.push(window.setTimeout(fn, t)); };
+
+    function run() {
+      if (cancelled) return;
+      setRevealed(0); setTypingIdx(null); setClearing(false);
+      let t = CHAT_TIMING.restartGap;
+      lines.forEach((line, i) => {
+        const typing = CHAT_TIMING.typingBase + line.text.length * CHAT_TIMING.typingPerChar;
+        at(() => setTypingIdx(i), t);
+        t += typing;
+        at(() => { setTypingIdx(null); setRevealed(i + 1); }, t);
+        t += CHAT_TIMING.readGap;
+      });
+      t += CHAT_TIMING.hold;
+      at(() => setClearing(true), t);                 // 先淡出整組
+      t += 320;
+      at(() => { setRevealed(0); setTypingIdx(null); setClearing(false); }, t); // 淡出後清空
+      t += CHAT_TIMING.restartGap;
+      at(run, t);                                     // 再跑一輪
+    }
+    run();
+    return () => { cancelled = true; timers.forEach(clearTimeout); };
+  }, [lines]);
+
+  return (
+    <div
+      className="flex-1 flex flex-col justify-center gap-2.5"
+      style={{ opacity: clearing ? 0 : 1, transition: "opacity 300ms ease" }}
+    >
+      <style>{`
+        @keyframes chatPop {
+          0%   { opacity: 0; transform: translateY(8px) scale(0.9); }
+          60%  { opacity: 1; transform: translateY(0) scale(1.02); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes chatDot { 0%,60%,100% { opacity: .25; transform: translateY(0); } 30% { opacity: .9; transform: translateY(-2px); } }
+        .chat-bubble { animation: chatPop .38s cubic-bezier(0.22,1,0.36,1) both; transform-origin: bottom; }
+      `}</style>
+      {lines.map((c, i) => {
+        const isIn = c.side === "in";
+        const bubbleStyle: React.CSSProperties = {
+          maxWidth: "82%",
+          fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(0.7rem, 0.95vw, 0.95rem)", letterSpacing: "0.02em",
+          color: isIn ? "#fff" : "#1a1a1a",
+          background: isIn ? "rgba(47,158,189,0.85)" : "rgba(255,255,255,0.9)",
+          borderBottomRightRadius: isIn ? "4px" : undefined,
+          borderBottomLeftRadius: !isIn ? "4px" : undefined,
+        };
+        // 已出現 → 顯示泡泡
+        if (i < revealed) {
+          return (
+            <div key={`msg-${i}`} className={`flex ${isIn ? "justify-end" : "justify-start"}`}>
+              <span className="chat-bubble inline-block rounded-2xl px-3 py-2 leading-snug" style={bubbleStyle}>
+                {c.text}
+              </span>
+            </div>
+          );
+        }
+        // 正在輸入 → 顯示三點跳動泡泡（同側同色）
+        if (i === typingIdx) {
+          const dotColor = isIn ? "rgba(255,255,255,0.9)" : "rgba(26,26,26,0.6)";
+          return (
+            <div key={`typing-${i}`} className={`flex ${isIn ? "justify-end" : "justify-start"}`}>
+              <span className="chat-bubble inline-flex items-center gap-1 rounded-2xl px-3.5 py-2.5" style={bubbleStyle}>
+                {[0, 1, 2].map((d) => (
+                  <span key={d} style={{ width: 5, height: 5, borderRadius: 999, background: dotColor, display: "inline-block", animation: `chatDot 1s ease-in-out ${d * 0.15}s infinite` }} />
+                ))}
+              </span>
+            </div>
+          );
+        }
+        return null; // 還沒輪到 → 不佔位（整組維持垂直置中）
+      })}
+    </div>
   );
 }
 
@@ -592,24 +692,9 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
             {/* RESOURCES：聊天泡泡 */}
             <Reveal delay={100} className="flex-1 flex flex-col">
               <a href={LINKS.resources} aria-label="學術資源" className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
-                <div className="flex-1 flex flex-col justify-center gap-2.5 transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
-                  {CHAT_LINES.map((c, i) => (
-                    <div key={i} className={`flex ${c.side === "in" ? "justify-end" : "justify-start"}`}>
-                      <span
-                        className="inline-block rounded-2xl px-3 py-2 leading-snug"
-                        style={{
-                          maxWidth: "82%",
-                          fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(0.7rem, 0.95vw, 0.95rem)", letterSpacing: "0.02em",
-                          color: c.side === "in" ? "#fff" : "#1a1a1a",
-                          background: c.side === "in" ? "rgba(47,158,189,0.85)" : "rgba(255,255,255,0.9)",
-                          borderBottomRightRadius: c.side === "in" ? "4px" : undefined,
-                          borderBottomLeftRadius: c.side === "out" ? "4px" : undefined,
-                        }}
-                      >
-                        {c.text}
-                      </span>
-                    </div>
-                  ))}
+                <div className="flex-1 flex flex-col transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
+                  {/* 聊天泡泡逐則出現動畫；改對話內容→上方 CHAT_LINES，時間自動調整。 */}
+                  <ChatBubbles lines={CHAT_LINES} />
                 </div>
                 <CardCaption en="RESOURCES" zh="學術資源" />
               </a>
