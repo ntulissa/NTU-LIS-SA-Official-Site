@@ -23,12 +23,12 @@ const FIGURE_ADJUST = {
   會長: {   // 黃子芸
     size: "clamp(280px, 70vh, 620px)",
     x: "-55px",
-    y: "-16vh",
+    y: "-7vh",
   },
   副會長: { // 洪聆雅
     size: "clamp(650px, 70vh, 720px)",
     x: "10px",
-    y: "-12vh",
+    y: "-7vh",
   },
 };
 const INFO_TOP_OFFSET = "40vh";

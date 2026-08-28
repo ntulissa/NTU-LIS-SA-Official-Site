@@ -291,7 +291,7 @@ export default function HeroSection() {
           可以這樣「玩」？
         </h2>
         <a
-          href="#"
+          href="#/news/term-53-inauguration"
           className="inline-flex items-center gap-3 bg-white text-black px-6 sm:px-7 py-3 rounded-full hover:bg-white/90 transition-all duration-200 group w-fit max-w-full"
           style={{
             fontFamily: "'Noto Sans TC', sans-serif",

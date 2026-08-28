@@ -7,7 +7,7 @@ import newsLogo from "@/imports/BentoGrid/NTULISSAlogo2.svg";
 // ── ABOUT 卡（第 53 屆）：中間直接放新版系學會 Logo 的 SVG（清晰不糊）。
 //   放到 src/imports/BentoGrid/NTULISSAlogo.svg（檔名需一致；若用別的檔名，改下面這行的路徑即可）。
 import aboutLogo from "@/imports/BentoGrid/NTULISSAlogo.svg";
-import { Reveal, monoBold, monoSemi, useCountdown } from "./shared";
+import { Reveal, monoBold, monoSemi } from "./shared";
 
 // ══════════════════════════════════════════════════════════════════════════
 // 資訊總覽 BentoGrid（重製版・比照 Figma 新設計）
@@ -69,7 +69,7 @@ const NEWS_LOGO_OFFSET_Y = 0;
 const LINKS = {
   calendar: "#calendar",
   about: "#about", // ★ 暫時擱置：ABOUT 卡目前「不連結」（等「學會發展歷程」公告頁做好再接）。要接時見下方 ABOUT 卡的 TODO。
-  news: "#news",
+  news: "#/news", // 最新動態卡 → 公告列表獨立頁
   resources: "#resources",
   team: "#/current-team", // 工作團隊卡 → 連到「現任團隊」獨立頁
   support: null as string | null,
@@ -79,6 +79,14 @@ const LINKS = {
 const CHAT_LINES = [
   { side: "in" as const, text: "學長學姊您好，請問你們有家產可以借我嗎……" },
   { side: "out" as const, text: "哪一門課？我這裡很多" },
+  { side: "in" as const, text: "我要這個，我也要那個" },
+  { side: "out" as const, text: "也太多了吧！你修這麼多課嗎？" },
+  { side: "in" as const, text: "我想要提前畢業所以每學期都修滿 25 學分" },
+  { side: "out" as const, text: "臺大圖資卷哥是你，告訴你一個地方，那裡什麼家產都有" },
+  { side: "in" as const, text: "哦？" },
+  { side: "out" as const, text: "去找系學會就對了！" },
+  { side: "in" as const, text: "LISSA！" },
+  { side: "out" as const, text: "LISSA！" },
 ];
 // ── 學術資源卡：聊天動畫節奏（想改快慢就改這裡；改對話直接改上方 CHAT_LINES 即可，時間會自動調整）──
 //   side："in"＝藍色靠右、"out"＝白色靠左；text＝內容。可自由增減句數、改字。
@@ -263,16 +271,17 @@ function ChatBubbles({ lines }: { lines: { side: "in" | "out"; text: string }[] 
 
 // ── 倒數圓環 ─────────────────────────────────────────────────────────────
 // 角度定義：0° 在正上方（12 點），順時針遞增。
-//   圓點段：從頂端順時針畫，佔比 = days / RING_FULL_DAYS（比例自動依天數偵測）。
-//   實線段：剩下的部分（紅→藍漸層），順時針接回頂端。
+//   圓點段（灰）：從頂端順時針畫，佔比 = frac＝剩餘時間 ÷（RING_FULL_DAYS 天）。
+//   實線段（紅→藍漸層）：剩下的部分，順時針接回頂端 → 越接近活動、彩色弧越長，到期＝滿環。
 function ringPoint(deg: number, r = 42) {
   const rad = (deg * Math.PI) / 180;
   return { x: 50 + r * Math.sin(rad), y: 50 - r * Math.cos(rad) };
 }
 
-function CountdownRing({ days, size = NEXT_RING_SIZE }: { days: number; size?: string }) {
+// 純視覺：frac＝剩餘比例(0~1)；value＝要顯示的數字；unit＝單位（天後／小時後／分鐘後／秒後）。
+function CountdownRing({ frac, value, unit, size = NEXT_RING_SIZE }: { frac: number; value: number; unit: string; size?: string }) {
   const R = 42;
-  const dottedFrac = Math.max(0, Math.min(1, days / RING_FULL_DAYS));
+  const dottedFrac = Math.max(0, Math.min(1, frac));
   const dottedAngle = dottedFrac * 360;
 
   // 圓點（每 DOT_STEP 度一顆，從頂端順時針排到 dottedAngle）。
@@ -329,14 +338,38 @@ function CountdownRing({ days, size = NEXT_RING_SIZE }: { days: number; size?: s
       <div className="relative flex flex-col items-center leading-none">
         {/* 倒數天數字體：Apple 裝置用系統內建 SF Pro Rounded（ui-rounded，免安裝）；其餘退回相近字型。 */}
         <span className="text-white tabular-nums" style={{ fontFamily: "'SF Pro Rounded', ui-rounded, 'Noto Sans TC', sans-serif", fontWeight: 600, fontSize: "clamp(2rem, 4vw, 3.0rem)", letterSpacing: "0.02em" }}>
-          {days}
+          {value}
         </span>
         <span className="text-white/60 mt-1.5" style={{ fontFamily: "'Chiron Hei HK Text'", fontWeight: 700, fontSize: "clamp(0.7rem, 0.95vw, 0.95rem)", letterSpacing: "0.3em" ,color:"#FFFFFF" }}>
-          天後
+          {unit}
         </span>
       </div>
     </div>
   );
+}
+
+// ── 倒數容器：每秒更新，算出「距離活動還剩多久」→ 決定圓環比例與顯示單位 ──────────
+// 單位自動切換：≥1 天→「天」；<1 天→「小時」；<1 小時→「分鐘」；<1 分鐘→「秒」。
+// 圓環比例＝剩餘時間 ÷（RING_FULL_DAYS 天），每秒連續變動（不再是整天才跳一次）。
+// ticking 獨立在這個小元件，每秒只重繪這一塊，不會拖累整個 BentoGrid。
+function CountdownDonut({ size = NEXT_RING_SIZE }: { size?: string }) {
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const DAY = 86400000, HOUR = 3600000, MIN = 60000;
+  const remainingMs = Math.max(0, COUNTDOWN_TARGET.getTime() - nowMs);
+  const frac = Math.min(1, remainingMs / (RING_FULL_DAYS * DAY)); // 剩餘比例（滿環＝離活動還很久；空環＝到期）
+
+  let value: number, unit: string;
+  if (remainingMs >= DAY)       { value = Math.floor(remainingMs / DAY);  unit = "天後"; }
+  else if (remainingMs >= HOUR) { value = Math.floor(remainingMs / HOUR); unit = "小時後"; }
+  else if (remainingMs >= MIN)  { value = Math.floor(remainingMs / MIN);  unit = "分鐘後"; }
+  else                          { value = Math.floor(remainingMs / 1000); unit = "秒後"; }
+
+  return <CountdownRing frac={frac} value={value} unit={unit} size={size} />;
 }
 
 // 解壓漸層條（PullBar）尺寸：軌道寬度、白色把手大小。想調就改這裡。
@@ -554,10 +587,6 @@ function SupportScene() {
 // standalone=true：獨立分頁（#/overview）。註：兩個版本的版面外框與格子大小現在完全一致；
 // standalone 目前只用來決定「是否套用首頁標題開關」（見下方 SHOW_HOME_HEADER），不再影響格子高度。
 export default function BentoSection({ standalone = false }: { standalone?: boolean }) {
-  const time = useCountdown(COUNTDOWN_TARGET);
-  // 圓環顯示「天數」；若當天/已過活動，退回顯示 0，避免負數。
-  const days = Math.max(0, time.d);
-
   return (
     // 版面外框：兩個版本（首頁捲動版 & 獨立頁 #/overview）共用同一套 → 整個 section 佔滿一屏（min-h-[100svh]），
     // 讓下面的格子在兩邊都是「完全相同的高度／大小」。以前首頁版用 py-16 + 固定 min-h[560px]，格子才會比獨立頁矮、看起來不一樣。
@@ -602,7 +631,7 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                   </p>
                 </HoverReveal>
                 <div className="flex flex-col items-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:translate-y-2.5">
-                  <CountdownRing days={days} size={NEXT_RING_SIZE} />
+                  <CountdownDonut size={NEXT_RING_SIZE} />
                   {/* 標題：維持單行（whitespace-nowrap，比照原型）；已移除 text-ellipsis，改由上方縮小圓環＋間距讓它完整顯示、不再被切。 */}
                   <p className="text-white whitespace-nowrap max-w-full" style={{ fontFamily: "'Chiron Hei HK Text','Noto Sans TC', sans-serif", fontWeight: 900, fontSize: NEXT_TITLE_SIZE, letterSpacing: "0.08em", marginTop: NEXT_TITLE_GAP }}>
                     {NEXT_EVENT.name}
