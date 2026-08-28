@@ -23,42 +23,31 @@ const monoFont = "'Ubuntu Sans Mono', monospace";
 const WATERMARK_OPACITY = 0.35; // 背景浮水印濃淡（0＝關掉浮水印）
 const IMAGE_MAX_WIDTH = "1000px"; // 右側大圖最大寬度（想更大／更小改這裡）
 
-// ★ 有圖片的文章（桌機左文右圖）：左文欄 : 右圖欄 的寬度比例。
-//   ★★ 想讓「內文變寬、版面平衡」就把 TEXT_COL 的數字調大（例如 1.6fr、1.8fr）。
-//   圖片本身仍最多到 IMAGE_MAX_WIDTH；文字欄變寬時圖會自動讓出一點空間。
-const TEXT_COL = "1.8fr";  // 左：內文欄（數字越大＝內文越寬）
-const IMAGE_COL = "1.6fr";   // 右：插圖欄
+// ★ 有圖片的文章（桌機左文右圖）：內文欄用「固定寬度」，插圖獨立 → 改插圖不會動到內文。
+//   ★★ 想「只調大插圖、內文不動」→ 只改上方 IMAGE_MAX_WIDTH（放大插圖）；BODY_COL 別動，內文就固定。
+//      插圖能長多大＝受頁面寬度限制：若插圖已頂到頁面邊還想更大，就把 LAYOUT.maxWidth 調大
+//      （頁面變寬、給插圖更多空間，內文一樣不動）。想讓內文本身變寬則改 BODY_COL。
+const BODY_COL = "600px";  // 左：內文欄「固定」寬度（改插圖不會動到它）
 
 // 版面（整體）
 const LAYOUT = {
-  maxWidth: "1200px",                   // 內容最大寬度
+  maxWidth: "1400px",                   // 內容最大寬度（也決定插圖最多能長多大；內文固定不受影響）
   padX: "clamp(20px, 5vw, 56px)",       // 左右內距（頁面兩側留白）
   padTop: "clamp(96px, 12vh, 130px)",   // 頂部留白（清掉固定 Header 的高度）
   padBottom: "clamp(64px, 10vh, 112px)",// 底部留白
-  textImageGap: "56px",                 // 桌機「左文」與「右圖」之間的距離
+  textImageGap: "80px",                 // 桌機「左文」與「右圖」之間的距離
 };
 
 // 各元素：大小 + 左右(x) + 上下(y) + 下方間距(gap)
-const BACK    = { size: "0.9rem",  x: -160, y: 10, gap: 32 }; // 回上頁按鈕
-const EYEBROW = { size: "14px",    x: -150, y: 0, gap: 16 }; // 眉標「— 最新動態・學會公告」
-const TITLE   = { size: "clamp(1.9rem, 4.2vw, 3.2rem)", x: -155, y: 0, gap: 16 }; // 標題
-const BYLINE  = { size: "0.92rem", x: -150, y: 0, gap: 40 }; // 作者掛名 + 日期
-const BODY    = { size: "clamp(0.95rem, 1.05vw, 1.05rem)", lineHeight: 2.1, x: -150, y: 0, paraGap: 24, width: "60em" }; // 內文（width＝一行最寬到多少才換行；越大一行字越多。em≈幾個字寬，也可用 "760px"／"90%"）
-const IMAGE   = { x: 0, y: 0 };                           // 右側插圖（大圖）位移；寬度用上方 IMAGE_MAX_WIDTH
-const CAPTION = { size: "0.82rem", x: 0, y: 0, gap: 16 }; // 圖說（與圖片的距離＝gap）
+const BACK    = { size: "0.9rem",  x: -45, y: 15, gap: 32 }; // 回上頁按鈕
+const TITLE   = { size: "clamp(1.9rem, 4.2vw, 3.2rem)", x: -40, y: 15, gap: 16 }; // 標題
+const BYLINE  = { size: "0.92rem", x: -35, y: 15, gap: 40 }; // 作者掛名 + 日期
+const BODY    = { size: "clamp(0.95rem, 1.05vw, 1.05rem)", lineHeight: 2.1, x: -35, y: 15, paraGap: 24, width: "60em" }; // 內文（width＝一行最寬到多少才換行；越大一行字越多。em≈幾個字寬，也可用 "760px"／"90%"）
+const IMAGE   = { x: 30, y: -35 };                           // 右側插圖（大圖）位移；寬度用上方 IMAGE_MAX_WIDTH
+const CAPTION = { size: "0.82rem", x: 0, y: 15, gap: 15 }; // 圖說（與圖片的距離＝gap）
 
 // 位移小工具：把 x/y 轉成 transform（0/0 時不輸出，避免影響 sticky 等行為）
 const move = (x: number, y: number): CSSProperties => (x || y ? { transform: `translate(${x}px, ${y}px)` } : {});
-
-// 眉標的漸層文字（沿用站上其他區塊風格）
-const eyebrowStyle: CSSProperties = {
-  fontFamily: monoFont,
-  background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
-  backgroundClip: "text",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  backgroundSize: "220% 100%",
-};
 
 // 回上頁：有上一頁就返回，否則退回公告列表。
 function goBack() {
@@ -124,13 +113,6 @@ export default function NewsArticlePage({ slug }: { slug: string }) {
           </button>
         </Reveal>
 
-        {/* 眉標 */}
-        <Reveal delay={40}>
-          <p style={{ ...eyebrowStyle, fontSize: EYEBROW.size, marginBottom: EYEBROW.gap, ...move(EYEBROW.x, EYEBROW.y) }}>
-            — 最新動態・{article.category}
-          </p>
-        </Reveal>
-
         {/* 標題 */}
         <Reveal delay={70}>
           <h1
@@ -154,19 +136,19 @@ export default function NewsArticlePage({ slug }: { slug: string }) {
         </Reveal>
 
         {/* 內文 + 插圖：有圖＝左文右圖（手機上下堆疊、圖在上）；沒圖＝純文字單欄。
-            欄寬比例＝TEXT_COL : IMAGE_COL（用 scoped CSS 設定，桌機才並排）。 */}
+            桌機兩欄＝「內文固定 BODY_COL」＋「插圖彈性 minmax(0, IMAGE_MAX_WIDTH)」：
+            內文欄鎖死不動，插圖在剩餘空間內長到 IMAGE_MAX_WIDTH（空間不夠時只縮插圖、內文照舊）。 */}
         {hasImage && (
           <style>{`
             .news-grid { display: grid; grid-template-columns: 1fr; gap: ${LAYOUT.textImageGap}; align-items: start; }
-            @media (min-width: 1024px) { .news-grid { grid-template-columns: ${TEXT_COL} ${IMAGE_COL}; } }
+            @media (min-width: 1024px) { .news-grid { grid-template-columns: ${BODY_COL} minmax(0, ${IMAGE_MAX_WIDTH}); } }
           `}</style>
         )}
         <div className={hasImage ? "news-grid" : ""}>
           {/* 內文 */}
           <Reveal delay={110} className={hasImage ? "order-2 lg:order-1 min-w-0" : ""}>
             {/* 內文最大寬度＝BODY.width（上限）：純文字文章靠這個控制一行字數。
-                ※ 有圖的文章（左文右圖）：一行字數主要由上方「TEXT_COL : IMAGE_COL 欄寬比例」決定，
-                  想讓內文更寬就把 TEXT_COL 調大；BODY.width 在這裡只是額外的上限。 */}
+                ※ 有圖的文章（左文右圖）：內文寬度＝上方 BODY_COL（固定），BODY.width 只是額外上限。 */}
             <div style={{ maxWidth: BODY.width, ...move(BODY.x, BODY.y) }}>
               {article.paragraphs.map((para, i) => (
                 <p
@@ -192,7 +174,7 @@ export default function NewsArticlePage({ slug }: { slug: string }) {
                 {article.imageCaption && (
                   <figcaption
                     className="text-white/45 leading-relaxed"
-                    style={{ fontFamily: zhFont, fontWeight: 500, fontSize: CAPTION.size, letterSpacing: "0.04em", marginTop: CAPTION.gap, ...move(CAPTION.x, CAPTION.y) }}
+                    style={{ fontFamily: zhFont, fontWeight: 500, fontSize: CAPTION.size, letterSpacing: "0.04em", color: "#FFFFFF", marginTop: CAPTION.gap, ...move(CAPTION.x, CAPTION.y) }}
                   >
                     {article.imageCaption}
                   </figcaption>
