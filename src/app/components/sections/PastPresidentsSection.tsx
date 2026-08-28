@@ -860,6 +860,26 @@ export default function PastPresidentsSection() {
   const hasData = p.name.trim() !== "";
   const photo = p.img || photoOf(p.gen); // 先看該屆有沒有手動指定，沒有就依屆數自動找
 
+  // 右半固定面板的「快到頁尾時往上帶」位移：平常 0（照舊釘住）；當本區塊底部升進畫面
+  // （＝ Footer 開始探進來）時，用同樣的量把面板往上推，讓它停在頁尾之上、不被 Footer 蓋住。
+  const sectionRef = useRef<HTMLElement>(null);
+  const [endShift, setEndShift] = useState(0);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const update = () => {
+      const el = sectionRef.current;
+      if (!el) return;
+      setEndShift(Math.min(0, el.getBoundingClientRect().bottom - window.innerHeight));
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [idx]); // 切換屆時內容高度會變，一併重算
+
   // 陣列是「新→舊」：往前一屆（較早）＝ index+1；往後一屆（較新）＝ index-1。
   const canOlder = idx < PRESIDENTS.length - 1;
   const canNewer = idx > 0;
@@ -897,7 +917,7 @@ export default function PastPresidentsSection() {
   );
 
   return (
-    <section id="presidents" className="relative bg-black">
+    <section ref={sectionRef} id="presidents" className="relative bg-black">
       {/* 屆數切換按鈕的「呼吸式」脈動動畫（提示可點擊）；尊重使用者的「減少動態」設定 */}
       <style>{`
         @keyframes navPulseHalo {
@@ -922,10 +942,14 @@ export default function PastPresidentsSection() {
           .pp-photo-in, .pp-photo-out { animation-duration: 1ms; }
         }
       `}</style>
-      {/* ══════════ 右半：桌機用 fixed 永遠釘在原地（不受左半捲動影響）══════════
+      {/* ══════════ 右半：桌機用 fixed 釘在原地（不受左半捲動影響）══════════
           用 fixed 而非 sticky，是因為 App 根層有 overflow-x-hidden 會讓 sticky 失效。
-          z-10：讓固定的 Header(z-50) 疊在照片上方；捲到底時 Footer 會蓋過它（Footer 已設 relative z-30）。 */}
-      <div className="hidden lg:block fixed top-0 right-0 w-1/2 h-screen z-10">
+          z-10：讓固定的 Header(z-50) 疊在照片上方。
+          endShift：快到頁尾時把面板往上帶，讓它停在 Footer 之上、不被蓋住（連續位移、不跳）。 */}
+      <div
+        className="hidden lg:block fixed top-0 right-0 w-1/2 h-screen z-10"
+        style={{ transform: `translateY(${endShift}px)` }}
+      >
         {panel}
       </div>
 
