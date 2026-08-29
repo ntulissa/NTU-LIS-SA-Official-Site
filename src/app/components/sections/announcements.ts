@@ -20,6 +20,7 @@
 import inaugurationPhoto from "@/imports/LatestUpdates/inauguration.png";
 import farewell52image from "@/imports/LatestUpdates/farewell52.png";
 import election2026 from "@/imports/LatestUpdates/election2026.png";
+import welcome2026 from "@/imports/LatestUpdates/welcome2026.png";
 
 export type Announcement = {
   slug: string;
@@ -35,6 +36,23 @@ export type Announcement = {
 
 export const ANNOUNCEMENTS: Announcement[] = [
   // ── 範例：有圖片的公告（版型參考你給的「上任公告」設計）───────────────
+  {
+    slug: "term-53-inauguration",
+    category: "學會公告",
+    title: "給大一的一封信",
+    author: "會長 黃子芸",
+    date: "2026.08.15",
+    excerpt: "各位親愛的 B15 同學們好：",
+    paragraphs: [
+      "我們是第 53 屆臺大圖書資訊學系學生會，恭喜大家成功上岸，踏上全新的求學旅程！系學會在此來信提醒大家一些必須留意的重要資訊與系上活動，若對於信中的內容、新生行政事務、大學生活或圖資系有任何疑問，歡迎大家追蹤並私訊系學會 Instagram 帳號，以獲取更多系上活動通知！",
+      "・入學重要時程與選課：",
+      "請於 8/3 起啟用計中帳號與 NTU Webmail，並在 8/3 至 9/4 間完成學雜費繳納與線上註冊。學分抵免與基礎學科免修考試報名皆於 8/19 截止，大一英文免修則開放至 9/8。宿舍申請期間為 8/12 至 8/20。115-1 課程選填共分預選（8/3～8/18）、一階（8/19～8/22）與二階（8/25～8/27），建議搭配學術部製作的選課懶人包與課程地圖填選。最後請於 8/18 至 8/20 填寫英文姓名，並於 8/28 或 8/31 至 9/3 前往保健中心完成新生健檢。",
+      "・新生專屬活動：",
+      "五系聯合宿營（圖資 x 機械 x 歷史 x 園藝 x 工海）將於 9/1 至 9/3 於新北坪林登場，報名至 8/27 截止，是認識同儕與學長姐的最佳機會；新生學習入門書院亦將於 9/2 至 9/3 舉行，鼓勵各位學弟妹踴躍報名！",
+      "祝大家開展精彩的大學旅程，我們開學見！"
+    ],
+    image: welcome2026,
+  },
   {
     slug: "term-53-inauguration",
     category: "學會公告",

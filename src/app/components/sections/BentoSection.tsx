@@ -8,6 +8,7 @@ import newsLogo from "@/imports/BentoGrid/NTULISSAlogo2.svg";
 //   放到 src/imports/BentoGrid/NTULISSAlogo.svg（檔名需一致；若用別的檔名，改下面這行的路徑即可）。
 import aboutLogo from "@/imports/BentoGrid/NTULISSAlogo.svg";
 import { Reveal, monoBold, monoSemi } from "./shared";
+import { ANNOUNCEMENTS } from "./announcements"; // NEWS 卡右上角紅點＝公告則數，跟公告列表自動對上
 
 // ══════════════════════════════════════════════════════════════════════════
 // 資訊總覽 BentoGrid（重製版・比照 Figma 新設計）
@@ -713,7 +714,7 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                       className="news-badge absolute -top-1.5 -right-1.5 rounded-full flex items-center justify-center text-white"
                       style={{ width: "clamp(20px, 2.2vw, 30px)", height: "clamp(20px, 2.2vw, 30px)", background: "#E5484D", ...monoBold, fontSize: "clamp(10px, 1.1vw, 15px)", transformOrigin: "center" }}
                     >
-                      5
+                      {ANNOUNCEMENTS.length}
                     </span>
                   </div>
                 </div>
