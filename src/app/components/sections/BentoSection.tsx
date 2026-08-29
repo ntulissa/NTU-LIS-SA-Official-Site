@@ -68,7 +68,7 @@ const NEWS_LOGO_OFFSET_Y = 0;
 
 // 各卡片點擊目標。support=null 代表暫不連結（會費＋贊助整合後再接）。
 const LINKS = {
-  calendar: "#calendar",
+  calendar: "#/calendar", // 系學會行事曆獨立頁
   about: "#about", // ★ 暫時擱置：ABOUT 卡目前「不連結」（等「學會發展歷程」公告頁做好再接）。要接時見下方 ABOUT 卡的 TODO。
   news: "#/news", // 最新動態卡 → 公告列表獨立頁
   resources: "#resources",

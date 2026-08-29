@@ -14,6 +14,7 @@ import AcademicResourcesSection from "./components/sections/AcademicResourcesSec
 import JoinUsSection from "./components/sections/JoinUsSection";
 import ContactSection from "./components/sections/ContactSection";
 import PastPresidentsSection from "./components/sections/PastPresidentsSection";
+import CalendarPage from "./components/sections/CalendarPage";
 import FeesSection from "./components/sections/FeesSection";
 import SponsorSection from "./components/sections/SponsorSection";
 import DepartmentPage from "./components/department-pages/DepartmentPage";
@@ -26,11 +27,12 @@ import DepartmentPage from "./components/department-pages/DepartmentPage";
 //   #/overview        → 資訊總覽獨立頁（只有 Header + BentoSection + Footer）
 //   #/news            → 公告列表頁（只有 Header + 公告列表 + Footer）
 //   #/news/<slug>     → 單篇公告文章頁（只有 Header + 文章 + Footer；slug 同 announcements.ts）
+//   #/calendar        → 系學會行事曆頁（只有 Header + 行事曆 + Footer）
 //   #/fees            → 系學會費專區（捲動式 · Apple 風動畫）
 //   #/sponsor         → 贊助頁（對外招募贊助 · 捲動式）
 //   #/dept/<slug>     → 部門獨立頁（例：#/dept/gen ＝行政部；slug 同 department-pages/ 檔名）
 //   其餘              → 捲動式主頁
-type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "contact" } | { name: "overview" } | { name: "news" } | { name: "article"; slug: string } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string };
+type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "contact" } | { name: "overview" } | { name: "news" } | { name: "article"; slug: string } | { name: "calendar" } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string };
 
 function getRoute(): Route {
   const h = window.location.hash;
@@ -43,6 +45,7 @@ function getRoute(): Route {
   const ma = h.match(/^#\/news\/([\w-]+)/);
   if (ma) return { name: "article", slug: ma[1] };
   if (h.startsWith("#/news")) return { name: "news" };
+  if (h.startsWith("#/calendar")) return { name: "calendar" };
   if (h.startsWith("#/fees")) return { name: "fees" };
   if (h.startsWith("#/sponsor")) return { name: "sponsor" };
   const m = h.match(/^#\/dept\/([\w-]+)/);
@@ -100,6 +103,9 @@ export default function App() {
       ) : route.name === "article" ? (
         // 獨立頁：單篇公告文章。
         <NewsArticlePage slug={route.slug} />
+      ) : route.name === "calendar" ? (
+        // 獨立頁：系學會行事曆（Header/Footer 在最外層一定會出現）。
+        <CalendarPage />
       ) : route.name === "fees" ? (
         // 系學會費專區（捲動式；Header 於最上方為透明疊在 Hero 上）。
         <FeesSection />

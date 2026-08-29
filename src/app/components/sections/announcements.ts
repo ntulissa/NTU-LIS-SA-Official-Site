@@ -37,7 +37,7 @@ export type Announcement = {
 export const ANNOUNCEMENTS: Announcement[] = [
   // ── 範例：有圖片的公告（版型參考你給的「上任公告」設計）───────────────
   {
-    slug: "term-53-inauguration",
+    slug: "welcome2026",
     category: "學會公告",
     title: "給大一的一封信",
     author: "會長 黃子芸",

@@ -29,7 +29,7 @@ const NAV_COLS = [
     links: [
       { label: "近期公告", href: "#/news" },
       { label: "活動紀錄", href: "#news" },
-      { label: "系學會行事曆", href: "#" },
+      { label: "系學會行事曆", href: "#/calendar" },
     ],
   },
   {
