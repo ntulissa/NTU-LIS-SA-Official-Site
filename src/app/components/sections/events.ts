@@ -6,7 +6,10 @@
 //
 // 每一筆活動 = 一個 CalEvent 物件，欄位說明：
 //   title   活動名稱。
-//   date    日期，格式 "YYYY-MM-DD"（如 "2026-09-07"）。
+//   date    （開始）日期，格式 "YYYY-MM-DD"（如 "2026-09-07"）。
+//   end?    結束日期（含當天），格式同 date。★ 只有「跨多天」的活動要填；單日活動省略即可。
+//           例：圖資週 09/22～09/24 → date:"2026-09-22", end:"2026-09-24"。
+//           月曆會自動把這幾天連成一條色條（頭尾實心圓、中間坐在色條上）。
 //   time?   時間，24 小時制 "HH:mm"（如 "14:00"）。可省略；省略＝當天整天、倒數以 00:00 計。
 //   depts   這個活動屬於哪些部門（陣列，至少一個）。用下方 DeptKey 的「key」。
 //           ▸ 跨多個部門（像「系學會發表會」全部門都參與）就把它們全列進去，
@@ -21,7 +24,7 @@
 // ══════════════════════════════════════════════════════════════════════════
 
 // ── 部門型別與色盤 ──────────────────────────────────────────────
-export type DeptKey = "lead" | "admin" | "event" | "acad" | "image" | "sport" | "school";
+export type DeptKey = "pres" | "gen" | "eve" | "aca" | "ima" | "sp" | "school";
 
 export type Dept = {
   key: DeptKey;
@@ -31,12 +34,12 @@ export type Dept = {
 
 // 順序＝月曆上方 Toggle 由左到右的排列順序。
 export const DEPTS: Dept[] = [
-  { key: "lead",   zh: "正副會長", color: "#A27F00" },
-  { key: "admin",  zh: "行政",     color: "#915E3E" },
-  { key: "event",  zh: "活動",     color: "#9F353A" },
-  { key: "acad",   zh: "學術",     color: "#42602D" },
-  { key: "image",  zh: "形象宣傳", color: "#572A3F" },
-  { key: "sport",  zh: "體育",     color: "#8C7B6B" },
+  { key: "pres",   zh: "正副會長", color: "#A27F00" },
+  { key: "gen",    zh: "行政", color: "#915E3E" },
+  { key: "eve",    zh: "活動",     color: "#9F353A" },
+  { key: "aca",    zh: "學術",     color: "#42602D" },
+  { key: "ima",    zh: "形象宣傳", color: "#572A3F" },
+  { key: "sp",     zh: "體育",     color: "#8C7B6B" },
   { key: "school", zh: "學校日程", color: "#FFFFFF" },
 ];
 
@@ -46,12 +49,13 @@ export const DEPT_MAP: Record<DeptKey, Dept> = DEPTS.reduce(
 );
 
 // 「跨多部門」時要用的顏色＝正副會長黃（上方卡片外框、月曆圓點都吃這個）。
-export const LEAD_COLOR = DEPT_MAP.lead.color;
+export const LEAD_COLOR = DEPT_MAP.pres.color;
 
 // ── 活動型別 ────────────────────────────────────────────────
 export type CalEvent = {
   title: string;
-  date: string;   // "YYYY-MM-DD"
+  date: string;   // 開始日期 "YYYY-MM-DD"
+  end?: string;   // 結束日期（含當天）"YYYY-MM-DD"；只有跨多天活動要填，單日省略
   time?: string;  // "HH:mm"（可省略）
   depts: DeptKey[]; // 一或多個部門；跨多部門會自動用正副會長黃
 };
@@ -62,37 +66,45 @@ export type CalEvent = {
 //   ▸ 學校日程   → depts: ["school"]，只在月曆顯示、不進上方卡片。
 export const EVENTS: CalEvent[] = [
   {
+    title: "臺大五系聯合宿營",
+    date: "2026-09-01",
+    end: "2026-09-03",
+    depts: ["eve"], // 全部門 → 黃色
+  },
+  {
     title: "B14~15 系學會發表會",
     date: "2026-09-07",
     time: "14:00",
-    depts: ["lead", "admin", "event", "acad", "image", "sport"], // 全部門 → 黃色
+    depts: ["pres", "gen", "eve", "aca", "ima", "sp"], // 全部門 → 黃色
   },
   {
-    title: "新生迎新活動 2026",
+    title: "B15 迎新活動 2026",
     date: "2026-09-20",
     time: "12:30",
-    depts: ["event"],
+    depts: ["eve"],
   },
   {
-    title: "系友職涯講座",
+    title: "LIS Talk: 系友講座",
     date: "2026-10-20",
     time: "18:30",
-    depts: ["acad"],
+    depts: ["aca"],
   },
   {
-    title: "小圖盃體育賽",
+    title: "LIS Cup 小圖盃",
     date: "2026-11-08",
     time: "09:00",
-    depts: ["sport"],
+    depts: ["sp"],
   },
   {
     title: "系學會形象攝影日",
     date: "2026-11-22",
     time: "13:00",
-    depts: ["image", "admin"], // 兩個部門 → 也算跨部門，用黃色
+    depts: ["ima", "gen"], // 兩個部門 → 也算跨部門，用黃色
   },
+
   // ── 學校日程範例（只在月曆顯示，不進上方卡片）──
-  { title: "上學期期中考週", date: "2026-11-09", depts: ["school"] },
+  //   期中考週也是跨多天，一樣用 end 表示（純學校日程 → 色條為白色）。
+  { title: "上學期期中考週", date: "2026-11-09", end: "2026-11-13", depts: ["school"] },
   { title: "校慶放假",       date: "2026-11-14", depts: ["school"] },
 ];
 
@@ -125,4 +137,37 @@ export function ymd(d: Date): string {
   const m = `${d.getMonth() + 1}`.padStart(2, "0");
   const day = `${d.getDate()}`.padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+// ── 跨多天活動相關 ──────────────────────────────────────────────
+// 結束日（沒填 end＝當天單日）。
+export function eventEnd(e: CalEvent): string {
+  return e.end ?? e.date;
+}
+
+// 是否跨多天（有 end 且和開始日不同）。
+export function spansMultipleDays(e: CalEvent): boolean {
+  return !!e.end && e.end !== e.date;
+}
+
+// 是否「進行中」：今天（含頭尾）落在 date ~ end 之間。單日活動＝就是當天。
+// 用 "YYYY-MM-DD" 字串比大小（字典序＝時間序），避開時區換算。
+export function isOngoing(e: CalEvent, now: Date = new Date()): boolean {
+  const t = ymd(now);
+  return t >= e.date && t <= eventEnd(e);
+}
+
+// 這個活動涵蓋的每一天（含頭尾）的日期字串陣列，用來標記月曆上每一格。
+// 用 UTC 逐日推進，避開夏令／時區造成的日期誤差。
+export function eventDayKeys(e: CalEvent): string[] {
+  const keys: string[] = [];
+  const cur = new Date(`${e.date}T00:00:00Z`);
+  const end = new Date(`${eventEnd(e)}T00:00:00Z`);
+  // 防呆：end 早於 date 時，至少回開始日一天。
+  if (end < cur) return [e.date];
+  while (cur <= end) {
+    keys.push(cur.toISOString().slice(0, 10));
+    cur.setUTCDate(cur.getUTCDate() + 1);
+  }
+  return keys;
 }
