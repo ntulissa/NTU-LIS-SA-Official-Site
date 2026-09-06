@@ -23,6 +23,10 @@ const monoFont = "'Ubuntu Sans Mono', monospace";
 // 幹部照片底部漸層（與歷屆會長一致：下緣淡出、漂浮）
 const PHOTO_FADE = "linear-gradient(to bottom, #000 74%, transparent 100%)";
 
+// ── 服務底部提示語：已推出 vs 準備中（想改字就改這兩句）──
+const SERVICE_HINT_OPEN = "點擊即可進入服務頁面";
+const SERVICE_HINT_SOON = "本服務準備中敬請期待";
+
 // 部門名稱統一用「紅→藍漸層文字」（取代原本各部門色，讓全站調性一致）。
 // 想改漸層方向或顏色，改這裡的 linear-gradient 即可，套用處會一起變。
 const GRAD_TEXT: CSSProperties = {
@@ -108,15 +112,28 @@ function ServiceCarousel({ services }: { services: Service[] }) {
   const canPrev = idx > 0;
   const canNext = idx < services.length - 1;
 
+  // 服務連結一律「開新分頁」（target=_blank + noopener 安全屬性）。
+  // 防呆：還是佔位的 "#"（或空值）就不開新分頁，等 gen.tsx 換成真網址才生效。
+  const linkProps = (href: string) =>
+    href && href !== "#"
+      ? { href, target: "_blank" as const, rel: "noopener noreferrer" }
+      : { href };
+
   if (!s) return null;
+
+  // 這項服務是否已推出：open 未填＝預設已推出；open:false＝準備中（按鈕變外框、不可點、提示語改成準備中）。
+  const isOpen = s.open !== false;
+
+  // 圖片外層：已推出用可點的 <a>（開新分頁）；準備中用不可點的 <div>。
+  const ImgTag: React.ElementType = isOpen ? "a" : "div";
+  const imgProps = isOpen ? { ...linkProps(s.href), "aria-label": `${s.name} — 進入服務頁面` } : {};
 
   return (
     <div className="flex flex-col items-center">
-      {/* 服務圖片（點擊進入服務頁） */}
-      <a
-        href={s.href}
-        aria-label={`${s.name} — 進入服務頁面`}
-        className="block relative w-full max-w-[420px] transition-transform duration-300 hover:-translate-y-1"
+      {/* 服務圖片（已推出才可點進服務頁） */}
+      <ImgTag
+        {...imgProps}
+        className={`block relative w-full max-w-[420px] transition-transform duration-300 ${isOpen ? "hover:-translate-y-1 cursor-pointer" : "cursor-default"}`}
         style={{ height: "clamp(240px, 42vh, 420px)" }}
       >
         {s.img ? (
@@ -137,23 +154,32 @@ function ServiceCarousel({ services }: { services: Service[] }) {
             </div>
           </div>
         )}
-      </a>
+      </ImgTag>
 
-      {/* 服務名稱（白色膠囊）＋左右切換點 */}
+      {/* 服務名稱 ＋ 左右切換點。已推出＝白色實心可點膠囊；準備中＝白框外框、不可點。 */}
       <div className="flex items-center gap-4 sm:gap-5 mt-6">
         <NavArrow dir="prev" color="#D14B4B" disabled={!canPrev} onClick={() => canPrev && setIdx((v) => v - 1)} />
-        <a
-          href={s.href}
-          className="rounded-full bg-white text-black px-6 py-2.5 whitespace-nowrap hover:bg-white/90 transition-colors"
-          style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.95rem,1.3vw,1.2rem)", letterSpacing: "0.16em" }}
-        >
-          {s.name}
-        </a>
+        {isOpen ? (
+          <a
+            {...linkProps(s.href)}
+            className="rounded-full bg-white text-black px-6 py-2.5 whitespace-nowrap hover:bg-white/90 transition-colors"
+            style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.95rem,1.3vw,1.2rem)", letterSpacing: "0.16em" }}
+          >
+            {s.name}
+          </a>
+        ) : (
+          <span
+            className="rounded-full px-6 py-2.5 whitespace-nowrap cursor-default select-none"
+            style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.95rem,1.3vw,1.2rem)", letterSpacing: "0.16em", color: "#fff", background: "transparent", border: "1.5px solid rgba(255,255,255,0.6)" }}
+          >
+            {s.name}
+          </span>
+        )}
         <NavArrow dir="next" color="#2F9EBD" disabled={!canNext} onClick={() => canNext && setIdx((v) => v + 1)} />
       </div>
 
       <p className="text-white/40 mt-3" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.16em" }}>
-        點擊即可進入服務頁面
+        {isOpen ? SERVICE_HINT_OPEN : SERVICE_HINT_SOON}
       </p>
     </div>
   );
@@ -280,7 +306,7 @@ export default function DepartmentPage({ slug }: { slug: string }) {
             <div className="max-w-[600px]">
               <Reveal>
                 <p className="text-white/30 text-xs tracking-widest mb-4" style={{ fontFamily: monoFont }}>
-                  — ABOUT US 關於我們
+                  — ABOUT US 關於我們・現任團隊
                 </p>
               </Reveal>
               <Reveal delay={40}>

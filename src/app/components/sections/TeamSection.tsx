@@ -336,13 +336,9 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
   return (
     <section id="team" className={`bg-black min-h-screen ${standalone ? "overflow-x-clip" : "overflow-hidden"}`}>
       <div className="relative w-full min-h-screen flex flex-col lg:flex-row">
-        <div className={`flex flex-col px-5 sm:px-8 md:px-[clamp(24px,4.3vw,74px)] w-full lg:w-[clamp(300px,54vw,920px)] lg:flex-shrink-0 ${
-          standalone
-            // 獨立頁：內容從上方開始（justify-start），頂部只留剛好清掉固定 Header 的一點空間，去掉原本一大塊留白。
-            ? "justify-start pt-24 sm:pt-28 lg:pt-28 pb-12 sm:pb-16 lg:pb-20"
-            // 主頁捲動版：維持原本的垂直置中與大留白，呈現不變。
-            : "justify-center py-16 sm:py-20 lg:py-[clamp(60px,11.4vw,197px)]"
-        }`}>
+        {/* 左欄排版：捲動版與獨立頁（#/current-team）共用同一套 → 兩邊完全一致（垂直置中＋同樣留白）。
+            （之前獨立頁用 justify-start pt-28 靠上對齊，把內容擠到頂端、和捲動版不一樣，已統一。） */}
+        <div className="flex flex-col px-5 sm:px-8 md:px-[clamp(24px,4.3vw,74px)] w-full lg:w-[clamp(300px,54vw,920px)] lg:flex-shrink-0 justify-center py-16 sm:py-20 lg:py-[clamp(60px,11.4vw,197px)]">
           <div>
             <Reveal>
               <p className="text-white/30 text-xs tracking-widest mb-5" style={{fontSize: "14px",fontFamily: "'Ubuntu Sans Mono', monospace" ,background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",

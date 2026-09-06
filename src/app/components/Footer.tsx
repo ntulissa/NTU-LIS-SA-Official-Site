@@ -28,7 +28,6 @@ const NAV_COLS = [
     zh: "最新動態",
     links: [
       { label: "近期公告", href: "#/news" },
-      { label: "活動紀錄", href: "#news" },
       { label: "系學會行事曆", href: "#/calendar" },
     ],
   },

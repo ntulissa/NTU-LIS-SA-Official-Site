@@ -66,7 +66,7 @@ const ONGOING_PILL_INSET_X = 24;         // 膠囊距卡片左緣（px）
 const ONGOING_PILL_INSET_Y = 20;         // 膠囊距卡片下緣（px）
 
 // ── 下方「行事曆」──
-const TOGGLE_GAP_X = 26;    // Toggle 之間的橫向間距（px）← 你要拉大就改這裡
+const TOGGLE_GAP_X = 66;    // Toggle 之間的橫向間距（px）← 你要拉大就改這裡
 const TOGGLE_GAP_Y = 16;    // Toggle 換行後的直向間距（px）
 const TOGGLE_HEIGHT = 36;   // Toggle 膠囊高度（px）
 const TOGGLE_KNOB = 24;     // Toggle 內部色點直徑（px）

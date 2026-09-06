@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Reveal } from "./shared";
 import { PRESIDENTS, type Dept, type Election } from "./presidents";
 
@@ -30,6 +30,11 @@ function termOf(gen: number) {
   if (gen === CURRENT_GEN) return `${start}.07 ～ 至今`;
   return `${start}.07 ～ ${start + 1}.07`;
 }
+
+// ── 「現任團隊」按鈕：只在「現任這屆」且尚未填團隊名單（depts 為空）時，於簡介下方出現。──
+// 之後若把現任屆的 depts 補上，按鈕會自動消失、改顯示團隊名單。連結／文字要改就改這兩個。
+const CURRENT_TEAM_HREF = "#/current-team";
+const CURRENT_TEAM_LABEL = "現任團隊";
 
 /* ── 會長照片：自動對應 ──────────────────────────────────────
    把照片放到  imports/Presidents/  資料夾，檔名＝屆數（如 52.jpg、51.png）。
@@ -621,6 +626,20 @@ export default function PastPresidentsSection() {
                 {p.intro ? p.intro : "本屆簡介整理中，敬請期待。"}
               </p>
             </Reveal>
+
+            {/* 現任這屆、且尚未填團隊名單時：簡介下方放「現任團隊」按鈕，直接連到現任團隊頁。 */}
+            {p.gen === CURRENT_GEN && p.depts.length === 0 && (
+              <Reveal delay={160}>
+                <a
+                  href={CURRENT_TEAM_HREF}
+                  className="group inline-flex items-center gap-2 rounded-full bg-white text-black px-6 py-2.5 mt-8 lg:mt-10 hover:bg-white/90 transition-colors"
+                  style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: "0.14em" }}
+                >
+                  {CURRENT_TEAM_LABEL}
+                  <ArrowRight size={17} strokeWidth={2.4} className="transition-transform duration-300 group-hover:translate-x-1" />
+                </a>
+              </Reveal>
+            )}
           </div>
         </div>
 

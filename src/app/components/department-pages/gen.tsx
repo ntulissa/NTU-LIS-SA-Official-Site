@@ -13,8 +13,8 @@ export const gen: DeptData = {
     "加入行政部，你將成為全系運作最核心的幕後推手，掌管系館空間、財務與行政決策。這不只是會務，更是累積組織管理經驗、展現影響力的旅程。打造更完善的圖資系，就差你一個！",
   services: [
     // 服務圖放 imports/services/gen1.png、gen2.png（找不到會顯示佔位框）；href 先用 "#"，之後接服務頁。
-    { name: "系櫃租借", img: svcImg("gen1"), href: "#" },
-    { name: "系學會費", img: svcImg("gen2"), href: "#" },
+    { name: "系櫃租借", img: svcImg("gen1"), href: "https://forms.gle/hsiidFFAwG9EmJJX6" },
+    { name: "系學會費", img: svcImg("gen2"), href: "https://forms.gle/hsiidFFAwG9EmJJX6" },
   ],
   heads: [
     // 幹部照放 imports/members/gen1.png、gen2.png、gen3.png（找不到＝照片待補）。
