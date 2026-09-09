@@ -1,0 +1,13 @@
+{
+  // 放在專案的 .devcontainer/devcontainer.json
+  // 如果你已經有這個檔案，只要把 forwardPorts 和 portsAttributes 這兩段合併進去即可。
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Vite Dev Server",
+      "protocol": "https",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "postCreateCommand": "npm install"
+}
