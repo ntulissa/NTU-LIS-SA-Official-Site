@@ -26,7 +26,7 @@
 // ── 部門與顏色（key ↔ 中文 ↔ 色碼；與全站部門色一致，可自由調整）──────────
 //   lead   正副會長   #A27F00        admin  行政      #915E3E
 //   event  活動       #9F353A        acad   學術      #42602D
-//   image  形象宣傳   #572A3F        sport  體育      #8C7B6B
+//   image  形象宣傳   #572A3F        sport  體育      #23658A
 //   school 學校日程   #FFFFFF（白）
 // ══════════════════════════════════════════════════════════════════════════
 
@@ -46,7 +46,7 @@ export const DEPTS: Dept[] = [
   { key: "eve",    zh: "活動",     color: "#9F353A" },
   { key: "aca",    zh: "學術",     color: "#42602D" },
   { key: "ima",    zh: "形象宣傳", color: "#572A3F" },
-  { key: "sp",     zh: "體育",     color: "#8C7B6B" },
+  { key: "sp",     zh: "體育",     color: "#23658A" },
   { key: "school", zh: "學校日程", color: "#FFFFFF" },
 ];
 

@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft } from "lucide-react";
 import { Reveal } from "../sections/shared";
-import { DEPARTMENTS } from "./departments";
+import { DEPARTMENTS, DEPT_HASHTAGS } from "./departments";
 import type { Service, Head } from "./deptShared";
 
 /**
@@ -26,6 +26,53 @@ const PHOTO_FADE = "linear-gradient(to bottom, #000 74%, transparent 100%)";
 // ── 服務底部提示語：已推出 vs 準備中（想改字就改這兩句）──
 const SERVICE_HINT_OPEN = "點擊即可進入服務頁面";
 const SERVICE_HINT_SOON = "本服務準備中敬請期待";
+
+// ══════════════════════════════════════════════════════════════
+// ★ 可調整常數區（改這裡就能微調版面，不用動下面的結構）
+// ══════════════════════════════════════════════════════════════
+
+// ① 幹部卡三個文字元素的位置微調（px；正 x = 右移、正 y = 下移）
+//    只影響位置、不改字級；三張卡會一起套用。
+const HEAD_POS = {
+  name:  { x: 0, y: 0 }, // 姓名（如 林榮恩）
+  cls:   { x: 5, y: 0 }, // 系級膠囊（如 B14）
+  title: { x: 0, y: 12 }, // 職稱（如 -部長 HEAD-）
+};
+
+// ② 部門簡介底下的 Hashtag 外觀（文字內容在 departments.ts 的 DEPT_HASHTAGS）
+const HASHTAG = {
+  x: 0,      // 整排水平位移（px）
+  y: 0,      // 整排垂直位移（px）
+  size: 15,  // 字級（px）
+  gap: 12,   // 標籤之間的間距（px）
+  padX: 14,  // 標籤左右內距（px）
+  padY: 6,   // 標籤上下內距（px）
+  radius: 6, // 圓角（px）
+};
+
+// ③ 背景「超大草寫部門名稱」SVG（放 imports/members/<slug>-name.svg，例：gen-name.svg）
+//    整頁只有一個，固定在畫面正中央，捲動時不會移動。
+//    x/y = 相對畫面中心的微調（px）；width = 大小（px）。
+const NAME_BG = {
+  x: 0,         // 相對畫面中心的水平微調（px，正 = 右）
+  y: 0,         // 相對畫面中心的垂直微調（px，正 = 下）
+  width: 800,  // 寬度（px，越大字越大）
+  opacity: 0.2, // 透明度（0~1）
+};
+
+// 讀取 imports/members/ 底下所有「<縮寫>-name.svg」（Vite）。
+// 若原始碼不在 /src 底下、或用其他打包工具，改下面這行的路徑字串即可；
+// 舊版 Vite 請把 `query:"?url", import:"default"` 換成 `as:"url"`。
+const NAME_SVG_FILES = import.meta.glob("/src/**/*-name.svg", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
+
+function nameSvgFor(slug: string): string | undefined {
+  const hit = Object.keys(NAME_SVG_FILES).find((p) => p.endsWith(`/${slug}-name.svg`));
+  return hit ? NAME_SVG_FILES[hit] : undefined;
+}
 
 // 部門名稱統一用「紅→藍漸層文字」（取代原本各部門色，讓全站調性一致）。
 // 想改漸層方向或顏色，改這裡的 linear-gradient 即可，套用處會一起變。
@@ -82,25 +129,26 @@ function NavArrow({ dir, color, disabled, onClick }: { dir: "prev" | "next"; col
   );
 }
 
-// ── 迷宮背景（近似 Pac-Man 迷宮牆；可替換成自訂圖像）──
-function MazeBackdrop() {
+// ── 背景：超大草寫部門名稱（SVG 由 imports/members/<slug>-name.svg 提供）──
+// 整頁只有一個，固定（fixed）在畫面正中央；從最上捲到最下都停在視窗中間。
+// 位置與大小改上面的 NAME_BG。尚未放入該部門 SVG 時自動留空、不影響版面。
+function NameBackdrop({ slug }: { slug: string }) {
+  const url = nameSvgFor(slug);
+  if (!url) return null;
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden select-none" aria-hidden style={{ opacity: 0.5 }}>
-      <svg width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <pattern id="mazeWall" width="240" height="240" patternUnits="userSpaceOnUse">
-            <g fill="#141414">
-              <rect x="24" y="24" width="86" height="26" rx="13" />
-              <rect x="24" y="24" width="26" height="120" rx="13" />
-              <rect x="150" y="60" width="26" height="96" rx="13" />
-              <rect x="150" y="60" width="70" height="26" rx="13" />
-              <rect x="60" y="176" width="120" height="26" rx="13" />
-              <rect x="194" y="176" width="26" height="46" rx="13" />
-            </g>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#mazeWall)" />
-      </svg>
+    <div className="fixed inset-0 pointer-events-none overflow-hidden select-none" aria-hidden>
+      <img
+        src={url}
+        alt=""
+        className="absolute max-w-none select-none"
+        style={{
+          left: "50%",
+          top: "50%",
+          width: `${NAME_BG.width}px`,
+          transform: `translate(calc(-50% + ${NAME_BG.x}px), calc(-50% + ${NAME_BG.y}px))`,
+          opacity: NAME_BG.opacity,
+        }}
+      />
     </div>
   );
 }
@@ -212,14 +260,14 @@ function HeadCard({ head, delay }: { head: Head; delay: number }) {
         </div>
 
         <div className="flex items-end justify-center gap-3 mt-4">
-          <p className="text-white leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.8rem,3vw,2.8rem)", letterSpacing: "0.06em" }}>
+          <p className="text-white leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.8rem,3vw,2.8rem)", letterSpacing: "0.06em", transform: `translate(${HEAD_POS.name.x}px, ${HEAD_POS.name.y}px)` }}>
             {head.name}
           </p>
-          <span className="mb-1 rounded-[6px] px-2.5 py-1" style={{ background: "linear-gradient(90deg,#FFF 0%,#B3B3B3 100%)", color: "#000", fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.8rem,1.1vw,1.05rem)" }}>
+          <span className="mb-1 rounded-[6px] px-2.5 py-1" style={{ background: "linear-gradient(90deg,#FFF 0%,#B3B3B3 100%)", color: "#000", fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.8rem,1.1vw,1.05rem)", transform: `translate(${HEAD_POS.cls.x}px, ${HEAD_POS.cls.y}px)` }}>
             {head.cls}
           </span>
         </div>
-        <p className="mt-2 text-white/55" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "clamp(0.72rem,0.95vw,0.95rem)", letterSpacing: "0.18em" }}>
+        <p className="mt-2 text-white/55" style={{ fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.72rem,0.95vw,0.95rem)", letterSpacing: "0.18em", color: "#BEBEBE", transform: `translate(${HEAD_POS.title.x}px, ${HEAD_POS.title.y}px)` }}>
           -{head.title}&nbsp;HEAD-
         </p>
       </div>
@@ -254,6 +302,9 @@ export default function DepartmentPage({ slug }: { slug: string }) {
 
   return (
     <section className="relative bg-black">
+      {/* 背景：草寫部門名稱，沿整頁由上到下重複平鋪（放在最底層，內容都疊在其上） */}
+      <NameBackdrop slug={slug} />
+
       {/* 切換點的脈動動畫（比照歷屆會長） */}
       <style>{`
         @keyframes deptPulseDot {
@@ -288,7 +339,6 @@ export default function DepartmentPage({ slug }: { slug: string }) {
 
       {/* ══════════ 上半：簡介 + 服務輪播 ══════════ */}
       <div className="relative overflow-hidden">
-        <MazeBackdrop />
         <div className="relative max-w-[1400px] mx-auto px-5 sm:px-8 md:px-12 lg:px-16 pt-24 sm:pt-28 lg:pt-[120px] pb-16 lg:pb-24 lg:min-h-screen lg:flex lg:flex-col lg:justify-center">
           {/* 回上頁 */}
           <Reveal>
@@ -322,6 +372,35 @@ export default function DepartmentPage({ slug }: { slug: string }) {
                   {data.intro}
                 </p>
               </Reveal>
+
+              {/* Hashtag（文字內容在 departments.ts 的 DEPT_HASHTAGS；外觀／位置改上面的 HASHTAG） */}
+              {DEPT_HASHTAGS[slug]?.length ? (
+                <Reveal delay={120}>
+                  <div
+                    className="flex flex-wrap"
+                    style={{ gap: `${HASHTAG.gap}px`, marginTop: "2rem", transform: `translate(${HASHTAG.x}px, ${HASHTAG.y}px)` }}
+                  >
+                    {DEPT_HASHTAGS[slug].map((t) => (
+                      <span
+                        key={t}
+                        style={{
+                          background: data.color,
+                          color: "#fff",
+                          fontFamily: zhFont,
+                          fontWeight: 900,
+                          fontSize: `${HASHTAG.size}px`,
+                          letterSpacing: "0.08em",
+                          padding: `${HASHTAG.padY}px ${HASHTAG.padX}px`,
+                          borderRadius: `${HASHTAG.radius}px`,
+                          lineHeight: 1,
+                        }}
+                      >
+                        #{t}
+                      </span>
+                    ))}
+                  </div>
+                </Reveal>
+              ) : null}
             </div>
 
             {/* 右：服務輪播 */}

@@ -59,7 +59,7 @@ export type President = {
 // ── 部門色（比照 TeamSection，略提高彩度貼近設計稿；可自由調整）──
 export const C = {
   GEN: "#B07C43", // 行政部（橘棕）
-  SP: "#8C7B6B", // 體育部（灰棕）
+  SP: "#23658A", // 體育部
   ACA: "#5E8C3C", // 學術部（綠）
   EVE: "#C24A4F", // 活動部（紅）
   IMA: "#9C4A6E", // 形象宣傳部 / 美宣部（洋紅）

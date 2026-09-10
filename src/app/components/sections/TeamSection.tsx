@@ -292,7 +292,7 @@ const DEPTS: DeptDef[] = [
   { name: "活動部", color: "#9F353A", renderIcon: (playing) => <GuitarIcon playing={playing} />, href: "#/dept/eve" },
   { name: "學術部", color: "#42602D", renderIcon: (playing) => <QuillIcon playing={playing} />, href: "#/dept/aca" },
   { name: "形象宣傳部", color: "#572A3F", renderIcon: (playing) => <CameraIcon playing={playing} />, href: "#/dept/ima" },
-  { name: "體育部", color: "#554236", renderIcon: (playing) => <BasketballIcon playing={playing} />, href: "#/dept/sp" },
+  { name: "體育部", color: "#23658A", renderIcon: (playing) => <BasketballIcon playing={playing} />, href: "#/dept/sp" },
 ];
 
 // 純資料：頭銜、姓名、羅馬拼音、系級、照片。大小／位置不寫在這裡，改上方 FIGURE_ADJUST。

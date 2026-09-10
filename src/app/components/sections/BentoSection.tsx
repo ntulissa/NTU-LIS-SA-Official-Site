@@ -120,7 +120,7 @@ const TEAM_DEPTS = [
   { name: "活動部", color: "#9F353A", count: 5 },
   { name: "學術部", color: "#42602D", count: 4 },
   { name: "形象宣傳部", color: "#572A3F", count: 4 },
-  { name: "體育部", color: "#8C7B6B", count: 3 },
+  { name: "體育部", color: "#23658A", count: 3 },
 ];
 // 圓點大小與間距（覺得太大就把 TEAM_DOT_SIZE 的最大值調小）。
 const TEAM_DOT_SIZE = "clamp(13px, 1.9vw, 24px)";
