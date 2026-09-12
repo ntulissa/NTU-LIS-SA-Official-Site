@@ -36,22 +36,6 @@ function termOf(gen: number) {
 const CURRENT_TEAM_HREF = "#/current-team";
 const CURRENT_TEAM_LABEL = "現任團隊";
 
-/* ── 會長照片：自動對應 ──────────────────────────────────────
-   把照片放到  imports/Presidents/  資料夾，檔名＝屆數（如 52.jpg、51.png）。
-   之後只要「丟檔案進資料夾」就會自動顯示，程式不用再改；presidents.ts 每屆的 img 可留空字串。
-   （若某屆想手動指定別的圖，仍可在該屆物件的 img 直接填路徑，會優先採用。）
-   註：import.meta.glob 為 Vite 功能；若 @/ 別名在此不生效，
-       把路徑改成相對路徑 "../../../imports/Presidents/*.{png,jpg,jpeg,webp}" 即可。 */
-const PHOTOS = import.meta.glob(
-  "@/imports/Presidents/*.{png,jpg,jpeg,webp}",
-  { eager: true, import: "default" }
-) as Record<string, string>;
-
-function photoOf(gen: number): string {
-  const hit = Object.entries(PHOTOS).find(([path]) => path.includes(`/${gen}.`));
-  return hit ? hit[1] : "";
-}
-
 // ── 屆數切換器上的「點 → 箭頭」按鈕 ─────────────────────────
 function NavArrow({
   dir,
@@ -469,7 +453,7 @@ export default function PastPresidentsSection() {
   const [idx, setIdx] = useState(0); // 0 = 最新一屆（陣列第一個）
   const p = PRESIDENTS[idx] ?? PRESIDENTS[0];
   const hasData = p.name.trim() !== "";
-  const photo = p.img || photoOf(p.gen); // 先看該屆有沒有手動指定，沒有就依屆數自動找
+  const photo = p.img;
 
   // 右半固定面板的「快到頁尾時往上帶」位移：平常 0（照舊釘住）；當本區塊底部升進畫面
   // （＝ Footer 開始探進來）時，用同樣的量把面板往上推，讓它停在頁尾之上、不被 Footer 蓋住。
@@ -503,7 +487,7 @@ export default function PastPresidentsSection() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     PRESIDENTS.forEach((pp) => {
-      const s = pp.img || photoOf(pp.gen);
+      const s = pp.img;
       if (s) {
         const im = new window.Image();
         im.src = s;

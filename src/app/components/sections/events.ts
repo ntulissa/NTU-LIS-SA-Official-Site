@@ -99,7 +99,7 @@ export const EVENTS: CalEvent[] = [
   },
   {
     title: "LIS Talk: 系友講座",
-    date: "2026-10-20",
+    date: "2026-11-04",
     time: "18:30",
     depts: ["aca"],
     location: "系館視聽室",

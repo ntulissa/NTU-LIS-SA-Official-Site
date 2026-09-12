@@ -117,8 +117,8 @@ const TEAM_EMPTY_COLOR = "#2E2E2E"; // 未填滿的空位（深灰）
 const TEAM_DEPTS = [
   { name: "正副會長", color: "#A27F00", count: 2 },
   { name: "行政部", color: "#915E3E", count: 2 },
-  { name: "活動部", color: "#9F353A", count: 5 },
-  { name: "學術部", color: "#42602D", count: 4 },
+  { name: "活動部", color: "#9F353A", count: 7 },
+  { name: "學術部", color: "#42602D", count: 5 },
   { name: "形象宣傳部", color: "#572A3F", count: 4 },
   { name: "體育部", color: "#23658A", count: 3 },
 ];

@@ -14,7 +14,7 @@ export const gen: DeptData = {
   services: [
     // 服務圖放 imports/services/gen1.png、gen2.png（找不到會顯示佔位框）；href 先用 "#"，之後接服務頁。
     { name: "系櫃租借", img: svcImg("gen1"), href: "https://docs.google.com/forms/d/e/1FAIpQLSfmwqzlNfrtShLDTGdOBX2NuIT-NDs3Z49nJHVlLnPXcYlJ6g/viewform?usp=header" },
-    { name: "系學會費", img: svcImg("gen2"), href: "https://docs.google.com/forms/d/e/1FAIpQLSfmwqzlNfrtShLDTGdOBX2NuIT-NDs3Z49nJHVlLnPXcYlJ6g/viewform?usp=header" },
+    { name: "系學會費", img: svcImg("gen2"), href: "#/fees" },
   ],
   heads: [
     // 幹部照放 imports/members/gen1.png、gen2.png、gen3.png（找不到＝照片待補）。

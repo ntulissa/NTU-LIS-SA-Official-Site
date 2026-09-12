@@ -12,9 +12,8 @@ export const aca: DeptData = {
   joinBlurb: "加入學術部，你將親自參與選課指引整理、系友講座籌辦、杜鵑花節展出與系刊採訪編輯，掌握從內容企劃到知識傳播的全套實戰力。這不只是整理資源，更是為大家指引學習與職涯方向的重要推手。與我們一起定義圖資人的專業，就差你一個！",
   services: [
     { name: "教科書代訂", img: svcImg("aca1"), href: "https://forms.gle/hRrdBgktdzDasGqr6" },
-    { name: "系友講座", img: svcImg("aca3"), href: "#", open: false },
-    { name: "杜鵑花節", img: svcImg("aca2"), href: "#", open: false },
-    { name: "聯絡學術部", img: svcImg("aca4"), href: "#"},
+    { name: "系友講座", img: svcImg("aca2"), href: "#", open: false },
+    { name: "杜鵑花節", img: svcImg("aca3"), href: "#", open: false },
   ],
   heads: [
     { name: "周家禾", cls: "B14", title: "部長", img: memImg("aca1") },

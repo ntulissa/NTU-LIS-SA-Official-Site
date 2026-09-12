@@ -12,8 +12,8 @@ export const eve: DeptData = {
   joinBlurb: "加入活動部，你將親手策劃系上各大精彩活動，從活動企劃、現場控場到拉贊助談判，全方位解鎖最扎實的實戰技能。這不只是辦活動，更是與夥伴並肩創造共同回憶、點燃全系熱情的絕佳舞台。點亮圖資人的精彩生活，就差你一個！",
   services: [
     // href 先用 "#"，之後接服務頁；找不到圖會顯示佔位框。
-    { name: "服務一（待補）", img: svcImg("eve1"), href: "#" },
-    { name: "服務二（待補）", img: svcImg("eve2"), href: "#" },
+    { name: "新生迎新", img: svcImg("eve1"), href: "https://forms.gle/nBQ2AgeNh6chaeQ8A" },
+    { name: "圖資之夜", img: svcImg("eve2"), href: "#" },
   ],
   heads: [
     // 幹部照放 imports/members/eve1.png…（找不到＝照片待補）。

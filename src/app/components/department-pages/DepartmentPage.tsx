@@ -60,6 +60,16 @@ const NAME_BG = {
   opacity: 0.2, // 透明度（0~1）
 };
 
+// ④ 服務圖片的「全域預設」顯示方式
+//    素材長寬比不一（橫幅 logo vs 直式照片）時，靠這裡定調；
+//    個別特殊的那一張，再到 gen.tsx / eve.tsx 等的 Service 覆寫 fit/pos/scale/fade。
+const SERVICE_IMG = {
+  fit: "contain" as "contain" | "cover", // 預設完整顯示（logo 適用）；照片那張可自己設 fit:"cover" 填滿裁切
+  pos: "center",                          // object-position。原本是靠上(object-top)，橫圖會飄在頂端 → 改置中
+  scale: 1,                               // 縮放倍率，1 = 原樣。個別圖太小可在該張設 scale:1.15 之類（會被框裁切，故已開 overflow-hidden）
+  fadeOnCover: true,                      // 底部漸層：只有 cover（照片）預設套用；contain（logo）不套，避免字下緣被削掉
+};
+
 // 讀取 imports/members/ 底下所有「<縮寫>-name.svg」（Vite）。
 // 若原始碼不在 /src 底下、或用其他打包工具，改下面這行的路徑字串即可；
 // 舊版 Vite 請把 `query:"?url", import:"default"` 換成 `as:"url"`。
@@ -172,6 +182,13 @@ function ServiceCarousel({ services }: { services: Service[] }) {
   // 這項服務是否已推出：open 未填＝預設已推出；open:false＝準備中（按鈕變外框、不可點、提示語改成準備中）。
   const isOpen = s.open !== false;
 
+  // 圖片顯示參數：單張有填就用單張，沒填就吃 SERVICE_IMG 全域預設。
+  const imgFit = s.fit ?? SERVICE_IMG.fit;
+  const imgPos = s.pos ?? SERVICE_IMG.pos;
+  const imgScale = s.scale ?? SERVICE_IMG.scale;
+  // 漸層：單張有明確指定就聽它的；否則預設「只有 cover 才淡出」。
+  const imgFade = s.fade ?? (SERVICE_IMG.fadeOnCover && imgFit === "cover");
+
   // 圖片外層：已推出用可點的 <a>（開新分頁）；準備中用不可點的 <div>。
   const ImgTag: React.ElementType = isOpen ? "a" : "div";
   const imgProps = isOpen ? { ...linkProps(s.href), "aria-label": `${s.name} — 進入服務頁面` } : {};
@@ -181,15 +198,20 @@ function ServiceCarousel({ services }: { services: Service[] }) {
       {/* 服務圖片（已推出才可點進服務頁） */}
       <ImgTag
         {...imgProps}
-        className={`block relative w-full max-w-[420px] transition-transform duration-300 ${isOpen ? "hover:-translate-y-1 cursor-pointer" : "cursor-default"}`}
+        className={`block relative w-full max-w-[420px] overflow-hidden transition-transform duration-300 ${isOpen ? "hover:-translate-y-1 cursor-pointer" : "cursor-default"}`}
         style={{ height: "clamp(240px, 42vh, 420px)" }}
       >
         {s.img ? (
           <img
             src={s.img}
             alt={s.name}
-            className="absolute inset-0 w-full h-full object-contain object-top select-none"
-            style={{ WebkitMaskImage: PHOTO_FADE, maskImage: PHOTO_FADE }}
+            className="absolute inset-0 w-full h-full select-none"
+            style={{
+              objectFit: imgFit,
+              objectPosition: imgPos,
+              transform: imgScale !== 1 ? `scale(${imgScale})` : undefined,
+              ...(imgFade ? { WebkitMaskImage: PHOTO_FADE, maskImage: PHOTO_FADE } : {}),
+            }}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
