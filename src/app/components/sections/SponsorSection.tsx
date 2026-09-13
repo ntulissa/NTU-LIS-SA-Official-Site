@@ -1,361 +1,400 @@
-import { useEffect, useRef, useState } from "react";
+import { useState, type CSSProperties } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Reveal } from "./shared";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 贊助頁（獨立分頁 · 路由 #/sponsor）
-// 對外招募贊助：Hero 視差 → 成效數字 sticky 隨捲動 count-up → 為什麼贊助我們
-// → 合作 / 露出管道（先不分級）→ 未來夥伴牆 → 聯絡 CTA。
-// 自我包含，只依賴 ./shared 的 Reveal。
+// A. Hero：左標題文案 ＋ 右六顆「拉長版 Switch Toggle」（圓球自動上下浮動）
+//           ＋ 底部置中 Sponsor LISSA logo。
+// B. 贊助方案規格比較：三方案圖＋名稱，類別可左右切換，切換後顯示差異，下面是方案敘述。
+// C. 感謝您的支持！：標題＋副標＋「聯絡我們」按鈕，背景是排成「向下箭頭」的浮動 Toggle。
 //
-// ★ 之後要改的地方集中在上方常數：
-//   CONTACT：聯絡 email（佔位）。
-//   IMPACT / REASONS / CHANNELS：文案與數字（目前為佔位範例）。
+// ★ 所有「大小(px)／位置(XY px)」都集中在下面的《版面常數區》，改那裡就好。
 // ─────────────────────────────────────────────────────────────────────────
 
-// 聯絡資訊（佔位）。換成真實 email 即可。
-const CONTACT = {
-  email: "lissa.ntu@gmail.com",
-  contactHref: "#/contact",
-};
+// ── 字型（與全站一致）──
+const zhHead = "'Chiron Hei HK Text','Noto Sans TC', sans-serif"; // 標題／敘述
+const zhBody = "'Noto Sans TC', sans-serif";                       // 按鈕
+const mono   = "'Ubuntu Sans Mono','Noto Sans TC', monospace";     // 方案名稱／數值
 
-// 成效數字（佔位範例）。label 為說明，suffix 例如 "+"。
-const IMPACT = [
-  { value: 250, suffix: "+", label: "系上學生", en: "STUDENTS" },
-  { value: 30, suffix: "+", label: "年度活動場次", en: "EVENTS / YR" },
-  { value: 3000, suffix: "+", label: "社群每月觸及", en: "REACH / MO" },
-  { value: 30, suffix: "+", label: "屆傳承", en: "YEARS" },
-];
-
-// 為什麼贊助我們（對外賣點）。
-const REASONS = [
-  {
-    en: "TALENT",
-    title: "精準觸及未來人才",
-    desc: "直接接觸臺大圖書資訊學系學生——資訊、圖書館與資料領域的明日專業人才。",
-  },
-  {
-    en: "VISIBILITY",
-    title: "多管道品牌曝光",
-    desc: "官網、活動主視覺、系服與社群貼文，讓你的品牌被全系與更廣的校園社群看見。",
-  },
-  {
-    en: "CSR",
-    title: "展現企業社會責任",
-    desc: "支持學生自治與校園活動，是對教育與青年培育最直接、也最真誠的長期投入。",
-  },
-  {
-    en: "RECRUIT",
-    title: "招募與合作管道",
-    desc: "實習與徵才資訊優先傳達給對口科系學生，為你建立長期的人才連結。",
-  },
-];
-
-// 合作 / 露出管道（不分級，彈性列點）。
-const CHANNELS = [
-  { title: "官網品牌露出", desc: "在系學會官方網站呈現贊助夥伴，長期可見。" },
-  { title: "活動主視覺與看板", desc: "於各式活動的海報、看板與現場物料露出。" },
-  { title: "系服・系外套印製", desc: "品牌隨會員穿在身上，走進校園每個角落。" },
-  { title: "社群貼文標記", desc: "在活動貼文與限動中標記與感謝贊助夥伴。" },
-  { title: "講座・攤位機會", desc: "可安排企業講座、體驗攤位或說明會。" },
-  { title: "客製化合作", desc: "我們樂於一起討論最適合你的合作形式。" },
-];
-
-const BRAND_GRADIENT = "linear-gradient(to right, #D14B4B, #2F9EBD)";
-const zhHead = "'Chiron Hei HK Text','Noto Sans TC', sans-serif";
-const zhBody = "'Noto Sans TC', sans-serif";
-const mono = "'Ubuntu Sans Mono', monospace";
-
-// 捲動進度 Hook（同 FeesSection，自我包含）。
-function useScrollProgress<T extends HTMLElement>(ref: React.RefObject<T | null>) {
-  const [p, setP] = useState(0);
-  useEffect(() => {
-    let raf = 0;
-    const calc = () => {
-      const el = ref.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const total = rect.height - window.innerHeight;
-      const scrolled = -rect.top;
-      const prog = total > 0 ? scrolled / total : 0;
-      setP(Math.min(1, Math.max(0, prog)));
-    };
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(calc);
-    };
-    calc();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, [ref]);
-  return p;
-}
-
-// 捲出進度 Hook（適用一屏 Hero；同 FeesSection）。
-function useExitProgress<T extends HTMLElement>(ref: React.RefObject<T | null>) {
-  const [p, setP] = useState(0);
-  useEffect(() => {
-    let raf = 0;
-    const calc = () => {
-      const el = ref.current;
-      if (!el) return;
-      const top = el.getBoundingClientRect().top;
-      setP(Math.min(1, Math.max(0, -top / window.innerHeight)));
-    };
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(calc);
-    };
-    calc();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, [ref]);
-  return p;
-}
-
-const easeOutCubic = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
-
-// 旋轉描邊 CTA（沿用全站樣式）。
-function GlowButton({ href, children }: { href: string; children: React.ReactNode }) {
+// ── 左上角小標題（麵包屑，與 FeesSection 對齊）──────────────────────────────
+const EYEBROW_TEXT = "支持我們・贊助我們";
+const EYEBROW_X = 0;
+const EYEBROW_Y = 90;
+function Eyebrow({ text = EYEBROW_TEXT }: { text?: string }) {
   return (
-    <a
-      href={href}
-      className="relative inline-flex items-center justify-center px-8 py-3.5 rounded-full overflow-hidden hover:opacity-90 transition-all duration-200"
-      style={{ fontFamily: zhBody, fontWeight: 900, fontSize: "1rem", letterSpacing: "0.2em", color: "white", background: "#000" }}
+    <p
+      className="tracking-widest pointer-events-none select-none"
+      style={{
+        fontSize: "14px",
+        fontFamily: "'Ubuntu Sans Mono', monospace",
+        background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
+        backgroundClip: "text",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundSize: "220% 100%",
+        transform: `translate(${EYEBROW_X}px, ${EYEBROW_Y}px)`,
+      }}
     >
-      <span className="absolute inset-0 rounded-full" style={{ padding: "1.5px", border: "1.5px solid transparent", background: "linear-gradient(#000, #000) padding-box, linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%) border-box" }} />
-      <span
-        className="absolute inset-0 rounded-full"
-        style={{
-          background: "conic-gradient(from 0deg, #D14B4B 0deg, #2F9EBD 180deg, #D14B4B 360deg)",
-          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          WebkitMaskComposite: "xor",
-          maskComposite: "exclude",
-          animation: "buttonRotate 8s linear infinite",
-          opacity: 0.95,
-        }}
-      />
-      <span className="relative z-10">{children}</span>
-    </a>
+      — {text}
+    </p>
   );
 }
 
-// ── 成效數字：sticky 釘住，數字隨捲動依序 count-up ──────────────────────
-function ImpactScene() {
-  const sceneRef = useRef<HTMLDivElement>(null);
-  const p = useScrollProgress(sceneRef);
-  const n = IMPACT.length;
-  // 中間 80% 範圍用來跑數字，首尾留緩衝。
-  const clamped = Math.min(1, Math.max(0, (p - 0.1) / 0.8));
+// 聯絡（換成真實連結即可）
+const CONTACT = { contactHref: "#/contact" };
 
+// ══════════════════════════════════════════════════════════════
+// ★★ 版面常數區：size=字級(px)；x/y=位移(px，正x=右、正y=下)；h/w=尺寸(px) ★★
+//    每個元素都有自己的一組，單獨調不影響別人。
+// ══════════════════════════════════════════════════════════════
+
+// 五個部門色（Toggle 用）。依序：行政(棕)、活動(紅)、學術(綠)、美宣(紫)、資訊/公關(藍)
+const DEPT_COLORS = ["#A9713F", "#C24747", "#4E7B3F", "#7B3F6B", "#2F7FA6"];
+// 正副會長色（放 Hero 最左邊那顆）
+const LEADER_COLOR = "#A27F00";
+// Hero 六顆並列：正副會長(最左) ＋ 五部門色
+const HERO_COLORS = [LEADER_COLOR, ...DEPT_COLORS];
+
+// ── A. Hero ─────────────────────────────────────────────
+const HERO_LAYOUT = {
+  title:   { size: 58, lh: 1.5, x: 0, y: -90 },   // 主標題（兩行）
+  sub:     { size: 20, lh: 2.0, x: 0, y: -60 },   // 副標（兩行）
+};
+const HERO_TOGGLE = { w: 60, h: 480, gap: 30, x: 65, y: 0 }; // 右側六顆：w=軌道寬(也是圓球直徑)、h=軌道高、gap=間距
+const HERO_LOGO   = { h: 60, x: 0, y: -30 };                   // 底部 Sponsor logo 高度與位移
+
+// ── B. 贊助方案規格比較 ──────────────────────────────────
+const PLANS_LAYOUT = {
+  heading:  { size: 44, x: -90, y: -70 },           // 「贊助方案規格比較」
+  art:      { h: 120, x: 0, y: -100 },             // 三張方案圖高度
+  name:     { size: 18, x: 0, y: -80 },           // 方案名稱（mono）
+  catLabel: { size: 18, x: 0, y: 0 },           // 類別膠囊文字
+  value:    { size: 26, x: 0, y: 20 },           // 三方案數值
+  desc:     { size: 15, lh: 2.0, x: 0, y: 0 },  // 方案敘述（Chiron）
+  colW:     300,   // ★ 每個方案欄的寬度(px)（三欄同寬）
+  colGap:   190,    // ★ 相鄰方案欄的間距(px)：調這個就能拉近／拉遠左右兩欄，Plus 永遠置中
+};
+// 三欄置中排版：整組水平置中（Plus 在正中央），欄寬 colW、間距 colGap
+const planRow: CSSProperties = { display: "flex", justifyContent: "center", gap: `${PLANS_LAYOUT.colGap}px` };
+const planCol: CSSProperties = { width: `${PLANS_LAYOUT.colW}px`, maxWidth: "100%" };
+// 兩條分隔線落在欄與欄間距的正中央（自動跟著 colW/colGap 對齊）
+const DIVIDER_OFFSET = PLANS_LAYOUT.colW / 2 + PLANS_LAYOUT.colGap / 2;
+
+// ── C. 感謝您的支持 ─────────────────────────────────────
+const THANKS_LAYOUT = {
+  title:  { size: 88, x: 0, y: 0 },             // 「感謝您的支持！」
+  sub:    { size: 20, x: 0, y: 0 },             // 副標
+  button: { size: 17, x: 0, y: 40 },            // 按鈕文字
+};
+// 背景：散布多個箭頭圖（imports/Sponsor/arrow.svg），各自「閃動」（淡入淡出）。
+// 每個箭頭：x/y = 相對畫面中心的位移(px，負=左/上、正=右/下)；size = 寬度(px，可省略用預設)；delay = 閃動起始錯開(秒)。
+// (0,0) = 畫面正中心。想加減幾個 → 增刪 THANKS_ARROWS 的項目。
+const THANKS_ARROW = { w: 300 };                       // 箭頭圖預設寬度(px)
+const THANKS_BLINK = { min: 0.12, max: 0.85, dur: 3.2 }; // 閃動：透明度最低/最高、週期(秒)
+type ThanksArrow = { x: number; y: number; size?: number; delay?: number };
+const THANKS_ARROWS: ThanksArrow[] = [
+  { x: -540, y: -240, delay: 0.0 },
+  { x:  540, y: -240, delay: 0.9 },
+  { x: -540, y:  240, delay: 1.8 },
+  { x:  540, y:  240, delay: 2.6 },
+];
+// ── imports/Sponsor/*.svg 自動讀取（缺檔不會壞，會顯示佔位框） ──
+// 若原始碼不在 /src 底下，改下面的 glob 路徑字串即可；
+// 舊版 Vite 請把 `query:"?url", import:"default"` 換成 `as:"url"`。
+const SPONSOR_SVGS = import.meta.glob("/src/**/Sponsor/*.svg", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
+function sponsorSvg(file: string): string | undefined {
+  const hit = Object.keys(SPONSOR_SVGS).find((p) => p.endsWith(`/Sponsor/${file}`));
+  return hit ? SPONSOR_SVGS[hit] : undefined;
+}
+
+// ── 三個贊助方案（svg 放 imports/Sponsor/；名稱用 mono）──
+const PLANS = [
+  { key: "basic",   svg: "basic.svg",   name: "BASIC  基礎曝光",  desc: "最輕量的支持方式，在系學會官網與年度感謝中露出品牌，適合想先試水溫的夥伴。" },
+  { key: "plus",    svg: "plus.svg",    name: "PLUS  深度推廣",   desc: "跨官網、社群與活動的多點曝光，讓品牌被全系與更廣的校園社群持續看見。" },
+  { key: "partner", svg: "partner.svg", name: "PARTNER  年度夥伴", desc: "一整年的深度合作與客製化露出，成為圖資系學會最緊密的長期夥伴。" },
+];
+
+// ── 比較面向（可左右切換）；每組 values 依序對應 Basic / Plus / Partner（皆為佔位範例）──
+const COMPARE = [
+  { label: "贊助金額", values: ["NT$ 1,000 以下", "NT$ 1,000 – 5,000", "NT$ 5,000 以上"] },
+  { label: "核心形式", values: ["官方網站專區露出", "官網 ＋ 社群宣傳", "官網 ＋ 社群 ＋ 實體宣傳"] },
+  { label: "官方網站", values: ["專屬頁面品牌 Logo", "品牌 Logo ＋ 首頁宣傳版位", "品牌 Logo ＋ 首頁宣傳 ＋ 獨立夥伴介紹頁面"] },
+  { label: "社群推廣", values: ["—", "專屬宣傳貼文 1 篇 ＋ 限時動態", "專屬宣傳貼文 2 篇以上 ＋ 限時動態"] },
+  { label: "實體宣傳", values: ["—", "—", "實體活動現場宣傳（文宣品、海報發放）"] },
+];
+
+// hex → rgba（Toggle 軌道底色／圓球光暈用）
+function hexToRgba(hex: string, a: number): string {
+  const h = hex.replace("#", "");
+  return `rgba(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)}, ${a})`;
+}
+// 位移 helper：把 {x,y} 變成 transform
+const move = (c: { x?: number; y?: number }): CSSProperties => ({ transform: `translate(${c.x ?? 0}px, ${c.y ?? 0}px)` });
+
+// ── 拉長版 Switch Toggle：軌道 ＋ 圓球繞「軌道中心」上下對稱擺動（w/h 為 px）──
+// travel：圓球上下總擺動幅度(px)，不填＝跑滿整條軌道(h-w)。圓球繞中心 ±travel/2 擺動，
+//         所以「軌道中心」就是這根的定位點——y 一樣、球的中心高度就一定一樣。
+// ★ delay 一律轉成「負值」：讓動畫一載入就從週期中段開始，圓球進場已散開、不會一起往下掉。
+function ToggleBar({ color, w, h, dur, delay, travel, className = "", style }: {
+  color: string; w: number; h: number; dur: number; delay: number; travel?: number; className?: string; style?: CSSProperties;
+}) {
+  const amp = (travel ?? (h - w)) / 2;
   return (
-    <div ref={sceneRef} className="relative" style={{ height: `${Math.max(2.6, n * 0.7) * 100}vh` }}>
-      <div className="sticky top-0 h-screen overflow-hidden flex flex-col items-center justify-center px-6">
-        <div aria-hidden className="pointer-events-none absolute rounded-full blur-[130px] opacity-30" style={{ width: "60vw", height: "60vw", background: BRAND_GRADIENT, top: "50%", left: "50%", transform: "translate(-50%,-50%)" }} />
-        <div className="relative z-10 text-center mb-14 md:mb-20">
-          <p className="mb-4 tracking-[0.4em]" style={{ fontFamily: mono, fontSize: "0.8rem", background: BRAND_GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-            OUR&nbsp;&nbsp;IMPACT
-          </p>
-          <h2 className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(1.9rem,4.2vw,3.6rem)" }}>
-            你的支持，會走得很遠
-          </h2>
+    <div
+      className={`relative overflow-hidden shrink-0 ${className}`}
+      style={{ width: `${w}px`, height: `${h}px`, borderRadius: 9999, background: hexToRgba(color, 0.16), ...style }}
+      aria-hidden
+    >
+      <span
+        className="sp-ball absolute left-1/2 top-1/2"
+        style={{
+          width: `${w}px`,
+          height: `${w}px`,
+          borderRadius: "9999px",
+          background: color,
+          boxShadow: `0 0 26px -4px ${hexToRgba(color, 0.55)}`,
+          ["--sp-amp" as string]: `${amp}px`,
+          animation: `spBall ${dur}s ease-in-out ${-Math.abs(delay)}s infinite`,
+        } as CSSProperties}
+      />
+    </div>
+  );
+}
+
+// ── 類別左右切換鈕（點 → 箭頭，比照 DepartmentPage）──
+function NavArrow({ dir, color, disabled, onClick }: { dir: "prev" | "next"; color: string; disabled: boolean; onClick: () => void }) {
+  const Icon = dir === "prev" ? ChevronLeft : ChevronRight;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={dir === "prev" ? "上一個面向" : "下一個面向"}
+      className="group relative flex items-center justify-center disabled:cursor-default"
+      style={{ width: "42px", height: "42px" }}
+    >
+      {disabled ? (
+        <span className="absolute rounded-full" style={{ width: "11px", height: "11px", background: color, opacity: 0.32 }} />
+      ) : (
+        <>
+          <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-out group-hover:opacity-0">
+            <span className="dept-pulse-dot absolute rounded-full" style={{ width: "12px", height: "12px", background: color, ["--dept-glow" as string]: hexToRgba(color, 0.55) } as CSSProperties} />
+          </span>
+          <span className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 scale-75 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:scale-100" style={{ background: color, boxShadow: `0 8px 20px -8px ${color}` }}>
+            <Icon size={20} strokeWidth={2.6} className="text-white" />
+          </span>
+        </>
+      )}
+    </button>
+  );
+}
+
+// ── 方案圖：固定高度框 ＋ object-contain 置中（不同尺寸 svg 都會對齊）──
+function PlanArt({ file, alt }: { file: string; alt: string }) {
+  const url = sponsorSvg(file);
+  return (
+    <div className="relative w-full flex items-center justify-center" style={{ height: `${PLANS_LAYOUT.art.h}px`, ...move(PLANS_LAYOUT.art) }}>
+      {url ? (
+        <img src={url} alt={alt} className="max-w-[86%] max-h-full object-contain select-none" />
+      ) : (
+        <div className="flex items-center justify-center rounded-2xl border border-dashed border-white/15 w-[70%] h-full text-white/25" style={{ fontFamily: mono, fontSize: "0.7rem", letterSpacing: "0.18em" }}>
+          {file}
         </div>
-        <div className="relative z-10 w-full max-w-[1200px] grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6">
-          {IMPACT.map((s, i) => {
-            // 每個數字錯開起跑，形成「依序點亮」的節奏。
-            const segStart = (i / n) * 0.7;
-            const local = easeOutCubic((clamped - segStart) / 0.35);
-            const shown = Math.round(s.value * local);
-            const lit = local > 0.02;
-            return (
-              <div
-                key={i}
-                className="text-center transition-all duration-500"
-                style={{ opacity: lit ? 1 : 0.25, transform: lit ? "translateY(0)" : "translateY(16px)" }}
-              >
-                <p className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(2.4rem,6vw,4.5rem)", lineHeight: 1 }}>
-                  <span style={{ background: BRAND_GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                    {shown.toLocaleString()}
-                  </span>
-                  <span className="text-white/80" style={{ fontSize: "0.5em" }}>{s.suffix}</span>
-                </p>
-                <p className="text-white/70 mt-3" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: "clamp(0.85rem,1.4vw,1.05rem)" }}>{s.label}</p>
-                <p className="text-white/30 mt-1" style={{ fontFamily: mono, fontSize: "0.65rem", letterSpacing: "0.2em" }}>{s.en}</p>
-              </div>
-            );
-          })}
-        </div>
-        <p className="relative z-10 text-white/30 mt-14" style={{ fontFamily: zhBody, fontSize: "0.8rem" }}>
-          ＊ 數字為範例，實際依系學會統計為準。
-        </p>
-      </div>
+      )}
     </div>
   );
 }
 
 export default function SponsorSection() {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const heroP = useExitProgress(heroRef);
+  const [cat, setCat] = useState(0);
+  const canPrev = cat > 0;
+  const canNext = cat < COMPARE.length - 1;
+  const current = COMPARE[cat];
+  const heroLogo = sponsorSvg("sponsorLISSA.svg");
+  const arrowImg = sponsorSvg("arrow.svg");
 
   return (
     <div className="bg-black">
       <style>{`
-        @keyframes buttonRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes spFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+        /* 圓球繞「軌道中心」上下對稱擺動（中心 = 這根 toggle 的定位點） */
+        @keyframes spBall {
+          0%,100% { transform: translate(-50%, calc(-50% - var(--sp-amp))); }
+          50%     { transform: translate(-50%, calc(-50% + var(--sp-amp))); }
+        }
+        /* 類別切換點的脈動（比照 DepartmentPage） */
+        @keyframes deptPulseDot {
+          0%,100% { transform: scale(1);    box-shadow: 0 0 0 0 var(--dept-glow); }
+          50%     { transform: scale(1.18); box-shadow: 0 0 10px 2px var(--dept-glow); }
+        }
+        .dept-pulse-dot { transform-origin: center; animation: deptPulseDot 1.8s ease-in-out infinite; }
+        /* 背景箭頭閃動（淡入淡出） */
+        @keyframes spBlink {
+          0%,100% { opacity: var(--sp-min); }
+          50%     { opacity: var(--sp-max); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .sp-ball, .dept-pulse-dot, .sp-blink { animation: none !important; }
+        }
       `}</style>
 
-      {/* ── A. Hero（視差 · 對外語氣） ─────────────────────────────── */}
-      <div ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden px-6">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute rounded-full blur-[130px]"
-          style={{ width: "72vw", height: "72vw", background: BRAND_GRADIENT, opacity: 0.32, top: "44%", left: "50%", transform: `translate(-50%,-50%) translateY(${heroP * -120}px) scale(${1 + heroP * 0.3})` }}
-        />
-        <div className="relative z-10 text-center max-w-4xl" style={{ transform: `translateY(${heroP * -60}px)`, opacity: 1 - heroP * 0.8 }}>
-          <p className="mb-6 tracking-[0.5em]" style={{ fontFamily: mono, fontSize: "clamp(0.8rem,1.4vw,1rem)", background: BRAND_GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-            SPONSORSHIP
-          </p>
-          <h1 className="text-white leading-tight mb-8" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(2.1rem,5.6vw,4.8rem)" }}>
-            與圖資系學會，<br />
-            一起{" "}
-            <span style={{ background: BRAND_GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>投資下一代</span>{" "}資訊人才
-          </h1>
-          <p className="text-white/60 leading-loose mb-4 max-w-2xl mx-auto" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(0.9rem,1.6vw,1.1rem)" }}>
-            你的支持，將化為一整年的活動、服務與成長機會，也讓你的品牌走進未來專業人才的日常。
-          </p>
-          <p className="text-white/35 mb-12" style={{ fontFamily: mono, fontSize: "clamp(0.7rem,1.2vw,0.85rem)", letterSpacing: "0.15em" }}>
-            Partner with NTU LIS Student Association
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <GlowButton href={CONTACT.contactHref}>成 為 贊 助 夥 伴</GlowButton>
-            <a href="#sponsor-why" className="inline-flex items-center justify-center px-8 py-3.5 rounded-full border border-white/40 text-white hover:bg-white/5 transition-all duration-200" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "1rem", letterSpacing: "0.12em" }}>
-              了 解 更 多
-            </a>
+      {/* ══════════ A. Hero ══════════ */}
+      <section className="relative min-h-screen flex items-center overflow-hidden px-5 sm:px-8 md:px-14 pt-24 pb-28">
+        <div className="absolute top-6 left-6 md:left-12 z-20">
+          <Eyebrow />
+        </div>
+        <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* 左：文案 */}
+          <div>
+            <div className="h-[14px] mb-8" aria-hidden="true" />
+            <Reveal delay={60}>
+              <h1 className="text-white mb-8" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `${HERO_LAYOUT.title.size}px`, lineHeight: HERO_LAYOUT.title.lh, letterSpacing: "0.02em", ...move(HERO_LAYOUT.title) }}>
+                <span className="block">讓你的品牌，</span>
+                <span className="block">走入知識與資訊的核心。</span>
+              </h1>
+            </Reveal>
+            <Reveal delay={120}>
+              <p className="text-white/60" style={{ fontFamily: zhBody, fontWeight: 500, color: "white", fontSize: `${HERO_LAYOUT.sub.size}px`, letterSpacing: "0.05em", lineHeight: HERO_LAYOUT.sub.lh, ...move(HERO_LAYOUT.sub) }}>
+                <span className="block">透過全新改版的系學會官方網站與社群渠道，</span>
+                <span className="block">精準對接臺大圖資系多元的專業人才與校園群體。</span>
+              </p>
+            </Reveal>
+          </div>
+
+          {/* 右：六顆拉長版 Toggle（最左為正副會長色；手機隱藏，避免擁擠） */}
+          <div className="hidden lg:flex items-center justify-center" style={{ gap: `${HERO_TOGGLE.gap}px`, ...move(HERO_TOGGLE) }}>
+            {HERO_COLORS.map((c, i) => (
+              <ToggleBar key={i} color={c} w={HERO_TOGGLE.w} h={HERO_TOGGLE.h} dur={3.4 + i * 0.4} delay={i * 0.7} />
+            ))}
           </div>
         </div>
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2" style={{ animation: "spFloat 2.4s ease-in-out infinite" }}>
-          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2">
-            <span className="w-1 h-2 rounded-full bg-white/50" />
-          </div>
+
+        {/* 底部置中：Sponsor LISSA logo（imports/Sponsor/sponsorLISSA.svg） */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center justify-center">
+          {heroLogo ? (
+            <img src={heroLogo} alt="Sponsor — NTU LIS SA" className="select-none" style={{ height: `${HERO_LOGO.h}px`, width: "auto", objectFit: "contain", ...move(HERO_LOGO) }} />
+          ) : (
+            <span className="text-white/30" style={{ fontFamily: mono, fontSize: "0.8rem", letterSpacing: "0.2em", ...move(HERO_LOGO) }}>Sponsor · sponsorLISSA.svg</span>
+          )}
         </div>
-      </div>
+      </section>
 
-      {/* ── B. 成效數字（sticky count-up） ─────────────────────────── */}
-      <ImpactScene />
-
-      {/* ── C. 為什麼贊助我們 ──────────────────────────────────────── */}
-      <section id="sponsor-why" className="py-28 md:py-36 px-6 border-t border-white/5">
-        <div className="max-w-[1200px] mx-auto">
+      {/* ══════════ B. 贊助方案規格比較 ══════════ */}
+      {/* 註：「往下繼續探索」白色指示器由全站共用元件提供，這裡不再重複。 */}
+      <section id="sponsor-plans" className="relative min-h-screen flex flex-col justify-center px-5 sm:px-8 md:px-14 py-24">
+        <div className="max-w-[1200px] w-full mx-auto">
           <Reveal>
-            <p className="mb-4 tracking-[0.4em] text-center" style={{ fontFamily: mono, fontSize: "0.8rem", background: BRAND_GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-              WHY&nbsp;&nbsp;SPONSOR&nbsp;&nbsp;US
-            </p>
-          </Reveal>
-          <Reveal delay={80}>
-            <h2 className="text-white text-center mb-16" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(1.9rem,4vw,3.4rem)" }}>
-              為 什 麼 贊 助 我 們
+            <h2 className="text-white mb-14 lg:mb-20" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `${PLANS_LAYOUT.heading.size}px`, letterSpacing: "0.04em", ...move(PLANS_LAYOUT.heading) }}>
+              贊助方案比較
             </h2>
           </Reveal>
-          <div className="grid md:grid-cols-2 gap-6">
-            {REASONS.map((r, i) => (
-              <Reveal key={i} delay={(i % 2) * 100}>
-                <div className="rounded-[22px] p-8 md:p-10 border border-white/10 h-full" style={{ background: "linear-gradient(150deg, rgba(47,158,189,0.14), rgba(209,75,75,0.12))" }}>
-                  <p className="mb-4 tracking-[0.25em]" style={{ fontFamily: mono, fontSize: "0.72rem", color: "rgba(255,255,255,0.4)" }}>{r.en}</p>
-                  <h3 className="text-white mb-4" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(1.3rem,2.4vw,2rem)" }}>{r.title}</h3>
-                  <p className="text-white/70 leading-loose" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(0.9rem,1.4vw,1.05rem)" }}>{r.desc}</p>
+
+          {/* 直向分隔線 ＋ 三欄內容（整組置中，Plus 在正中央；間距改 PLANS_LAYOUT.colGap） */}
+          <div className="relative">
+            <span aria-hidden className="pointer-events-none absolute top-0 bottom-0 w-px bg-white/10" style={{ left: `calc(50% - ${DIVIDER_OFFSET}px)` }} />
+            <span aria-hidden className="pointer-events-none absolute top-0 bottom-0 w-px bg-white/10" style={{ left: `calc(50% + ${DIVIDER_OFFSET}px)` }} />
+
+            {/* 方案圖 ＋ 名稱 */}
+            <div style={planRow}>
+              {PLANS.map((p, i) => (
+                <div key={p.key} style={planCol}>
+                  <Reveal delay={i * 80}>
+                    <div className="flex flex-col items-center text-center">
+                      <PlanArt file={p.svg} alt={p.name} />
+                      <p className="text-white mt-6" style={{ fontFamily: mono, fontWeight: 700, fontSize: `${PLANS_LAYOUT.name.size}px`, letterSpacing: "0.06em", ...move(PLANS_LAYOUT.name) }}>
+                        {p.name}
+                      </p>
+                    </div>
+                  </Reveal>
                 </div>
-              </Reveal>
-            ))}
+              ))}
+            </div>
+
+            {/* 類別切換（置中） */}
+            <div className="flex items-center justify-center gap-4 sm:gap-5 my-12 lg:my-16">
+              <NavArrow dir="prev" color="#D14B4B" disabled={!canPrev} onClick={() => canPrev && setCat((v) => v - 1)} />
+              <div className="rounded-full border border-white/40 bg-black px-6 py-2.5 min-w-[140px] text-center" style={{ fontFamily: zhHead, fontWeight: 700, color: "#fff", fontSize: `${PLANS_LAYOUT.catLabel.size}px`, letterSpacing: "0.12em", ...move(PLANS_LAYOUT.catLabel) }}>
+                {current.label}
+              </div>
+              <NavArrow dir="next" color="#2F9EBD" disabled={!canNext} onClick={() => canNext && setCat((v) => v + 1)} />
+            </div>
+
+            {/* 該面向下三方案的差異數值 */}
+            <div style={planRow}>
+              {current.values.map((v: string, i: number) => (
+                <div key={i} style={planCol} className="flex items-center justify-center text-center">
+                  <span className="text-white" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: "23px", letterSpacing: "0.02em", ...move(PLANS_LAYOUT.value) }}>
+                    {v}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* 方案敘述 */}
+            <div style={planRow} className="mt-14 lg:mt-20">
+              {PLANS.map((p, i) => (
+                <div key={p.key} style={planCol}>
+                  <Reveal delay={i * 80}>
+                    <p className="text-white/60 text-center" style={{ fontFamily: zhHead, fontWeight: 500, fontSize: `${PLANS_LAYOUT.desc.size}px`, lineHeight: PLANS_LAYOUT.desc.lh, ...move(PLANS_LAYOUT.desc) }}>
+                      {p.desc}
+                    </p>
+                  </Reveal>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── D. 合作 / 露出管道（不分級） ───────────────────────────── */}
-      <section className="py-28 md:py-36 px-6 border-t border-white/5">
-        <div className="max-w-[1200px] mx-auto">
-          <Reveal>
-            <h2 className="text-white text-center mb-5" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(1.9rem,4vw,3.4rem)" }}>
-              我 們 能 一 起 做 什 麼
-            </h2>
-          </Reveal>
-          <Reveal delay={80}>
-            <p className="text-center text-white/55 leading-loose mb-16 max-w-2xl mx-auto" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(0.9rem,1.5vw,1.05rem)" }}>
-              我們沒有制式的方案框架——以下是常見的合作形式，最終會依你的需求，一起討論最合適的組合。
-            </p>
-          </Reveal>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {CHANNELS.map((c, i) => (
-              <Reveal key={i} delay={(i % 3) * 90}>
-                <div className="group rounded-[18px] p-7 md:p-8 border border-white/10 h-full hover:border-white/25 transition-colors duration-300" style={{ background: "rgba(255,255,255,0.03)" }}>
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="block rounded-full" style={{ width: "10px", height: "10px", background: BRAND_GRADIENT }} />
-                    <h3 className="text-white" style={{ fontFamily: zhBody, fontWeight: 900, fontSize: "clamp(1.05rem,1.7vw,1.25rem)" }}>{c.title}</h3>
-                  </div>
-                  <p className="text-white/60 leading-loose" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(0.85rem,1.3vw,0.98rem)" }}>{c.desc}</p>
-                </div>
-              </Reveal>
+      {/* ══════════ C. 感謝您的支持！ ══════════ */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 py-24">
+        {/* 背景：散布的箭頭圖（arrow.svg），各自閃動；位置全由 THANKS_ARROWS 手動控制 */}
+        {arrowImg ? (
+          <div className="absolute inset-0 pointer-events-none select-none" aria-hidden>
+            {THANKS_ARROWS.map((a, i) => (
+              <img
+                key={i}
+                src={arrowImg}
+                alt=""
+                className="sp-blink absolute max-w-none"
+                style={{
+                  left: "50%",
+                  top: "50%",
+                  width: `${a.size ?? THANKS_ARROW.w}px`,
+                  transform: `translate(calc(-50% + ${a.x}px), calc(-50% + ${a.y}px))`,
+                  ["--sp-min" as string]: THANKS_BLINK.min,
+                  ["--sp-max" as string]: THANKS_BLINK.max,
+                  animation: `spBlink ${THANKS_BLINK.dur}s ease-in-out ${-(a.delay ?? 0)}s infinite`,
+                } as CSSProperties}
+              />
             ))}
           </div>
-        </div>
-      </section>
+        ) : null}
 
-      {/* ── E. 未來夥伴牆（佔位） ──────────────────────────────────── */}
-      <section className="py-28 md:py-36 px-6 border-t border-white/5">
-        <div className="max-w-[1100px] mx-auto">
+        <div className="relative z-10 text-center max-w-3xl">
           <Reveal>
-            <h2 className="text-white text-center mb-4" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(1.7rem,3.4vw,2.8rem)" }}>
-              期 待 與 你 並 肩
-            </h2>
-          </Reveal>
-          <Reveal delay={80}>
-            <p className="text-center text-white/45 mb-14" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(0.85rem,1.4vw,1rem)" }}>
-              這裡會留給每一位支持我們的夥伴——下一個，會不會是你？
-            </p>
-          </Reveal>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Reveal key={i} delay={(i % 4) * 70}>
-                <div className="aspect-[3/2] rounded-[16px] border border-dashed border-white/15 flex items-center justify-center hover:border-white/30 transition-colors duration-300" style={{ background: "rgba(255,255,255,0.02)" }}>
-                  <span className="text-white/25" style={{ fontFamily: mono, fontSize: "0.75rem", letterSpacing: "0.2em" }}>YOUR LOGO</span>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── F. 聯絡 CTA ────────────────────────────────────────────── */}
-      <section className="relative py-32 md:py-44 px-6 overflow-hidden border-t border-white/5">
-        <div aria-hidden className="pointer-events-none absolute rounded-full blur-[130px] opacity-30" style={{ width: "60vw", height: "60vw", background: BRAND_GRADIENT, top: "50%", left: "50%", transform: "translate(-50%,-50%)" }} />
-        <div className="relative z-10 text-center max-w-3xl mx-auto">
-          <Reveal>
-            <h2 className="text-white leading-tight mb-8" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(2rem,5vw,4rem)" }}>
-              聊 聊 合 作 的 可 能
+            <h2 className="text-white mb-6" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `${THANKS_LAYOUT.title.size}px`, letterSpacing: "0.08em", textShadow: "0 4px 30px rgba(0,0,0,0.7)", ...move(THANKS_LAYOUT.title) }}>
+              感謝您的支持！
             </h2>
           </Reveal>
           <Reveal delay={100}>
-            <p className="text-white/60 leading-loose mb-10" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(0.9rem,1.6vw,1.1rem)" }}>
-              無論是企業、店家或個人，只要你願意支持圖資，我們都很想認識你。
+            <p className="text-white/80 mb-10" style={{ fontFamily: zhHead, fontWeight: 500, fontSize: `${THANKS_LAYOUT.sub.size}px`, letterSpacing: "0.04em", textShadow: "0 2px 16px rgba(0,0,0,0.6)", ...move(THANKS_LAYOUT.sub) }}>
+              歡迎尋找最適合您／貴司的合作方式。
             </p>
           </Reveal>
-          <Reveal delay={160}>
-            <a href={`mailto:${CONTACT.email}`} className="inline-block mb-10 text-white/80 hover:text-white transition-colors" style={{ fontFamily: mono, fontSize: "clamp(0.95rem,1.8vw,1.3rem)", letterSpacing: "0.1em", borderBottom: "1px solid rgba(255,255,255,0.3)", paddingBottom: "4px" }}>
-              {CONTACT.email}
+          <Reveal delay={180}>
+            <a
+              href={CONTACT.contactHref}
+              className="inline-flex items-center gap-3 bg-white text-black px-7 sm:px-8 py-3.5 rounded-full hover:bg-white/90 transition-all duration-200 group w-fit max-w-full"
+              style={{ fontFamily: zhBody, fontWeight: 700, fontSize: `${THANKS_LAYOUT.button.size}px`, letterSpacing: "0.06em", ...move(THANKS_LAYOUT.button) }}
+            >
+              聯絡我們
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-200" />
             </a>
-          </Reveal>
-          <Reveal delay={220}>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <GlowButton href={CONTACT.contactHref}>聯 絡 我 們</GlowButton>
-            </div>
           </Reveal>
         </div>
       </section>

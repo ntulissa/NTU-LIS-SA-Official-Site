@@ -7,8 +7,24 @@ import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
 // LOGO_OFFSET_X：水平位移，正值往右、負值往左（px）
 // LOGO_OFFSET_Y：垂直位移，正值往下、負值往上（px）
 const LOGO_SIZE = 180;
-const LOGO_OFFSET_X = -8;
+const LOGO_OFFSET_X = -55;
 const LOGO_OFFSET_Y = 0;
+
+// ── 右側四個選單欄微調（新增類別後標題被擠到換行時調這裡）──────────────
+// NAV_COL_GAP：四欄之間的水平間距（px），調小 → 每欄更寬、標題更不會換行
+// NAV_SHIFT_X：四欄「整體」水平位移（px，負=往左、正=往右）
+const NAV_COL_GAP = 20;
+const NAV_SHIFT_X = 100;
+
+// ── 其他元素的 XY 位移（px；正 x=往右、正 y=往下）──────────────────────
+const DESC_X = -50;        // 左側敘述文字
+const DESC_Y = 0;
+const SOCIAL_X = -55;      // 三個社群圖示（整排）
+const SOCIAL_Y = 0;
+const COPYRIGHT_X = -55;   // 底部版權宣告
+const COPYRIGHT_Y = 0;
+const EMAIL_X = 30;       // 底部 Email
+const EMAIL_Y = 0;
 
 // 每個連結改成 { label, href }，讓 Footer 也能連到對應頁面／錨點（與 Header 一致）。
 // 「現任團隊」連到獨立頁 #/current-team；「歷任會長」連到 #/presidents。
@@ -37,6 +53,14 @@ const NAV_COLS = [
     links: [
       { label: "學術資源", href: "#resources" },
       { label: "聯絡我們", href: "#/contact" },
+    ],
+  },
+  {
+    en: "SUPPORT US",
+    zh: "支持我們",
+    links: [
+      { label: "系學會費", href: "#/fees" },
+      { label: "贊助我們", href: "#/sponsor" },
     ],
   },
 ];
@@ -100,10 +124,13 @@ export default function Footer() {
         }
       `}</style>
       <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-14">
-        <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-8 md:gap-10 lg:gap-20 mb-10">
-          {/* 右側選單區塊可手動調整：lg:gap-14 / md:gap-10 這兩個數字；數字越大，三排之間距離越寬 */}
+        <div
+          className="grid grid-cols-1 md:grid-cols-[auto_repeat(4,minmax(0,1fr))] gap-y-8 mb-10"
+          style={{ columnGap: `${NAV_COL_GAP}px` }}
+        >
+          {/* 欄距改上方常數 NAV_COL_GAP；選單整體左右位移改 NAV_SHIFT_X */}
           {/* Brand */}
-          <div className="md:max-w-[220px] md:mr-6 lg:mr-30">
+          <div className="md:max-w-[200px] md:mr-2 lg:mr-6">
             {/* 左側 Logo 區塊向右推的距離：md:mr-8 / lg:mr-12；數字越大，Logo 會離右邊選單更遠 */}
             {/* Logo — matches Header exactly */}
             {/* Logo（只保留上傳的 SVG；大小與位移用上方常數調整）*/}
@@ -122,12 +149,12 @@ export default function Footer() {
 
             <p
               className="text-white/35 leading-relaxed mb-6"
-              style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "0.8rem" }}
+              style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "0.8rem", transform: `translate(${DESC_X}px, ${DESC_Y}px)` }}
             >
               國立臺灣大學圖書資訊學系學生自治組織，致力於促進學術交流與同學福祉。
             </p>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2" style={{ transform: `translate(${SOCIAL_X}px, ${SOCIAL_Y}px)` }}>
               {SOCIAL_ICONS.map(({ label, href, icon }) => (
                 <a
                   key={label}
@@ -144,11 +171,10 @@ export default function Footer() {
           </div>
 
           {/* Nav columns */}
-          {NAV_COLS.map((col, index) => (
-            <div key={col.en} className={index === NAV_COLS.length - 1 ? "md:pl-10 lg:pl-14" : "md:pl-6 lg:pl-8"}>
-              {/* 右側選單欄位的內距：最右欄用 md:pl-10 / lg:pl-14，其他欄用 md:pl-6 / lg:pl-8；數字越大，欄位會更往右偏 */}
+          {NAV_COLS.map((col) => (
+            <div key={col.en} style={{ transform: `translateX(${NAV_SHIFT_X}px)` }}>
               <p
-                className="footer-flow-text text-sm font-bold mb-6"
+                className="footer-flow-text text-sm font-bold mb-6 whitespace-nowrap"
                 style={{
                   fontFamily: "'Ubuntu Sans Mono', monospace",
                   letterSpacing: "0.07em",
@@ -177,11 +203,11 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/8 gap-3">
           <p
             className="text-white/25 text-xs"
-            style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500 }}
+            style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, transform: `translate(${COPYRIGHT_X}px, ${COPYRIGHT_Y}px)` }}
           >
             © 2026 臺大圖資系學會 NTU LIS Student Association. All rights reserved.
           </p>
-          <div className="flex items-center gap-2 text-white/60">
+          <div className="flex items-center gap-2 text-white/60" style={{ transform: `translate(${EMAIL_X}px, ${EMAIL_Y}px)` }}>
             <Mail size={13} />
             <span
               className="text-xs"

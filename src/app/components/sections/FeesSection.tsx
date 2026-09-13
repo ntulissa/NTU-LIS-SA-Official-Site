@@ -39,7 +39,7 @@ const scriptFont = "'Dancing Script','Brush Script MT',cursive";
 // ── 左上角小標題（麵包屑，只放在 Hero）─────────────────────────────────────
 // 字體格式沿用 TeamSection：Ubuntu Sans Mono + 白→灰漸層字，前面加「— 」。
 // 想改文字改 EYEBROW_TEXT；想移動位置改 EYEBROW_X / EYEBROW_Y（px；正 X=右、正 Y=下）。
-const EYEBROW_TEXT = "各種服務・系學會費";
+const EYEBROW_TEXT = "支持我們・系學會費";
 const EYEBROW_X = 0; // 水平位移（px）：正 = 往右、負 = 往左
 const EYEBROW_Y = 90; // 垂直位移（px）：正 = 往下、負 = 往上
 function Eyebrow({

@@ -41,9 +41,15 @@ const NAV_ITEMS = [
     labelEn: "SERVICES",
     sub: [
       { label: "學術資源", href: "#resources" },
+      { label: "聯絡我們", href: "#/contact" },
+    ],
+  },
+  {
+    label: "支持我們",
+    labelEn: "SUPPORT",
+    sub: [
       { label: "系學會費", href: "#/fees" },
       { label: "贊助我們", href: "#/sponsor" },
-      { label: "聯絡我們", href: "#/contact" },
     ],
   },
 ];
