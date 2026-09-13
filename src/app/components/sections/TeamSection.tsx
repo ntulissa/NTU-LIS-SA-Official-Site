@@ -361,7 +361,7 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
               </p>
             </Reveal>
             <Reveal delay={50}>
-              <h2 className="font-bold leading-none mb-6" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "clamp(2.8rem,3.5vw,60px)" }}>
+              <h2 className="font-bold leading-none mb-6" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "60px" }}>
                 <span className="text-white">CURRENT</span><br />
                 <span style={{ color: "#2f9ebd" }}>TEAM</span>
               </h2>

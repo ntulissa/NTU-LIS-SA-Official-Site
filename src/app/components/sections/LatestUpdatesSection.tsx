@@ -30,7 +30,7 @@ export default function LatestUpdatesSection({ standalone = false }: { standalon
           >
             — 最新動態・近期公告
           </p>
-          <h2 className="font-bold leading-none mb-12" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>
+          <h2 className="font-bold leading-none mb-12" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "60px" }}>
             <span className="text-white block">LATEST</span>
             <span style={{ color: "#D14B4B" }} className="block">UPDATES</span>
           </h2>

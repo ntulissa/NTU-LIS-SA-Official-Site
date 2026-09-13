@@ -568,7 +568,7 @@ export default function PastPresidentsSection() {
               </p>
             </Reveal>
             <Reveal delay={40}>
-              <h2 className="font-bold leading-none mb-8 lg:mb-10" style={{ fontFamily: enDisplay, fontSize: "clamp(2.6rem,5vw,5rem)" }}>
+              <h2 className="font-bold leading-none mb-8 lg:mb-10" style={{ fontFamily: enDisplay, fontSize: "60px" }}>
                 <span className="text-white block">PAST</span>
                 <span className="block" style={{ color: "#D14B4B" }}>PRESIDENTS</span>
               </h2>

@@ -5,15 +5,13 @@ import imgRect8 from "@/imports/AcademicResources/1f59199eb1196007561b8c8c386714
 import { Reveal } from "./shared";
 
 const EXTERNAL_LINKS = [
-  { title: "臺大圖資系官網", sub: "國立臺灣大學圖書資訊學系", img: imgBuildingResources, href: "https://lis.ntu.edu.tw" },
-  { title: "臺大圖資課程地圖", sub: "國立臺灣大學大學部課程地圖查詢", img: imgBuildingResources, href: "#" },
-  { title: "課程筆記資料庫", sub: "系學會整理之課程筆記共享資源", img: null, href: "#" },
+  { title: "臺大圖資系官網", sub: "國立臺灣大學圖書資訊學系", img: null, href: "https://www.lis.ntu.edu.tw" },
+  { title: "臺大圖資課程地圖", sub: "國立臺灣大學大學部課程地圖查詢", img: null, href: "#" },
   { title: "必修科目及應修學分資料查詢網站", sub: "國立臺灣大學學務處", img: null, href: "#" },
 ];
 
 const DOWNLOAD_LINKS = [
-  { title: "書府 2023", sub: "系學會學術部製作", img: imgRect7, href: "#" },
-  { title: "新生選課指南", sub: "系學會學術部製作", img: imgRect8, href: "#" },
+  { title: "新生選課指南", sub: "系學會學術部製作", img: imgRect8, href: "https://reurl.cc/lnQG49" },
 ];
 
 function ResourceRow({ title, sub, img, href }: { title: string; sub: string; img: string | null; href: string }) {
@@ -26,10 +24,10 @@ function ResourceRow({ title, sub, img, href }: { title: string; sub: string; im
           </div>
         )}
         <div className="min-w-0">
-          <p className="text-white truncate" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "clamp(0.85rem, 1.5vw, 1.05rem)" }}>
+          <p className="text-white truncate" style={{ fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif", fontWeight: 700, letterSpacing: "0.04em", fontSize: "20px" }}>
             {title}
           </p>
-          {sub && <p className="text-white/35 text-xs truncate" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500 }}>{sub}</p>}
+          {sub && <p className="text-white/35 text-xs truncate" style={{ fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif", fontWeight: 500 }}>{sub}</p>}
         </div>
       </div>
       <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center shrink-0 group-hover:border-white/50 transition-colors self-end sm:self-auto">
@@ -51,7 +49,7 @@ export default function AcademicResourcesSection() {
             backgroundSize: "220% 100%",}}>
             — 各種服務・學術資源
           </p>
-          <h2 className="font-bold leading-none mb-12" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>
+          <h2 className="font-bold leading-none mb-12" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "60px" }}>
             <span className="text-white block">ACADEMIC</span>
             <span style={{ color: "#D14B4B" }} className="block">RESOURCES</span>
           </h2>
@@ -60,7 +58,7 @@ export default function AcademicResourcesSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10">
           <div>
             <Reveal>
-              <p className="mb-5 text-xs tracking-widest font-bold" style={{ fontFamily: "'Ubuntu Sans Mono', monospace", background: "linear-gradient(to right, #2F9EBD, #ffffff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              <p className="mb-5 text-xs tracking-widest font-bold" style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontSize: "16px", background: "linear-gradient(to right, #2F9EBD, #ffffff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 各式網址 EXTERNAL LINKS
               </p>
             </Reveal>
@@ -75,7 +73,7 @@ export default function AcademicResourcesSection() {
 
           <div>
             <Reveal delay={60}>
-              <p className="mb-5 text-xs tracking-widest font-bold" style={{ fontFamily: "'Ubuntu Sans Mono', monospace", background: "linear-gradient(to right, #D14B4B, #ffffff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              <p className="mb-5 text-xs tracking-widest font-bold" style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontSize: "16px", background: "linear-gradient(to right, #D14B4B, #ffffff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 檔案下載 DOWNLOADS
               </p>
             </Reveal>
@@ -88,13 +86,13 @@ export default function AcademicResourcesSection() {
 
               <Reveal delay={160}>
                 <div className="border border-white/10 rounded-xl p-5 bg-white/[0.03]">
-                  <p className="text-white mb-2" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: "1rem" }}>
+                  <p className="text-white mb-2" style={{ fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "24px" }}>
                     找不到你需要的資源？
                   </p>
                   <p className="text-white/50 text-sm mb-5 leading-relaxed" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500 }}>
-                    歡迎聯絡系學會學術部，我們將協助提供相關資料。
+                    歡迎聯絡系學會，我們將協助提供相關資料。
                   </p>
-                  <a href="mailto:ntulissa1060@gmail.com" className="inline-flex items-center gap-2 bg-white text-black px-5 py-2 rounded-full text-sm hover:bg-white/90 transition-all group" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, letterSpacing: "0.08em" }}>
+                  <a href="#/contact" className="inline-flex items-center gap-2 bg-white text-black px-5 py-2 rounded-full text-sm hover:bg-white/90 transition-all group" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, letterSpacing: "0.08em" }}>
                     聯絡我們
                     <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
                   </a>

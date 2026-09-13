@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from "react";
+import { type ReactNode, type CSSProperties } from "react";
 import { Mail } from "lucide-react";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
 import { Reveal } from "./shared";
@@ -153,81 +153,30 @@ const COMMUNITY_INFO = (
 
 type Card = { key: string; href: string; label: string; className: string; logo: ReactNode; info: ReactNode };
 
-function GrayFace() {
-  return <div className="w-full h-full rounded-[20px] lg:rounded-[26px]" style={{ background: DARK }} />;
-}
-
 function FlipCard({ card }: { card: Card }) {
-  const [step, setStep] = useState(0);
-  const [frontKind, setFrontKind] = useState<"gray" | "logo">("gray");
-  const pinned = useRef(false);                                   // 滑鼠停在上面時 = true（暫停自動翻）
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const alive = useRef(true);
-
-  // 翻一次（step+1）；第一次翻牌後把灰面換成 Logo 面
-  const flipOnce = () => setStep((s) => {
-    const ns = s + 1;
-    if (ns === 1) window.setTimeout(() => { if (alive.current) setFrontKind("logo"); }, 780);
-    return ns;
-  });
-  // 排下一次自動翻（6–8 秒隨機）；被釘住時不排
-  const schedule = () => {
-    timer.current = setTimeout(() => {
-      if (!alive.current || pinned.current) return;
-      flipOnce();
-      schedule();
-    }, 6000 + Math.random() * 2000);
-  };
-
-  useEffect(() => {
-    alive.current = true;
-    timer.current = setTimeout(() => {          // 起始延遲隨機 → 進場錯開
-      if (!alive.current || pinned.current) return;
-      flipOnce();
-      schedule();
-    }, 300 + Math.random() * 2600);
-    return () => { alive.current = false; if (timer.current) clearTimeout(timer.current); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // hover：暫停自動翻，並確保停在彩色資訊面（奇數 step ＝ back ＝ info）
-  const handleEnter = () => {
-    pinned.current = true;
-    if (timer.current) clearTimeout(timer.current);
-    setStep((s) => {
-      if (s % 2 === 0) { // 目前在 Logo/灰面 → 翻到 info
-        const ns = s + 1;
-        if (ns === 1) window.setTimeout(() => { if (alive.current) setFrontKind("logo"); }, 780);
-        return ns;
-      }
-      return s; // 已經在 info 面就維持
-    });
-  };
-  // 放開：恢復自動翻（維持目前面，時間到再翻）
-  const handleLeave = () => {
-    pinned.current = false;
-    if (timer.current) clearTimeout(timer.current);
-    schedule();
-  };
-
-  const front = frontKind === "gray" ? <GrayFace /> : card.logo;
-  const back = card.info;
   const href = card.href || "#";
   const external = href.startsWith("http");
 
+  // 純 hover 翻牌（不再自動翻）：
+  //   靜置＝Logo 面（深灰底白字，即「灰色」狀態）→ 滑鼠移上去翻到彩色資訊面 → 移開自動翻回。
+  // 用 CSS group-hover 控制 rotateX；group-focus 讓鍵盤 Tab 也能翻，兼顧無障礙。
+  // ★ rotateX 只寫在 className，別放進 style，否則 inline style 會蓋掉 hover 的翻轉值。
   return (
     <a
       href={href}
       aria-label={card.label}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
       className={`group block ${card.className}`}
       style={{ perspective: "1400px" }}
     >
-      <div className="relative w-full h-full transition-transform duration-200 group-hover:scale-[0.985]" style={{ transformStyle: "preserve-3d", transform: `rotateX(${step * 180}deg)`, transition: "transform 0.75s cubic-bezier(0.4,0,0.2,1)" }}>
-        <div className="absolute inset-0" style={{ backfaceVisibility: "hidden", transform: "rotateX(0deg)" }}>{front}</div>
-        <div className="absolute inset-0" style={{ backfaceVisibility: "hidden", transform: "rotateX(180deg)" }}>{back}</div>
+      <div
+        className="relative w-full h-full [transform:rotateX(0deg)] group-hover:[transform:rotateX(180deg)] group-focus:[transform:rotateX(180deg)]"
+        style={{ transformStyle: "preserve-3d", transition: "transform 0.75s cubic-bezier(0.4,0,0.2,1)" }}
+      >
+        {/* 正面：Logo 面（靜置顯示） */}
+        <div className="absolute inset-0" style={{ backfaceVisibility: "hidden", transform: "rotateX(0deg)" }}>{card.logo}</div>
+        {/* 背面：彩色資訊面（hover 顯示） */}
+        <div className="absolute inset-0" style={{ backfaceVisibility: "hidden", transform: "rotateX(180deg)" }}>{card.info}</div>
       </div>
     </a>
   );

@@ -110,18 +110,6 @@ export const ANNOUNCEMENTS: Announcement[] = [
 
 
   },
-  {
-    slug: "club-evaluation-excellent",
-    category: "學會公告",
-    title: "系學會獲得社團評鑑自治組優等",
-    author: "",
-    date: "2026.05.20",
-    excerpt: "在 114 學年度臺大全校社團評鑑中，臺大圖資系學會勇奪「自治性社團組 — 優等」的殊榮。",
-    paragraphs: [
-      "在剛落幕的 114 學年度臺大全校社團評鑑中，臺大圖資系學會在全校眾多自治組織中脫穎而出，勇奪「自治性社團組 — 優等」的殊榮。",
-      "（這裡替換成完整內文。）",
-    ],
-  },
 ];
 
 // 依 slug 找出某一篇公告（文章頁用）。
