@@ -202,7 +202,7 @@ export default function ContactSection() {
           <p className="text-xs tracking-widest mb-3" style={{ fontSize: "14px", fontFamily: monoFont, background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundSize: "220% 100%" }}>
             — 各種服務・聯絡我們
           </p>
-          <h2 className="font-bold leading-none mb-5 sm:mb-6 lg:mb-8" style={{ fontFamily: enDisplay, fontSize: "clamp(2.25rem, 4.6vw, 4.25rem)" }}>
+          <h2 className="font-bold leading-none mb-5 sm:mb-6 lg:mb-8" style={{ fontFamily: enDisplay, fontSize: "60px" }}>
             <span className="text-white block">CONTACT</span>
             <span className="block" style={{ color: "#2F9EBD" }}>US</span>
           </h2>

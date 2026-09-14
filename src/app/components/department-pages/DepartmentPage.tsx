@@ -24,7 +24,7 @@ const monoFont = "'Ubuntu Sans Mono', monospace";
 const PHOTO_FADE = "linear-gradient(to bottom, #000 74%, transparent 100%)";
 
 // ── 服務底部提示語：已推出 vs 準備中（想改字就改這兩句）──
-const SERVICE_HINT_OPEN = "點擊即可進入服務頁面";
+const SERVICE_HINT_OPEN = "深入了解";
 const SERVICE_HINT_SOON = "本服務準備中敬請期待";
 
 // ══════════════════════════════════════════════════════════════
@@ -170,14 +170,14 @@ function ServiceCarousel({ services }: { services: Service[] }) {
   const canPrev = idx > 0;
   const canNext = idx < services.length - 1;
 
-  // 服務連結一律「開新分頁」（target=_blank + noopener 安全屬性）。
-  // 防呆：還是佔位的 "#"（或空值）就不開新分頁，等 gen.tsx 換成真網址才生效。
-  const linkProps = (href: string) =>
-    href && href !== "#"
-      ? { href, target: "_blank" as const, rel: "noopener noreferrer" }
-      : { href };
-
   if (!s) return null;
+
+  // 服務按鈕改「連內部服務詳情頁」#/service/<slug>（同分頁），不再開外部網址。
+  // slug 取自該服務：請在 deptShared 的 Service 型別加上 slug?: string，並在各部資料（gen.tsx…）填入，
+  // 對應 Services.tsx 的服務 slug；沒填時退回 #/services 總覽頁。
+  const slug = (s as { slug?: string }).slug;
+  const detailHref = slug ? `#/service/${slug}` : "#/services";
+  const linkProps = (_?: string) => ({ href: detailHref });
 
   // 這項服務是否已推出：open 未填＝預設已推出；open:false＝準備中（按鈕變外框、不可點、提示語改成準備中）。
   const isOpen = s.open !== false;
@@ -189,16 +189,16 @@ function ServiceCarousel({ services }: { services: Service[] }) {
   // 漸層：單張有明確指定就聽它的；否則預設「只有 cover 才淡出」。
   const imgFade = s.fade ?? (SERVICE_IMG.fadeOnCover && imgFit === "cover");
 
-  // 圖片外層：已推出用可點的 <a>（開新分頁）；準備中用不可點的 <div>。
-  const ImgTag: React.ElementType = isOpen ? "a" : "div";
-  const imgProps = isOpen ? { ...linkProps(s.href), "aria-label": `${s.name} — 進入服務頁面` } : {};
+  // 圖片外層：一律用 <a> 連到該服務的詳情頁（同分頁）。
+  const ImgTag: React.ElementType = "a";
+  const imgProps = { href: detailHref, "aria-label": `${s.name} — 進入服務頁面` };
 
   return (
     <div className="flex flex-col items-center">
       {/* 服務圖片（已推出才可點進服務頁） */}
       <ImgTag
         {...imgProps}
-        className={`block relative w-full max-w-[420px] overflow-hidden transition-transform duration-300 ${isOpen ? "hover:-translate-y-1 cursor-pointer" : "cursor-default"}`}
+        className="block relative w-full max-w-[420px] overflow-hidden transition-transform duration-300 hover:-translate-y-1 cursor-pointer"
         style={{ height: "clamp(240px, 42vh, 420px)" }}
       >
         {s.img ? (
@@ -238,17 +238,18 @@ function ServiceCarousel({ services }: { services: Service[] }) {
             {s.name}
           </a>
         ) : (
-          <span
-            className="rounded-full px-6 py-2.5 whitespace-nowrap cursor-default select-none"
+          <a
+            {...linkProps(s.href)}
+            className="rounded-full px-6 py-2.5 whitespace-nowrap select-none cursor-pointer"
             style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.95rem,1.3vw,1.2rem)", letterSpacing: "0.16em", color: "#fff", background: "transparent", border: "1.5px solid rgba(255,255,255,0.6)" }}
           >
             {s.name}
-          </span>
+          </a>
         )}
         <NavArrow dir="next" color="#2F9EBD" disabled={!canNext} onClick={() => canNext && setIdx((v) => v + 1)} />
       </div>
 
-      <p className="text-white/40 mt-3" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.16em" }}>
+      <p className="text-white/40 mt-3" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.16em", color: "#FFFFFF" }}>
         {isOpen ? SERVICE_HINT_OPEN : SERVICE_HINT_SOON}
       </p>
     </div>
@@ -377,8 +378,8 @@ export default function DepartmentPage({ slug }: { slug: string }) {
             {/* 左：ABOUT + 標題 + 簡介 + 加入鈕 */}
             <div className="max-w-[600px]">
               <Reveal>
-                <p className="text-white/30 text-xs tracking-widest mb-4" style={{ fontFamily: monoFont }}>
-                  — ABOUT US 關於我們・現任團隊
+                <p className="text-white/30 text-xs tracking-widest mb-4" style={{  fontSize: "14px", fontFamily: monoFont, background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"  }}>
+                  — 關於我們・現任團隊
                 </p>
               </Reveal>
               <Reveal delay={40}>

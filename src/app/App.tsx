@@ -18,6 +18,7 @@ import CalendarPage from "./components/sections/CalendarPage";
 import FeesSection from "./components/sections/FeesSection";
 import SponsorSection from "./components/sections/SponsorSection";
 import DepartmentPage from "./components/department-pages/DepartmentPage";
+import Services from "./components/department-pages/Services";
 
 // 極輕量的 hash 分頁（不需安裝 react-router；同時保留原本 #team / #news 等錨點捲動）：
 //   #/current-team    → 現任團隊獨立頁（只有 Header + TeamSection + Footer）
@@ -31,8 +32,10 @@ import DepartmentPage from "./components/department-pages/DepartmentPage";
 //   #/fees            → 系學會費專區（捲動式 · Apple 風動畫）
 //   #/sponsor         → 贊助頁（對外招募贊助 · 捲動式）
 //   #/dept/<slug>     → 部門獨立頁（例：#/dept/gen ＝行政部；slug 同 department-pages/ 檔名）
+//   #/services        → 各種服務 Bento 總覽頁
+//   #/service/<slug>  → 單一服務詳情頁（slug 同 servicesData.ts）
 //   其餘              → 捲動式主頁
-type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "contact" } | { name: "overview" } | { name: "news" } | { name: "article"; slug: string } | { name: "calendar" } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string };
+type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "contact" } | { name: "overview" } | { name: "news" } | { name: "article"; slug: string } | { name: "calendar" } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string } | { name: "services" } | { name: "service"; slug: string };
 
 function getRoute(): Route {
   const h = window.location.hash;
@@ -48,6 +51,10 @@ function getRoute(): Route {
   if (h.startsWith("#/calendar")) return { name: "calendar" };
   if (h.startsWith("#/fees")) return { name: "fees" };
   if (h.startsWith("#/sponsor")) return { name: "sponsor" };
+  // 注意：單一服務頁（#/service/<slug>）要在總覽頁（#/services）之前比對。
+  const msvc = h.match(/^#\/service\/([\w-]+)/);
+  if (msvc) return { name: "service", slug: msvc[1] };
+  if (h.startsWith("#/services")) return { name: "services" };
   const m = h.match(/^#\/dept\/([\w-]+)/);
   if (m) return { name: "dept", slug: m[1] };
   return { name: "home" };
@@ -142,6 +149,12 @@ export default function App() {
         <SponsorSection />
       ) : route.name === "dept" ? (
         <DepartmentPage slug={route.slug} />
+      ) : route.name === "services" ? (
+        // 各種服務 Bento 總覽頁。
+        <Services />
+      ) : route.name === "service" ? (
+        // 單一服務詳情頁。
+        <Services slug={route.slug} />
       ) : (
         <>
           <HeroSection />

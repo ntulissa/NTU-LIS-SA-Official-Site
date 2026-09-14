@@ -40,6 +40,7 @@ const NAV_ITEMS = [
     label: "各種服務",
     labelEn: "SERVICES",
     sub: [
+      { label: "各部業務", href: "#/services" },
       { label: "學術資源", href: "#resources" },
       { label: "聯絡我們", href: "#/contact" },
     ],

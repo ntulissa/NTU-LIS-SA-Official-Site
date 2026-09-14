@@ -142,7 +142,7 @@ export const EVENTS: CalEvent[] = [
   { title: "國慶連假", date: "2026-10-09", end: "2026-10-11", depts: ["school"] },
   { title: "光復節連假", date: "2026-10-24", end: "2026-10-26", depts: ["school"] },
   { title: "期中考週", date: "2026-11-09", end: "2026-11-13", depts: ["school"] },
-  { title: "校慶放假",       date: "2026-11-14", depts: ["school"] },
+  { title: "校慶放假", date: "2026-11-14", depts: ["school"] },
   { title: "115-1 學期課程停修截止日", date: "2026-12-11", depts: ["school"] },
   { title: "期末考週", date: "2026-12-21", end: "2026-12-25", depts: ["school"] },
   { title: "115-2 開學日", date: "2027-02-22", depts: ["school"] },
