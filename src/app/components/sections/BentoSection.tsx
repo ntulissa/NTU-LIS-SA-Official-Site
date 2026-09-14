@@ -49,7 +49,7 @@ const RING_GRADIENT_SPIN = false;
 // ⚠ 重要觀念（為什麼調大反而更擠）：這三個元素是「一整組、垂直置中」放進固定高度的格子。
 //   把 GAP 或 RING 調大 → 這一組會變高變寬 → 格子大小沒變，四周留白反而更少 = 看起來更擠。
 //   想要「更有呼吸感」→ 反過來把數字調小（讓這一組變小、四周留白變多）。目前刻意收小，讓它在格子裡浮起來。
-const NEXT_TITLE_GAP = 35; // Donut 圓環 → 活動標題 的距離（px）
+const NEXT_TITLE_GAP = 15; // Donut 圓環 → 活動標題 的距離（px）
 // （「UP NEXT」標籤現在絕對定位在卡片頂部；它與頂部距離＝倒數卡 JSX 裡的 top-5/top-7，不再用間距常數。）
 // Donut 圓環直徑：clamp(最小, 隨螢幕縮放, 最大)。整組太高頂到卡片上下 → 先把最大值（140px）往下調。
 const NEXT_RING_SIZE = "clamp(200px, 10vw, 300px)";

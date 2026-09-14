@@ -122,15 +122,30 @@ export const EVENTS: CalEvent[] = [
       "籃球、排球、羽球等你來組隊，一起為榮譽而戰！",
     signup: false,
   },
+  {
+    title: "杜鵑花節 2027",
+    date: "2027-03-13",
+    end: "2027-03-14",
+    depts: ["pres", "gen", "eve", "aca", "ima", "sp"],
+    location: "臺大綜合體育館",
+    mapUrl: "https://maps.app.goo.gl/AUNEkXhgnx4LV3zp6",
+    desc:
+      "穿梭於人文與科技之間，圖資系跟你想的完全不一樣！\n" +
+      "現場提供系所課程解析、備審面試經驗分享，還有專屬互動體驗與系學會紀念品。\n" +
+      "杜鵑花開的季節，我們在臺大體育館等你來相見！",
+    signup: false,
+  },
 
   // ── 學校日程範例（只在月曆顯示，不進上方卡片）──
   //   期中考週也是跨多天，一樣用 end 表示（純學校日程 → 色條為白色）。
-  { title: "期中考週", date: "2026-11-09", end: "2026-11-13", depts: ["school"] },
-  { title: "校慶放假",       date: "2026-11-14", depts: ["school"] },
-  { title: "課程停修截止日", date: "2026-12-11", depts: ["school"] },
   { title: "中秋節連假", date: "2026-09-25", end: "2026-09-28", depts: ["school"] },
   { title: "國慶連假", date: "2026-10-09", end: "2026-10-11", depts: ["school"] },
-  { title: "期末考週", date: "2026-12-21", end: "2026-12-25", depts: ["school"] }
+  { title: "光復節連假", date: "2026-10-24", end: "2026-10-26", depts: ["school"] },
+  { title: "期中考週", date: "2026-11-09", end: "2026-11-13", depts: ["school"] },
+  { title: "校慶放假",       date: "2026-11-14", depts: ["school"] },
+  { title: "115-1 學期課程停修截止日", date: "2026-12-11", depts: ["school"] },
+  { title: "期末考週", date: "2026-12-21", end: "2026-12-25", depts: ["school"] },
+  { title: "115-2 開學日", date: "2027-02-22", depts: ["school"] },
 
 
 ];

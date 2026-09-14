@@ -6,8 +6,8 @@ import { Reveal } from "./shared";
 
 const EXTERNAL_LINKS = [
   { title: "臺大圖資系官網", sub: "國立臺灣大學圖書資訊學系", img: null, href: "https://www.lis.ntu.edu.tw" },
-  { title: "臺大圖資課程地圖", sub: "國立臺灣大學大學部課程地圖查詢", img: null, href: "#" },
-  { title: "必修科目及應修學分資料查詢網站", sub: "國立臺灣大學學務處", img: null, href: "#" },
+  { title: "臺大圖資課程地圖", sub: "國立臺灣大學大學部課程地圖查詢", img: null, href: "https://coursemap.aca.ntu.edu.tw/course_map_all/class.php?code=1060" },
+  { title: "臺大學士班修課檢視表", sub: "國立臺灣大學教務處", img: null, href: "https://reg.aca.ntu.edu.tw/GradeCheck/MessageForm?code=1" },
 ];
 
 const DOWNLOAD_LINKS = [

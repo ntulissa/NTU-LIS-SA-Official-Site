@@ -3,7 +3,7 @@
 import { svcImg, memImg, type DeptData } from "./deptShared";
 
 export const gen: DeptData = {
-  slug: "gen", // 網址：#/dept/gen
+  slug: "gen", 
   zh: "行政部",
   en: "GENERAL AFFAIRS",
   color: "#B07C43",

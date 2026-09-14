@@ -78,6 +78,34 @@ export default function App() {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
+  useEffect(() => {
+    const openLinksInNewWindow = () => {
+      document.querySelectorAll<HTMLAnchorElement>("a").forEach((link) => {
+        const href = link.getAttribute("href");
+        if (!href) return;
+
+        const url = new URL(href, window.location.href);
+        const isExternal = ["mailto:", "tel:"].includes(url.protocol)
+          || ((url.protocol === "http:" || url.protocol === "https:")
+            && url.origin !== window.location.origin);
+
+        if (isExternal) {
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+        } else {
+          link.removeAttribute("target");
+          link.removeAttribute("rel");
+        }
+      });
+    };
+
+    openLinksInNewWindow();
+    const observer = new MutationObserver(openLinksInNewWindow);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, [route]);
+
   return (
     <div className="bg-black text-white overflow-x-hidden">
       <Header />
