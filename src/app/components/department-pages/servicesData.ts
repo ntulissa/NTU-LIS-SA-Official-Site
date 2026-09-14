@@ -11,13 +11,13 @@
 
 export type Dept = "gen" | "eve" | "aca" | "ima" | "sp";
 
-// 五個部門色（Bento 格線色、詳情頁背景色都吃這裡）
+// 五個部門色（Bento 格線色、詳情頁背景色都吃這裡）— 你的正式色票
 export const DEPT_COLORS: Record<Dept, string> = {
-  gen: "#8B6B47", // 行政（棕）
-  eve: "#9E4A4A", // 活動（紅）
-  aca: "#4F6E3B", // 學術（綠）
-  ima: "#5C3F58", // 美宣（紫）
-  sp:  "#3E6E8B", // 資訊/公關（藍）
+  gen: "#915E3E", // 行政（棕）
+  eve: "#9F353A", // 活動（紅）
+  aca: "#42602D", // 學術（綠）
+  ima: "#572A3F", // 美宣（紫）
+  sp:  "#23658A", // 體育（藍）
 };
 
 export type Cell =
@@ -29,15 +29,15 @@ export type Cell =
 
 export const BENTO: Cell[] = [
   // ── 部門名稱格（填色 + svg）──
-  { type: "dept", dept: "gen", gc: "1 / span 2", gr: "1 / span 2" },
+  { type: "dept", dept: "gen", gc: "1 / span 2", gr: "1 / span 1" },
   { type: "dept", dept: "eve", gc: "6",          gr: "1 / span 2" },
   { type: "dept", dept: "aca", gc: "1",          gr: "7 / span 2" },
-  { type: "dept", dept: "ima", gc: "8 / span 2", gr: "5 / span 2" },
+  { type: "dept", dept: "ima", gc: "8 / span 2", gr: "5 / span 1" },
   { type: "dept", dept: "sp",  gc: "12",         gr: "5 / span 2" },
 
   // ── gen 行政（棕）──
-  { type: "service", dept: "gen", slug: "fee",       zh: "系學會費",       gc: "1",          gr: "3 / span 2", en: "MEMBERSHIP FEE",     intro: "（介紹內文佔位）系學會費的用途、繳費方式與福利說明。", note: "一年一次" },
-  { type: "service", dept: "gen", slug: "locker",    zh: "系櫃租借",       gc: "2",          gr: "3 / span 2", en: "LOCKER RENTAL",      intro: "（介紹內文佔位）系櫃租借的申請時間、位置與規則。", note: "數量有限" },
+  { type: "service", dept: "gen", slug: "fee",       zh: "系學會費",       gc: "1",          gr: "2 / span 3", vertical: true, en: "MEMBERSHIP FEE",     intro: "（介紹內文佔位）系學會費的用途、繳費方式與福利說明。", note: "一年一次" },
+  { type: "service", dept: "gen", slug: "locker",    zh: "系櫃租借",       gc: "2",          gr: "2 / span 3", vertical: true, en: "LOCKER RENTAL",      intro: "（介紹內文佔位）系櫃租借的申請時間、位置與規則。", note: "數量有限" },
   { type: "service", dept: "gen", slug: "studyroom", zh: "學輔室使用申請", gc: "3 / span 3", gr: "1 / span 2", en: "STUDY ROOM BOOKING", intro: "（介紹內文佔位）學輔室的借用流程、開放時段與注意事項。", note: "線上預約" },
   { type: "service", dept: "gen", slug: "aircon",    zh: "學輔室冷氣使用", gc: "3 / span 3", gr: "3 / span 2", en: "STUDY ROOM AIR-CON", intro: "（介紹內文佔位）學輔室冷氣的儲值與使用方式。", note: "記得儲值" },
 
@@ -63,11 +63,11 @@ export const BENTO: Cell[] = [
   { type: "service", dept: "ima", slug: "social",     zh: "社群經營", gc: "6", gr: "5 / span 4", vertical: true, en: "SOCIAL MEDIA", intro: "（介紹內文佔位）系學會社群的經營與內容。", note: "追蹤我們" },
   { type: "service", dept: "ima", slug: "dept-shirt", zh: "系服訂購", gc: "7", gr: "5 / span 4", vertical: true, en: "DEPT SHIRT",   intro: "（介紹內文佔位）系服的款式、尺寸與訂購。", note: "限時開賣" },
   { type: "service", dept: "ima", slug: "contact",    zh: "聯絡我們", gc: "8 / span 2", gr: "7 / span 2", en: "CONTACT US", intro: "（介紹內文佔位）各種合作與聯繫管道。", note: "找得到我們" },
+  { type: "service", dept: "ima", slug: "souvenir",     zh: "文宣品", gc: "8 / span 2", gr: "6 / span 1", en: "POSTER DESIGN", intro: "（介紹內文佔位）系學會活動的海報設計與製作。", note: "美宣專業" },
 
   // ── sp 資訊/公關（藍）下排 ──
-  { type: "service", dept: "sp", slug: "japanese",   zh: "臺大日文", gc: "10", gr: "5 / span 4", vertical: true, en: "JAPANESE CLUB",    intro: "（介紹內文佔位）臺大日文相關活動介紹。", note: "こんにちは" },
-  { type: "service", dept: "sp", slug: "men-basket", zh: "圖資男籃", gc: "11", gr: "5 / span 4", vertical: true, en: "MEN'S BASKETBALL", intro: "（介紹內文佔位）圖資男籃的練球與賽事資訊。", note: "上場" },
-  { type: "service", dept: "sp", slug: "lis-cup",    zh: "小圖盃",   gc: "12", gr: "7 / span 2", en: "LIS CUP", intro: "（介紹內文佔位）小圖盃的賽制與報名。", note: "友誼賽" },
+  { type: "service", dept: "sp", slug: "men-basket", zh: "臺大日文圖資男籃",gc: "10 / span 2", gr: "5 / span 4", vertical: true, en: "MEN'S BASKETBALL", intro: "（介紹內文佔位）圖資男籃的練球與賽事資訊。", note: "上場" },
+  { type: "service", dept: "sp", slug: "lis-cup",    zh: "小圖盃",gc: "12 / span 1", gr: "7 / span 2", vertical: true, en: "LIS CUP", intro: "（介紹內文佔位）小圖盃的賽制與報名。", note: "友誼賽" },
 ];
 
 // 詳情頁用：以 slug 找服務資料

@@ -26,6 +26,10 @@ const mono = "'Ubuntu Sans Mono', monospace";
 // ── 準備中的膠囊提示語 ──
 const SERVICE_SOON = "本服務準備中，敬請期待";
 
+// ── 部門名稱格：svg 顯示大小（部門名稱 svg 由你放在 imports/services/<dept>.svg）──
+// 想再更小／更大，改這兩個百分比即可（相對於該格）。
+const DEPT_LOGO = { maxW: "100%", maxH: "42%" };
+
 // ── 讀 imports/services/ 底下的圖檔（部門名稱 svg：gen.svg…；服務詳情圖：<slug>.png/jpg/svg）──
 // 若原始碼不在 /src 底下，改下面 glob 的路徑字串即可；舊版 Vite 把 query/import 換成 as:"url"。
 const SERVICE_ASSETS = import.meta.glob("/src/**/services/*.{svg,png,jpg,jpeg,webp}", {
@@ -57,9 +61,10 @@ function BentoCell({ cell }: { cell: Cell }) {
     return (
       <div className="rounded-2xl flex items-center justify-center p-3 select-none" style={{ ...style, background: color }}>
         {svg ? (
-          <img src={svg} alt={`${cell.dept}.`} className="max-w-[72%] max-h-[64%] object-contain" />
+          <img src={svg} alt={`${cell.dept}.`} className="object-contain" style={{ maxWidth: DEPT_LOGO.maxW, maxHeight: DEPT_LOGO.maxH }} />
         ) : (
-          <span className="text-white lowercase" style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(1.2rem,2vw,2rem)" }}>{cell.dept}.</span>
+          // 佔位（等你放 imports/services/<dept>.svg 就會換掉），字級刻意做小。
+          <span className="text-white/90 lowercase" style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.85rem,1.3vw,1.3rem)" }}>{cell.dept}.</span>
         )}
       </div>
     );
@@ -76,7 +81,7 @@ function BentoCell({ cell }: { cell: Cell }) {
         className="text-white leading-tight"
         style={{
           fontFamily: zhDisplay,
-          fontWeight: 900,
+          fontWeight: 700,
           fontSize: "clamp(0.95rem,1.5vw,1.7rem)",
           letterSpacing: "0.08em",
           ...(cell.vertical ? { writingMode: "vertical-rl", textOrientation: "upright" } as CSSProperties : {}),
