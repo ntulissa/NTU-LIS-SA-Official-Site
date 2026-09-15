@@ -26,20 +26,33 @@ const mono = "'Ubuntu Sans Mono', monospace";
 // ── 準備中的膠囊提示語 ──
 const SERVICE_SOON = "本服務準備中，敬請期待";
 
-// ── 部門名稱格：svg 顯示大小（部門名稱 svg 由你放在 imports/services/<dept>.svg）──
+// ── 部門名稱格：svg 顯示大小（部門名稱 svg 放在 imports/services/IMG-<dept>/）──
 // 想再更小／更大，改這兩個百分比即可（相對於該格）。
 const DEPT_LOGO = { maxW: "100%", maxH: "42%" };
 
-// ── 讀 imports/services/ 底下的圖檔（部門名稱 svg：gen.svg…；服務詳情圖：<slug>.png/jpg/svg）──
+// ── 服務詳情頁：每個元素的 XY 位移（px；正 x=往右、正 y=往下），手動微調版面用 ──
+const DETAIL_LAYOUT = {
+  back:    { x: 0, y: 0 }, // 回上頁按鈕
+  eyebrow: { x: 0, y: 0 }, // — 各種服務・各部業務
+  title:   { x: 0, y: 0 }, // 主標題（中文名）
+  note:    { x: 0, y: 0 }, // 便利貼
+  en:      { x: 0, y: 0 }, // 英文標題
+  intro:   { x: 0, y: 0 }, // 介紹內文
+  button:  { x: 0, y: 0 }, // 按鈕（前往／準備中）
+  image:   { x: 0, y: 0 }, // 右側圖片
+};
+const mv = (c: { x: number; y: number }) => `translate(${c.x}px, ${c.y}px)`;
+
+// ── 讀 imports/services/ 各部門子資料夾的圖檔（部門名稱 svg：IMG-gen/gen.svg…；服務詳情圖：<slug>.png/jpg/svg）──
 // 若原始碼不在 /src 底下，改下面 glob 的路徑字串即可；舊版 Vite 把 query/import 換成 as:"url"。
-const SERVICE_ASSETS = import.meta.glob("/src/**/services/*.{svg,png,jpg,jpeg,webp}", {
+const SERVICE_ASSETS = import.meta.glob("/src/**/services/**/*.{svg,png,jpg,jpeg,webp}", {
   eager: true,
   query: "?url",
   import: "default",
 }) as Record<string, string>;
 // 依「完整檔名」取（給部門 svg 用，如 gen.svg）
 function assetByFile(file: string): string | undefined {
-  const hit = Object.keys(SERVICE_ASSETS).find((p) => p.endsWith(`/services/${file}`));
+  const hit = Object.keys(SERVICE_ASSETS).find((p) => p.endsWith(`/${file}`));
   return hit ? SERVICE_ASSETS[hit] : undefined;
 }
 // 依「檔名去副檔名 = slug」取（給服務詳情圖用，副檔名不限）
@@ -63,7 +76,7 @@ function BentoCell({ cell }: { cell: Cell }) {
         {svg ? (
           <img src={svg} alt={`${cell.dept}.`} className="object-contain" style={{ maxWidth: DEPT_LOGO.maxW, maxHeight: DEPT_LOGO.maxH }} />
         ) : (
-          // 佔位（等你放 imports/services/<dept>.svg 就會換掉），字級刻意做小。
+          // 佔位（等你放 imports/services/IMG-<dept>/<dept>.svg 就會換掉），字級刻意做小。
           <span className="text-white/90 lowercase" style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.85rem,1.3vw,1.3rem)" }}>{cell.dept}.</span>
         )}
       </div>
@@ -161,31 +174,32 @@ function ServiceDetail({ slug }: { slug: string }) {
           <button
             onClick={goBack}
             className="group inline-flex items-center gap-2 rounded-full bg-white text-black px-5 py-2 mb-8 lg:mb-10 hover:bg-white/90 transition-all duration-200 w-fit"
-            style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.06em" }}
+            style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.06em", transform: mv(DETAIL_LAYOUT.back) }}
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform duration-200" /> 回上頁
           </button>
         </Reveal>
 
         <Reveal delay={40}>
-          <p className="mb-6" style={{ fontFamily: mono, fontSize: "14px", letterSpacing: "0.05em", color: "rgba(255,255,255,0.7)" }}>
+          <p className="mb-6" style={{ fontFamily: mono, fontSize: "14px", letterSpacing: "0.05em", color: "rgba(255,255,255,0.7)", transform: mv(DETAIL_LAYOUT.eyebrow) }}>
             — 各種服務・各部業務
           </p>
         </Reveal>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+        {/* items-start：標題一律靠上對齊，副標到標題的距離每頁固定一致（不再隨內文長度浮動） */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start">
           {/* 左：標題 + 便利貼 + 英文 + 介紹 + 按鈕 */}
           <div className="max-w-[620px]">
             <Reveal delay={60}>
               <div className="flex items-end flex-wrap gap-3 mb-2">
-                <h1 className="leading-none text-white" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(2.4rem,4.5vw,4.2rem)", letterSpacing: "0.08em" }}>
+                <h1 className="leading-none text-white" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(2.4rem,4.5vw,4.2rem)", letterSpacing: "0.08em", transform: mv(DETAIL_LAYOUT.title) }}>
                   {s.zh}
                 </h1>
                 {/* 便利貼（隨機/自填文字，內容在該服務的 note） */}
                 {s.note ? (
                   <span
                     className="inline-block mb-2 rounded-[6px] px-3 py-1 select-none"
-                    style={{ background: "#111", color: "#fff", fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.72rem,1vw,0.95rem)", letterSpacing: "0.04em", transform: "rotate(-3deg)", boxShadow: "0 6px 16px -8px rgba(0,0,0,0.6)" }}
+                    style={{ background: "#111", color: "#fff", fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.72rem,1vw,0.95rem)", letterSpacing: "0.04em", boxShadow: "0 6px 16px -8px rgba(0,0,0,0.6)" }}
                   >
                     {s.note}
                   </span>
@@ -194,20 +208,20 @@ function ServiceDetail({ slug }: { slug: string }) {
             </Reveal>
 
             <Reveal delay={90}>
-              <p className="mb-8" style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.8rem,1.2vw,1.1rem)", letterSpacing: "0.28em", color: "rgba(255,255,255,0.85)" }}>
+              <p className="mb-8" style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.8rem,1.2vw,1.1rem)", letterSpacing: "0.28em", color: "rgba(255,255,255,0.85)", transform: mv(DETAIL_LAYOUT.en) }}>
                 {s.en}
               </p>
             </Reveal>
 
             <Reveal delay={120}>
-              <p style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.9rem,1.05vw,1.05rem)", lineHeight: 2.1, letterSpacing: "0.04em", color: "rgba(255,255,255,0.92)" }}>
+              <p style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.9rem,1.05vw,1.05rem)", lineHeight: 2.1, letterSpacing: "0.04em", color: "rgba(255,255,255,0.92)", transform: mv(DETAIL_LAYOUT.intro) }}>
                 {s.intro}
               </p>
             </Reveal>
 
             {/* 按鈕：有網址＝白色實心「前往 →」；沒網址＝純外框膠囊、無箭頭、不可點 */}
             <Reveal delay={160}>
-              <div className="mt-10">
+              <div className="mt-10" style={{ transform: mv(DETAIL_LAYOUT.button) }}>
                 {hasHref ? (
                   <a
                     href={s.href}
@@ -232,7 +246,7 @@ function ServiceDetail({ slug }: { slug: string }) {
 
           {/* 右：圖片（無按鈕）。放 imports/services/<slug>.png（或 jpg/webp/svg） */}
           <Reveal delay={100}>
-            <div className="relative w-full flex items-center justify-center" style={{ height: "clamp(260px, 46vh, 460px)" }}>
+            <div className="relative w-full flex items-center justify-center" style={{ height: "clamp(260px, 46vh, 460px)", transform: mv(DETAIL_LAYOUT.image) }}>
               {img ? (
                 <img src={img} alt={s.zh} className="max-w-full max-h-full object-contain select-none" />
               ) : (

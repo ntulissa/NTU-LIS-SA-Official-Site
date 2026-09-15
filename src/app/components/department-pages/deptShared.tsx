@@ -10,10 +10,15 @@
 //   pos  — object-position，如 "center" / "top" / "50% 30%"
 //   scale— 縮放倍率，1 = 原樣；圖偏小可設 1.15（會被框裁切）
 //   fade — 是否套底部漸層；不填＝只有 cover(照片)才淡出
+// slug?: 對應 Services（servicesData.ts）的服務 slug。用途有二：
+//   ① 部門頁的服務按鈕連到 #/service/<slug> 的詳情頁；
+//   ② 圖片依部門分類放在 imports/services/IMG-<dept>/（如 IMG-gen/locker.png），
+//      部門頁與詳情頁共用同一張。
 export type Service = {
   name: string;
   img: string;
   href: string;
+  slug?: string;
   open?: boolean;
   fit?: "contain" | "cover";
   pos?: string;
@@ -35,12 +40,12 @@ export type DeptData = {
 };
 
 // ══════════ 圖片自動對應（丟檔就用）══════════
-// 在 imports/ 底下開「兩個共用資料夾」，各部門都放這裡、用「部門前綴＋編號」命名：
-//   imports/services/ ← 服務圖，如 行政部：gen1.png、gen2.svg…；活動部：eve1.png…
+// 在 imports/ 底下開「兩個共用資料夾」，各部門服務圖依部門分類：
+//   imports/services/IMG-<dept>/ ← 服務圖，如 IMG-gen/locker.png、IMG-eve/lis-night.svg…
 //   imports/members/  ← 幹部照，如 行政部：gen1.png、gen2.png、gen3.png…
 // 用相對路徑（從本檔 department-pages/ 往上三層到 imports/），避免 @/ 別名在 import.meta.glob 不生效。
 // ★ 新增/替換圖片後，若畫面沒更新，請重啟一次 dev server（glob 於啟動時掃描資料夾）。
-const SERVICE_IMGS = import.meta.glob("../../../imports/services/*.{png,jpg,jpeg,webp,svg}", { eager: true, import: "default" }) as Record<string, string>;
+const SERVICE_IMGS = import.meta.glob("../../../imports/services/**/*.{png,jpg,jpeg,webp,svg}", { eager: true, import: "default" }) as Record<string, string>;
 const MEMBER_IMGS = import.meta.glob("../../../imports/members/*.{png,jpg,jpeg,webp}", { eager: true, import: "default" }) as Record<string, string>;
 
 // 依檔名（不含副檔名）取圖，找不到回空字串（會顯示佔位框）。

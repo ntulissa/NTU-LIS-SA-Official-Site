@@ -12,9 +12,11 @@ export const gen: DeptData = {
   joinBlurb:
     "加入行政部，你將成為全系運作最核心的幕後推手，掌管系館空間、財務與行政決策。這不只是會務，更是累積組織管理經驗、展現影響力的旅程。打造更完善的圖資系，就差你一個！",
   services: [
-    // 服務圖放 imports/services/gen1.png、gen2.png（找不到會顯示佔位框）；href 先用 "#"，之後接服務頁。
-    { name: "系櫃租借", img: svcImg("gen1"), href: "https://docs.google.com/forms/d/e/1FAIpQLSfmwqzlNfrtShLDTGdOBX2NuIT-NDs3Z49nJHVlLnPXcYlJ6g/viewform?usp=header" },
-    { name: "系學會費", img: svcImg("gen2"), href: "#/fees" },
+    // ★ slug 對應 Services（servicesData.ts）的服務；圖檔依部門放在 imports/services/IMG-gen/
+    //   （例：把 gen1.png 改名成 locker.png、gen2.png 改名成 fee.png），
+    //   這樣「部門頁輪播」與「服務詳情頁」會共用同一張圖。
+    { name: "系櫃租借", slug: "locker", img: svcImg("locker"), href: "https://docs.google.com/forms/d/e/1FAIpQLSfmwqzlNfrtShLDTGdOBX2NuIT-NDs3Z49nJHVlLnPXcYlJ6g/viewform?usp=header" },
+    { name: "系學會費", slug: "fee",    img: svcImg("fee"),    href: "#/fees" },
   ],
   heads: [
     // 幹部照放 imports/members/gen1.png、gen2.png、gen3.png（找不到＝照片待補）。
