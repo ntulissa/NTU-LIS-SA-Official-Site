@@ -2,7 +2,10 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft } from "lucide-react";
 import { Reveal } from "../sections/shared";
 import { DEPARTMENTS, DEPT_HASHTAGS } from "./departments";
-import type { Service, Head } from "./deptShared";
+import { svcImg, type Head } from "./deptShared";
+// ★ 服務清單改由「單一資料來源」servicesData.ts 提供（與 Services 頁共用同一份）：
+//   部門頁輪播用 servicesByDept(slug) 撈該部門的所有業務，不再從各部資料檔的 services 讀。
+import { servicesByDept, type Dept, type ServiceCell } from "./servicesData";
 
 /**
  * 部門獨立頁（共用渲染元件）
@@ -25,7 +28,6 @@ const PHOTO_FADE = "linear-gradient(to bottom, #000 74%, transparent 100%)";
 
 // ── 服務底部提示語：已推出 vs 準備中（想改字就改這兩句）──
 const SERVICE_HINT_OPEN = "深入了解";
-const SERVICE_HINT_SOON = "本服務準備中敬請期待";
 
 // ══════════════════════════════════════════════════════════════
 // ★ 可調整常數區（改這裡就能微調版面，不用動下面的結構）
@@ -164,23 +166,25 @@ function NameBackdrop({ slug }: { slug: string }) {
 }
 
 // ── 服務輪播（右側；圖片可點進服務頁；兩旁圓點 hover 變箭頭切換）──
-function ServiceCarousel({ services }: { services: Service[] }) {
+// 服務清單改吃 servicesData.ts：傳入部門 slug，用 servicesByDept 撈該部門所有業務（與 Services 頁同一份資料）。
+function ServiceCarousel({ dept }: { dept: string }) {
+  const services: ServiceCell[] = servicesByDept(dept as Dept);
   const [idx, setIdx] = useState(0);
+  // 提示語（深入了解／準備中）只有在滑鼠移到「名稱膠囊」上時才顯示。
+  const [hintOn, setHintOn] = useState(false);
   const s = services[idx] ?? services[0];
   const canPrev = idx > 0;
   const canNext = idx < services.length - 1;
 
   if (!s) return null;
 
-  // 服務按鈕改「連內部服務詳情頁」#/service/<slug>（同分頁），不再開外部網址。
-  // slug 取自該服務：請在 deptShared 的 Service 型別加上 slug?: string，並在各部資料（gen.tsx…）填入，
-  // 對應 Services.tsx 的服務 slug；沒填時退回 #/services 總覽頁。
-  const slug = (s as { slug?: string }).slug;
-  const detailHref = slug ? `#/service/${slug}` : "#/services";
-  const linkProps = (_?: string) => ({ href: detailHref });
+  // 服務按鈕一律「連內部服務詳情頁」#/service/<slug>（同分頁），不開外部網址。
+  const detailHref = `#/service/${s.slug}`;
+  const linkProps = () => ({ href: detailHref });
 
-  // 這項服務是否已推出：open 未填＝預設已推出；open:false＝準備中（按鈕變外框、不可點、提示語改成準備中）。
-  const isOpen = s.open !== false;
+  // 名稱與圖片：名稱用 zh；圖片以 slug 命名放 imports/services/（與詳情頁共用同一張）。
+  const label = s.zh;
+  const img = svcImg(s.slug);
 
   // 圖片顯示參數：單張有填就用單張，沒填就吃 SERVICE_IMG 全域預設。
   const imgFit = s.fit ?? SERVICE_IMG.fit;
@@ -191,7 +195,7 @@ function ServiceCarousel({ services }: { services: Service[] }) {
 
   // 圖片外層：一律用 <a> 連到該服務的詳情頁（同分頁）。
   const ImgTag: React.ElementType = "a";
-  const imgProps = { href: detailHref, "aria-label": `${s.name} — 進入服務頁面` };
+  const imgProps = { href: detailHref, "aria-label": `${label} — 進入服務頁面` };
 
   return (
     <div className="flex flex-col items-center">
@@ -201,10 +205,10 @@ function ServiceCarousel({ services }: { services: Service[] }) {
         className="block relative w-full max-w-[420px] overflow-hidden transition-transform duration-300 hover:-translate-y-1 cursor-pointer"
         style={{ height: "clamp(240px, 42vh, 420px)" }}
       >
-        {s.img ? (
+        {img ? (
           <img
-            src={s.img}
-            alt={s.name}
+            src={img}
+            alt={label}
             className="absolute inset-0 w-full h-full select-none"
             style={{
               objectFit: imgFit,
@@ -226,31 +230,28 @@ function ServiceCarousel({ services }: { services: Service[] }) {
         )}
       </ImgTag>
 
-      {/* 服務名稱 ＋ 左右切換點。已推出＝白色實心可點膠囊；準備中＝白框外框、不可點。 */}
+      {/* 服務名稱 ＋ 左右切換點。部門頁每項服務都連到自己的詳情頁，一律白色實心可點膠囊。 */}
       <div className="flex items-center gap-4 sm:gap-5 mt-6">
         <NavArrow dir="prev" color="#D14B4B" disabled={!canPrev} onClick={() => canPrev && setIdx((v) => v - 1)} />
-        {isOpen ? (
-          <a
-            {...linkProps(s.href)}
-            className="rounded-full bg-white text-black px-6 py-2.5 whitespace-nowrap hover:bg-white/90 transition-colors"
-            style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.95rem,1.3vw,1.2rem)", letterSpacing: "0.16em" }}
-          >
-            {s.name}
-          </a>
-        ) : (
-          <a
-            {...linkProps(s.href)}
-            className="rounded-full px-6 py-2.5 whitespace-nowrap select-none cursor-pointer"
-            style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.95rem,1.3vw,1.2rem)", letterSpacing: "0.16em", color: "#fff", background: "transparent", border: "1.5px solid rgba(255,255,255,0.6)" }}
-          >
-            {s.name}
-          </a>
-        )}
+        <a
+          {...linkProps()}
+          onMouseEnter={() => setHintOn(true)}
+          onMouseLeave={() => setHintOn(false)}
+          className="rounded-full bg-white text-black px-6 py-2.5 whitespace-nowrap hover:bg-white/90 transition-colors"
+          style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.95rem,1.3vw,1.2rem)", letterSpacing: "0.16em" }}
+        >
+          {label}
+        </a>
         <NavArrow dir="next" color="#2F9EBD" disabled={!canNext} onClick={() => canNext && setIdx((v) => v + 1)} />
       </div>
 
-      <p className="text-white/40 mt-3" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.16em", color: "#FFFFFF" }}>
-        {isOpen ? SERVICE_HINT_OPEN : SERVICE_HINT_SOON}
+      {/* 提示語：預設隱藏（opacity 0，但保留高度不跳版），滑到名稱膠囊上才淡入 */}
+      <p
+        className="mt-3 transition-opacity duration-200"
+        aria-hidden={!hintOn}
+        style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.16em", color: "#FFFFFF", opacity: hintOn ? 1 : 0 }}
+      >
+        {SERVICE_HINT_OPEN}
       </p>
     </div>
   );
@@ -428,7 +429,7 @@ export default function DepartmentPage({ slug }: { slug: string }) {
 
             {/* 右：服務輪播 */}
             <Reveal delay={100}>
-              <ServiceCarousel services={data.services} />
+              <ServiceCarousel dept={slug} />
             </Reveal>
           </div>
         </div>
