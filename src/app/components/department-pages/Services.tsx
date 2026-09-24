@@ -1,5 +1,5 @@
-import { useEffect, type CSSProperties } from "react";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { ArrowRight, ArrowLeft, Info, XCircle } from "lucide-react";
 import { Reveal } from "../sections/shared";
 // ↑ 若 Services.tsx 不是放在跟 DepartmentPage 同一層，請改這行的相對路徑到 sections/shared。
 import { DEPT_COLORS, BENTO, serviceBySlug, type Cell } from "./servicesData";
@@ -42,6 +42,18 @@ const DETAIL_LAYOUT = {
   image:   { x: 0, y: 0 }, // 右側圖片
 };
 const mv = (c: { x: number; y: number }) => `translate(${c.x}px, ${c.y}px)`;
+
+// ── 詳情頁右側「翻牌卡」外觀（想改卡片大小、比例、外框、翻牌速度改這裡）──
+const CARD = {
+  maxW: 460,            // 卡片最大寬度（px）
+  ratio: "10 / 11",     // 寬 / 高 比例（越大越扁）
+  radius: 26,           // 圓角（px）
+  border: "linear-gradient(135deg, #D14B4B 0%, #2F9EBD 100%)", // 紅→藍漸層外框
+  flipMs: 600,          // 翻牌動畫時間（ms）
+  offset: { x: 20, y: -20 }, // 卡片整體位移（px；正 x=往右、正 y=往下）。想再挪就改這裡。
+};
+// 卡片底部部門標籤文字：NTU LIS SA - <DEPT>.
+const deptTag = (dept: string) => `NTU LIS SA - ${dept.toUpperCase()}.`;
 
 // ── 讀 imports/services/ 各部門子資料夾的圖檔（部門名稱 svg：IMG-gen/gen.svg…；服務詳情圖：<slug>.png/jpg/svg）──
 // 若原始碼不在 /src 底下，改下面 glob 的路徑字串即可；舊版 Vite 把 query/import 換成 as:"url"。
@@ -137,7 +149,90 @@ function ServicesGrid() {
   );
 }
 
-// ── 服務詳情頁（只有上半：左 標題/便利貼/英文/介紹/按鈕，右 圖片）──
+// ── 詳情頁右側「翻牌卡」──────────────────────────────────
+// 正面：黑底 + 紅藍漸層外框；上方服務圖，下方部門名稱（Ubuntu Sans Mono），右上角「i」。
+// 點「i」→ 翻到背面「服務指引」（條列，內容寫在 servicesData.ts 的 guide）；背面右上角「✕」翻回正面。
+// 沒填 guide 的服務不顯示「i」，就當一張純圖卡。
+function ServiceCard({ dept, img, zh, guide }: { dept: string; img?: string; zh: string; guide?: string[] }) {
+  const [flipped, setFlipped] = useState(false);
+  const hasGuide = !!guide && guide.length > 0;
+
+  // 兩面共用的底：黑底 + 紅藍漸層外框（padding-box/border-box 疊法）+ 背面剔除。
+  // ★ 兩面「各自」都要有自己的 rotateY transform，backface-visibility:hidden 才會生效；
+  //   正面若沒有 transform，翻轉時它的背面不會被剔除，正面的「i」會鏡像穿到背面 → 所以正面補上 rotateY(0)。
+  const face: CSSProperties = {
+    position: "absolute", inset: 0, borderRadius: CARD.radius,
+    border: "1.5px solid transparent",
+    background: `linear-gradient(#000,#000) padding-box, ${CARD.border} border-box`,
+    WebkitBackfaceVisibility: "hidden", backfaceVisibility: "hidden",
+    overflow: "hidden",
+  };
+  // 右上角圓形按鈕（i / ✕）：黏在各自那一面，跟著卡片一起翻。
+  const iconBtnClass = "absolute top-4 right-4 z-10 text-white/85 hover:text-white transition-colors";
+  const tag = (
+    <p className="text-center text-white select-none" style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.8rem,1.3vw,1.05rem)", letterSpacing: "0.28em", paddingLeft: "0.28em" }}>
+      {deptTag(dept)}
+    </p>
+  );
+
+  return (
+    <div className="w-full mx-auto relative" style={{ maxWidth: CARD.maxW, perspective: "1600px", transform: `translate(${CARD.offset.x}px, ${CARD.offset.y}px)` }}>
+      {/* 翻牌本體（正/背兩面 3D 翻轉） */}
+      <div
+        className="relative w-full"
+        style={{
+          aspectRatio: CARD.ratio,
+          transformStyle: "preserve-3d",
+          transition: `transform ${CARD.flipMs}ms cubic-bezier(0.4,0,0.2,1)`,
+          transform: flipped ? "rotateY(180deg)" : "none",
+        }}
+      >
+        {/* 正面：服務圖 + 部門名稱（rotateY(0) 讓背面剔除生效，i 才不會穿到背面） */}
+        <div style={{ ...face, transform: "rotateY(0deg)" }} className="flex flex-col p-5 sm:p-6">
+          {hasGuide ? (
+            <button type="button" onClick={() => setFlipped(true)} aria-label="服務指引" className={iconBtnClass}>
+              <Info size={38} strokeWidth={1.4} />
+            </button>
+          ) : null}
+          <div className="flex-1 flex items-center justify-center min-h-0 pt-2 pb-1">
+            {img ? (
+              <img src={img} alt={zh} className="max-w-full max-h-full object-contain select-none" />
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-3 text-white/40" style={{ fontFamily: mono, letterSpacing: "0.2em" }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="w-14 h-14">
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M3 15l5-5 4 4 3-3 6 6" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="8.5" cy="9" r="1.4" />
+                </svg>
+                <span className="text-xs">服務圖片</span>
+              </div>
+            )}
+          </div>
+          {tag}
+        </div>
+
+        {/* 背面（旋轉 180°）：服務指引條列（靠上排，避免上方一大片黑） */}
+        <div style={{ ...face, transform: "rotateY(180deg)" }} className="flex flex-col p-6 sm:p-7">
+          <button type="button" onClick={() => setFlipped(false)} aria-label="返回正面" className={iconBtnClass}>
+            <XCircle size={38} strokeWidth={1.4} />
+          </button>
+          <div className="flex-1 flex flex-col justify-start gap-5 min-h-0 pt-16 pr-1">
+            {(guide ?? []).map((g, i) => (
+              <div key={i} className="flex items-start gap-3">
+                {/* 圓點對齊「第一行文字」的垂直中央：line-height 1.7 → 半行 0.85em，再扣圓點半徑 */}
+                <span className="shrink-0 rounded-full bg-white" style={{ width: 9, height: 9, marginTop: "calc(0.85em - 4.5px)" }} />
+                <p className="text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.95rem,1.5vw,1.25rem)", lineHeight: 1.7, letterSpacing: "0.02em" }}>{g}</p>
+              </div>
+            ))}
+          </div>
+          {tag}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── 服務詳情頁（只有上半：左 標題/便利貼/英文/介紹/按鈕，右 翻牌卡）──
 function ServiceDetail({ slug }: { slug: string }) {
   const s = serviceBySlug(slug);
 
@@ -247,21 +342,10 @@ function ServiceDetail({ slug }: { slug: string }) {
             </Reveal>
           </div>
 
-          {/* 右：圖片（無按鈕）。放 imports/services/<slug>.png（或 jpg/webp/svg） */}
+          {/* 右：翻牌卡（正面圖 + 部門名稱 + i；背面服務指引 + ✕）。圖放 imports/services/<slug>.png */}
           <Reveal delay={100}>
-            <div className="relative w-full flex items-center justify-center" style={{ height: "clamp(260px, 46vh, 460px)", transform: mv(DETAIL_LAYOUT.image) }}>
-              {img ? (
-                <img src={img} alt={s.zh} className="max-w-full max-h-full object-contain select-none" />
-              ) : (
-                <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-white/25 w-[70%] h-full text-white/50" style={{ fontFamily: mono, letterSpacing: "0.2em" }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="w-14 h-14">
-                    <rect x="3" y="4" width="18" height="16" rx="2" />
-                    <path d="M3 15l5-5 4 4 3-3 6 6" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle cx="8.5" cy="9" r="1.4" />
-                  </svg>
-                  <span className="text-xs">{s.slug}.png</span>
-                </div>
-              )}
+            <div className="relative w-full flex items-center justify-center" style={{ transform: mv(DETAIL_LAYOUT.image) }}>
+              <ServiceCard dept={s.dept} img={img} zh={s.zh} guide={s.guide} />
             </div>
           </Reveal>
         </div>
