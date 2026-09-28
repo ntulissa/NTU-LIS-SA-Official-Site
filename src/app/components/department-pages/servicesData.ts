@@ -71,9 +71,9 @@ export const BENTO: Cell[] = [
   // ══ gen 行政（棕） ══
   // 系學會費
   {
-    type: "service", dept: "gen", slug: "fee", zh: "系學會費",
+    type: "service", dept: "gen", slug: "fee-lissa", zh: "系學會費",
     gc: "1", gr: "2 / span 3", vertical: true,
-    en: "MEMBERSHIP FEE",
+    en: "FEE LISSA",
     intro:
       "繳納系學會費不僅是對系上運作的支持，更是伴隨你四年大學生活最超值的專屬投資！有繳費的系胞立即享有「五大核心權益」：迎新活動直接免費參加、系館專屬系櫃享免租金借用、學術部嚴選教科書享有更便宜的團購專屬優惠價、系服訂購享有減免折扣，以及系烤、舞會等整年度各大精彩活動的專屬報名優惠價；一份會費直接解鎖學習置物、課業購書到社交娛樂的全方位福利，陪伴你用最划算、充實的方式度過整個圖資大學生活！",
     note: "一年一次",
@@ -100,11 +100,11 @@ export const BENTO: Cell[] = [
 
   // 學輔室使用申請
   {
-    type: "service", dept: "gen", slug: "studyroom", zh: "學輔室使用申請",
+    type: "service", dept: "gen", slug: "lounge", zh: "學輔室使用申請",
     gc: "3 / span 3", gr: "1 / span 2",
-    en: "STUDY ROOM BOOKING",
+    en: "LOUNGE BOOKING",
     intro:
-      "為了讓需要自習、討論報告或準備專案的同學擁有更彈性的空間，系學會特別推出貼心的「學輔室延後使用申請」服務；依系辦規定，系館平時超過晚間 19:30 即需離館，若系上同學有晚間延長使用的正當需求，系學會將扮演溝通橋樑，統一協助大家向系辦提出留館與學輔室延後使用的申請手續，省去個人繁瑣的行政流程，全力支援大家的課業與專案進度，讓你在熟悉的系館空間裡安心衝刺無後顧之憂！",
+      "為了讓需要自習、討論報告或準備專案的同學擁有更彈性的空間，系學會特別推出貼心的「學輔室延後使用申請」服務；依系辦規定，系館平時超過晚間 19:00 即需離館，若系上同學有晚間延長使用的正當需求，系學會將扮演溝通橋樑，統一協助大家向系辦提出留館與學輔室延後使用的申請手續，省去個人繁瑣的行政流程，全力支援大家的課業與專案進度，讓你在熟悉的系館空間裡安心衝刺無後顧之憂！",
     note: "線上預約",
   },
 
@@ -112,7 +112,7 @@ export const BENTO: Cell[] = [
   {
     type: "service", dept: "gen", slug: "aircon", zh: "學輔室冷氣使用",
     gc: "3 / span 3", gr: "3 / span 2",
-    en: "STUDY ROOM AIR-CON",
+    en: "LOUNGE AIR-CON",
     intro:
       "自第 52 屆系學會起正式開放學輔室冷氣讓大家使用，希望為系胞打造一個清涼舒適的自習與討論空間；但享受福利的同時也需要大家共同守護，冷氣運轉期間請隨手關門並上鎖其中一扇以防被風吹開，使用完畢務必主動關閉電源並將遙控器放回原位，若未遵守規範將考慮暫停開放以示警告，美好的共享資源有賴全體同學共同維持，感謝大家的配合！",
     note: false,
@@ -136,9 +136,9 @@ export const BENTO: Cell[] = [
 
   // 迎新宿營
   {
-    type: "service", dept: "eve", slug: "orientation-camp", zh: "迎新宿營",
+    type: "service", dept: "eve", slug: "camp", zh: "迎新宿營",
     gc: "9 / span 2", gr: "2 / span 2",
-    en: "ORIENTATION CAMP",
+    en: "JOINT ORIENTATION CAMP",
     intro:
       "踏入大學校園前最熱血、最難忘的第一場冒險！系學會特別攜手外系共同舉辦「跨系聯合迎新宿營」，在開學前夕帶領大一新鮮人走出日常、展開為期數天的精彩旅程；透過豐富刺激的團隊闖關、熱力四射的營火晚會與深度的夜間談心，你將提早認識照顧你的暖心學長姐，更能在第一時間結交橫跨不同科系的大學摯友，消除對新環境的陌生與焦慮，帶著滿滿的回憶與自信迎接精彩的大學第一學期！",
     note: false,
@@ -146,7 +146,7 @@ export const BENTO: Cell[] = [
 
   // 聖誕大會
   {
-    type: "service", dept: "eve", slug: "christmas", zh: "聖誕大會",
+    type: "service", dept: "eve", slug: "xmas", zh: "聖誕大會",
     gc: "9 / span 2", gr: "1",
     en: "CHRISTMAS SPECIAL",
     intro:
@@ -155,7 +155,7 @@ export const BENTO: Cell[] = [
 
   // 新生迎新
   {
-    type: "service", dept: "eve", slug: "freshman", zh: "新生迎新",
+    type: "service", dept: "eve", slug: "orientation", zh: "新生迎新",
     gc: "6", gr: "3 / span 2", vertical: true,
     en: "FRESHMAN ORIENTATION - LIS",
     intro:
@@ -200,9 +200,9 @@ export const BENTO: Cell[] = [
 
   // 系友講座
   {
-    type: "service", dept: "aca", slug: "alumni-talk", zh: "系友講座",
+    type: "service", dept: "aca", slug: "alumni", zh: "系友講座",
     gc: "2 / span 2", gr: "7 / span 2",
-    en: "ALUMNI TALK",
+    en: "LIS TALK",
     intro:
       "想知道圖資系畢業後能走入哪些多元領域嗎？系學會定期舉辦「系友講座（LIS Talks）」，特別邀請來自軟體科技、數據分析、數位行銷、學術研究、出版策展及文化機構等不同產業的學長姐重返母校，親自拆解求職心路歷程、職場實戰經驗與行業趨勢；透過近距離的對談交流與提問互動，不僅能打破你的職涯迷惘、看見跨領域發展的各種可能，更是提早拓展人脈網絡、為未來的實習與就業做好準備的最佳契機！",
     note: "前輩經驗",
@@ -210,9 +210,9 @@ export const BENTO: Cell[] = [
 
   // 企業參訪
   {
-    type: "service", dept: "aca", slug: "company-visit", zh: "企業參訪",
+    type: "service", dept: "aca", slug: "corp", zh: "企業參訪",
     gc: "4 / span 2", gr: "5 / span 2",
-    en: "COMPANY VISIT",
+    en: "CORP. VISIT",
     intro:
       "走出校園理論，親眼見證圖資專業在產業界的真實實踐！為了替系胞拓展更多元開闊的視野，系學會正積極尋求各方管道與合作機會，致力推動前所未有的「企業參訪」計畫；我們將接洽科技資訊、數據分析、數位內容與文化機構等多元領域的指標性企業，帶領大家走進產業第一線，實地了解職場運作模式、工作環境與未來人才需求，期待為系上同學搭建起與產業接軌的堅實橋樑，提前為未來的實習與職涯佈局做好萬全準備！",
     note: "看看業界",
@@ -231,7 +231,7 @@ export const BENTO: Cell[] = [
   // ══ ima 美宣（紫） ══
   // 社群經營
   {
-    type: "service", dept: "ima", slug: "social", zh: "社群經營",
+    type: "service", dept: "ima", slug: "socials", zh: "社群經營",
     gc: "6", gr: "5 / span 4", vertical: true,
     en: "SOCIAL MEDIA",
     intro:
@@ -242,9 +242,9 @@ export const BENTO: Cell[] = [
 
   // 系服訂購
   {
-    type: "service", dept: "ima", slug: "dept-shirt", zh: "系服訂購",
+    type: "service", dept: "ima", slug: "ooty", zh: "系服訂購",
     gc: "7", gr: "5 / span 4", vertical: true,
-    en: "DEPT SHIRT",
+    en: "OOTY LIS",
     intro:
       "每一位圖資人的衣櫃裡，都必須擁有一件專屬的年度代表作！系學會推出的「系服訂購」可謂是圖資人當之無愧的年度時尚指標 OOTY（Outfit of the Year），兼具質感剪裁與系所精神的獨創設計，無論是日常上課穿搭、系上大型活動還是系隊征戰，穿上它就能一眼認出彼此、展現最強凝聚力；有繳納系學會費的同學還能享有專屬的訂購減免優惠，快跟上全系潮流換上今年的代表戰袍，穿出屬於圖資人的專屬風格！",
     note: "限時開賣",
@@ -263,7 +263,7 @@ export const BENTO: Cell[] = [
 
   // 文宣品
   {
-    type: "service", dept: "ima", slug: "souvenir", zh: "文宣品",
+    type: "service", dept: "ima", slug: "poster", zh: "文宣品",
     gc: "8 / span 2", gr: "6 / span 1",
     en: "POSTER DESIGN",
     intro:
@@ -294,7 +294,7 @@ export const BENTO: Cell[] = [
 
   // 臺大日文圖資男籃
   {
-    type: "service", dept: "sp", slug: "men-basket", zh: "臺大日文圖資男籃",
+    type: "service", dept: "sp", slug: "basketball", zh: "臺大日文圖資男籃",
     gc: "10 / span 1", gr: "5 / span 4", vertical: true,
     en: "NTU J-LIS MEN'S BASKETBALL",
     intro:
@@ -311,7 +311,7 @@ export const BENTO: Cell[] = [
 
   // 臺大圖資女排
   {
-    type: "service", dept: "sp", slug: "women-volley", zh: "臺大圖資女排",
+    type: "service", dept: "sp", slug: "volleyball", zh: "臺大圖資女排",
     gc: "11", gr: "1 / span 4", vertical: true,
     en: "NTU LIS WOMEN'S VOLLEYBALL",
     intro:
@@ -323,7 +323,7 @@ export const BENTO: Cell[] = [
   {
     type: "service", dept: "sp", slug: "badminton", zh: "臺大圖資羽球",
     gc: "12", gr: "1 / span 4", vertical: true,
-    en: "BADMINTON",
+    en: "NTU LIS BADMINTON",
     intro:
       "想在課餘時間揮拍流汗、享受羽球破風的俐落快感嗎？「臺大圖資羽球隊」不限性別、男女生都熱烈歡迎！不論你是身經百戰的場上高手，還是剛拿起球拍想運動健身的初學者，這裡都有最友善耐心的學長姐陪伴你一起練習、精進球技；除了定期的練球時間外，隊上溫馨歡樂的氛圍更是系胞們放鬆交流、培養深厚情誼的最佳所在，快帶著你的球拍加入我們，在球場上一同揮灑青春汗水！",
     note: "揮拍",
