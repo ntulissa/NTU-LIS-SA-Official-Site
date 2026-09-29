@@ -34,8 +34,8 @@ const NAV_COLS = [
     zh: "關於我們",
     links: [
       { label: "資訊總覽", href: "#/overview" },
+      { label: "學會簡介", href: "#/about" },
       { label: "現任團隊", href: "#/current-team" },
-      { label: "學會發展歷程", href: "#about" },
       { label: "歷任會長", href: "#/presidents" },
     ],
   },

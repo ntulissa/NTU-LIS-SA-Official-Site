@@ -83,7 +83,10 @@ const DEPT_LAYOUT = {
   en:   { size: 20 },                  // 英文名
   cardTitle: { size: 24 },             // 「在這裡，你會得到」
   item: { size: 26 },                  // 卡片條列
+  quizCta: { size: 24 },               // 底部「不知道自己屬於哪個部門？」
 };
+const QUIZ_HREF = "#/dept-quiz"; // 部門適性測驗頁路由（DeptQuizPage.tsx）
+const GRADIENT_TEXT = "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)";
 
 // ── D. 加入手續三步驟 ───────────────────────────────────
 const STEP_LAYOUT = {
@@ -586,6 +589,19 @@ function DeptRecruit() {
           </div>
         ))}
       </div>
+
+      {/* 部門測驗入口 */}
+      <p className="text-white text-center mt-[clamp(28px,5vh,64px)] flex flex-wrap items-center justify-center gap-x-8 gap-y-2" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(16px, 1.7vw, ${DEPT_LAYOUT.quizCta.size}px)`, letterSpacing: "0.14em" }}>
+        <span>不知道自己屬於哪個部門？</span>
+        <a
+          href={QUIZ_HREF}
+          className="jn-quiz-link relative inline-block"
+          style={{ fontFamily: zhHead, fontWeight: 900, background: GRADIENT_TEXT, WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent" }}
+        >
+          點擊按鈕
+        </a>
+        <span>讓我們幫你評估</span>
+      </p>
     </div>
   );
 }
@@ -1018,6 +1034,8 @@ export default function JoinUsSection() {
           animation: jnFlow .35s linear infinite;
         }
         @keyframes jnFlow { from { background-position: 0 0, 0 0; } to { background-position: 0 14px, 0 0; } }
+        .jn-quiz-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 2px; background: ${GRADIENT_TEXT}; transform: scaleX(0); transform-origin: left; transition: transform .35s cubic-bezier(0.22,1,0.36,1); }
+        .jn-quiz-link:hover::after, .jn-quiz-link:focus-visible::after { transform: scaleX(1); }
         @keyframes jnFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
         .jn-fade { animation: jnFade .55s cubic-bezier(0.22,1,0.36,1) both; }
         /* ① 待辦清單 */

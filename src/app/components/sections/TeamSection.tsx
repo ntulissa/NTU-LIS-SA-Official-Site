@@ -1,5 +1,5 @@
 import { useState } from "react";
-import imgBuildingHistory from "@/imports/OurHistory/de7749452570d864c1f5c584765f093ab16a6d89.png";
+import imgBuildingHistory from "@/imports/AboutUs/de7749452570d864c1f5c584765f093ab16a6d89.png";
 import imgMeiji from "@/imports/Presidents/53.png";
 import imgHongLingYa from "@/imports/CurrentTeam/53vp.png";
 import { Reveal } from "./shared";

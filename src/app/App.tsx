@@ -5,13 +5,14 @@ import ScrollIndicator from "./components/ScrollIndicator";
 import HeroSection from "./components/sections/HeroSection";
 import BentoSection from "./components/sections/BentoSection";
 import SloganSection from "./components/sections/SloganSection";
-import HistorySection from "./components/sections/HistorySection";
+import AboutUsSection from "./components/sections/AboutUsSection";
 import TeamSection from "./components/sections/TeamSection";
 import SloganPage2Section from "./components/sections/SloganPage2Section";
 import LatestUpdatesSection from "./components/sections/LatestUpdatesSection";
 import NewsArticlePage from "./components/sections/NewsArticlePage";
 import AcademicResourcesSection from "./components/sections/AcademicResourcesSection";
 import JoinUsSection from "./components/sections/JoinUsSection";
+import DeptQuizPage from "./components/sections/DeptQuizPage";
 import ContactSection from "./components/sections/ContactSection";
 import PastPresidentsSection from "./components/sections/PastPresidentsSection";
 import CalendarPage from "./components/sections/CalendarPage";
@@ -23,7 +24,9 @@ import Services from "./components/department-pages/Services";
 // 極輕量的 hash 分頁（不需安裝 react-router；同時保留原本 #team / #news 等錨點捲動）：
 //   #/current-team    → 現任團隊獨立頁（只有 Header + TeamSection + Footer）
 //   #/presidents      → 歷任會長頁
+//   #/about           → 學會簡介獨立頁（只有 Header + AboutUsSection + Footer）
 //   #/join            → 加入我們獨立頁（只有 Header + JoinUsSection + Footer）
+//   #/dept-quiz       → 部門適性測驗頁（從加入我們的「點擊按鈕」進入）
 //   #/contact         → 聯絡我們獨立頁（只有 Header + ContactSection + Footer）
 //   #/overview        → 資訊總覽獨立頁（只有 Header + BentoSection + Footer）
 //   #/news            → 公告列表頁（只有 Header + 公告列表 + Footer）
@@ -35,13 +38,15 @@ import Services from "./components/department-pages/Services";
 //   #/services        → 各種服務 Bento 總覽頁
 //   #/service/<slug>  → 單一服務詳情頁（slug 同 servicesData.ts）
 //   其餘              → 捲動式主頁
-type Route = { name: "home" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "contact" } | { name: "overview" } | { name: "news" } | { name: "article"; slug: string } | { name: "calendar" } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string } | { name: "services" } | { name: "service"; slug: string };
+type Route = { name: "home" } | { name: "about" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "dept-quiz" } | { name: "contact" } | { name: "overview" } | { name: "news" } | { name: "article"; slug: string } | { name: "calendar" } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string } | { name: "services" } | { name: "service"; slug: string };
 
 function getRoute(): Route {
   const h = window.location.hash;
+  if (h.startsWith("#/about")) return { name: "about" };
   if (h.startsWith("#/current-team")) return { name: "current-team" };
   if (h.startsWith("#/presidents")) return { name: "presidents" };
   if (h.startsWith("#/join")) return { name: "join" };
+  if (h.startsWith("#/dept-quiz")) return { name: "dept-quiz" };
   if (h.startsWith("#/contact")) return { name: "contact" };
   if (h.startsWith("#/overview")) return { name: "overview" };
   // 注意：文章頁（#/news/<slug>）要在列表頁（#/news）之前比對，否則會被列表頁吃掉。
@@ -121,11 +126,17 @@ export default function App() {
         // 獨立頁：只顯示 TeamSection（Header/Footer 在最外層一定會出現）。
         // 頂部間距由 TeamSection 的 standalone 模式自己處理（剛好清掉固定 Header）。
         <TeamSection standalone />
+      ) : route.name === "about" ? (
+        // 獨立頁：只顯示 AboutUsSection（Header/Footer 在最外層一定會出現）。
+        <AboutUsSection />
       ) : route.name === "presidents" ? (
         <PastPresidentsSection />
       ) : route.name === "join" ? (
         // 獨立頁：只顯示 JoinUsSection（Header/Footer 在最外層一定會出現）。
         <JoinUsSection />
+      ) : route.name === "dept-quiz" ? (
+        // 獨立頁：部門適性測驗。
+        <DeptQuizPage />
       ) : route.name === "contact" ? (
         // 獨立頁：只顯示 ContactSection（Header/Footer 在最外層一定會出現）。
         <ContactSection />
@@ -160,7 +171,7 @@ export default function App() {
           <HeroSection />
           <BentoSection />
           <SloganSection />
-          <HistorySection />
+          <AboutUsSection />
           <TeamSection />
           <SloganPage2Section />
           <LatestUpdatesSection />
@@ -169,8 +180,10 @@ export default function App() {
       )}
 
       <Footer />
-      {/* 固定於畫面下方的捲動提示；滑到 Footer 會自動淡出 */}
-      <ScrollIndicator />
+      {route.name === "home" && (
+        // 固定於畫面下方的捲動提示；獨立頁只保留 Header、Body、Footer。
+        <ScrollIndicator />
+      )}
     </div>
   );
 }
