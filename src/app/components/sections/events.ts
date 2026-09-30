@@ -123,6 +123,19 @@ export const EVENTS: CalEvent[] = [
     signup: false,
   },
   {
+    title: "系烤 2026",
+    date: "2026-11-13",
+    time: "18:00",
+    depts: ["eve"],
+    location: "華中露營場",
+    mapUrl: "",
+    desc:
+      "一年一度的系學會成果發表會，\n" +
+      "各部門將展示過去一年的努力與成果，\n" +
+      "並分享未來的計畫與願景。",
+    signup: false,
+  },
+  {
     title: "杜鵑花節 2027",
     date: "2027-03-13",
     end: "2027-03-14",

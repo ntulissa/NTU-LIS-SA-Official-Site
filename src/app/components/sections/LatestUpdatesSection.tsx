@@ -11,7 +11,8 @@ export default function LatestUpdatesSection({ standalone = false }: { standalon
     <section
       id="news"
       className={`relative bg-black px-5 sm:px-8 md:px-14 ${
-        standalone ? "pt-28 sm:pt-32 lg:pt-32 pb-20 lg:pb-28 min-h-screen" : "py-16 sm:py-20 md:py-24"
+        // 上內距兩種模式都用 --page-content-top（globals.css），卡片才不會壓到頁面小標題。
+        standalone ? "pt-[var(--page-content-top)] pb-20 lg:pb-28 min-h-screen" : "pt-[var(--page-content-top)] pb-16 sm:pb-20 md:pb-24"
       }`}
     >
       <div className="max-w-[1400px] mx-auto">

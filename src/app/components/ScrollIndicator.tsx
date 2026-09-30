@@ -23,8 +23,26 @@ export default function ScrollIndicator() {
     return () => observer.disconnect();
   }, []);
 
+  // 捲到「下一個區塊的開頭」，讓每個區塊的頁面小標題都停在畫面同一個位置。
+  // 若下一個區塊還很遠（目前這塊比一個螢幕還高），先照舊往下捲約一個畫面，避免跳過內容。
   const scrollDown = () => {
-    window.scrollBy({ top: window.innerHeight * 0.85, behavior: "smooth" });
+    const footer = document.querySelector("footer");
+    const blocks = footer?.parentElement
+      ? Array.from(footer.parentElement.children).filter(
+          (el): el is HTMLElement =>
+            el instanceof HTMLElement && !["HEADER", "FOOTER", "BUTTON", "STYLE", "SCRIPT"].includes(el.tagName)
+        )
+      : [];
+    const vh = window.innerHeight;
+    const next = blocks
+      .map((el) => el.getBoundingClientRect().top)
+      .find((top) => top > 4); // 第一個「頂端還在畫面下方」的區塊
+
+    if (next === undefined || next > vh) {
+      window.scrollBy({ top: vh * 0.85, behavior: "smooth" });
+    } else {
+      window.scrollBy({ top: next, behavior: "smooth" });
+    }
   };
 
   return (

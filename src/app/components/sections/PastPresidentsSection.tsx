@@ -245,7 +245,8 @@ function ProfilePanel({
 }) {
   return (
     // 固定頂端對齊（justify-start + 固定 pt）：照片、姓名、屆數在每一屆都落在同一垂直位置，換屆不位移。
-    <div className="w-full h-full flex flex-col items-center justify-start text-center px-6 sm:px-10 pt-24 lg:pt-[112px] pb-16">
+    // 手機版面板在頁面最上方，用 --page-content-top 讓照片避開頁面小標題；桌機（右半 fixed）維持 112px。
+    <div className="w-full h-full flex flex-col items-center justify-start text-center px-6 sm:px-10 pt-[var(--page-content-top)] lg:pt-[112px] pb-16">
       {/* 會長照片（交叉淡入；縮小、完整顯示人物；頭頂大致與左側 ABOUT US 齊高）*/}
       <PhotoStage src={photo} name={name} />
 
@@ -556,7 +557,7 @@ export default function PastPresidentsSection() {
         {/* 第一屏：標題 + 第X屆 + 任期 + 簡介
             用「固定頂端對齊」而非置中：標題/任期永遠釘在同一位置，換屆時不會因簡介長短而位移。
             lg:min-h-screen 仍讓「團隊成員」落到第二屏，需下滑才看到。 */}
-        <div className="lg:min-h-screen pt-24 sm:pt-28 lg:pt-[128px] pb-16 lg:pb-24">
+        <div className="lg:min-h-screen pt-[var(--page-content-top)] pb-16 lg:pb-24">
           <div className="max-w-[640px]">
             <PageEyebrow text="關於我們・歷任會長" />
             <Reveal delay={80}>

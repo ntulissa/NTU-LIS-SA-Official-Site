@@ -196,7 +196,7 @@ const CARDS: Card[] = [
 
 export default function ContactSection() {
   return (
-    <section id="contact" className="relative bg-black min-h-[100svh] flex flex-col px-5 sm:px-8 md:px-14 pt-24 sm:pt-28 lg:pt-28 pb-6 sm:pb-8 lg:pb-12">
+    <section id="contact" className="relative bg-black min-h-[100svh] flex flex-col px-5 sm:px-8 md:px-14 pt-[var(--page-content-top)] pb-6 sm:pb-8 lg:pb-12">
       <div className="max-w-[1400px] w-full mx-auto flex flex-col flex-1 min-h-0">
         <PageEyebrow text="各種服務・聯絡我們" />
 

@@ -661,7 +661,7 @@ export default function CalendarPage() {
   }, [view]);
 
   return (
-    <section id="calendar" className="relative bg-black min-h-screen px-5 sm:px-8 md:px-12 lg:px-16 pt-24 sm:pt-28 lg:pt-28 pb-16 lg:pb-24">
+    <section id="calendar" className="relative bg-black min-h-screen px-5 sm:px-8 md:px-12 lg:px-16 pt-[var(--page-content-top)] pb-16 lg:pb-24">
       <style>{`
         @keyframes calPopIn { from { opacity: 0; transform: translate(-50%, calc(var(--dy) + 6px)); } to { opacity: 1; transform: translate(-50%, var(--dy)); } }
         .cal-pop { animation: calPopIn 0.16s ease-out both; }

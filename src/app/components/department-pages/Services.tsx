@@ -121,7 +121,7 @@ function BentoCell({ cell }: { cell: Cell }) {
 // ── Bento Grid 總覽 ───────────────────────────────────────
 function ServicesGrid() {
   return (
-    <section className="relative bg-black min-h-screen px-4 sm:px-6 lg:px-10 pt-24 sm:pt-28 lg:pt-[120px] pb-10">
+    <section className="relative bg-black min-h-screen px-4 sm:px-6 lg:px-10 pt-[var(--page-content-top)] pb-10">
       <style>{`.svc-cell:hover{ background: var(--svc-fill); }`}</style>
       <PageEyebrow text="各種服務・各部業務" />
 
@@ -264,7 +264,7 @@ function ServiceDetail({ slug }: { slug: string }) {
   return (
     <section className="relative min-h-screen" style={{ background: color }}>
       <PageEyebrow text="各種服務・各部業務" />
-      <div className="relative max-w-[1400px] mx-auto px-5 sm:px-8 md:px-12 lg:px-16 pt-24 sm:pt-28 lg:pt-[120px] pb-16 lg:pb-24 lg:min-h-screen lg:flex lg:flex-col lg:justify-center">
+      <div className="relative max-w-[1400px] mx-auto px-5 sm:px-8 md:px-12 lg:px-16 pt-[var(--page-content-top)] pb-16 lg:pb-24 lg:min-h-screen lg:flex lg:flex-col lg:justify-center">
         {/* 回上頁 */}
         <Reveal>
           <button

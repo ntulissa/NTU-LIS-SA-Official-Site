@@ -3,11 +3,10 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ScrollIndicator from "./components/ScrollIndicator";
 import HeroSection from "./components/sections/HeroSection";
+import UpcomingEventsSection from "./components/sections/UpcomingEventsSection";
 import BentoSection from "./components/sections/BentoSection";
-import SloganSection from "./components/sections/SloganSection";
 import AboutUsSection from "./components/sections/AboutUsSection";
 import TeamSection from "./components/sections/TeamSection";
-import SloganPage2Section from "./components/sections/SloganPage2Section";
 import LatestUpdatesSection from "./components/sections/LatestUpdatesSection";
 import NewsArticlePage from "./components/sections/NewsArticlePage";
 import AcademicResourcesSection from "./components/sections/AcademicResourcesSection";
@@ -174,11 +173,10 @@ export default function App() {
       ) : (
         <>
           <HeroSection />
-          <BentoSection />
-          <SloganSection />
+          {/* 近一個月的系學會活動（Hero 的「往下繼續探索」會捲到這裡） */}
           <AboutUsSection />
+          <UpcomingEventsSection />
           <TeamSection />
-          <SloganPage2Section />
           <LatestUpdatesSection />
           <AcademicResourcesSection />
         </>

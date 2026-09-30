@@ -316,9 +316,6 @@ export default function DeptQuizPage() {
               回答 {QUESTIONS.length} 個生活小情境，我們會綜合評估你的特質，<br className="hidden sm:block" />
               找出最適合你的系學會部門。
             </p>
-            <p className="mt-4 text-white/45" style={{ fontFamily: mono, fontSize: "13px", letterSpacing: "0.2em" }}>
-              {QUESTIONS.length} QUESTIONS · ABOUT 1 MIN
-            </p>
             <div className="mt-12"><PillButton onClick={start}>開始測驗<ArrowRight size={20} strokeWidth={2.6} className="group-hover:translate-x-1 transition-transform" /></PillButton></div>
           </div>
         )}

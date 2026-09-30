@@ -1,84 +1,181 @@
-import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
-import { ArrowRight } from "lucide-react";
-import imgBuilding from "@/imports/HomePage-1/de7749452570d864c1f5c584765f093ab16a6d89.png";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
+import { ArrowRight, ArrowDown } from "lucide-react";
+
+/* ════════════════════════════════════════════════════════════════
+   ✏️ 在這裡輸入你的 Hashtag 文案（不用打「#」，程式會自動加上）
+   想加幾個都可以，一行一個，記得用 "" 包起來、後面加逗號。
+   ════════════════════════════════════════════════════════════════ */
+const HASHTAGS: string[] = [
+  "加入學術部",
+  "加入形象宣傳部",
+  "加入活動部",
+  "加入行政部",
+  "加入體育部",
+  "圖資人大團結",
+  "LISSA on LIVE",
+  "可以這樣玩",
+];
+
+/* 畫面上最多同時出現幾個 Hashtag（超過會把最舊的收掉） */
+const MAX_TAGS = 10;
+
+/* Hashtag 出現後多久消失（毫秒，3000 = 3 秒） */
+const TAG_LIFETIME = 3000;
+
+/* 消失時淡出動畫的長度（毫秒），會包含在上面的 3 秒內 */
+const EXIT_MS = 350;
+
+/* 「加入系學會」按鈕要連到哪裡 */
+const JOIN_LINK = "#/join";
+
+type Tag = {
+  id: number;
+  text: string;
+  x: number; // 點擊位置（相對於 Hero 區塊）
+  y: number;
+  cw: number; // 點擊當下 Hero 區塊的寬高，用來防止 Hashtag 超出畫面
+  ch: number;
+};
+
+/* ── 隨機但不重複的抽籤器 ─────────────────────────────────────────
+   像「抽籤筒」：把所有文案洗牌後一張張抽，全部抽完才重新洗牌。
+   所以一輪之內不會重複，而且換輪時也不會連續抽到同一句。 */
+function useShuffleBag(items: string[]) {
+  const bagRef = useRef<string[]>([]);
+  const lastRef = useRef<string | null>(null);
+
+  return useCallback(() => {
+    if (items.length === 0) return "";
+    if (bagRef.current.length === 0) {
+      const next = [...items];
+      for (let i = next.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [next[i], next[j]] = [next[j], next[i]];
+      }
+      // 抽籤是從陣列尾巴拿；若新一輪第一張剛好等於上一張，就換到最前面
+      if (next.length > 1 && next[next.length - 1] === lastRef.current) {
+        [next[0], next[next.length - 1]] = [next[next.length - 1], next[0]];
+      }
+      bagRef.current = next;
+    }
+    const value = bagRef.current.pop()!;
+    lastRef.current = value;
+    return value;
+  }, [items]);
+}
+
+/* ── 單一 Hashtag 標籤 ────────────────────────────────────────────
+   以點擊位置為中心出現；會先量自己的寬高，若會超出畫面邊緣就自動往內推。 */
+function HashtagChip({ tag }: { tag: Tag }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ left: tag.x, top: tag.y });
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    const MARGIN = 12; // 距離畫面邊緣至少留多少 px
+    const left = Math.min(Math.max(tag.x - w / 2, MARGIN), Math.max(MARGIN, tag.cw - w - MARGIN));
+    const top = Math.min(Math.max(tag.y - h / 2, MARGIN), Math.max(MARGIN, tag.ch - h - MARGIN));
+    setPos({ left, top });
+  }, [tag]);
+
+  return (
+    <div
+      ref={ref}
+      className="hashtag-chip absolute bg-white border-2 border-[#FFFFFF] text-black"
+      style={{
+        left: pos.left,
+        top: pos.top,
+        // 先「捲出」，停留到快 3 秒時再「淡出」
+        animation: `hashtagRoll 420ms cubic-bezier(0.22, 1, 0.36, 1) both, hashtagOut ${EXIT_MS}ms ease-in ${TAG_LIFETIME - EXIT_MS}ms forwards`,
+        maxWidth: "calc(100% - 24px)",
+        padding: "clamp(0.55rem, 1vw, 1rem) clamp(0.8rem, 1.2vw, 1.1rem)",
+        fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif",
+        fontWeight: 900,
+        fontSize: "clamp(0.95rem, 1.5vw, 1.5rem)",
+        letterSpacing: "0.15em",
+        lineHeight: 1.2,
+      }}
+    >
+      <span className="hashtag-chip-text">#&nbsp;{tag.text}</span>
+    </div>
+  );
+}
 
 export default function HeroSection() {
-  const [scrollY, setScrollY] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const idRef = useRef(0);
+  const timersRef = useRef<Set<number>>(new Set());
+  const [tags, setTags] = useState<Tag[]>([]);
   const [displayText, setDisplayText] = useState("");
-  const [num53Hover, setNum53Hover] = useState(false); // 滑鼠是否在「53」數字上
-  const svg53Ref = useRef<SVGSVGElement>(null);
-  const hit53Ref = useRef<{ ctx: CanvasRenderingContext2D; w: number; h: number } | null>(null);
-  const num53HoverRef = useRef(false);
+  const nextHashtag = useShuffleBag(HASHTAGS);
 
-  // 字型載入完成或視窗尺寸改變時，讓命中用的 canvas 失效、下次重建
-  // （確保 canvas 用的是 Josefin 而非 fallback，命中形狀才會跟畫面一致）
+  /* 點擊畫面任一處 → 在點擊位置捲出一個 Hashtag */
+  const handleClick = (e: ReactMouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    // 點到按鈕或連結時不要產生 Hashtag（避免跟按鈕功能打架）
+    if (target.closest("a, button, [data-no-hashtag]")) return;
+    // 使用者在反白選字時也不要產生
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) return;
+
+    const section = sectionRef.current;
+    if (!section) return;
+    const rect = section.getBoundingClientRect();
+    const newTag: Tag = {
+      id: idRef.current++,
+      text: nextHashtag(),
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      cw: rect.width,
+      ch: rect.height,
+    };
+    setTags((prev) => [...prev, newTag].slice(-MAX_TAGS));
+
+    // 3 秒後把這個 Hashtag 從畫面移除（淡出動畫已在這之前播完）
+    const timer = window.setTimeout(() => {
+      setTags((prev) => prev.filter((t) => t.id !== newTag.id));
+      timersRef.current.delete(timer);
+    }, TAG_LIFETIME);
+    timersRef.current.add(timer);
+  };
+
+  /* 視窗尺寸改變（例如手機轉橫向）時清掉 Hashtag，避免位置跑掉；
+     離開頁面時也把還沒跑完的計時器清掉 */
   useEffect(() => {
-    const invalidate = () => { hit53Ref.current = null; };
-    const anyDoc = document as unknown as { fonts?: { ready?: Promise<unknown> } };
-    if (anyDoc.fonts?.ready) anyDoc.fonts.ready.then(invalidate);
-    window.addEventListener("resize", invalidate);
-    return () => window.removeEventListener("resize", invalidate);
+    const timers = timersRef.current;
+    const clear = () => setTags([]);
+    window.addEventListener("resize", clear);
+    return () => {
+      window.removeEventListener("resize", clear);
+      timers.forEach((t) => window.clearTimeout(t));
+      timers.clear();
+    };
   }, []);
 
-  // 用隱藏 canvas 畫出「53」，以像素透明度判斷滑鼠是否落在「數字形狀」上（精準貼合字形，
-  // 避開 SVG 文字只用方框感應、以及 clip-path 會讓元素收不到事件的問題）
-  const isOver53 = (clientX: number, clientY: number) => {
-    const svg = svg53Ref.current;
-    if (!svg) return false;
-    const rect = svg.getBoundingClientRect();
-    const w = Math.max(1, Math.round(rect.width));
-    const h = Math.max(1, Math.round(rect.height));
-    let hit = hit53Ref.current;
-    if (!hit || hit.w !== w || hit.h !== h) {
-      const canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext("2d", { willReadFrequently: true });
-      if (!ctx) return false;
-      const scale = h / 1000; // viewBox 高 1000 對應到 rect 高 h
-      ctx.fillStyle = "#000";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font = `400 ${1000 * scale}px 'Josefin Sans', sans-serif`;
-      ctx.fillText("53", 600 * scale, 560 * scale); // 對應 SVG text 的 x=600 y=560
-      hit = { ctx, w, h };
-      hit53Ref.current = hit;
-    }
-    const x = Math.round(clientX - rect.left);
-    const y = Math.round(clientY - rect.top);
-    if (x < 0 || y < 0 || x >= w || y >= h) return false;
-    return hit.ctx.getImageData(x, y, 1, 1).data[3] > 10;
+  /* 「往下繼續探索」→ 平滑捲到下一個區塊 */
+  const scrollToNext = () => {
+    const next = sectionRef.current?.nextElementSibling as HTMLElement | null;
+    if (next) next.scrollIntoView({ behavior: "smooth" });
+    else window.scrollBy({ top: window.innerHeight, behavior: "smooth" });
   };
 
-  const handleHeroMouseMove = (e: ReactMouseEvent) => {
-    const over = isOver53(e.clientX, e.clientY);
-    if (over !== num53HoverRef.current) {
-      num53HoverRef.current = over;
-      setNum53Hover(over);
-    }
-  };
-
-  const handleHeroMouseLeave = () => {
-    if (num53HoverRef.current) {
-      num53HoverRef.current = false;
-      setNum53Hover(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // 打字機動畫：兩句輪流。打完一句停留約 7 秒 → 逐字刪掉 → 換下一句重打，
-  // 整段循環大約每 10 秒重打一次。
+  /* 打字機動畫：兩句輪流。打完停留約 7 秒 → 逐字刪掉 → 換下一句 */
   useEffect(() => {
     const PHRASES = ["→ LISSA, on LIVE.", "→ 真的可以這樣玩。"];
-    const TYPE_SPEED = 90; // 打字速度（每字 ms）
-    const DELETE_SPEED = 45; // 刪字速度（每字 ms）
-    const HOLD_AFTER_TYPE = 7000; // 打完停留多久再重打（ms）← 調這個控制「大約十秒」
-    const PAUSE_BEFORE_NEXT = 500; // 刪完到下一句開始的間隔（ms）
+    const TYPE_SPEED = 90;
+    const DELETE_SPEED = 45;
+    const HOLD_AFTER_TYPE = 7000;
+    const PAUSE_BEFORE_NEXT = 500;
 
     let phraseIdx = 0;
     let charIdx = 0;
@@ -91,7 +188,6 @@ export default function HeroSection() {
         charIdx += 1;
         setDisplayText(full.slice(0, charIdx));
         if (charIdx >= full.length) {
-          // 打完整句 → 停留後開始刪
           deleting = true;
           timer = window.setTimeout(tick, HOLD_AFTER_TYPE);
           return;
@@ -101,7 +197,6 @@ export default function HeroSection() {
         charIdx -= 1;
         setDisplayText(full.slice(0, Math.max(0, charIdx)));
         if (charIdx <= 0) {
-          // 刪完 → 換下一句
           deleting = false;
           phraseIdx = (phraseIdx + 1) % PHRASES.length;
           timer = window.setTimeout(tick, PAUSE_BEFORE_NEXT);
@@ -117,17 +212,12 @@ export default function HeroSection() {
 
   return (
     <section
-      className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-end pb-24 pt-24 sm:pt-28 sm:pb-32 md:pt-[100px] md:pb-40"
-      onMouseMove={handleHeroMouseMove}
-      onMouseLeave={handleHeroMouseLeave}
-      style={{ cursor: num53Hover ? "pointer" : undefined }}
+      ref={sectionRef}
+      onClick={handleClick}
+      className="relative min-h-[100svh] bg-black overflow-hidden flex flex-col items-center justify-center text-center px-5 sm:px-8 pt-28 pb-40"
     >
-      {/* 內容整塊往上：加大 pb（padding-bottom）把 justify-end 的內容往上推；
-          想再往上就把 md:pb-40 調更大，想回原本改回 md:pb-20。 */}
-      {/* 「系學會」紅藍漸層流動動畫（參考 Footer 的 footerFlow，速度放慢） */}
-      {/* 想調流動速度：改 animation 的秒數（現在 12s，數字越大越慢）。 */}
-      {/* 想調顏色：改 linear-gradient 裡的 #D14B4B / #2F9EBD。 */}
       <style>{`
+        /* 「系學會」紅藍漸層流動（12s 一輪，數字越大越慢） */
         @keyframes heroFlow {
           0%   { background-position: 200% 50%; }
           100% { background-position: -200% 50%; }
@@ -141,168 +231,96 @@ export default function HeroSection() {
           color: transparent;
           animation: heroFlow 12s linear infinite;
         }
-        /* 「53」外框流動：平移一條寬的重複漸層矩形。想調速度改 dur（現在 4s）。 */
-        @keyframes num53Flow {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-600px); }
+
+        /* Hashtag「捲出」動畫：白色方塊由左往右展開，文字再淡入 */
+        @keyframes hashtagRoll {
+          0%   { clip-path: inset(0 100% 0 0); transform: scale(0.92); }
+          70%  { transform: scale(1.03); }
+          100% { clip-path: inset(0 0 0 0); transform: scale(1); }
         }
-        .num53-flow-rect {
-          animation: num53Flow 4s linear infinite;
+        @keyframes hashtagText {
+          from { opacity: 0; transform: translateX(-6px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        /* Hashtag 消失：往上飄一點點並淡出 */
+        @keyframes hashtagOut {
+          from { opacity: 1; transform: translateY(0) scale(1); }
+          to   { opacity: 0; transform: translateY(-10px) scale(0.96); }
+        }
+        .hashtag-chip {
+          transform-origin: left center;
+        }
+        .hashtag-chip-text {
+          display: inline-block;
+          animation: hashtagText 280ms ease-out 220ms both;
+        }
+
+        /* 「往下繼續探索」箭頭上下輕輕浮動 */
+        @keyframes scrollHint {
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(6px); }
+        }
+        .scroll-hint-icon { animation: scrollHint 1.8s ease-in-out infinite; }
+
+        /* 使用者若在系統開啟「減少動態效果」，就關掉動畫 */
+        @media (prefers-reduced-motion: reduce) {
+          .hero-flow-text, .hashtag-chip, .hashtag-chip-text, .scroll-hint-icon { animation: none !important; }
         }
       `}</style>
 
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          style={{
-            position: "absolute",
-            width: "115vw",
-            height: "162vw",
-            left: "-2.3vw",
-            top: "-57vw",
-            transform: `translateY(${scrollY * 0.1}px)`,
-            willChange: "transform",
-          }}
+      {/* ── 主要內容（置中） ── */}
+      <div className="relative z-10 flex flex-col items-center w-full max-w-[1400px]">
+        <p
+          className="text-white text-sm sm:text-base mb-6 sm:mb-8 tracking-[2px] min-h-[1.5em]"
+          style={{ fontFamily: "'Ubuntu Sans Mono', 'Noto Sans TC', monospace", fontWeight: 700 }}
         >
-          <div className="absolute inset-0 overflow-hidden opacity-30">
-            <img
-              src={imgBuilding}
-              alt=""
-              className="absolute max-w-none"
-              style={{ width: "280%", height: "140%", left: "-90%", top: "-20%", objectFit: "contain", objectPosition: "center" }}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
-        }}
-      />
-
-      {/* ── 背景大數字「53」 ─────────────────────────────────────────────
-          黑色填滿（蓋住建築圖）+ 紅藍漸層外框（stroke 2px）。
-          用 SVG 是因為 CSS text-stroke 不支援漸層；SVG stroke 可指向 linearGradient。
-          位置：靠右、垂直置中（可改下方 right / height）。
-          大小：height 用 clamp 讓它隨畫面縮放，最大 1000px（對應你的 font-size:1000px）。 */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden="true">
-        {/* 53 往下移：top:50% 置中後，再用 translateY 加 +67px 往下推，
-            讓 53 頂端大約與「系學會」頂端切齊。想再往下就把 67px 調大，往上就調小。 */}
-        <svg
-          ref={svg53Ref}
-          className="absolute"
-          style={{ right: "-4%", top: "50%", transform: "translateY(calc(-50% + 67px))", height: "clamp(360px, 82vh, 1000px)", width: "auto" }}
-          viewBox="0 0 1200 1000"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          <defs>
-            {/* 靜態漸層（平常沒 hover 時的外框顏色） */}
-            <linearGradient id="stroke53Gradient" gradientUnits="userSpaceOnUse" x1="150" y1="120" x2="1050" y2="880">
-              <stop offset="0" stopColor="#D14B4B" />
-              <stop offset="1" stopColor="#2F9EBD" />
-            </linearGradient>
-            {/* 流動漸層：紅-藍-紅 重複（objectBoundingBox，隨矩形移動）。
-                實際流動是靠 CSS 平移矩形（.num53-flow-rect）產生，Safari 也會動。 */}
-            <linearGradient id="stroke53Flow" x1="0" y1="0" x2="0.2" y2="0" spreadMethod="repeat">
-              <stop offset="0" stopColor="#D14B4B" />
-              <stop offset="0.5" stopColor="#2F9EBD" />
-              <stop offset="1" stopColor="#D14B4B" />
-            </linearGradient>
-            {/* Safari 安全做法：外框用 mask 讓漸層矩形只在字的邊框露出，
-                而不是用「文字漸層 stroke」（Safari 不支援，會把整個字填滿變實心）。
-                遮罩文字只用白色實色描邊，Safari 完全支援。
-                想調外框粗細：改下面遮罩文字的 strokeWidth。 */}
-            <mask id="mask53" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="1000">
-              <rect x="0" y="0" width="1200" height="1000" fill="black" />
-              <text
-                x="600"
-                y="560"
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill="black"
-                stroke="white"
-                strokeWidth="4"
-                style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 400, fontSize: "1000px" }}
-              >
-                53
-              </text>
-            </mask>
-          </defs>
-
-          {/* 1) 純黑字身：純視覺，蓋住建築圖。
-                （hover 感應改用 section 上的 canvas 取樣，見上方 isOver53，能精準貼合字形） */}
-          <text
-            x="600"
-            y="560"
-            textAnchor="middle"
-            dominantBaseline="central"
-            fill="#000000"
-            style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 400, fontSize: "1000px" }}
-          >
-            53
-          </text>
-
-          {/* 2) 漸層外框：平常靜態漸層；hover 在數字上時淡入切換成流動漸層 */}
-          <g mask="url(#mask53)">
-            {/* 靜態外框 */}
-            <rect
-              x="0" y="0" width="1200" height="1000"
-              fill="url(#stroke53Gradient)"
-              style={{ opacity: num53Hover ? 0 : 1, transition: "opacity 300ms ease" }}
-            />
-            {/* 流動外框：寬矩形 + 重複漸層，用 CSS 平移 (num53-flow-rect) 產生流動；hover 才淡入 */}
-            <rect
-              className="num53-flow-rect"
-              x="-900" y="0" width="3000" height="1000"
-              fill="url(#stroke53Flow)"
-              style={{ opacity: num53Hover ? 1 : 0, transition: "opacity 300ms ease" }}
-            />
-          </g>
-
-        </svg>
-      </div>
-
-      <div className="relative px-5 sm:px-8 md:px-14 max-w-[1400px] mx-auto w-full">
-        <p className="text-white text-sm sm:text-base mb-4 tracking-[2px]" style={{ fontFamily: "'Ubuntu Sans Mono', 'Noto Sans TC', monospace", fontWeight: 700 }}>
           {displayText}
           <span className="ml-1 inline-block h-4 w-[0.6ch] align-middle border-r border-white/80 animate-pulse" aria-hidden="true" />
         </p>
+
         <h1
-          className="hero-flow-text leading-none select-none mb-10"
+          className="hero-flow-text leading-none select-none mb-8 sm:mb-12"
           style={{
             fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif",
             fontWeight: 900,
-            fontSize: "clamp(2.6rem, 10vw, 15rem)",
+            fontSize: "clamp(4rem, 14vw, 12rem)",
+            letterSpacing: "0.04em",
           }}
         >
           系學會
         </h1>
+
         <h2
-          className="text-white leading-tight mb-10"
+          className="text-white leading-tight select-none mb-12 sm:mb-20"
           style={{
-            fontFamily: "'Chiron Hei HK Text','Noto Sans TC', sans-serif",
+            fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif",
             fontWeight: 900,
-            fontSize: "clamp(1.6rem, 7vw, 11rem)",
+            fontSize: "clamp(1.2rem, 5.5vw, 3rem)",
           }}
         >
-          可以這樣「玩」？
+          可以這樣「玩」
         </h2>
+
         <a
-          href="#/news/term-53-inauguration"
-          className="inline-flex items-center gap-3 bg-white text-black px-6 sm:px-7 py-3 rounded-full hover:bg-white/90 transition-all duration-200 group w-fit max-w-full"
+          href={JOIN_LINK}
+          className="inline-flex items-center gap-3 bg-white text-black px-7 sm:px-9 py-3 sm:py-4 rounded-full hover:bg-white/90 active:scale-95 transition-all duration-200 group"
           style={{
             fontFamily: "'Noto Sans TC', sans-serif",
             fontWeight: 700,
-            fontSize: "clamp(0.85rem, 1.5vw, 1.1rem)",
-            letterSpacing: "0.06em",
+            fontSize: "clamp(1rem, 1.6vw, 1.4rem)",
+            letterSpacing: "0.08em",
           }}
         >
-          第 53 屆系學會上任公告
-          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
+          第 53 屆系學會招募中
+          <ArrowRight size={22} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform duration-200" />
         </a>
+      </div>
+
+      {/* ── Hashtag 圖層（不擋住按鈕：pointer-events-none，點擊會穿透） ── */}
+      <div className="absolute inset-0 z-20 pointer-events-none select-none" aria-hidden="true">
+        {tags.map((tag) => (
+          <HashtagChip key={tag.id} tag={tag} />
+        ))}
       </div>
     </section>
   );

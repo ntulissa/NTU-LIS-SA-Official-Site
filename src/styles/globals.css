@@ -1,3 +1,12 @@
+/* ── 頁面小標題（PageEyebrow）與內容起點 ★全站共用，改這裡所有頁面一起變 ★──
+   --eyebrow-top      ：小標題距離「區塊頂端」多遠（Header 高 80px，再往下留一點）。
+   --page-content-top ：每頁內容從哪裡開始（要比小標題再低一些，內容才不會壓到它）。
+   兩者的差距＝小標題與內容之間的空隙；想拉開就把 --page-content-top 調大。 */
+:root {
+  --eyebrow-top: 112px;
+  --page-content-top: 168px;
+}
+
 @keyframes sloganFlow {
   0% {
     background-position: 300% 50%;

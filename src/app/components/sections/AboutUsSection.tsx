@@ -370,7 +370,7 @@ export default function AboutUsSection() {
   };
 
   return (
-    <section id="about" className="bg-black relative min-h-screen flex flex-col justify-center pt-28 pb-16 overflow-hidden">
+    <section id="about" className="bg-black relative min-h-screen flex flex-col justify-center pt-[var(--page-content-top)] pb-16 overflow-hidden">
       <style>{`
         .ab-track { scrollbar-width: none; -ms-overflow-style: none; }
         .ab-track::-webkit-scrollbar { display: none; }

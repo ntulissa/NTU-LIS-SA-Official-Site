@@ -49,7 +49,8 @@ const TOGGLE_BOTTOM_OFFSET = "clamp(24px, 5vh, 64px)";
 const TOGGLE_RIGHT_OFFSET = "clamp(20px, 3vw, 56px)";
 
 // ── 左欄（關於我們／CURRENT TEAM 那一整塊）上下留白 ★可手動調 ★────────────────
-// 這個值＝整塊內容距離上、下的內距。
+// 這個值＝整塊內容距離「下方」的內距。
+// （上內距已改用全站統一的 --page-content-top，在 globals.css；這樣內容不會壓到頁面小標題。）
 //   ▸ 太大 → 上面一片空白、內容被往下推，底部部門卡容易被切。
 //   ▸ 太小 → 會顯得擠。
 // 可填純 px（如 "90px"）或 clamp(最小, 隨螢幕縮放, 最大)（會隨視窗大小縮放）。手機也吃這個值。
@@ -352,7 +353,7 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
         {/* 左欄上下內距改用常數 CONTENT_PADDING_Y（在上方調整區），想調上下留白改那裡即可。 */}
         <div
           className="flex flex-col px-5 sm:px-8 md:px-[clamp(24px,4.3vw,74px)] w-full lg:w-[clamp(300px,54vw,920px)] lg:flex-shrink-0 justify-center"
-          style={{ paddingTop: CONTENT_PADDING_Y, paddingBottom: CONTENT_PADDING_Y }}
+          style={{ paddingTop: "var(--page-content-top)", paddingBottom: CONTENT_PADDING_Y }}
         >
           <div>
             <PageEyebrow text="關於我們・現任團隊" />

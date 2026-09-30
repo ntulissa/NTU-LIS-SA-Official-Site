@@ -4,10 +4,6 @@ import imgRect7 from "@/imports/AcademicResources/aeb41d7034b1b48d5fc9df0a580281
 import imgRect8 from "@/imports/AcademicResources/1f59199eb1196007561b8c8c386714d53fbb3e21.png";
 import { PageEyebrow, Reveal } from "./shared";
 
-// ── 頁面標題「— 各種服務・學習資源」與下方內容的間距 ★可手動調 ★─────────────
-// 數字越大，下面所有內容（兩欄標題＋卡片）整體往下挪越多。原本是 16px（mb-4）。
-const HEADER_GAP = "clamp(32px, 4vw, 64px)";
-
 const EXTERNAL_LINKS = [
   { title: "臺大圖資系官網", sub: "國立臺灣大學圖書資訊學系", img: null, href: "https://www.lis.ntu.edu.tw" },
   { title: "臺大圖資課程地圖", sub: "國立臺灣大學大學部課程地圖查詢", img: null, href: "https://coursemap.aca.ntu.edu.tw/course_map_all/class.php?code=1060" },
@@ -43,11 +39,11 @@ function ResourceRow({ title, sub, img, href }: { title: string; sub: string; im
 
 export default function AcademicResourcesSection() {
   return (
-    <section id="resources" className="relative bg-black px-5 sm:px-8 md:px-14 py-16 sm:py-20 md:py-24">
+    // 上內距＝--page-content-top（globals.css），內容一律從標題下方開始、不會重疊。
+    <section id="resources" className="relative bg-black px-5 sm:px-8 md:px-14 pt-[var(--page-content-top)] pb-16 sm:pb-20 md:pb-24">
+      {/* 標題不可包在 <Reveal> 裡（Reveal 的 transform 會讓標題跑位） */}
+      <PageEyebrow text="各種服務・學習資源" />
       <div className="max-w-[1400px] mx-auto">
-        <Reveal>
-          <PageEyebrow text="各種服務・學習資源" />
-        </Reveal>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10">
           <div>
