@@ -2,7 +2,11 @@ import { ArrowRight } from "lucide-react";
 import imgBuildingResources from "@/imports/AcademicResources/de7749452570d864c1f5c584765f093ab16a6d89.png";
 import imgRect7 from "@/imports/AcademicResources/aeb41d7034b1b48d5fc9df0a580281ac376ad0f1.png";
 import imgRect8 from "@/imports/AcademicResources/1f59199eb1196007561b8c8c386714d53fbb3e21.png";
-import { Reveal } from "./shared";
+import { PageEyebrow, Reveal } from "./shared";
+
+// ── 頁面標題「— 各種服務・學習資源」與下方內容的間距 ★可手動調 ★─────────────
+// 數字越大，下面所有內容（兩欄標題＋卡片）整體往下挪越多。原本是 16px（mb-4）。
+const HEADER_GAP = "clamp(32px, 4vw, 64px)";
 
 const EXTERNAL_LINKS = [
   { title: "臺大圖資系官網", sub: "國立臺灣大學圖書資訊學系", img: null, href: "https://www.lis.ntu.edu.tw" },
@@ -39,20 +43,10 @@ function ResourceRow({ title, sub, img, href }: { title: string; sub: string; im
 
 export default function AcademicResourcesSection() {
   return (
-    <section id="resources" className="bg-black px-5 sm:px-8 md:px-14 py-16 sm:py-20 md:py-24">
+    <section id="resources" className="relative bg-black px-5 sm:px-8 md:px-14 py-16 sm:py-20 md:py-24">
       <div className="max-w-[1400px] mx-auto">
         <Reveal>
-          <p className="text-white/30 text-xs tracking-widest mb-4" style={{ fontSize: "14px",fontFamily: "'Ubuntu Sans Mono', monospace" ,background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundSize: "220% 100%",}}>
-            — 各種服務・學術資源
-          </p>
-          <h2 className="font-bold leading-none mb-12" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "60px" }}>
-            <span className="text-white block">ACADEMIC</span>
-            <span style={{ color: "#D14B4B" }} className="block">RESOURCES</span>
-          </h2>
+          <PageEyebrow text="各種服務・學習資源" />
         </Reveal>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10">

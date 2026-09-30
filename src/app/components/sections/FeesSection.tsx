@@ -10,6 +10,7 @@ import benefit5 from "@/imports/Fee/benefit5.jpg";
 import lockerImg from "@/imports/Fee/locker.png";
 import logoSvg from "@/imports/Fee/NTULISSAlogo.svg";
 import feelissaSvg from "@/imports/Fee/feelissa.svg";
+import { PageEyebrow } from "./shared";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 系學費專區（路由 #/fees）· Apple 風垂直捲動長頁
@@ -35,41 +36,6 @@ const GREEN = "#34A24E";
 const zhFont = "'Chiron Hei HK Text','Chiron Hei HK','Noto Sans TC',sans-serif";
 // 草寫英文專用字體（背景裝飾用；如專案已有指定手寫字體可換掉）
 const scriptFont = "'Dancing Script','Brush Script MT',cursive";
-
-// ── 左上角小標題（麵包屑，只放在 Hero）─────────────────────────────────────
-// 字體格式沿用 TeamSection：Ubuntu Sans Mono + 白→灰漸層字，前面加「— 」。
-// 想改文字改 EYEBROW_TEXT；想移動位置改 EYEBROW_X / EYEBROW_Y（px；正 X=右、正 Y=下）。
-const EYEBROW_TEXT = "支持我們・系學會費";
-const EYEBROW_X = 0; // 水平位移（px）：正 = 往右、負 = 往左
-const EYEBROW_Y = 90; // 垂直位移（px）：正 = 往下、負 = 往上
-function Eyebrow({
-  text = EYEBROW_TEXT,
-  className = "",
-  style,
-}: {
-  text?: string;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  return (
-    <p
-      className={`tracking-widest pointer-events-none select-none ${className}`}
-      style={{
-        fontSize: "14px",
-        fontFamily: "'Ubuntu Sans Mono', monospace",
-        background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
-        backgroundClip: "text",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundSize: "220% 100%",
-        transform: `translate(${EYEBROW_X}px, ${EYEBROW_Y}px)`,
-        ...style,
-      }}
-    >
-      — {text}
-    </p>
-  );
-}
 
 // ── 五大福利字卡（五張分開編輯）────────────────────────────────────────────
 // 每張卡片一個物件，欄位都可手動調。三種版型（type）：
@@ -811,9 +777,7 @@ export default function FeesSection() {
       {/* ── A. Hero ─────────────────────────────────────────────────── */}
       <section className="relative min-h-screen bg-black overflow-hidden">
         {/* 小標題（麵包屑） */}
-        <div className="relative z-20 px-6 md:px-12 pt-6">
-          <Eyebrow />
-        </div>
+        <PageEyebrow text="支持我們・系學會費" />
 
         {/* 背景草寫「fee lissa.」：真・手寫描繪（一筆一筆畫出來）+ 筆尖 */}
         <HandwrittenFee />

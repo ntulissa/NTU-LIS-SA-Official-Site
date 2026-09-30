@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import { Reveal } from "./shared";
+import { PageEyebrow, Reveal } from "./shared";
 import { ANNOUNCEMENTS } from "./announcements";
 
 // 公告列表。兩種用法：
@@ -10,31 +10,12 @@ export default function LatestUpdatesSection({ standalone = false }: { standalon
   return (
     <section
       id="news"
-      className={`bg-black px-5 sm:px-8 md:px-14 ${
+      className={`relative bg-black px-5 sm:px-8 md:px-14 ${
         standalone ? "pt-28 sm:pt-32 lg:pt-32 pb-20 lg:pb-28 min-h-screen" : "py-16 sm:py-20 md:py-24"
       }`}
     >
       <div className="max-w-[1400px] mx-auto">
-        <Reveal>
-          <p
-            className="text-white/30 text-xs tracking-widest mb-4"
-            style={{
-              fontSize: "14px",
-              fontFamily: "'Ubuntu Sans Mono', monospace",
-              background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundSize: "220% 100%",
-            }}
-          >
-            — 最新動態・近期公告
-          </p>
-          <h2 className="font-bold leading-none mb-12" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "60px" }}>
-            <span className="text-white block">LATEST</span>
-            <span style={{ color: "#D14B4B" }} className="block">UPDATES</span>
-          </h2>
-        </Reveal>
+        <PageEyebrow text="最新動態・近期公告" />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
           {ANNOUNCEMENTS.map((item, i) => (

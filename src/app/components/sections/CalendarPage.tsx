@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, MapPin, X, ArrowRight } from "lucide-react";
-import { Reveal } from "./shared";
+import { PageEyebrow, Reveal } from "./shared";
 import {
   EVENTS,
   DEPTS,
@@ -672,13 +672,9 @@ export default function CalendarPage() {
         @media (prefers-reduced-motion: reduce) { .cal-pop, .cal-modal-in { animation: none; } .cal-fade { transition: none !important; } }
       `}</style>
 
+      <PageEyebrow text="最新動態・系學會行事曆" />
+
       <div className="max-w-[1200px] mx-auto">
-        {/* 眉標 */}
-        <Reveal>
-          <p className="mb-6" style={{ fontSize: "14px", fontFamily: monoFont, background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            － 最新動態・系學會行事曆
-          </p>
-        </Reveal>
 
         {/* ══════════ 上半：下一場活動 ══════════ */}
         <Reveal delay={40}>

@@ -78,11 +78,11 @@ const NEWS_LOGO_OFFSET_Y = 0;
 // 各卡片點擊目標。support=null 代表暫不連結（會費＋贊助整合後再接）。
 const LINKS = {
   calendar: "#/calendar", // 系學會行事曆獨立頁
-  about: "#about", // ★ 暫時擱置：ABOUT 卡目前「不連結」（等「學會發展歷程」公告頁做好再接）。要接時見下方 ABOUT 卡的 TODO。
+  about: "#/about", // ABOUT US 卡 → 學會簡介獨立頁
   news: "#/news", // 最新動態卡 → 公告列表獨立頁
-  resources: "#resources",
+  resources: "#/resources", // 學術資源卡 → 學術資源獨立頁
   team: "#/current-team", // 工作團隊卡 → 連到「現任團隊」獨立頁
-  support: null as string | null,
+  support: "#/sponsor", // SUPPORT US 卡 → 贊助獨立頁
 };
 
 // 學術資源卡的聊天泡泡（from＝對方藍色泡泡靠右；to＝自己灰色泡泡靠左）。
@@ -620,10 +620,6 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
             >
               －關於我們・資訊總覽
             </p>
-            <h2 className="leading-none mb-6" style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 700, letterSpacing: "0.6px", fontSize: "clamp(2.5rem, 3.5vw, 60px)" }}>
-              <span className="text-white block">YOUR</span>
-              <span className="text-[#2f9ebd] block">CAMPUS PORTAL</span>
-            </h2>
           </Reveal>
         </div>
       )}
@@ -660,18 +656,15 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
             </div>
           </div>
 
-          {/* 下排：ABOUT 53 卡 —— 中間系學會 Logo（SVG）＋ 左右大數字 5、3（SVG，你的三層堆疊設計）。
-              ★ 連結暫時擱置：等「學會發展歷程」公告頁做好後，把下面外層的 <div> 換回
-                <a href="#你的公告頁路由" aria-label="…" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8 cursor-pointer`} …>
-                （記得加回 cursor-pointer），CardCaption 的 hover 展開不受影響。 */}
+          {/* 下排：ABOUT 53 卡 —— 中間系學會 Logo（SVG）＋ 左右大數字 5、3（SVG，你的三層堆疊設計）。 */}
           <Reveal delay={60} className="flex-[0.9] flex flex-col min-h-[160px] lg:min-h-[0]">
-            <div aria-label="關於臺大圖資系學會 — 第 53 屆" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8`} style={BENTO_BG}>
+            <a href={LINKS.about} aria-label="關於臺大圖資系學會 — 第 53 屆" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8 cursor-pointer`} style={BENTO_BG}>
               <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
                 {/* 新版系學會 Logo（含 53）SVG，等比例置中。想調大小改 ABOUT_LOGO_MAXH。 */}
                 <img src={aboutLogo} alt="臺大圖資系學會 第 53 屆" className="w-auto max-w-[92%] object-contain select-none" style={{ maxHeight: ABOUT_LOGO_MAXH }} />
               </div>
               <CardCaption en="ABOUT US" zh="臺大圖資系學會" />
-            </div>
+            </a>
           </Reveal>
         </div>
 
@@ -765,14 +758,14 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
               </a>
             </Reveal>
 
-            {/* SUPPORT US：水龍頭滴錢幣進撲滿（暫不連結 → 用 div，無 hover 箭頭） */}
+            {/* SUPPORT US：水龍頭滴錢幣進撲滿 */}
             <Reveal delay={140} className="flex-1 flex flex-col">
-              <div className={`${BENTO_CARD} flex-1 p-5 md:p-6`} style={BENTO_BG}>
+              <a href={LINKS.support!} aria-label="贊助我們" className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
                 <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
                   <SupportScene />
                 </div>
                 <CardCaption en="SUPPORT US" zh="贊助我們" />
-              </div>
+              </a>
             </Reveal>
           </div>
 

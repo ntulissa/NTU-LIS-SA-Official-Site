@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { Reveal } from "./shared";
+import { PageEyebrow, Reveal } from "./shared";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 贊助頁（獨立分頁 · 路由 #/sponsor）
@@ -16,30 +16,6 @@ import { Reveal } from "./shared";
 const zhHead = "'Chiron Hei HK Text','Noto Sans TC', sans-serif"; // 標題／敘述
 const zhBody = "'Noto Sans TC', sans-serif";                       // 按鈕
 const mono   = "'Ubuntu Sans Mono','Noto Sans TC', monospace";     // 方案名稱／數值
-
-// ── 左上角小標題（麵包屑，與 FeesSection 對齊）──────────────────────────────
-const EYEBROW_TEXT = "支持我們・贊助我們";
-const EYEBROW_X = 0;
-const EYEBROW_Y = 90;
-function Eyebrow({ text = EYEBROW_TEXT }: { text?: string }) {
-  return (
-    <p
-      className="tracking-widest pointer-events-none select-none"
-      style={{
-        fontSize: "14px",
-        fontFamily: "'Ubuntu Sans Mono', monospace",
-        background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
-        backgroundClip: "text",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundSize: "220% 100%",
-        transform: `translate(${EYEBROW_X}px, ${EYEBROW_Y}px)`,
-      }}
-    >
-      — {text}
-    </p>
-  );
-}
 
 // 聯絡（換成真實連結即可）
 const CONTACT = { contactHref: "#/contact" };
@@ -244,9 +220,7 @@ export default function SponsorSection() {
 
       {/* ══════════ A. Hero ══════════ */}
       <section className="relative min-h-screen flex items-center overflow-hidden px-5 sm:px-8 md:px-14 pt-24 pb-28">
-        <div className="absolute top-6 left-6 md:left-12 z-20">
-          <Eyebrow />
-        </div>
+        <PageEyebrow text="支持我們・贊助我們" />
         <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* 左：文案 */}
           <div>

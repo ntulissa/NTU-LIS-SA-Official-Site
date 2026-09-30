@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { Reveal } from "./shared";
+import { PageEyebrow, Reveal } from "./shared";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 關於我們（AboutUsSection · 取代舊 HistorySection，錨點仍為 #about）
@@ -423,11 +423,7 @@ export default function AboutUsSection() {
 
       {/* 標題 */}
       <div className="px-[clamp(20px,4.3vw,74px)]">
-        <Reveal>
-          <p className="tracking-widest select-none" style={{ fontSize: "14px", fontFamily: mono, background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundSize: "220% 100%" }}>
-            — {EYEBROW}
-          </p>
-        </Reveal>
+        <PageEyebrow text={EYEBROW} />
         <Reveal delay={60}>
           <h2 className="text-white text-center mt-[clamp(20px,5vh,64px)] mb-[clamp(24px,6vh,72px)]" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(24px, 3vw, ${HEADING.size}px)`, letterSpacing: "0.16em", paddingLeft: "0.16em" }}>
             {HEADING.text}

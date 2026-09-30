@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { Reveal } from "./shared";
+import { PageEyebrow, Reveal } from "./shared";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 加入我們（Join Us · Apple 式捲動頁）
@@ -46,9 +46,6 @@ function joinAsset(...files: string[]): string | undefined {
 // ══════════════════════════════════════════════════════════════
 // ★★ 版面常數區：size=字級(px)；x/y=位移(px，正x=右、正y=下) ★★
 // ══════════════════════════════════════════════════════════════
-
-// ── 左上角小標題（麵包屑，與 Sponsor / Fees 對齊）──
-const EYEBROW = { text: "加入我們", x: 0, y: 90 };
 
 // ── A. Hero ─────────────────────────────────────────────
 const HERO_LAYOUT = {
@@ -155,26 +152,6 @@ const WAVE_PATH = (() => {
   }
   return `M${pts.join(" L")} L200,20 L0,20 Z`;
 })();
-
-function Eyebrow() {
-  return (
-    <p
-      className="tracking-widest pointer-events-none select-none"
-      style={{
-        fontSize: "14px",
-        fontFamily: "'Ubuntu Sans Mono', monospace",
-        background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
-        backgroundClip: "text",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundSize: "220% 100%",
-        ...move(EYEBROW),
-      }}
-    >
-      — {EYEBROW.text}
-    </p>
-  );
-}
 
 // ══════════════════════════════════════════════════════════════
 // A. 飲料機
@@ -1084,9 +1061,7 @@ export default function JoinUsSection() {
 
       {/* ══════════ A. Hero ══════════ */}
       <section className="relative min-h-screen flex items-center overflow-hidden px-5 sm:px-8 md:px-14 pt-24 pb-32">
-        <div className="absolute top-6 left-6 md:left-12 z-20">
-          <Eyebrow />
-        </div>
+        <PageEyebrow text="加入我們" />
         <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
             <Reveal delay={60}>

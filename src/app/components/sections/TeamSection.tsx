@@ -2,7 +2,7 @@ import { useState } from "react";
 import imgBuildingHistory from "@/imports/AboutUs/de7749452570d864c1f5c584765f093ab16a6d89.png";
 import imgMeiji from "@/imports/Presidents/53.png";
 import imgHongLingYa from "@/imports/CurrentTeam/53vp.png";
-import { Reveal } from "./shared";
+import { PageEyebrow, Reveal } from "./shared";
 
 type DeptDef = {
   name: string;
@@ -28,7 +28,7 @@ const FIGURE_ADJUST = {
   副會長: {
     size: "clamp(650px, 70vh, 720px)",
     x: "10px",
-    y: "-8vh",
+    y: "-2vh",
   },
 };
 const INFO_TOP_OFFSET = "40vh";
@@ -41,8 +41,12 @@ const YEAR_FONT_SIZE = "clamp(0.72rem, 2.4vw, 0.95vw)";
 const ROLE_MARGIN_BOTTOM = "5vh";
 const NAME_MARGIN_BOTTOM = "3vh";
 const ROMAN_MARGIN_BOTTOM = "3vh";
-const TOGGLE_BOTTOM_OFFSET = "20vh";
-const TOGGLE_RIGHT_OFFSET = "4vw";
+// ── 正副會長切換鈕（Switch Toggle）位置 ★可手動調 ★──────────────────────────
+// 桌機版（lg 以上）固定在右半區的「右下角」，離上方系級格子（圖資三）拉開距離。
+//   TOGGLE_BOTTOM_OFFSET：距離畫面底部，數字越小越貼底（原本 20vh 太靠近資訊）。
+//   TOGGLE_RIGHT_OFFSET ：距離畫面右緣。
+const TOGGLE_BOTTOM_OFFSET = "clamp(24px, 5vh, 64px)";
+const TOGGLE_RIGHT_OFFSET = "clamp(20px, 3vw, 56px)";
 
 // ── 左欄（關於我們／CURRENT TEAM 那一整塊）上下留白 ★可手動調 ★────────────────
 // 這個值＝整塊內容距離上、下的內距。
@@ -341,7 +345,7 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
   const activeLeader = LEADERS[leaderIdx] ?? LEADERS[0];
 
   return (
-    <section id="team" className={`bg-black min-h-screen ${standalone ? "overflow-x-clip" : "overflow-hidden"}`}>
+    <section id="team" className={`relative bg-black min-h-screen ${standalone ? "overflow-x-clip" : "overflow-hidden"}`}>
       <div className="relative w-full min-h-screen flex flex-col lg:flex-row">
         {/* 左欄排版：捲動版與獨立頁（#/current-team）共用同一套 → 兩邊完全一致（垂直置中＋同樣留白）。
             （之前獨立頁用 justify-start pt-28 靠上對齊，把內容擠到頂端、和捲動版不一樣，已統一。） */}
@@ -351,23 +355,9 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
           style={{ paddingTop: CONTENT_PADDING_Y, paddingBottom: CONTENT_PADDING_Y }}
         >
           <div>
-            <Reveal>
-              <p className="text-white/30 text-xs tracking-widest mb-5" style={{fontSize: "14px",fontFamily: "'Ubuntu Sans Mono', monospace" ,background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundSize: "220% 100%",}}>
-                — 關於我們・現任團隊
-              </p>
-            </Reveal>
-            <Reveal delay={50}>
-              <h2 className="font-bold leading-none mb-6" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: "60px" }}>
-                <span className="text-white">CURRENT</span><br />
-                <span style={{ color: "#2f9ebd" }}>TEAM</span>
-              </h2>
-            </Reveal>
+            <PageEyebrow text="關於我們・現任團隊" />
             <Reveal delay={90}>
-              <p className="text-white mb-10" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(0.75rem,0.95vw,16px)", lineHeight: 2, letterSpacing: "0.1em", maxWidth: "520px" }}>
+              <p className="text-white mb-10" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(1.0rem,0.95vw,24px)", lineHeight: 2, letterSpacing: "0.1em", maxWidth: "520px" }}>
                 臺大圖資系學會目前由正副會長統領，下轄行政、活動、學術、形象宣傳、體育等五個常設部門（第 52 屆始）：
               </p>
             </Reveal>
@@ -450,7 +440,11 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
             </div>
           </div>
 
-          <div className="absolute left-4 right-4 bottom-4 sm:left-auto sm:right-6 lg:left-auto lg:right-[4vw] lg:bottom-[20vh] rounded-full border border-white/20 p-[3px] max-w-fit">
+          {/* 切換鈕：桌機版位置吃上方 TOGGLE_BOTTOM_OFFSET / TOGGLE_RIGHT_OFFSET（透過 CSS 變數帶入） */}
+          <div
+            className="absolute left-4 right-4 bottom-4 sm:left-auto sm:right-6 lg:left-auto lg:right-[var(--toggle-right)] lg:bottom-[var(--toggle-bottom)] rounded-full border border-white/20 p-[3px] max-w-fit z-20"
+            style={{ "--toggle-bottom": TOGGLE_BOTTOM_OFFSET, "--toggle-right": TOGGLE_RIGHT_OFFSET } as React.CSSProperties}
+          >
             <div className="absolute top-[3px] bottom-[3px] rounded-full bg-white" style={{ width: "calc(50% - 3px)", left: leaderIdx === 0 ? "3px" : "calc(50%)", transition: "left 300ms cubic-bezier(0.4,0,0.2,1)" }} />
             <div className="relative flex">
               {LEADERS.map((l, i) => (

@@ -24,26 +24,6 @@ export default function SloganPage2Section() {
           掌握系上脈動，不漏接任何一次精彩。
         </h2>
       </Reveal>
-      <Reveal delay={160}>
-        <p
-          className="text-center"
-          style={{
-            fontFamily: "'Ubuntu Sans Mono', monospace",
-            fontWeight: 500,
-            fontSize: "clamp(1rem, 3.7vw, 53px)",
-            letterSpacing: "3.71px",
-            lineHeight: "normal",
-            background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundSize: "220% 100%",
-            animation: "sloganFlow 6s linear infinite",
-          }}
-        >
-          STAY TUNED. LIS SA ON LIVE.
-        </p>
-      </Reveal>
     </section>
   );
 }

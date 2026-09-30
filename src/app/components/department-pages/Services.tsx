@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { ArrowRight, ArrowLeft, Info, XCircle } from "lucide-react";
-import { Reveal } from "../sections/shared";
+import { PageEyebrow, Reveal } from "../sections/shared";
 // ↑ 若 Services.tsx 不是放在跟 DepartmentPage 同一層，請改這行的相對路徑到 sections/shared。
 import { DEPT_COLORS, BENTO, serviceBySlug, type Cell } from "./servicesData";
 // ↑ 服務資料（Bento 佈局 + 詳情頁內容）集中在 servicesData.ts；本檔只負責呈現。
@@ -123,11 +123,7 @@ function ServicesGrid() {
   return (
     <section className="relative bg-black min-h-screen px-4 sm:px-6 lg:px-10 pt-24 sm:pt-28 lg:pt-[120px] pb-10">
       <style>{`.svc-cell:hover{ background: var(--svc-fill); }`}</style>
-      <Reveal>
-        <p className="mb-6" style={{ fontFamily: mono, fontSize: "14px", letterSpacing: "0.05em", background: "linear-gradient(90deg,#FFF 0%,#595959 34%,#FFF 68%,#3A3A3A 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          — 各種服務・各部業務
-        </p>
-      </Reveal>
+      <PageEyebrow text="各種服務・各部業務" />
 
       {/* 手機以水平捲動檢視完整 Bento（min-width 保底）；桌機直接鋪滿 */}
       <div className="overflow-x-auto">
@@ -267,6 +263,7 @@ function ServiceDetail({ slug }: { slug: string }) {
 
   return (
     <section className="relative min-h-screen" style={{ background: color }}>
+      <PageEyebrow text="各種服務・各部業務" />
       <div className="relative max-w-[1400px] mx-auto px-5 sm:px-8 md:px-12 lg:px-16 pt-24 sm:pt-28 lg:pt-[120px] pb-16 lg:pb-24 lg:min-h-screen lg:flex lg:flex-col lg:justify-center">
         {/* 回上頁 */}
         <Reveal>
@@ -277,12 +274,6 @@ function ServiceDetail({ slug }: { slug: string }) {
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform duration-200" /> 回上頁
           </button>
-        </Reveal>
-
-        <Reveal delay={40}>
-          <p className="mb-6" style={{ fontFamily: mono, fontSize: "14px", letterSpacing: "0.05em", color: "rgba(255,255,255,0.7)", transform: mv(DETAIL_LAYOUT.eyebrow) }}>
-            — 各種服務・各部業務
-          </p>
         </Reveal>
 
         {/* items-start：標題一律靠上對齊，副標到標題的距離每頁固定一致（不再隨內文長度浮動） */}

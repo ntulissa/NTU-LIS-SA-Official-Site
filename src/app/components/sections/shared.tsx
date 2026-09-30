@@ -70,6 +70,22 @@ export function Reveal({ children, delay = 0, className = "" }: { children: Reac
   );
 }
 
+export function PageEyebrow({ text }: { text: string }) {
+  return (
+    <p
+      className="absolute top-6 left-6 md:left-12 z-20 tracking-widest pointer-events-none select-none"
+      style={{
+        fontSize: "14px",
+        fontFamily: "'Ubuntu Sans Mono', monospace",
+        color: "#FFFFFF",
+        transform: "translateY(90px)",
+      }}
+    >
+      — {text}
+    </p>
+  );
+}
+
 export const cardBase = "rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.04)] hover:border-white/20 transition-colors duration-200 cursor-pointer";
 
 export const monoSemi: CSSProperties = { fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 600 };

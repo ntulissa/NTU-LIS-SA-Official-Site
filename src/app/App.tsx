@@ -25,6 +25,7 @@ import Services from "./components/department-pages/Services";
 //   #/current-team    → 現任團隊獨立頁（只有 Header + TeamSection + Footer）
 //   #/presidents      → 歷任會長頁
 //   #/about           → 學會簡介獨立頁（只有 Header + AboutUsSection + Footer）
+//   #/resources       → 學術資源獨立頁（只有 Header + AcademicResourcesSection + Footer）
 //   #/join            → 加入我們獨立頁（只有 Header + JoinUsSection + Footer）
 //   #/dept-quiz       → 部門適性測驗頁（從加入我們的「點擊按鈕」進入）
 //   #/contact         → 聯絡我們獨立頁（只有 Header + ContactSection + Footer）
@@ -38,11 +39,12 @@ import Services from "./components/department-pages/Services";
 //   #/services        → 各種服務 Bento 總覽頁
 //   #/service/<slug>  → 單一服務詳情頁（slug 同 servicesData.ts）
 //   其餘              → 捲動式主頁
-type Route = { name: "home" } | { name: "about" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "dept-quiz" } | { name: "contact" } | { name: "overview" } | { name: "news" } | { name: "article"; slug: string } | { name: "calendar" } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string } | { name: "services" } | { name: "service"; slug: string };
+type Route = { name: "home" } | { name: "about" } | { name: "resources" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "dept-quiz" } | { name: "contact" } | { name: "overview" } | { name: "news" } | { name: "article"; slug: string } | { name: "calendar" } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string } | { name: "services" } | { name: "service"; slug: string };
 
 function getRoute(): Route {
   const h = window.location.hash;
   if (h.startsWith("#/about")) return { name: "about" };
+  if (h.startsWith("#/resources")) return { name: "resources" };
   if (h.startsWith("#/current-team")) return { name: "current-team" };
   if (h.startsWith("#/presidents")) return { name: "presidents" };
   if (h.startsWith("#/join")) return { name: "join" };
@@ -129,6 +131,9 @@ export default function App() {
       ) : route.name === "about" ? (
         // 獨立頁：只顯示 AboutUsSection（Header/Footer 在最外層一定會出現）。
         <AboutUsSection />
+      ) : route.name === "resources" ? (
+        // 獨立頁：只顯示 AcademicResourcesSection（Header/Footer 在最外層一定會出現）。
+        <AcademicResourcesSection />
       ) : route.name === "presidents" ? (
         <PastPresidentsSection />
       ) : route.name === "join" ? (

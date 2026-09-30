@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft } from "lucide-react";
-import { Reveal } from "../sections/shared";
+import { PageEyebrow, Reveal } from "../sections/shared";
 import { DEPARTMENTS, DEPT_HASHTAGS } from "./departments";
 import { svcImg, type Head } from "./deptShared";
 // ★ 服務清單改由「單一資料來源」servicesData.ts 提供（與 Services 頁共用同一份）：
@@ -326,10 +326,6 @@ export default function DepartmentPage({ slug }: { slug: string }) {
 
   return (
     <section className="relative bg-black">
-      {/* 背景：草寫部門名稱，沿整頁由上到下重複平鋪（放在最底層，內容都疊在其上） */}
-      <NameBackdrop slug={slug} />
-
-      {/* 切換點的脈動動畫（比照歷屆會長） */}
       <style>{`
         @keyframes deptPulseDot {
           0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 var(--dept-glow); }
@@ -374,15 +370,8 @@ export default function DepartmentPage({ slug }: { slug: string }) {
               <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform duration-200" /> 回上頁
             </button>
           </Reveal>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start">
-            {/* 左：ABOUT + 標題 + 簡介 + 加入鈕 */}
             <div className="max-w-[600px]">
-              <Reveal>
-                <p className="text-white/30 text-xs tracking-widest mb-4" style={{  fontSize: "14px", fontFamily: monoFont, background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"  }}>
-                  — 關於我們・現任團隊
-                </p>
-              </Reveal>
               <Reveal delay={40}>
                 <h1 className="leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(2.6rem,4.5vw,4.4rem)", letterSpacing: "0.1em", color: data.color }}>
                   {data.zh}

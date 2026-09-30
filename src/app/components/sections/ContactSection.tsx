@@ -1,7 +1,7 @@
 import { type ReactNode, type CSSProperties } from "react";
 import { Mail } from "lucide-react";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
-import { Reveal } from "./shared";
+import { PageEyebrow, Reveal } from "./shared";
 
 // ★ 品牌 wordmark SVG（放在 src/imports/contact/ 底下）
 //   IG / FB 用 filter 強制白色；交流版右下小 facebook 重用同一個 facebook.svg。
@@ -196,17 +196,9 @@ const CARDS: Card[] = [
 
 export default function ContactSection() {
   return (
-    <section id="contact" className="bg-black min-h-[100svh] flex flex-col px-5 sm:px-8 md:px-14 pt-24 sm:pt-28 lg:pt-28 pb-6 sm:pb-8 lg:pb-12">
+    <section id="contact" className="relative bg-black min-h-[100svh] flex flex-col px-5 sm:px-8 md:px-14 pt-24 sm:pt-28 lg:pt-28 pb-6 sm:pb-8 lg:pb-12">
       <div className="max-w-[1400px] w-full mx-auto flex flex-col flex-1 min-h-0">
-        <Reveal>
-          <p className="text-xs tracking-widest mb-3" style={{ fontSize: "14px", fontFamily: monoFont, background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundSize: "220% 100%" }}>
-            — 各種服務・聯絡我們
-          </p>
-          <h2 className="font-bold leading-none mb-5 sm:mb-6 lg:mb-8" style={{ fontFamily: enDisplay, fontSize: "60px" }}>
-            <span className="text-white block">CONTACT</span>
-            <span className="block" style={{ color: "#2F9EBD" }}>US</span>
-          </h2>
-        </Reveal>
+        <PageEyebrow text="各種服務・聯絡我們" />
 
         {/* md 以上：grid 撐滿剩餘高度、兩列各佔 1fr → 兩排卡片剛好一屏 */}
         <div className="grid grid-cols-12 gap-4 sm:gap-5 lg:gap-6 md:flex-1 md:min-h-0 md:[grid-template-rows:1fr_1fr]">
