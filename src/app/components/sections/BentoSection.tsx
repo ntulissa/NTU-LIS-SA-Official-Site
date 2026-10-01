@@ -736,7 +736,7 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                   {/* 聊天泡泡逐則出現動畫；改對話內容→上方 CHAT_LINES，時間自動調整。 */}
                   <ChatBubbles lines={CHAT_LINES} />
                 </div>
-                <CardCaption en="RESOURCES" zh="學術資源" />
+                <CardCaption en="RESOURCES" zh="學習資源" />
               </a>
             </Reveal>
           </div>

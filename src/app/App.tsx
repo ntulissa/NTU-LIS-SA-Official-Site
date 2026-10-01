@@ -5,6 +5,7 @@ import ScrollIndicator from "./components/ScrollIndicator";
 import HeroSection from "./components/sections/HeroSection";
 import UpcomingEventsSection from "./components/sections/UpcomingEventsSection";
 import LoungeSection from "./components/sections/LoungeSection";
+import SportsTeamsSection from "./components/sections/SportsTeamsSection";
 import BentoSection from "./components/sections/BentoSection";
 import AboutUsSection from "./components/sections/AboutUsSection";
 import TeamSection from "./components/sections/TeamSection";
@@ -177,6 +178,8 @@ export default function App() {
           <AboutUsSection />
           <UpcomingEventsSection />
           <LoungeSection />
+          <SportsTeamsSection />
+          <BentoSection />
         </>
       )}
 
