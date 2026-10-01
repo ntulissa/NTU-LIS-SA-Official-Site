@@ -100,7 +100,7 @@ export const BENTO: Cell[] = [
 
   // 學輔室使用申請
   {
-    type: "service", dept: "gen", slug: "lounge", zh: "學輔室使用申請",
+    type: "service", dept: "gen", slug: "lounge", zh: "學輔室夜間使用",
     gc: "3 / span 3", gr: "1 / span 2",
     en: "LOUNGE BOOKING",
     intro:

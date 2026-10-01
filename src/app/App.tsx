@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 import ScrollIndicator from "./components/ScrollIndicator";
 import HeroSection from "./components/sections/HeroSection";
 import UpcomingEventsSection from "./components/sections/UpcomingEventsSection";
+import LoungeSection from "./components/sections/LoungeSection";
 import BentoSection from "./components/sections/BentoSection";
 import AboutUsSection from "./components/sections/AboutUsSection";
 import TeamSection from "./components/sections/TeamSection";
@@ -173,12 +174,9 @@ export default function App() {
       ) : (
         <>
           <HeroSection />
-          {/* 近一個月的系學會活動（Hero 的「往下繼續探索」會捲到這裡） */}
           <AboutUsSection />
           <UpcomingEventsSection />
-          <TeamSection />
-          <LatestUpdatesSection />
-          <AcademicResourcesSection />
+          <LoungeSection />
         </>
       )}
 

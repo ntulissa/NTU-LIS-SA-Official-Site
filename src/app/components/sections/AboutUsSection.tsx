@@ -425,7 +425,7 @@ export default function AboutUsSection() {
       <div className="px-[clamp(20px,4.3vw,74px)]">
         <PageEyebrow text={EYEBROW} />
         <Reveal delay={60}>
-          <h2 className="text-white text-center mt-[clamp(20px,5vh,64px)] mb-[clamp(24px,6vh,72px)]" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(24px, 3vw, ${HEADING.size}px)`, letterSpacing: "0.16em", paddingLeft: "0.16em" }}>
+          <h2 className="text-white text-center mt-[clamp(20px,5vh,64px)] mb-[clamp(24px,6vh,72px)]" style={{ fontFamily: zhHead, fontWeight: 700, fontSize: `clamp(24px, 3vw, ${HEADING.size}px)`, letterSpacing: "0.16em", paddingLeft: "0.16em" }}>
             {HEADING.text}
           </h2>
         </Reveal>
