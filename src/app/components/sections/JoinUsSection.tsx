@@ -8,7 +8,7 @@ import { PageEyebrow, Reveal } from "./shared";
 //          底下五顆 PRESS：「按住」飲料往下流、放開就停；流乾後放開會自動補滿。
 //          機台上方 ntulissa 草寫字、畫面底部 Recruit 字 → 讀 imports/JoinUs/ 的圖檔。
 // B. 音樂播放器 UI（介紹加入的好處）。正方形專輯（紅藍漸層外框）、上一首／播放／下一首、
-//          進度條（每首 10 秒自動切下一首）、COVER / CAPTION 切換 → 專輯翻面到說明。
+//          進度條（每首 10 秒自動切下一首）、右上角 COVER / CAPTION 切換 → 專輯翻面到說明。
 // C. 部門招募：五顆部門色球並排，左右黑色漸層遮罩，
 //          只清楚看到正中央那顆；左右切換顯示該部門招募資訊。
 // D. 加入手續三步驟：
@@ -67,7 +67,13 @@ const RECRUIT = { h: 44, x: 0, y: 0 }; // 底部 Recruit 圖高度與位移
 // ── B. 為何要加入？（音樂播放器）──────────────────────────
 const PLAYER_LAYOUT = {
   album:   "min(80vw, 520px, 50vh)",   // 專輯邊長
-  coverChar: "calc(min(80vw, 520px, 50vh) * 0.125)", // 封面直排字大小（跟著專輯邊長等比例縮放）
+  coverChar: "calc(min(80vw, 520px, 50vh) * 0.125)", // 封面直排字大小（找不到 coverN.svg 時的備用文字才會用到）
+  coverSvg: "54%",                       // 封面 SVG（imports/JoinUs/cover1.svg…）最大寬高，佔專輯邊長比例
+  toggle: {                              // 專輯右上角 COVER / CAPTION 切換鈕
+    w: "clamp(84px, calc(min(80vw, 520px, 50vh) * 0.26), 136px)", // 寬度（高度自動 = 寬 × 0.3）
+    inset: "4.5%",                       // 距離專輯上緣、右緣
+    font: "clamp(8px, calc(min(80vw, 520px, 50vh) * 0.021), 11px)", // 圓鈕內文字大小
+  },
   caption: { size: 22, lh: 2.5 },        // 翻面說明文字
 };
 const TRACK_MS = 10_000; // ★ 每首展示時間（毫秒）
@@ -342,15 +348,15 @@ function SideToggle({ caption, onToggle }: { caption: boolean; onToggle: () => v
       role="switch"
       aria-checked={caption}
       aria-label="切換封面／說明"
-      onClick={onToggle}
-      className="relative rounded-full bg-black"
-      style={{ width: "170px", height: "52px", border: "3px solid #fff" }}
+      onClick={(e) => { e.stopPropagation(); onToggle(); }}
+      className="relative rounded-full bg-black transition-transform active:scale-95"
+      style={{ width: PLAYER_LAYOUT.toggle.w, aspectRatio: "10 / 3", border: "2px solid #fff" }}
     >
       <span
         className="absolute rounded-full bg-white flex items-center justify-center"
-        style={{ top: "3px", bottom: "3px", width: "60%", left: caption ? "calc(40% - 3px)" : "3px", transition: "left 360ms cubic-bezier(0.4,0,0.2,1)" }}
+        style={{ top: "2px", bottom: "2px", width: "52%", left: caption ? "calc(48% - 2px)" : "2px", transition: "left 360ms cubic-bezier(0.4,0,0.2,1)" }}
       >
-        <span key={caption ? "cap" : "cov"} className="jn-fade" style={{ fontFamily: latin, fontWeight: 700, fontSize: "14px", letterSpacing: "0.1em", color: "#140606", paddingTop: "2px" }}>
+        <span key={caption ? "cap" : "cov"} className="jn-fade" style={{ fontFamily: latin, fontWeight: 700, fontSize: PLAYER_LAYOUT.toggle.font, letterSpacing: "0.06em", color: "#140606", paddingTop: "1px", whiteSpace: "nowrap" }}>
           {caption ? "CAPTION" : "COVER"}
         </span>
       </span>
@@ -402,30 +408,49 @@ function AlbumPlayer() {
   const next = () => go(idx + 1);
   const track = TRACKS[idx];
   const pct = Math.min(100, (elapsed / TRACK_MS) * 100);
+  const coverSvg = joinAsset(`cover${idx + 1}.svg`);
 
   return (
     <div ref={rootRef} className="flex flex-col items-center w-full">
       {/* 專輯（可翻面） */}
-      <div style={{ width: PLAYER_LAYOUT.album, aspectRatio: "1 / 1", perspective: "1800px" }}>
+      <div className="relative" style={{ width: PLAYER_LAYOUT.album, aspectRatio: "1 / 1", perspective: "1800px" }}>
         <div
           className="relative w-full h-full cursor-pointer"
           onClick={() => setCaption((c) => !c)}
           style={{ transformStyle: "preserve-3d", transition: "transform 0.9s cubic-bezier(0.22,1,0.36,1)", transform: caption ? "rotateY(180deg)" : "none" }}
         >
           <AlbumFace bg="#000">
-            <div key={`c${idx}`} className="jn-fade flex" style={{ gap: `calc(${PLAYER_LAYOUT.coverChar} * 1.6)` }}>
-              {track.cover.map((col, ci) => (
-                <div key={ci} className="flex flex-col items-center" style={{ fontFamily: serif, fontWeight: 900, fontSize: PLAYER_LAYOUT.coverChar, lineHeight: 1.38, color: "#fff" }}>
-                  {Array.from(col).map((ch, k) => <span key={k}>{ch}</span>)}
-                </div>
-              ))}
-            </div>
+            {coverSvg ? (
+              // imports/JoinUs/cover{N}.svg（N = 第幾首，從 1 開始）
+              <img
+                key={`c${idx}`}
+                src={coverSvg}
+                alt={track.cover.join(" ")}
+                draggable={false}
+                className="jn-fade select-none"
+                style={{ maxWidth: PLAYER_LAYOUT.coverSvg, maxHeight: PLAYER_LAYOUT.coverSvg, width: "auto", height: "auto", objectFit: "contain" }}
+              />
+            ) : (
+              // 備用：還沒放 SVG 時用文字顯示
+              <div key={`c${idx}`} className="jn-fade flex" style={{ gap: `calc(${PLAYER_LAYOUT.coverChar} * 1.6)` }}>
+                {track.cover.map((col, ci) => (
+                  <div key={ci} className="flex flex-col items-center" style={{ fontFamily: serif, fontWeight: 900, fontSize: PLAYER_LAYOUT.coverChar, lineHeight: 1.38, color: "#fff" }}>
+                    {Array.from(col).map((ch, k) => <span key={k}>{ch}</span>)}
+                  </div>
+                ))}
+              </div>
+            )}
           </AlbumFace>
           <AlbumFace back bg="#1E1E1E">
             <p key={`t${idx}`} className="jn-fade text-white" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: `clamp(15px, 1.6vw, ${PLAYER_LAYOUT.caption.size}px)`, lineHeight: PLAYER_LAYOUT.caption.lh, letterSpacing: "0.14em", padding: "0 11%", textAlign: "justify" }}>
               {track.caption}
             </p>
           </AlbumFace>
+        </div>
+
+        {/* COVER / CAPTION 切換：固定在專輯右上角（放在翻轉層外面，翻面時不會跟著轉） */}
+        <div className="absolute z-10" style={{ top: PLAYER_LAYOUT.toggle.inset, right: PLAYER_LAYOUT.toggle.inset, transform: "translateZ(1px)" }}>
+          <SideToggle caption={caption} onToggle={() => setCaption((c) => !c)} />
         </div>
       </div>
 
@@ -457,10 +482,6 @@ function AlbumPlayer() {
         </div>
       </div>
 
-      {/* COVER / CAPTION */}
-      <div className="mt-[clamp(14px,3vh,40px)]">
-        <SideToggle caption={caption} onToggle={() => setCaption((c) => !c)} />
-      </div>
     </div>
   );
 }
