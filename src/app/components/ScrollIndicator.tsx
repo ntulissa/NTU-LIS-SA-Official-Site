@@ -4,23 +4,28 @@ import { ArrowDown } from "lucide-react";
 /**
  * 畫面下方中央的「往下繼續探索」捲動提示。
  * - 固定於視窗底部中央（fixed），使用者一路往下捲時都會顯示。
- * - 以 IntersectionObserver 監看頁面的 <footer>：footer 進入畫面即淡出隱藏。
+ * - 電腦版：footer 進入畫面即淡出隱藏；手機／平板（沒有 footer）：捲到頁面底部即隱藏。
  * - 可點擊：每次點擊平滑往下捲動約一個畫面高度。
  */
 export default function ScrollIndicator() {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    // 找到頁面最底部的 Footer；捲到它就把提示藏起來。
-    const footer = document.querySelector("footer");
-    if (!footer) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setHidden(entry.isIntersecting),
-      { root: null, threshold: 0 }
-    );
-    observer.observe(footer);
-    return () => observer.disconnect();
+    // 電腦版：Footer 一露出就把提示藏起來（同原本）。
+    // 手機／平板：Footer 是隱藏的，改成「捲到頁面最底部」就藏起來。
+    const check = () => {
+      const footer = document.querySelector("footer");
+      const footerH = footer && footer.offsetParent !== null ? footer.offsetHeight : 0; // 隱藏時＝0
+      const distToBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+      setHidden(footerH > 0 ? distToBottom < footerH : distToBottom <= 40);
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
   }, []);
 
   // 捲到「下一個區塊的開頭」，讓每個區塊的頁面小標題都停在畫面同一個位置。

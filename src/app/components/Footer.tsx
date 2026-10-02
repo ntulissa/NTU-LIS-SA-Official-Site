@@ -109,7 +109,9 @@ export default function Footer() {
   const isDesktop = useIsDesktop();
   const t = (x: number, y = 0) => (isDesktop ? `translate(${x}px, ${y}px)` : undefined);
   return (
-    <footer className="relative z-30 bg-[#060606] border-t border-white/8 pt-14 pb-8">
+    // ★ 只在電腦版（≥ 1024px）顯示：手機／平板已經有 Header 的選單，Footer 會重複又擠，所以整個隱藏。
+    //   想讓手機也顯示，把 className 開頭的「hidden lg:block」刪掉即可。
+    <footer className="hidden lg:block relative z-30 bg-[#060606] border-t border-white/8 pt-14 pb-8">
       <style>{`
         @keyframes footerFlow {
           0% {
