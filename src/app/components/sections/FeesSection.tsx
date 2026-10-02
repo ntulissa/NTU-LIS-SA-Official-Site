@@ -10,7 +10,7 @@ import benefit5 from "@/imports/Fee/benefit5.jpg";
 import lockerImg from "@/imports/Fee/locker.png";
 import logoSvg from "@/imports/Fee/NTULISSAlogo.svg";
 import feelissaSvg from "@/imports/Fee/feelissa.svg";
-import { PageEyebrow } from "./shared";
+import { PageEyebrow, useIsDesktop, fitLine, textUnits } from "./shared";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 系學費專區（路由 #/fees）· Apple 風垂直捲動長頁
@@ -236,6 +236,11 @@ function PayButton({ size = "md" }: { size?: "md" | "lg" }) {
 // ── 單張福利卡片：依 type 渲染三種版型 ────────────────────────────────────
 // 標題固定錨在「左上」、敘述錨在「右下」、草寫錨在「左下」；各自再用 X/Y 微調。
 function BenefitCard({ b }: { b: Benefit }) {
+  // 手機／平板：標題縮小到「一行放得下」、敘述允許換行、X/Y 微調不套用；電腦版完全照舊。
+  const isDesktop = useIsDesktop();
+  const titleSize = isDesktop
+    ? b.titleSize
+    : `max(22px, min(${b.titleSize}, calc((86vw - 64px) / ${textUnits(b.title).toFixed(2)})))`;
   const isFill = b.type === "fill";
   const isGradient = b.type === "gradient";
   const showCenterImg = b.type === "center" || isGradient;
@@ -279,8 +284,9 @@ function BenefitCard({ b }: { b: Benefit }) {
               width: "auto",
               maxWidth: "82%",
               objectFit: "contain",
+              maxHeight: isDesktop ? undefined : "44%",
               opacity: isGradient ? b.imgOpacity ?? 0.35 : 1,
-              transform: `translate(${b.imgX ?? 0}px, ${b.imgY ?? 0}px)`,
+              transform: isDesktop ? `translate(${b.imgX ?? 0}px, ${b.imgY ?? 0}px)` : undefined,
             }}
           />
         </div>
@@ -296,8 +302,8 @@ function BenefitCard({ b }: { b: Benefit }) {
           fontWeight: 900,
           lineHeight: 1.1,
           color: b.titleColor,
-          fontSize: b.titleSize,
-          transform: `translate(${b.titleX}px, ${b.titleY}px)`,
+          fontSize: titleSize,
+          transform: isDesktop ? `translate(${b.titleX}px, ${b.titleY}px)` : undefined,
         }}
       >
         {b.title}
@@ -309,14 +315,14 @@ function BenefitCard({ b }: { b: Benefit }) {
         style={{
           bottom: "clamp(28px,4vw,56px)",
           right: "clamp(28px,4vw,56px)",
-          maxWidth: "none", // 不限寬，配合 nowrap 就不會換行
-          whiteSpace: "nowrap", // ← 強制不換行；想恢復自動換行改成 "normal"
+          maxWidth: isDesktop ? "none" : "calc(100% - 56px)", // 電腦版不限寬；手機限制在卡片內
+          whiteSpace: isDesktop ? "nowrap" : "normal", // ← 電腦版強制不換行；手機版放不下才換行
           fontFamily: zhFont,
           fontWeight: 700,
           lineHeight: 1.6,
           color: b.descColor,
-          fontSize: b.descSize,
-          transform: `translate(${b.descX}px, ${b.descY}px)`,
+          fontSize: isDesktop ? b.descSize : "clamp(15px, 3.8vw, 20px)",
+          transform: isDesktop ? `translate(${b.descX}px, ${b.descY}px)` : undefined,
         }}
       >
         {b.desc}
@@ -767,6 +773,7 @@ function GreenCTA() {
 
 // ── 主元件 ────────────────────────────────────────────────────────────────
 export default function FeesSection() {
+  const isDesktop = useIsDesktop();
   return (
     <div className="bg-black">
       <style>{`
@@ -786,7 +793,7 @@ export default function FeesSection() {
         <div className="relative z-10 px-6 md:px-12 min-h-screen flex flex-col justify-center max-w-[1400px] mx-auto w-full">
           <h1
             className="text-white mb-8"
-            style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "clamp(2.4rem,6.5vw,5.5rem)", lineHeight: 1.15 }}
+            style={{ fontFamily: zhFont, fontWeight: 900, fontSize: isDesktop ? "clamp(2.4rem,6.5vw,5.5rem)" : fitLine("讓你可以這樣「玩」。", "clamp(2.4rem,6.5vw,5.5rem)", { min: 26, gutter: 56 }), lineHeight: 1.15 }}
           >
             一年會費，
             <br />

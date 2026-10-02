@@ -2,7 +2,7 @@ import { useState } from "react";
 import imgBuildingHistory from "@/imports/AboutUs/de7749452570d864c1f5c584765f093ab16a6d89.png";
 import imgMeiji from "@/imports/Presidents/53.png";
 import imgHongLingYa from "@/imports/CurrentTeam/53vp.png";
-import { PageEyebrow, Reveal } from "./shared";
+import { PageEyebrow, Reveal, useIsDesktop } from "./shared";
 
 type DeptDef = {
   name: string;
@@ -31,6 +31,9 @@ const FIGURE_ADJUST = {
     y: "-2vh",
   },
 };
+// 手機／平板（< 1024px）的人像大小與位置（電腦版仍用上面的 FIGURE_ADJUST，不受影響）
+//   size 用百分比＝佔人像區塊高度的比例；人像靠右，左上角留給姓名資訊。
+const FIGURE_ADJUST_MOBILE = { size: "94%", x: "0px", y: "0px" };
 const INFO_TOP_OFFSET = "40vh";
 const INFO_RIGHT_OFFSET = "4vw";
 const INFO_MAX_WIDTH = "22vw";
@@ -344,6 +347,7 @@ function DeptCard({ dept }: { dept: DeptDef }) {
 export default function TeamSection({ standalone = false }: { standalone?: boolean } = {}) {
   const [leaderIdx, setLeaderIdx] = useState(0);
   const activeLeader = LEADERS[leaderIdx] ?? LEADERS[0];
+  const isDesktop = useIsDesktop();
 
   return (
     <section id="team" className={`relative bg-black min-h-screen ${standalone ? "overflow-x-clip" : "overflow-hidden"}`}>
@@ -353,7 +357,7 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
         {/* 左欄上下內距改用常數 CONTENT_PADDING_Y（在上方調整區），想調上下留白改那裡即可。 */}
         <div
           className="flex flex-col px-5 sm:px-8 md:px-[clamp(24px,4.3vw,74px)] w-full lg:w-[clamp(300px,54vw,920px)] lg:flex-shrink-0 justify-center"
-          style={{ paddingTop: "var(--page-content-top)", paddingBottom: CONTENT_PADDING_Y }}
+          style={{ paddingTop: "var(--page-content-top)", paddingBottom: isDesktop ? CONTENT_PADDING_Y : "40px" }}
         >
           <div>
             <PageEyebrow text="關於我們・現任團隊" />
@@ -363,7 +367,7 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
               </p>
             </Reveal>
 
-            <div className="flex flex-col gap-[clamp(8px,1vw,14px)] max-w-full lg:max-w-[clamp(280px,42vw,700px)]">
+            <div className="flex flex-col gap-[clamp(8px,1vw,14px)] max-w-full sm:max-w-[520px] lg:max-w-[clamp(280px,42vw,700px)]">
               <div className="grid grid-cols-3 gap-[clamp(8px,1vw,14px)]">
                 {DEPTS.slice(0, 3).map((dept, i) => (
                   <Reveal key={dept.name} delay={100 + i * 40}>
@@ -384,7 +388,7 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
 
         {/* 右半：人像區。z-10 讓溢出的人像蓋在左半黑底之上；這裡不再用 overflow-hidden，
             人像往左移才不會被「裁切」。背景建築線條改由內層自己包 overflow-hidden 以保留圓角。 */}
-        <div className="relative min-h-[320px] sm:min-h-[460px] lg:flex-1 lg:min-h-[600px] mt-4 lg:mt-0 z-10">
+        <div className="relative min-h-[440px] sm:min-h-[560px] lg:flex-1 lg:min-h-[600px] mt-4 lg:mt-0 z-10">
           <div className="absolute inset-0 overflow-hidden rounded-[24px] lg:rounded-none">
             <img src={imgBuildingHistory} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none" style={{ opacity: 0.06 }} />
           </div>
@@ -394,7 +398,9 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
                 {LEADERS.map((leader, i) => {
                   const isActive = i === leaderIdx;
                   // 這個人的大小／位置：去上方 FIGURE_ADJUST 找同名（會長／副會長）的那塊。
-                  const adj = FIGURE_ADJUST[leader.title as keyof typeof FIGURE_ADJUST] ?? Object.values(FIGURE_ADJUST)[0];
+                  const adj = isDesktop
+                    ? FIGURE_ADJUST[leader.title as keyof typeof FIGURE_ADJUST] ?? Object.values(FIGURE_ADJUST)[0]
+                    : FIGURE_ADJUST_MOBILE;
                   return (
                     <div
                       key={leader.title}
@@ -408,11 +414,11 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
                         pointerEvents: "none",
                       }}
                     >
-                      <div className="h-full flex-shrink-0 flex items-end justify-center lg:justify-start w-full">
+                      <div className="h-full flex-shrink-0 flex items-end justify-end pr-2 sm:pr-10 lg:pr-0 lg:justify-start w-full">
                         <img
                           src={leader.img}
                           alt={leader.name}
-                          className="w-auto max-w-full object-contain object-bottom"
+                          className="w-auto max-w-[70%] lg:max-w-full object-contain object-bottom"
                           style={{ height: adj.size, opacity: isActive ? 1 : 0 }}
                         />
                       </div>
@@ -420,7 +426,7 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
                   );
                 })}
               </div>
-              <div className="absolute left-4 right-4 top-4 sm:left-6 sm:right-6 lg:left-auto lg:right-[4vw] lg:top-[40vh] lg:bottom-auto flex flex-col items-start max-w-[min(100%,320px)] lg:max-w-[22vw]">
+              <div className="absolute left-4 right-4 top-4 sm:left-6 sm:right-6 lg:left-auto lg:right-[4vw] lg:top-[40vh] lg:bottom-auto flex flex-col items-start max-w-[min(55%,320px)] lg:max-w-[22vw] z-10 lg:z-auto">
                 <div style={{ padding: "1.5px", background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)", borderRadius: "999px", marginBottom: ROLE_MARGIN_BOTTOM }}>
                   <div style={{ background: "#000", borderRadius: "999px", padding: "4px 14px", color: "white", fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 650, fontSize: ROLE_FONT_SIZE, letterSpacing: "0.16em", whiteSpace: "nowrap" }}>
                     第 53 屆{activeLeader.title}

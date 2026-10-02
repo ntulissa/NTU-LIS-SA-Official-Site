@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, MapPin, X, ArrowRight } from "lucide-react";
-import { PageEyebrow, Reveal } from "./shared";
+import { PageEyebrow, Reveal, useIsDesktop } from "./shared";
 import {
   EVENTS,
   DEPTS,
@@ -621,6 +621,8 @@ export default function CalendarPage() {
   };
 
   const todayKey = ymd(today);
+  // 手機／平板：部門開關之間的間距縮小（電腦版仍用 TOGGLE_GAP_X / TOGGLES_MB）
+  const isDesktop = useIsDesktop();
 
   // 該月每一天的活動：跨多天活動會展開到它涵蓋的每一天（用日期字串比對，避開時區誤差）。
   const eventsByDay = useMemo(() => {
@@ -702,14 +704,14 @@ export default function CalendarPage() {
             {/* 左右捲動箭頭（有需要才出現） */}
             {canLeft && (
               <button type="button" onClick={() => scrollByDir(-1)} aria-label="上一個活動"
-                className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/2 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+                className="absolute top-1/2 left-0 -translate-y-1/2 lg:-translate-x-1/2 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
                 style={{ width: ARROW_SIZE, height: ARROW_SIZE }}>
                 <ChevronLeft size={22} strokeWidth={2.4} />
               </button>
             )}
             {canRight && (
               <button type="button" onClick={() => scrollByDir(1)} aria-label="下一個活動"
-                className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+                className="absolute top-1/2 right-0 -translate-y-1/2 lg:translate-x-1/2 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
                 style={{ width: ARROW_SIZE, height: ARROW_SIZE }}>
                 <ChevronRight size={22} strokeWidth={2.4} />
               </button>
@@ -725,7 +727,7 @@ export default function CalendarPage() {
 
           {/* 部門 Toggle（名稱包在膠囊內） */}
           <Reveal delay={40}>
-            <div className="flex flex-wrap" style={{ columnGap: TOGGLE_GAP_X, rowGap: TOGGLE_GAP_Y, marginBottom: TOGGLES_MB }}>
+            <div className="flex flex-wrap" style={{ columnGap: isDesktop ? TOGGLE_GAP_X : 12, rowGap: isDesktop ? TOGGLE_GAP_Y : 12, marginBottom: isDesktop ? TOGGLES_MB : 40 }}>
               {DEPTS.map((d) => (
                 <Switch key={d.key} on={enabled[d.key]} dept={d} onClick={() => setEnabled((p) => ({ ...p, [d.key]: !p[d.key] }))} />
               ))}

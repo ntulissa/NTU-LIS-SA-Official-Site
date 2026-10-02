@@ -98,6 +98,55 @@ export function PageEyebrow({ text }: { text: string }) {
   );
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// ★ RWD 共用工具（手機／平板用；電腦版 ≥ 1024px 一律維持原本的數值，完全不變）
+// ══════════════════════════════════════════════════════════════════════════
+// 斷點：寬度 ≥ 1024px＝電腦版（和 Tailwind 的 lg: 一致）；以下＝平板／手機。
+export const DESKTOP_MIN = 1024;
+
+// 監聽 media query（例如 "(min-width: 1024px)"），視窗大小改變時會自動更新。
+export function useMediaQuery(query: string) {
+  const get = () => typeof window !== "undefined" && !!window.matchMedia?.(query).matches;
+  const [match, setMatch] = useState(get);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const on = () => setMatch(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, [query]);
+  return match;
+}
+
+// true＝電腦版。用法：const isDesktop = useIsDesktop();
+//   之後寫 isDesktop ? 原本的值 : 手機平板的值 → 電腦版完全不受影響。
+export function useIsDesktop() {
+  return useMediaQuery(`(min-width: ${DESKTOP_MIN}px)`);
+}
+
+// 「字體縮小優先、不要換行」的字級：
+//   fitText(原本的字級, 一行的字數, { min: 最小字級px, ls: 字距em, gutter: 左右留白總和px })
+//   → 螢幕夠寬時＝原本的字級；螢幕變窄就等比例縮小，讓這一行剛好塞得下；
+//     縮到 min 還放不下，才允許換行（避免字小到看不清楚）。
+//   chars：該行字數（中文、全形標點算 1，英數算 0.55 左右）。
+export function fitText(desktop: string | number, chars: number, opts: { min?: number; ls?: number; gutter?: number } = {}) {
+  const { min = 16, ls = 0, gutter = 40 } = opts;
+  const d = typeof desktop === "number" ? `${desktop}px` : desktop;
+  const k = (chars * (1 + ls) + 0.5).toFixed(3); // +0.5：預留標點／字型寬度誤差，避免剛好差一點就換行
+  return `max(${min}px, min(${d}, calc((100vw - ${gutter}px) / ${k})))`;
+}
+
+// 估算一行文字的「寬度單位」（中文／全形＝1、英數＝0.6、空白＝0.3），給 fitText 用。
+export function textUnits(s: string) {
+  let n = 0;
+  for (const ch of s) n += ch === " " ? 0.3 : /[\u0000-ÿ]/.test(ch) ? 0.6 : 1;
+  return n;
+}
+// 傳入「最長那一行」的文字，自動算字數：fitLine("你的大學生涯", 58, { min: 26, ls: 0.1 })
+export function fitLine(longestLine: string, desktop: string | number, opts: { min?: number; ls?: number; gutter?: number } = {}) {
+  return fitText(desktop, textUnits(longestLine), opts);
+}
+
 export const cardBase = "rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.04)] hover:border-white/20 transition-colors duration-200 cursor-pointer";
 
 export const monoSemi: CSSProperties = { fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 600 };

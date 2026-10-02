@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { PageEyebrow, Reveal } from "./shared";
+import { PageEyebrow, Reveal, useIsDesktop, fitLine } from "./shared";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 贊助頁（獨立分頁 · 路由 #/sponsor）
@@ -111,6 +111,8 @@ function hexToRgba(hex: string, a: number): string {
 }
 // 位移 helper：把 {x,y} 變成 transform
 const move = (c: { x?: number; y?: number }): CSSProperties => ({ transform: `translate(${c.x ?? 0}px, ${c.y ?? 0}px)` });
+// 手機／平板：X/Y 位移不套用（那些數字是照電腦版畫面調的）
+const moveIf = (on: boolean, c: { x?: number; y?: number }): CSSProperties => (on ? move(c) : {});
 
 // ── 拉長版 Switch Toggle：軌道 ＋ 圓球繞「軌道中心」上下對稱擺動（w/h 為 px）──
 // travel：圓球上下總擺動幅度(px)，不填＝跑滿整條軌道(h-w)。圓球繞中心 ±travel/2 擺動，
@@ -171,10 +173,10 @@ function NavArrow({ dir, color, disabled, onClick }: { dir: "prev" | "next"; col
 }
 
 // ── 方案圖：固定高度框 ＋ object-contain 置中（不同尺寸 svg 都會對齊）──
-function PlanArt({ file, alt }: { file: string; alt: string }) {
+function PlanArt({ file, alt, compact = false }: { file: string; alt: string; compact?: boolean }) {
   const url = sponsorSvg(file);
   return (
-    <div className="relative w-full flex items-center justify-center" style={{ height: `${PLANS_LAYOUT.art.h}px`, ...move(PLANS_LAYOUT.art) }}>
+    <div className="relative w-full flex items-center justify-center" style={{ height: `${compact ? 90 : PLANS_LAYOUT.art.h}px`, ...(compact ? {} : move(PLANS_LAYOUT.art)) }}>
       {url ? (
         <img src={url} alt={alt} className="max-w-[86%] max-h-full object-contain select-none" />
       ) : (
@@ -193,6 +195,9 @@ export default function SponsorSection() {
   const current = COMPARE[cat];
   const heroLogo = sponsorSvg("sponsorLISSA.svg");
   const arrowImg = sponsorSvg("arrow.svg");
+  const isDesktop = useIsDesktop();
+  // 背景箭頭：手機／平板依螢幕寬等比例縮小位置與大小（電腦版＝1，完全照舊）
+  const arrowK = isDesktop ? 1 : 0.42;
 
   return (
     <div className="bg-black">
@@ -219,20 +224,20 @@ export default function SponsorSection() {
       `}</style>
 
       {/* ══════════ A. Hero ══════════ */}
-      <section className="relative min-h-screen flex items-center overflow-hidden px-5 sm:px-8 md:px-14 pt-24 pb-28">
+      <section className="relative min-h-screen flex items-center overflow-hidden px-5 sm:px-8 md:px-14 pt-[var(--page-content-top)] lg:pt-24 pb-28">
         <PageEyebrow text="支持我們・贊助我們" />
         <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* 左：文案 */}
           <div>
-            <div className="h-[14px] mb-8" aria-hidden="true" />
+            <div className="hidden lg:block h-[14px] mb-8" aria-hidden="true" />
             <Reveal delay={60}>
-              <h1 className="text-white mb-8" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `${HERO_LAYOUT.title.size}px`, lineHeight: HERO_LAYOUT.title.lh, letterSpacing: "0.02em", ...move(HERO_LAYOUT.title) }}>
+              <h1 className="text-white mb-8" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `${HERO_LAYOUT.title.size}px` : fitLine("走入知識與資訊的核心。", HERO_LAYOUT.title.size, { min: 24, ls: 0.02 }), lineHeight: HERO_LAYOUT.title.lh, letterSpacing: "0.02em", ...moveIf(isDesktop, HERO_LAYOUT.title) }}>
                 <span className="block">讓你的品牌，</span>
                 <span className="block">走入知識與資訊的核心。</span>
               </h1>
             </Reveal>
             <Reveal delay={120}>
-              <p className="text-white/60" style={{ fontFamily: zhBody, fontWeight: 500, color: "white", fontSize: `${HERO_LAYOUT.sub.size}px`, letterSpacing: "0.05em", lineHeight: HERO_LAYOUT.sub.lh, ...move(HERO_LAYOUT.sub) }}>
+              <p className="text-white/60" style={{ fontFamily: zhBody, fontWeight: 500, color: "white", fontSize: isDesktop ? `${HERO_LAYOUT.sub.size}px` : "clamp(15px, 2.2vw, 20px)", letterSpacing: "0.05em", lineHeight: HERO_LAYOUT.sub.lh, ...moveIf(isDesktop, HERO_LAYOUT.sub) }}>
                 <span className="block">透過全新改版的系學會官方網站與社群渠道，</span>
                 <span className="block">精準對接臺大圖資系多元的專業人才與校園群體。</span>
               </p>
@@ -250,7 +255,7 @@ export default function SponsorSection() {
         {/* 底部置中：Sponsor LISSA logo（imports/Sponsor/sponsorLISSA.svg） */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center justify-center">
           {heroLogo ? (
-            <img src={heroLogo} alt="Sponsor — NTU LIS SA" className="select-none" style={{ height: `${HERO_LOGO.h}px`, width: "auto", objectFit: "contain", ...move(HERO_LOGO) }} />
+            <img src={heroLogo} alt="Sponsor — NTU LIS SA" className="select-none" style={{ height: `${isDesktop ? HERO_LOGO.h : 44}px`, width: "auto", objectFit: "contain", ...moveIf(isDesktop, HERO_LOGO) }} />
           ) : (
             <span className="text-white/30" style={{ fontFamily: mono, fontSize: "0.8rem", letterSpacing: "0.2em", ...move(HERO_LOGO) }}>Sponsor · sponsorLISSA.svg</span>
           )}
@@ -259,15 +264,47 @@ export default function SponsorSection() {
 
       {/* ══════════ B. 贊助方案規格比較 ══════════ */}
       {/* 註：「往下繼續探索」白色指示器由全站共用元件提供，這裡不再重複。 */}
-      <section id="sponsor-plans" className="relative min-h-screen flex flex-col justify-center px-5 sm:px-8 md:px-14 py-24">
+      <section id="sponsor-plans" className="relative min-h-screen flex flex-col justify-center px-5 sm:px-8 md:px-14 py-20 lg:py-24">
         <div className="max-w-[1200px] w-full mx-auto">
           <Reveal>
-            <h2 className="text-white mb-14 lg:mb-20" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `${PLANS_LAYOUT.heading.size}px`, letterSpacing: "0.04em", ...move(PLANS_LAYOUT.heading) }}>
+            <h2 className="text-white mb-10 lg:mb-20" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `${PLANS_LAYOUT.heading.size}px` : "clamp(28px, 5vw, 44px)", letterSpacing: "0.04em", ...moveIf(isDesktop, PLANS_LAYOUT.heading) }}>
               贊助方案比較
             </h2>
           </Reveal>
 
-          {/* 直向分隔線 ＋ 三欄內容（整組置中，Plus 在正中央；間距改 PLANS_LAYOUT.colGap） */}
+          {/* 手機／平板：三欄放不下 → 改成「類別切換 ＋ 三張上下排列的方案卡」 */}
+          {!isDesktop && (
+            <div>
+              <div className="flex items-center justify-center gap-3 sm:gap-5 mb-8">
+                <NavArrow dir="prev" color="#D14B4B" disabled={!canPrev} onClick={() => canPrev && setCat((v) => v - 1)} />
+                <div className="rounded-full border border-white/40 bg-black px-6 py-2.5 min-w-[130px] text-center" style={{ fontFamily: zhHead, fontWeight: 700, color: "#fff", fontSize: "17px", letterSpacing: "0.12em" }}>
+                  {current.label}
+                </div>
+                <NavArrow dir="next" color="#2F9EBD" disabled={!canNext} onClick={() => canNext && setCat((v) => v + 1)} />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {PLANS.map((p, i) => (
+                  <Reveal key={p.key} delay={i * 80}>
+                    <div className="h-full rounded-2xl border border-white/12 bg-white/[0.03] px-5 py-6 flex flex-col items-center text-center">
+                      <PlanArt file={p.svg} alt={p.name} compact />
+                      <p className="text-white mt-4" style={{ fontFamily: mono, fontWeight: 700, fontSize: "16px", letterSpacing: "0.06em", whiteSpace: "pre" }}>
+                        {p.name}
+                      </p>
+                      <p className="text-white mt-4 min-h-[2.8em] flex items-center justify-center" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: "clamp(17px, 2.4vw, 20px)", letterSpacing: "0.02em", lineHeight: 1.4 }}>
+                        {current.values[i]}
+                      </p>
+                      <p className="text-white/60 mt-4" style={{ fontFamily: zhHead, fontWeight: 500, fontSize: "14px", lineHeight: 1.9 }}>
+                        {p.desc}
+                      </p>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 直向分隔線 ＋ 三欄內容（整組置中，Plus 在正中央；間距改 PLANS_LAYOUT.colGap）—— 電腦版 */}
+          {isDesktop && (
           <div className="relative">
             <span aria-hidden className="pointer-events-none absolute top-0 bottom-0 w-px bg-white/10" style={{ left: `calc(50% - ${DIVIDER_OFFSET}px)` }} />
             <span aria-hidden className="pointer-events-none absolute top-0 bottom-0 w-px bg-white/10" style={{ left: `calc(50% + ${DIVIDER_OFFSET}px)` }} />
@@ -321,11 +358,12 @@ export default function SponsorSection() {
               ))}
             </div>
           </div>
+          )}
         </div>
       </section>
 
       {/* ══════════ C. 感謝您的支持！ ══════════ */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 py-24">
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-5 sm:px-6 py-24">
         {/* 背景：散布的箭頭圖（arrow.svg），各自閃動；位置全由 THANKS_ARROWS 手動控制 */}
         {arrowImg ? (
           <div className="absolute inset-0 pointer-events-none select-none" aria-hidden>
@@ -338,8 +376,8 @@ export default function SponsorSection() {
                 style={{
                   left: "50%",
                   top: "50%",
-                  width: `${a.size ?? THANKS_ARROW.w}px`,
-                  transform: `translate(calc(-50% + ${a.x}px), calc(-50% + ${a.y}px))`,
+                  width: `${(a.size ?? THANKS_ARROW.w) * arrowK}px`,
+                  transform: `translate(calc(-50% + ${a.x * arrowK}px), calc(-50% + ${a.y * arrowK * (isDesktop ? 1 : 1.4)}px))`,
                   ["--sp-min" as string]: THANKS_BLINK.min,
                   ["--sp-max" as string]: THANKS_BLINK.max,
                   animation: `spBlink ${THANKS_BLINK.dur}s ease-in-out ${-(a.delay ?? 0)}s infinite`,
@@ -351,12 +389,12 @@ export default function SponsorSection() {
 
         <div className="relative z-10 text-center max-w-3xl">
           <Reveal>
-            <h2 className="text-white mb-6" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `${THANKS_LAYOUT.title.size}px`, letterSpacing: "0.08em", textShadow: "0 4px 30px rgba(0,0,0,0.7)", ...move(THANKS_LAYOUT.title) }}>
+            <h2 className="text-white mb-6" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `${THANKS_LAYOUT.title.size}px` : fitLine("感謝您的支持！", THANKS_LAYOUT.title.size, { min: 30, ls: 0.08 }), letterSpacing: "0.08em", textShadow: "0 4px 30px rgba(0,0,0,0.7)", ...moveIf(isDesktop, THANKS_LAYOUT.title) }}>
               感謝您的支持！
             </h2>
           </Reveal>
           <Reveal delay={100}>
-            <p className="text-white/80 mb-10" style={{ fontFamily: zhHead, fontWeight: 500, fontSize: `${THANKS_LAYOUT.sub.size}px`, letterSpacing: "0.04em", textShadow: "0 2px 16px rgba(0,0,0,0.6)", ...move(THANKS_LAYOUT.sub) }}>
+            <p className="text-white/80 mb-10" style={{ fontFamily: zhHead, fontWeight: 500, fontSize: isDesktop ? `${THANKS_LAYOUT.sub.size}px` : fitLine("歡迎尋找最適合您／貴司的合作方式。", THANKS_LAYOUT.sub.size, { min: 14, ls: 0.04 }), letterSpacing: "0.04em", textShadow: "0 2px 16px rgba(0,0,0,0.6)", ...moveIf(isDesktop, THANKS_LAYOUT.sub) }}>
               歡迎尋找最適合您／貴司的合作方式。
             </p>
           </Reveal>
@@ -364,7 +402,7 @@ export default function SponsorSection() {
             <a
               href={CONTACT.contactHref}
               className="inline-flex items-center gap-3 bg-white text-black px-7 sm:px-8 py-3.5 rounded-full hover:bg-white/90 transition-all duration-200 group w-fit max-w-full"
-              style={{ fontFamily: zhBody, fontWeight: 700, fontSize: `${THANKS_LAYOUT.button.size}px`, letterSpacing: "0.06em", ...move(THANKS_LAYOUT.button) }}
+              style={{ fontFamily: zhBody, fontWeight: 700, fontSize: `${THANKS_LAYOUT.button.size}px`, letterSpacing: "0.06em", ...(isDesktop ? move(THANKS_LAYOUT.button) : { transform: "translateY(16px)" }) }}
             >
               聯絡我們
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-200" />

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
+import { useIsDesktop, fitLine } from "./shared";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 部門適性測驗（獨立分頁 · 路由 #/dept-quiz）
@@ -280,6 +281,7 @@ export default function DeptQuizPage() {
     return () => window.removeEventListener("keydown", onKey);
   });
 
+  const isDesktop = useIsDesktop();
   const q = QUESTIONS[qi];
   const answeredCount = useMemo(() => answers.filter((a) => a >= 0).length, [answers]);
 
@@ -308,8 +310,8 @@ export default function DeptQuizPage() {
         {/* ── 開場 ── */}
         {stage === "intro" && (
           <div className="flex-1 flex flex-col items-center justify-center text-center dq-in">
-            <Balls mode="idle" size={52} />
-            <h1 className="mt-14" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(40px, 6vw, 84px)", letterSpacing: "0.12em", paddingLeft: "0.12em", lineHeight: 1.25 }}>
+            <Balls mode="idle" size={isDesktop ? 52 : 40} />
+            <h1 className="mt-14" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? "clamp(40px, 6vw, 84px)" : fitLine("你屬於哪個部門？", "clamp(40px, 6vw, 84px)", { min: 26, ls: 0.12 }), letterSpacing: "0.12em", paddingLeft: "0.12em", lineHeight: 1.25 }}>
               你屬於哪個部門？
             </h1>
             <p className="mt-8 text-white/80" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(15px, 1.5vw, 20px)", letterSpacing: "0.08em", lineHeight: 2 }}>
@@ -337,7 +339,7 @@ export default function DeptQuizPage() {
             </div>
 
             <div key={qi} className="dq-in">
-              <h2 className="mt-14 mb-10" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(26px, 3.4vw, 46px)", letterSpacing: "0.08em", lineHeight: 1.5 }}>
+              <h2 className="mt-10 sm:mt-14 mb-8 sm:mb-10" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? "clamp(26px, 3.4vw, 46px)" : fitLine(q.q, "clamp(26px, 3.4vw, 46px)", { min: 20, ls: 0.08 }), letterSpacing: "0.08em", lineHeight: 1.5 }}>
                 {q.q}
               </h2>
               <div className="flex flex-col gap-4">
@@ -348,7 +350,7 @@ export default function DeptQuizPage() {
                       key={oi}
                       type="button"
                       onClick={() => choose(oi)}
-                      className="dq-opt w-full text-left rounded-[18px] border px-6 py-5 flex items-center gap-5"
+                      className="dq-opt w-full text-left rounded-[18px] border px-4 sm:px-6 py-4 sm:py-5 flex items-center gap-4 sm:gap-5"
                       style={{ borderColor: sel ? "#fff" : "rgba(255,255,255,0.22)", background: sel ? "#fff" : "transparent", color: sel ? "#000" : "#fff" }}
                     >
                       <span className="shrink-0 flex items-center justify-center rounded-full" style={{ width: 32, height: 32, border: `1.5px solid ${sel ? "#000" : "rgba(255,255,255,0.5)"}`, fontFamily: mono, fontSize: "14px" }}>
@@ -379,17 +381,17 @@ export default function DeptQuizPage() {
           const t = DEPTS[result.top];
           return (
             <div className="flex-1 flex flex-col items-center pt-8">
-              <p className="dq-in text-white/70" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "18px", letterSpacing: "0.3em", paddingLeft: "0.3em" }}>你最適合的部門是</p>
+              <p className="dq-in text-white/70" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "18px", letterSpacing: isDesktop ? "0.3em" : "0.2em", paddingLeft: isDesktop ? "0.3em" : "0.2em" }}>你最適合的部門是</p>
               <div className="dq-pop rounded-full mt-10" style={{ width: "clamp(120px, 14vw, 180px)", height: "clamp(120px, 14vw, 180px)", background: t.color, boxShadow: `0 0 90px -10px ${t.color}` }} />
-              <h1 className="dq-in mt-10 text-center" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(44px, 6vw, 80px)", letterSpacing: "0.18em", paddingLeft: "0.18em", animationDelay: ".25s" }}>{t.name}</h1>
+              <h1 className="dq-in mt-10 text-center" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? "clamp(44px, 6vw, 80px)" : fitLine(t.name, "clamp(44px, 6vw, 80px)", { min: 30, ls: 0.18 }), letterSpacing: "0.18em", paddingLeft: "0.18em", animationDelay: ".25s" }}>{t.name}</h1>
               <p className="dq-in mt-2" style={{ fontFamily: mono, fontWeight: 500, fontSize: "clamp(13px, 1.3vw, 18px)", letterSpacing: "0.24em", animationDelay: ".3s" }}>{t.en}</p>
-              <span className="dq-in mt-7 rounded-full px-5 py-2" style={{ border: "1.5px solid rgba(255,255,255,.6)", fontFamily: zhBody, fontWeight: 700, fontSize: "15px", letterSpacing: "0.16em", animationDelay: ".4s" }}>
+              <span className="dq-in mt-7 rounded-full px-5 py-2 text-center" style={{ border: "1.5px solid rgba(255,255,255,.6)", fontFamily: zhBody, fontWeight: 700, fontSize: isDesktop ? "15px" : "14px", letterSpacing: isDesktop ? "0.16em" : "0.08em", animationDelay: ".4s" }}>
                 「{t.persona}」・契合度 {result.fits[result.top]}%
               </span>
 
               {/* 分析 */}
               <div className="dq-in w-full mt-14 rounded-[28px] p-[2px]" style={{ background: "linear-gradient(180deg, #D14B4B 0%, #2F9EBD 100%)", animationDelay: ".5s" }}>
-                <div className="rounded-[26px] px-7 sm:px-12 py-10" style={{ background: "#141414" }}>
+                <div className="rounded-[26px] px-5 sm:px-12 py-8 sm:py-10" style={{ background: "#141414" }}>
                   <p className="text-white/50 mb-5" style={{ fontFamily: mono, fontSize: "13px", letterSpacing: "0.3em" }}>ANALYSIS</p>
                   <p style={{ fontFamily: zhBody, fontWeight: 500, fontSize: "clamp(15px, 1.5vw, 19px)", letterSpacing: "0.08em", lineHeight: 2.1, textAlign: "justify" }}>{result.summary}</p>
                   <div className="flex flex-wrap gap-3 mt-8">
@@ -406,7 +408,7 @@ export default function DeptQuizPage() {
                 <div className="flex flex-col gap-4">
                   {[...ORDER].sort((a, b) => result.fits[b] - result.fits[a]).map((d, i) => (
                     <div key={d} className="flex items-center gap-4">
-                      <span className="shrink-0 w-[6.5em]" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: "15px", letterSpacing: "0.1em", opacity: d === result.top ? 1 : 0.75 }}>{DEPTS[d].name}</span>
+                      <span className="shrink-0 w-[5.6em] sm:w-[6.5em]" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: isDesktop ? "15px" : "14px", letterSpacing: isDesktop ? "0.1em" : "0.04em", opacity: d === result.top ? 1 : 0.75 }}>{DEPTS[d].name}</span>
                       <div className="relative flex-1 h-[14px] rounded-full overflow-hidden" style={{ background: "#262626" }}>
                         <div className="dq-bar absolute left-0 top-0 bottom-0 rounded-full" style={{ width: `${result.fits[d]}%`, background: DEPTS[d].color, animationDelay: `${0.6 + i * 0.12}s` }} />
                       </div>
@@ -417,7 +419,7 @@ export default function DeptQuizPage() {
               </div>
 
               {/* 行動 */}
-              <div className="flex flex-wrap items-center justify-center gap-4 mt-16">
+              <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-12 sm:mt-16">
                 <PillButton href={JOIN_FORM_URL} external>加入我們<ArrowRight size={20} strokeWidth={2.6} className="group-hover:translate-x-1 transition-transform" /></PillButton>
                 <PillButton href={t.href} variant="outline">認識{t.name}</PillButton>
                 <PillButton onClick={start} variant="outline"><RotateCcw size={17} strokeWidth={2.4} />再測一次</PillButton>

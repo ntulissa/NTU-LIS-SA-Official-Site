@@ -1,6 +1,7 @@
 import { Mail } from "lucide-react";
 import imgLissaLogo from "@/imports/Footer/NTULISSAlogo.svg";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
+import { useIsDesktop } from "./sections/shared";
 
 // ── Logo 調整區（可手動修改）─────────────────────────────────
 // LOGO_SIZE：logo 顯示寬度（px），高度會等比例縮放
@@ -103,6 +104,10 @@ const SOCIAL_ICONS = [
 ];
 
 export default function Footer() {
+  // ★ 手機／平板（< 1024px）：上面這些 X/Y 位移都歸零、選單改成兩欄排列，避免被推出畫面外。
+  //   電腦版（≥ 1024px）完全照舊使用上方常數。
+  const isDesktop = useIsDesktop();
+  const t = (x: number, y = 0) => (isDesktop ? `translate(${x}px, ${y}px)` : undefined);
   return (
     <footer className="relative z-30 bg-[#060606] border-t border-white/8 pt-14 pb-8">
       <style>{`
@@ -126,12 +131,12 @@ export default function Footer() {
       `}</style>
       <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-14">
         <div
-          className="grid grid-cols-1 md:grid-cols-[auto_repeat(4,minmax(0,1fr))] gap-y-8 mb-10"
-          style={{ columnGap: `${NAV_COL_GAP}px` }}
+          className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto_repeat(4,minmax(0,1fr))] gap-y-10 lg:gap-y-8 mb-10"
+          style={{ columnGap: isDesktop ? `${NAV_COL_GAP}px` : "24px" }}
         >
           {/* 欄距改上方常數 NAV_COL_GAP；選單整體左右位移改 NAV_SHIFT_X */}
           {/* Brand */}
-          <div className="md:max-w-[200px] md:mr-2 lg:mr-6">
+          <div className="col-span-2 sm:col-span-4 lg:col-span-1 lg:max-w-[200px] lg:mr-6">
             {/* 左側 Logo 區塊向右推的距離：md:mr-8 / lg:mr-12；數字越大，Logo 會離右邊選單更遠 */}
             {/* Logo — matches Header exactly */}
             {/* Logo（只保留上傳的 SVG；大小與位移用上方常數調整）*/}
@@ -141,21 +146,21 @@ export default function Footer() {
                 alt="臺大圖資系學會 Logo"
                 className="object-contain"
                 style={{
-                  width: `${LOGO_SIZE}px`,
+                  width: `${isDesktop ? LOGO_SIZE : 150}px`,
                   height: "auto",
-                  transform: `translate(${LOGO_OFFSET_X}px, ${LOGO_OFFSET_Y}px)`,
+                  transform: t(LOGO_OFFSET_X, LOGO_OFFSET_Y),
                 }}
               />
             </div>
 
             <p
               className="text-white/35 leading-relaxed mb-6"
-              style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "0.8rem", transform: `translate(${DESC_X}px, ${DESC_Y}px)` }}
+              style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "0.8rem", transform: t(DESC_X, DESC_Y) }}
             >
               國立臺灣大學圖書資訊學系學生自治組織，致力於促進學術交流與同學福祉。
             </p>
 
-            <div className="flex gap-2" style={{ transform: `translate(${SOCIAL_X}px, ${SOCIAL_Y}px)` }}>
+            <div className="flex gap-2" style={{ transform: t(SOCIAL_X, SOCIAL_Y) }}>
               {SOCIAL_ICONS.map(({ label, href, icon }) => (
                 <a
                   key={label}
@@ -173,17 +178,17 @@ export default function Footer() {
 
           {/* Nav columns */}
           {NAV_COLS.map((col) => (
-            <div key={col.en} style={{ transform: `translateX(${NAV_SHIFT_X}px)` }}>
+            <div key={col.en} style={{ transform: t(NAV_SHIFT_X) }}>
               <p
-                className="footer-flow-text text-sm font-bold mb-6 whitespace-nowrap"
+                className="footer-flow-text text-sm font-bold mb-4 lg:mb-6 whitespace-nowrap"
                 style={{
                   fontFamily: "'Ubuntu Sans Mono', monospace",
                   letterSpacing: "0.07em",
                 }}
               >
-                {col.en}&nbsp;&nbsp;{col.zh}
+                {isDesktop ? <>{col.en}&nbsp;&nbsp;{col.zh}</> : <>{col.en}<br />{col.zh}</>}
               </p>
-              <ul className="space-y-4">
+              <ul className="space-y-3 lg:space-y-4">
                 {col.links.map((link) => (
                   <li key={link.label}>
                     <a
@@ -201,14 +206,14 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/8 gap-3">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between pt-6 border-t border-white/8 gap-3">
           <p
             className="text-white/25 text-xs"
-            style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, transform: `translate(${COPYRIGHT_X}px, ${COPYRIGHT_Y}px)` }}
+            style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, transform: t(COPYRIGHT_X, COPYRIGHT_Y) }}
           >
             © 2026 臺大圖資系學會 NTU LIS Student Association. All rights reserved.
           </p>
-          <div className="flex items-center gap-2 text-white/60" style={{ transform: `translate(${EMAIL_X}px, ${EMAIL_Y}px)` }}>
+          <div className="flex items-center gap-2 text-white/60" style={{ transform: t(EMAIL_X, EMAIL_Y) }}>
             <Mail size={13} />
             <span
               className="text-xs"

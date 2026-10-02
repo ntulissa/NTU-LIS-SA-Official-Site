@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { ArrowRight, ArrowLeft, Info, XCircle } from "lucide-react";
-import { PageEyebrow, Reveal } from "../sections/shared";
+import { PageEyebrow, Reveal, useIsDesktop } from "../sections/shared";
 // ↑ 若 Services.tsx 不是放在跟 DepartmentPage 同一層，請改這行的相對路徑到 sections/shared。
 import { DEPT_COLORS, BENTO, serviceBySlug, type Cell } from "./servicesData";
 // ↑ 服務資料（Bento 佈局 + 詳情頁內容）集中在 servicesData.ts；本檔只負責呈現。
@@ -119,13 +119,55 @@ function BentoCell({ cell }: { cell: Cell }) {
 }
 
 // ── Bento Grid 總覽 ───────────────────────────────────────
+// ── 手機／平板版總覽：12×8 的 Bento 在小螢幕塞不下，改成「每個部門一組」的兩欄格子 ──
+const DEPT_ORDER = ["gen", "eve", "aca", "ima", "sp"] as const;
+function ServicesListMobile() {
+  return (
+    <div className="flex flex-col gap-8">
+      {DEPT_ORDER.map((d) => {
+        const color = DEPT_COLORS[d];
+        const svg = assetByFile(`${d}.svg`);
+        const items = BENTO.filter((c) => c.type === "service" && c.dept === d) as Extract<Cell, { type: "service" }>[];
+        return (
+          <div key={d}>
+            <div className="rounded-2xl flex items-center justify-center px-4 mb-3 select-none" style={{ background: color, height: 64 }}>
+              {svg ? (
+                <img src={svg} alt={`${d}.`} className="object-contain" style={{ maxHeight: "60%", maxWidth: "70%" }} />
+              ) : (
+                <span className="text-white/90 lowercase" style={{ fontFamily: mono, fontWeight: 700, fontSize: "1.1rem" }}>{d}.</span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {items.map((c) => (
+                <a
+                  key={c.slug}
+                  href={`#/service/${c.slug}`}
+                  className="svc-cell rounded-2xl border-[1.5px] flex items-center justify-center text-center px-3 py-5 min-h-[84px] transition-colors duration-200"
+                  style={{ borderColor: color, ["--svc-fill" as string]: color } as CSSProperties}
+                  aria-label={c.zh}
+                >
+                  <span className="text-white leading-snug" style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "clamp(15px, 3.8vw, 18px)", letterSpacing: "0.06em" }}>
+                    {c.zh}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function ServicesGrid() {
+  const isDesktop = useIsDesktop();
   return (
     <section className="relative bg-black min-h-screen px-4 sm:px-6 lg:px-10 pt-[var(--page-content-top)] pb-10">
       <style>{`.svc-cell:hover{ background: var(--svc-fill); }`}</style>
       <PageEyebrow text="各種服務・各部業務" />
 
-      {/* 手機以水平捲動檢視完整 Bento（min-width 保底）；桌機直接鋪滿 */}
+      {/* 手機／平板：改用分部門的兩欄清單；電腦版：原本的 Bento Grid */}
+      {!isDesktop ? <ServicesListMobile /> : (
       <div className="overflow-x-auto">
         <div
           className="grid gap-2 sm:gap-3"
@@ -141,6 +183,7 @@ function ServicesGrid() {
           ))}
         </div>
       </div>
+      )}
     </section>
   );
 }
@@ -151,6 +194,7 @@ function ServicesGrid() {
 // 沒填 guide 的服務不顯示「i」，就當一張純圖卡。
 function ServiceCard({ dept, img, zh, guide }: { dept: string; img?: string; zh: string; guide?: string[] }) {
   const [flipped, setFlipped] = useState(false);
+  const isDesktop = useIsDesktop();
   const hasGuide = !!guide && guide.length > 0;
 
   // 兩面共用的底：黑底 + 紅藍漸層外框（padding-box/border-box 疊法）+ 背面剔除。
@@ -172,7 +216,7 @@ function ServiceCard({ dept, img, zh, guide }: { dept: string; img?: string; zh:
   );
 
   return (
-    <div className="w-full mx-auto relative" style={{ maxWidth: CARD.maxW, perspective: "1600px", transform: `translate(${CARD.offset.x}px, ${CARD.offset.y}px)` }}>
+    <div className="w-full mx-auto relative" style={{ maxWidth: CARD.maxW, perspective: "1600px", transform: isDesktop ? `translate(${CARD.offset.x}px, ${CARD.offset.y}px)` : undefined }}>
       {/* 翻牌本體（正/背兩面 3D 翻轉） */}
       <div
         className="relative w-full"

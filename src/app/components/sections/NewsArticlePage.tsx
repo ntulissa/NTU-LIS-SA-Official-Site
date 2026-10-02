@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft } from "lucide-react";
-import { Reveal } from "./shared";
+import { Reveal, useIsDesktop } from "./shared";
 import { getAnnouncement } from "./announcements";
 // 背景浮水印圖：先沿用現有的建築圖（很淡）。想換成臺大校徽等，改這行 import 即可。
 import watermark from "@/imports/LatestUpdates/newsbackground.png";
@@ -59,6 +59,9 @@ function goBack() {
 // 由「公告列表頁」卡片的「閱讀全文」進入，網址＝ #/news/<slug>。
 export default function NewsArticlePage({ slug }: { slug: string }) {
   const article = getAnnouncement(slug);
+  // 手機／平板：各元素的 X/Y 微調是照電腦版畫面調的，小螢幕一律不套用（避免按鈕被推出畫面）。
+  const isDesktop = useIsDesktop();
+  const mv = (x: number, y: number) => (isDesktop ? move(x, y) : {});
 
   // 右半固定插圖的「快到頁尾時往上帶」位移：平常 0（照舊釘在畫面中央），
   // 當本頁區塊底部升進畫面（＝ Footer 開始探進來）時，用同樣的量把插圖往上推，
@@ -131,7 +134,7 @@ export default function NewsArticlePage({ slug }: { slug: string }) {
         <button
           onClick={goBack}
           className="group inline-flex items-center gap-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors px-5 py-2"
-          style={{ fontFamily: zhFont, fontWeight: 700, fontSize: BACK.size, letterSpacing: "0.12em", marginBottom: BACK.gap, ...move(BACK.x, BACK.y) }}
+          style={{ fontFamily: zhFont, fontWeight: 700, fontSize: BACK.size, letterSpacing: "0.12em", marginBottom: BACK.gap, ...mv(BACK.x, BACK.y) }}
         >
           <ArrowLeft size={16} strokeWidth={2.4} className="group-hover:-translate-x-1 transition-transform duration-200" /> 回上頁
         </button>
@@ -141,7 +144,7 @@ export default function NewsArticlePage({ slug }: { slug: string }) {
       <Reveal delay={70}>
         <h1
           className="text-white leading-tight"
-          style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: TITLE.size, letterSpacing: "0.02em", marginBottom: TITLE.gap, ...move(TITLE.x, TITLE.y) }}
+          style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: TITLE.size, letterSpacing: "0.02em", marginBottom: TITLE.gap, ...mv(TITLE.x, TITLE.y) }}
         >
           {article.title}
         </h1>
@@ -150,8 +153,8 @@ export default function NewsArticlePage({ slug }: { slug: string }) {
       {/* 作者掛名 + 日期 */}
       <Reveal delay={90}>
         <div
-          className="flex items-center gap-4 text-white/55"
-          style={{ fontFamily: zhFont, fontWeight: 500, fontSize: BYLINE.size, letterSpacing: "0.06em", marginBottom: BYLINE.gap, ...move(BYLINE.x, BYLINE.y) }}
+          className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/55"
+          style={{ fontFamily: zhFont, fontWeight: 500, fontSize: BYLINE.size, letterSpacing: "0.06em", marginBottom: BYLINE.gap, ...mv(BYLINE.x, BYLINE.y) }}
         >
           {article.author && <span>文／{article.author}</span>}
           {article.author && <span className="w-px h-3.5 bg-white/20" />}
@@ -168,7 +171,7 @@ export default function NewsArticlePage({ slug }: { slug: string }) {
 
       {/* 內文 */}
       <Reveal delay={110}>
-        <div style={{ maxWidth: BODY.width, ...move(BODY.x, BODY.y) }}>
+        <div style={{ maxWidth: BODY.width, ...mv(BODY.x, BODY.y) }}>
           {article.paragraphs.map((para, i) => (
             <p
               key={i}

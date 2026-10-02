@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import imgLissaLogo from "@/imports/Header/NTULISSAlogo.svg";
+import { useIsDesktop } from "./sections/shared";
 
 // 導覽列中文字體（維持原設計：Noto Sans TC）。
 // 若想讓 Header 也吃 Chiron Hei HK Text，改成：
@@ -14,6 +15,10 @@ const zhFont = "'Noto Sans TC', sans-serif";
 const LOGO_SIZE = 150;
 const LOGO_OFFSET_X = -30;
 const LOGO_OFFSET_Y = 7;
+// 手機／平板（< 1024px）用的 Logo 大小與位移（電腦版仍用上面三個值，不受影響）
+const LOGO_SIZE_MOBILE = 120;
+const LOGO_OFFSET_X_MOBILE = 0;
+const LOGO_OFFSET_Y_MOBILE = 4;
 
 // 選單子項目改為 { label, href } 物件，讓每一項都能連到對應區塊或分頁。
 // 「歷任會長」連到 #/presidents（App.tsx 的 hash 分頁）；其餘先指向主頁對應錨點。
@@ -59,6 +64,13 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+  const isDesktop = useIsDesktop();
+  const logoW = isDesktop ? LOGO_SIZE : LOGO_SIZE_MOBILE;
+  const logoX = isDesktop ? LOGO_OFFSET_X : LOGO_OFFSET_X_MOBILE;
+  const logoY = isDesktop ? LOGO_OFFSET_Y : LOGO_OFFSET_Y_MOBILE;
+
+  // 視窗放大回電腦版時，自動收起手機選單
+  useEffect(() => { if (isDesktop) setMobileOpen(false); }, [isDesktop]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -90,15 +102,16 @@ export default function Header() {
             alt="臺大圖資系學會 Logo"
             className="object-contain"
             style={{
-              width: `${LOGO_SIZE}px`,
+              width: `${logoW}px`,
               height: "auto",
-              transform: `translate(${LOGO_OFFSET_X}px, ${LOGO_OFFSET_Y}px)`,
+              transform: `translate(${logoX}px, ${logoY}px)`,
             }}
           />
         </a>
 
         {/* ── Desktop Nav ───────────────────────────────────────────────── */}
-        <nav className="hidden md:flex items-center gap-3 ml-auto mr-0 md:mr-0">
+        {/* 平板（768–1023px）四個選單塞不下會擠爆，所以 1024px 以上才顯示桌機選單 */}
+        <nav className="hidden lg:flex items-center gap-3 ml-auto mr-0 md:mr-0">
           {NAV_ITEMS.map((item, i) => (
             <div
               key={i}
@@ -182,7 +195,9 @@ export default function Header() {
 
         {/* ── Mobile toggle ─────────────────────────────────────────────── */}
         <button
-          className="md:hidden text-white/70 hover:text-white p-2"
+          className="lg:hidden text-white/70 hover:text-white p-2 -mr-2"
+          aria-label={mobileOpen ? "關閉選單" : "開啟選單"}
+          aria-expanded={mobileOpen}
           onClick={() => setMobileOpen(!mobileOpen)}
         >
           {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -191,7 +206,7 @@ export default function Header() {
 
       {/* ── Mobile menu ───────────────────────────────────────────────── */}
       {mobileOpen && (
-        <div className="md:hidden bg-[#090909]/98 backdrop-blur-xl border-t border-white/8 px-4 sm:px-6 py-4 sm:py-5 space-y-4 max-h-[calc(100vh-80px)] overflow-y-auto">
+        <div className="lg:hidden bg-[#090909]/98 backdrop-blur-xl border-t border-white/8 px-4 sm:px-6 py-4 sm:py-5 space-y-4 max-h-[calc(100vh-80px)] overflow-y-auto">
           {NAV_ITEMS.map((item, i) => (
             <div key={i}>
               <p

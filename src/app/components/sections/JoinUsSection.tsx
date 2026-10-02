@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { PageEyebrow, Reveal } from "./shared";
+import { PageEyebrow, Reveal, useIsDesktop, fitLine } from "./shared";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 加入我們（Join Us · Apple 式捲動頁）
@@ -147,6 +147,8 @@ const TRACKS = [
 
 // ── helpers ──
 const move = (c: { x?: number; y?: number }): CSSProperties => ({ transform: `translate(${c.x ?? 0}px, ${c.y ?? 0}px)` });
+// 手機／平板版：X/Y 位移一律不套用（那些數字是照電腦版畫面調的，套在小螢幕會跑版）
+const moveIf = (on: boolean, c: { x?: number; y?: number }): CSSProperties => (on ? move(c) : {});
 const GRADIENT_STROKE = "linear-gradient(180deg, #D14B4B 0%, #2F9EBD 100%)";
 
 // 無縫波浪路徑：viewBox 200×20，週期 100（左右兩段相同 → translateX(-50%) 可無縫循環）
@@ -164,6 +166,7 @@ const WAVE_PATH = (() => {
 // ══════════════════════════════════════════════════════════════
 function DrinkMachine() {
   const logo = joinAsset("ntulissa.svg", "ntulissa.png");
+  const isDesktop = useIsDesktop();
   const n = DEPTS.length;
   const [levels, setLevels] = useState<number[]>(() => Array(n).fill(1));
   const [held, setHeld] = useState<boolean[]>(() => Array(n).fill(false));
@@ -224,7 +227,7 @@ function DrinkMachine() {
   const cols: CSSProperties = { display: "grid", gridTemplateColumns: `repeat(${n}, 1fr)`, gap: `${MACHINE.gap}px` };
 
   return (
-    <div className="w-full select-none" style={{ maxWidth: `${MACHINE.w}px`, ...move(MACHINE) }}>
+    <div className="w-full select-none" style={{ maxWidth: `${MACHINE.w}px`, ...moveIf(isDesktop, MACHINE) }}>
       {/* 頂部招牌：ntulissa 草寫 */}
       <div className="flex items-center justify-center rounded-[22px] border-[1.5px] border-white/90 mb-[10px]" style={{ height: "clamp(52px, 5vw, 68px)" }}>
         {logo ? (
@@ -288,7 +291,7 @@ function DrinkMachine() {
                 onContextMenu={(e) => e.preventDefault()}
                 className="w-full max-w-[96px] rounded-full border-[1.5px] border-white py-[5px] transition-colors duration-150"
                 style={{
-                  fontFamily: latin, fontWeight: 700, fontSize: "clamp(9px, 0.8vw, 12px)", letterSpacing: "0.38em", paddingLeft: "0.38em",
+                  fontFamily: latin, fontWeight: 700, fontSize: "clamp(9px, 0.8vw, 12px)", letterSpacing: isDesktop ? "0.38em" : "0.2em", paddingLeft: isDesktop ? "0.38em" : "0.2em",
                   background: pressed ? "#fff" : "transparent", color: pressed ? "#000" : "#fff",
                   touchAction: "none", WebkitTouchCallout: "none", userSelect: "none",
                 }}
@@ -371,6 +374,7 @@ function AlbumPlayer() {
   const [caption, setCaption] = useState(false);
   const [inView, setInView] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const isDesktop = useIsDesktop();
 
   // 捲到畫面內才開始計時（Apple 式：看到才播）
   useEffect(() => {
@@ -455,12 +459,12 @@ function AlbumPlayer() {
       </div>
 
       {/* 播放控制 */}
-      <div className="flex items-center justify-center mt-[clamp(20px,4vh,48px)]" style={{ gap: "clamp(56px, 10vw, 150px)" }}>
-        <button type="button" onClick={prev} aria-label="上一則" className="transition-transform active:scale-90 hover:opacity-80" style={{ width: "76px", height: "58px" }}><IconPrev /></button>
-        <button type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? "暫停" : "播放"} className="transition-transform active:scale-90 hover:opacity-80" style={{ width: "58px", height: "58px" }}>
+      <div className="flex items-center justify-center mt-[clamp(20px,4vh,48px)]" style={{ gap: isDesktop ? "clamp(56px, 10vw, 150px)" : "clamp(36px, 10vw, 80px)" }}>
+        <button type="button" onClick={prev} aria-label="上一則" className="transition-transform active:scale-90 hover:opacity-80" style={{ width: isDesktop ? "76px" : "60px", height: isDesktop ? "58px" : "46px" }}><IconPrev /></button>
+        <button type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? "暫停" : "播放"} className="transition-transform active:scale-90 hover:opacity-80" style={{ width: isDesktop ? "58px" : "46px", height: isDesktop ? "58px" : "46px" }}>
           {playing ? <IconPause /> : <IconPlay />}
         </button>
-        <button type="button" onClick={next} aria-label="下一則" className="transition-transform active:scale-90 hover:opacity-80" style={{ width: "76px", height: "58px" }}><IconNext /></button>
+        <button type="button" onClick={next} aria-label="下一則" className="transition-transform active:scale-90 hover:opacity-80" style={{ width: isDesktop ? "76px" : "60px", height: isDesktop ? "58px" : "46px" }}><IconNext /></button>
       </div>
 
       {/* 進度條（可點擊跳轉） */}
@@ -502,6 +506,7 @@ function DeptRecruit() {
   const go = (d: number) => setActive((a) => (a + d + n) % n);
   const dept = DEPTS[active];
   const swipeX = useRef<number | null>(null);
+  const isDesktop = useIsDesktop();
 
   return (
     <div
@@ -550,12 +555,12 @@ function DeptRecruit() {
       </div>
 
       {/* 部門名 ＋ 左右切換 */}
-      <div className="flex items-center justify-center gap-10 sm:gap-20 mt-[clamp(20px,4vh,56px)]">
+      <div className="flex items-center justify-center gap-4 sm:gap-20 mt-[clamp(20px,4vh,56px)]">
         <button type="button" onClick={() => go(-1)} aria-label="上一個部門" className="text-white hover:opacity-70 transition-all active:-translate-x-1">
           <ChevronLeft size={44} strokeWidth={3.2} />
         </button>
-        <div key={dept.key} className="jn-fade text-center min-w-[220px]">
-          <p className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(32px, 3.6vw, ${DEPT_LAYOUT.name.size}px)`, letterSpacing: "0.18em", paddingLeft: "0.18em" }}>
+        <div key={dept.key} className="jn-fade text-center min-w-0 sm:min-w-[220px]">
+          <p className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(32px, 3.6vw, ${DEPT_LAYOUT.name.size}px)` : fitLine("形象宣傳部", `clamp(32px, 3.6vw, ${DEPT_LAYOUT.name.size}px)`, { min: 24, ls: 0.18, gutter: 150 }), letterSpacing: "0.18em", paddingLeft: "0.18em", whiteSpace: isDesktop ? undefined : "nowrap" }}>
             {dept.name}
           </p>
           <p className="text-white mt-2" style={{ fontFamily: mono, fontWeight: 500, fontSize: `clamp(13px, 1.3vw, ${DEPT_LAYOUT.en.size}px)`, letterSpacing: "0.22em" }}>
@@ -568,16 +573,16 @@ function DeptRecruit() {
       </div>
 
       {/* 招募資訊卡 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-9 mt-[clamp(24px,5vh,64px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-9 mt-[clamp(24px,5vh,64px)] max-w-[640px] lg:max-w-none mx-auto">
         {[{ title: "在這裡，你會得到", items: dept.gains }, { title: "我們需要這樣的你加入", items: dept.needs }].map((card) => (
           <div key={card.title}>
-            <p className="text-white text-center mb-[clamp(12px,2.5vh,32px)]" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(17px, 1.7vw, ${DEPT_LAYOUT.cardTitle.size}px)`, letterSpacing: "0.3em" }}>
+            <p className="text-white text-center mb-[clamp(12px,2.5vh,32px)]" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(17px, 1.7vw, ${DEPT_LAYOUT.cardTitle.size}px)`, letterSpacing: isDesktop ? "0.3em" : "0.16em" }}>
               {card.title}
             </p>
-            <div className="rounded-[28px] px-8 sm:px-12 py-[clamp(20px,4vh,40px)]" style={{ background: dept.color, transition: "background-color 600ms ease" }}>
+            <div className="rounded-[28px] px-6 sm:px-12 py-[clamp(20px,4vh,40px)]" style={{ background: dept.color, transition: "background-color 600ms ease" }}>
               <ul key={dept.key} className="jn-fade flex flex-col gap-[clamp(12px,2.6vh,28px)]">
                 {card.items.map((it) => (
-                  <li key={it} className="text-white flex items-center gap-5" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(17px, 1.8vw, ${DEPT_LAYOUT.item.size}px)`, letterSpacing: "0.3em" }}>
+                  <li key={it} className="text-white flex items-center gap-4 sm:gap-5" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(17px, 1.8vw, ${DEPT_LAYOUT.item.size}px)` : fitLine("課程資訊蒐集與統整", 22, { min: 14, ls: 0.16, gutter: 130 }), letterSpacing: isDesktop ? "0.3em" : "0.16em" }}>
                     <span className="inline-block rounded-full bg-white shrink-0" style={{ width: "7px", height: "7px" }} />
                     {it}
                   </li>
@@ -623,22 +628,23 @@ function useInView<T extends Element>(threshold = 0.3) {
 // 步驟版型：編號圓圈＋大標＋小標；reverse=true 時圖在左、字在右
 function StepSection({ num, visual, reverse = false }: { num: number; visual: ReactNode; reverse?: boolean }) {
   const t = STEPS_TEXT[num - 1];
+  const isDesktop = useIsDesktop();
   return (
-    <section className="relative min-h-[92vh] flex items-center px-5 sm:px-8 md:px-14 py-24 overflow-hidden">
-      <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-10 items-center">
+    <section className="relative lg:min-h-[92vh] flex items-center px-5 sm:px-8 md:px-14 py-20 lg:py-24 overflow-hidden">
+      <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-10 items-center">
         <div className={`flex flex-col items-center text-center ${reverse ? "lg:order-2" : ""}`}>
           <Reveal>
-            <span className="flex items-center justify-center rounded-full bg-white text-black mb-10" style={{ width: STEP_LAYOUT.badge, height: STEP_LAYOUT.badge, fontFamily: latin, fontWeight: 700, fontSize: STEP_LAYOUT.badge * 0.56, paddingTop: STEP_LAYOUT.badge * 0.08 }}>
+            <span className="flex items-center justify-center rounded-full bg-white text-black mb-8 lg:mb-10" style={{ width: STEP_LAYOUT.badge, height: STEP_LAYOUT.badge, fontFamily: latin, fontWeight: 700, fontSize: STEP_LAYOUT.badge * 0.56, paddingTop: STEP_LAYOUT.badge * 0.08 }}>
               {num}
             </span>
           </Reveal>
           <Reveal delay={80}>
-            <h3 className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(52px, 7vw, ${STEP_LAYOUT.title.size}px)`, letterSpacing: "0.14em", paddingLeft: "0.14em", lineHeight: 1.2, ...move(STEP_LAYOUT.title) }}>
+            <h3 className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(52px, 7vw, ${STEP_LAYOUT.title.size}px)` : fitLine("線上登記", `clamp(52px, 7vw, ${STEP_LAYOUT.title.size}px)`, { min: 36, ls: 0.14 }), letterSpacing: "0.14em", paddingLeft: "0.14em", lineHeight: 1.2, ...moveIf(isDesktop, STEP_LAYOUT.title) }}>
               {t.title}
             </h3>
           </Reveal>
           <Reveal delay={150}>
-            <p className="text-white mt-10" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(16px, 1.6vw, ${STEP_LAYOUT.sub.size}px)`, letterSpacing: "0.4em", paddingLeft: "0.4em", ...move(STEP_LAYOUT.sub) }}>
+            <p className="text-white mt-6 lg:mt-10" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(16px, 1.6vw, ${STEP_LAYOUT.sub.size}px)`, letterSpacing: isDesktop ? "0.4em" : "0.3em", paddingLeft: isDesktop ? "0.4em" : "0.3em", ...moveIf(isDesktop, STEP_LAYOUT.sub) }}>
               {t.sub}
             </p>
           </Reveal>
@@ -982,6 +988,10 @@ function Certificate() {
 // E. 歡迎你的加入：六顆球 ＋1
 // ══════════════════════════════════════════════════════════════
 function PlusOneBalls() {
+  const isDesktop = useIsDesktop();
+  // 手機：六顆球縮小一點，三顆一排（電腦版維持原尺寸）
+  const ball = isDesktop ? WELCOME_LAYOUT.ball.size : 52;
+  const gap = isDesktop ? WELCOME_LAYOUT.ball.gap : 22;
   const colors = [LEADER_COLOR, ...DEPTS.map((d) => d.color)];
   const labels = ["正副會長", ...DEPTS.map((d) => d.name)];
   const [pops, setPops] = useState<{ id: number; i: number }[]>([]);
@@ -996,15 +1006,15 @@ function PlusOneBalls() {
   };
 
   return (
-    <div className="flex items-center justify-center flex-wrap" style={{ gap: `${WELCOME_LAYOUT.ball.gap}px`, paddingTop: `${WELCOME_LAYOUT.plus.size * 1.8}px` }}>
+    <div className="flex items-center justify-center flex-wrap" style={{ gap: `${gap}px`, paddingTop: `${WELCOME_LAYOUT.plus.size * 1.8}px`, maxWidth: isDesktop ? undefined : `${ball * 3 + gap * 2 + 1}px`, marginInline: "auto", rowGap: isDesktop ? undefined : `${WELCOME_LAYOUT.plus.size * 1.8}px` }}>
       {colors.map((c, i) => (
-        <div key={i} className="relative flex justify-center" style={{ width: `${WELCOME_LAYOUT.ball.size}px` }}>
+        <div key={i} className="relative flex justify-center" style={{ width: `${ball}px` }}>
           {pops.filter((p) => p.i === i).map((p) => (
             <span key={p.id} className="jn-plus absolute text-white pointer-events-none select-none whitespace-nowrap" style={{ bottom: "calc(100% + 12px)", fontFamily: latin, fontWeight: 700, fontSize: `${WELCOME_LAYOUT.plus.size}px`, letterSpacing: "0.04em" }}>
               +1
             </span>
           ))}
-          <button type="button" onClick={() => tap(i)} aria-label={`${labels[i]} +1`} className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/60" style={{ width: `${WELCOME_LAYOUT.ball.size}px`, height: `${WELCOME_LAYOUT.ball.size}px` }}>
+          <button type="button" onClick={() => tap(i)} aria-label={`${labels[i]} +1`} className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/60" style={{ width: `${ball}px`, height: `${ball}px` }}>
             <span key={bumps[i]} className={`block w-full h-full rounded-full ${bumps[i] ? "jn-squish" : ""}`} style={{ background: c, boxShadow: `0 0 28px -8px ${c}` }} />
           </button>
         </div>
@@ -1016,6 +1026,7 @@ function PlusOneBalls() {
 // ══════════════════════════════════════════════════════════════
 export default function JoinUsSection() {
   const recruit = joinAsset("recruit.svg", "recruit.png", "Recruit.svg", "Recruit.png");
+  const isDesktop = useIsDesktop();
 
   return (
     <div id="join" className="bg-black">
@@ -1081,18 +1092,18 @@ export default function JoinUsSection() {
       `}</style>
 
       {/* ══════════ A. Hero ══════════ */}
-      <section className="relative min-h-screen flex items-center overflow-hidden px-5 sm:px-8 md:px-14 pt-24 pb-32">
+      <section className="relative min-h-screen flex items-center overflow-hidden px-5 sm:px-8 md:px-14 pt-[var(--page-content-top)] lg:pt-24 pb-32">
         <PageEyebrow text="加入我們" />
-        <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
             <Reveal delay={60}>
-              <h1 className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(36px, 5vw, ${HERO_LAYOUT.title.size}px)`, lineHeight: HERO_LAYOUT.title.lh, letterSpacing: "0.1em", ...move(HERO_LAYOUT.title) }}>
+              <h1 className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(36px, 5vw, ${HERO_LAYOUT.title.size}px)` : fitLine("還有這種「玩」法。", `clamp(36px, 5vw, ${HERO_LAYOUT.title.size}px)`, { min: 22, ls: 0.1 }), lineHeight: HERO_LAYOUT.title.lh, letterSpacing: "0.1em", ...moveIf(isDesktop, HERO_LAYOUT.title) }}>
                 <span className="block">你的大學生涯</span>
                 <span className="block">還有這種「玩」法。</span>
               </h1>
             </Reveal>
             <Reveal delay={140}>
-              <p className="text-white mt-16" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(17px, 1.7vw, ${HERO_LAYOUT.sub.size}px)`, lineHeight: HERO_LAYOUT.sub.lh, letterSpacing: "0.08em", ...move(HERO_LAYOUT.sub) }}>
+              <p className="text-white mt-8 lg:mt-16" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(17px, 1.7vw, ${HERO_LAYOUT.sub.size}px)`, lineHeight: HERO_LAYOUT.sub.lh, letterSpacing: "0.08em", ...moveIf(isDesktop, HERO_LAYOUT.sub) }}>
                 <span className="block">成為</span>
                 <span className="block">臺大圖資系學會的一員</span>
               </p>
@@ -1108,7 +1119,7 @@ export default function JoinUsSection() {
         {/* 底部置中：Recruit（imports/JoinUs/recruit.svg） */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
           {recruit ? (
-            <img src={recruit} alt="Recruit — NTU LIS SA" className="select-none" draggable={false} style={{ height: `${RECRUIT.h}px`, width: "auto", ...move(RECRUIT) }} />
+            <img src={recruit} alt="Recruit — NTU LIS SA" className="select-none" draggable={false} style={{ height: `${isDesktop ? RECRUIT.h : 34}px`, width: "auto", ...moveIf(isDesktop, RECRUIT) }} />
           ) : (
             <span className="text-white/30" style={{ fontFamily: mono, fontSize: "0.8rem", letterSpacing: "0.2em", ...move(RECRUIT) }}>Recruit · JoinUs/recruit.svg</span>
           )}
@@ -1116,7 +1127,7 @@ export default function JoinUsSection() {
       </section>
 
       {/* ══════════ B. 為何要加入？ ══════════ */}
-      <section className="relative min-h-screen flex items-center px-5 sm:px-8 md:px-14 pt-28 pb-16">
+      <section className="relative lg:min-h-screen flex items-center px-5 sm:px-8 md:px-14 pt-20 lg:pt-28 pb-16">
         <div className="max-w-[1400px] w-full mx-auto">
           <Reveal>
             <AlbumPlayer />
@@ -1125,7 +1136,7 @@ export default function JoinUsSection() {
       </section>
 
       {/* ══════════ C. 部門招募 ══════════ */}
-      <section className="relative min-h-screen flex items-center px-5 sm:px-8 md:px-14 pt-28 pb-16">
+      <section className="relative lg:min-h-screen flex items-center px-5 sm:px-8 md:px-14 pt-20 lg:pt-28 pb-16">
         <div className="max-w-[1400px] w-full mx-auto">
           <Reveal>
             <DeptRecruit />
@@ -1139,17 +1150,17 @@ export default function JoinUsSection() {
       <StepSection num={3} visual={<Certificate />} />
 
       {/* ══════════ E. 歡迎你的加入 ══════════ */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 py-24 text-center">
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-5 sm:px-6 py-24 text-center">
         <Reveal>
           <PlusOneBalls />
         </Reveal>
         <Reveal delay={80}>
-          <h2 className="text-white mt-14" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(52px, 8vw, ${WELCOME_LAYOUT.title.size}px)`, letterSpacing: "0.1em", paddingLeft: "0.1em", lineHeight: 1.2, ...move(WELCOME_LAYOUT.title) }}>
+          <h2 className="text-white mt-14" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(52px, 8vw, ${WELCOME_LAYOUT.title.size}px)` : fitLine("歡迎你的加入", `clamp(52px, 8vw, ${WELCOME_LAYOUT.title.size}px)`, { min: 30, ls: 0.1 }), letterSpacing: "0.1em", paddingLeft: "0.1em", lineHeight: 1.2, ...moveIf(isDesktop, WELCOME_LAYOUT.title) }}>
             歡迎你的加入
           </h2>
         </Reveal>
         <Reveal delay={150}>
-          <p className="text-white mt-10" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(15px, 1.6vw, ${WELCOME_LAYOUT.sub.size}px)`, letterSpacing: "0.1em", ...move(WELCOME_LAYOUT.sub) }}>
+          <p className="text-white mt-8 lg:mt-10" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(15px, 1.6vw, ${WELCOME_LAYOUT.sub.size}px)`, letterSpacing: isDesktop ? "0.1em" : "0.06em", lineHeight: isDesktop ? undefined : 1.8, ...moveIf(isDesktop, WELCOME_LAYOUT.sub) }}>
             臺大圖資系學會 — 是學生組織，也是改變與成長的起點。
           </p>
         </Reveal>
@@ -1159,7 +1170,7 @@ export default function JoinUsSection() {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-4 bg-white text-black px-10 py-4 rounded-full mt-16 hover:bg-white/90 transition-all duration-200 group"
-            style={{ fontFamily: zhBody, fontWeight: 900, fontSize: `${WELCOME_LAYOUT.button.size}px`, letterSpacing: "0.1em", ...move(WELCOME_LAYOUT.button) }}
+            style={{ fontFamily: zhBody, fontWeight: 900, fontSize: `${isDesktop ? WELCOME_LAYOUT.button.size : 18}px`, letterSpacing: "0.1em", ...moveIf(isDesktop, WELCOME_LAYOUT.button) }}
           >
             加入我們
             <ArrowRight size={24} strokeWidth={2.8} className="group-hover:translate-x-1 transition-transform duration-200" />
