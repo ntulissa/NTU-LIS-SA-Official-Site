@@ -7,7 +7,7 @@ import newsLogo from "@/imports/BentoGrid/NTULISSAlogo2.svg";
 // ── ABOUT 卡（第 53 屆）：中間直接放新版系學會 Logo 的 SVG（清晰不糊）。
 //   放到 src/imports/BentoGrid/NTULISSAlogo.svg（檔名需一致；若用別的檔名，改下面這行的路徑即可）。
 import aboutLogo from "@/imports/BentoGrid/NTULISSAlogo.svg";
-import { Reveal, monoBold, monoSemi } from "./shared";
+import { Reveal, monoBold, monoSemi, useIsDesktop } from "./shared";
 import { ANNOUNCEMENTS } from "./announcements"; // NEWS 卡右上角紅點＝公告則數，跟公告列表自動對上
 import { EVENTS, eventStart, isSchoolOnly } from "./events"; // 「下一場活動」倒數＝行事曆同一份資料
 
@@ -171,15 +171,24 @@ function HoverReveal({ children, className = "" }: { children: React.ReactNode; 
 
 // 右側小卡的底部置中標籤（英＋中）。絕對定位浮在卡片底部中央（脫離版面 → 平常內容照樣置中、不留空白）；
 // 平常隱藏，hover 才淡入＋輕輕上滑。pointer-events-none 避免擋到卡片點擊。
+// ★ 手機／平板（< 1024px）：格子比較小，英文＋中文會擠到黏住圖片 → 只顯示中文標題
+//   （沒有中文的社群卡，例如 INSTAGRAM，就照樣顯示英文）。電腦版維持英＋中，完全不變。
 function CardCaption({ en, zh }: { en: string; zh: string }) {
+  const isDesktop = useIsDesktop();
+  const showEn = isDesktop || !zh;
+  const showZh = !!zh;
   return (
     <HoverReveal className="absolute inset-x-0 bottom-3 md:bottom-4 flex items-center justify-center gap-2 px-3 pointer-events-none">
-      <span className="text-white/90 tracking-[0.24em] whitespace-nowrap" style={{ ...monoSemi, fontSize: "clamp(10px, 1vw, 15px)" }}>
-        {en}
-      </span>
-      <span className="text-white/90 whitespace-nowrap" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: "clamp(11px, 1.05vw, 16px)", letterSpacing: "0.14em" }}>
-        {zh}
-      </span>
+      {showEn && (
+        <span className="text-white/90 tracking-[0.24em] whitespace-nowrap" style={{ ...monoSemi, fontSize: "clamp(10px, 1vw, 15px)" }}>
+          {en}
+        </span>
+      )}
+      {showZh && (
+        <span className="text-white/90 whitespace-nowrap" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: isDesktop ? "clamp(11px, 1.05vw, 16px)" : "13px", letterSpacing: "0.14em" }}>
+          {zh}
+        </span>
+      )}
     </HoverReveal>
   );
 }
@@ -602,6 +611,7 @@ function SupportScene() {
 export default function BentoSection({ standalone = false }: { standalone?: boolean }) {
   // 下一場活動＝events.ts 中距今最近、即將到來的系學會活動（每次載入頁面重算）。
   const nextEvent = getNextEvent();
+  const isDesktop = useIsDesktop();
   return (
     // 版面外框：兩個版本（首頁捲動版 & 獨立頁 #/overview）共用同一套 → 整個 section 佔滿一屏（min-h-[100svh]），
     // 讓下面的格子在兩邊都是「完全相同的高度／大小」。以前首頁版用 py-16 + 固定 min-h[560px]，格子才會比獨立頁矮、看起來不一樣。
@@ -638,7 +648,7 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                     ▸ 質感：hover 時標籤在頂部淡入，圓環＋標題整組往下滑一點讓位（GPU transform，不重排、不卡）；觸控裝置一律顯示。 */}
                 <HoverReveal className="absolute inset-x-0 top-5 md:top-7 flex justify-center px-4 pointer-events-none">
                   <p className="text-white tracking-[0.24em]" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)" }}>
-                    UP NEXT&nbsp;&nbsp;下一場活動
+                    {isDesktop ? <>UP NEXT&nbsp;&nbsp;下一場活動</> : "下一場活動"}
                   </p>
                 </HoverReveal>
                 <div className="flex flex-col items-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:translate-y-2.5">
