@@ -51,6 +51,17 @@ const CARD = {
   border: "linear-gradient(135deg, #D14B4B 0%, #2F9EBD 100%)", // 紅→藍漸層外框
   flipMs: 600,          // 翻牌動畫時間（ms）
   offset: { x: 20, y: -20 }, // 卡片整體位移（px；正 x=往右、正 y=往下）。想再挪就改這裡。
+  // 懸浮陰影：第一層大而柔（遠處的影子），第二層小而深（貼近卡片的影子）。想更浮就把 60px / 0.55 調大。
+  shadow: "0 34px 60px -18px rgba(0,0,0,0.6), 0 14px 28px -10px rgba(0,0,0,0.4)",
+};
+
+// ── 詳情頁左側各元素的「上下間距」（Tailwind class；手機 → lg 電腦版）──
+// 覺得還是太擠／太鬆，改這裡的數字即可（數字 × 4 = px，例如 mb-16 = 64px）。
+const GAP = {
+  backToTitle: "mb-10 lg:mb-12", // 回上頁 ↔ 主標題
+  titleToEn:   "mb-4 lg:mb-6",   // 主標題 ↔ 英文標題
+  enToIntro:   "mb-10 lg:mb-10", // 英文標題 ↔ 介紹內文
+  introToBtn:  "mt-12 lg:mt-20", // 介紹內文 ↔ 前往按鈕
 };
 
 // ── 讀 imports/services/ 各部門子資料夾的圖檔（部門名稱 svg：IMG-gen/gen.svg…；服務詳情圖：<slug>.png/jpg/svg）──
@@ -204,6 +215,7 @@ function ServiceCard({ dept, img, zh, guide }: { dept: string; img?: string; zh:
     background: `linear-gradient(#000,#000) padding-box, ${CARD.border} border-box`,
     WebkitBackfaceVisibility: "hidden", backfaceVisibility: "hidden",
     overflow: "hidden",
+    boxShadow: CARD.shadow, // 懸浮陰影（兩面都加，翻到背面也一樣浮著）
   };
   // 右上角圓形按鈕（i / ✕）：黏在各自那一面，跟著卡片一起翻。
   const iconBtnClass = "absolute top-4 right-4 z-10 text-white/85 hover:text-white transition-colors";
@@ -253,7 +265,7 @@ function ServiceCard({ dept, img, zh, guide }: { dept: string; img?: string; zh:
               <div key={i} className="flex items-start gap-3">
                 {/* 圓點對齊「第一行文字」的垂直中央：line-height 1.7 → 半行 0.85em，再扣圓點半徑 */}
                 <span className="shrink-0 rounded-full bg-white" style={{ width: 9, height: 9, marginTop: "calc(0.85em - 4.5px)" }} />
-                <p className="text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.95rem,1.5vw,1.25rem)", lineHeight: 1.7, letterSpacing: "0.02em" }}>{g}</p>
+                <p className="text-white" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.95rem,1.5vw,1.25rem)", lineHeight: 1.7, letterSpacing: "0.02em" }}>{g}</p>
               </div>
             ))}
           </div>
@@ -304,7 +316,7 @@ function ServiceDetail({ slug }: { slug: string }) {
         <Reveal>
           <button
             onClick={goBack}
-            className="group inline-flex items-center gap-2 rounded-full bg-white text-black px-5 py-2 mb-8 lg:mb-10 hover:bg-white/90 transition-all duration-200 w-fit"
+            className={`group inline-flex items-center gap-2 rounded-full bg-white text-black px-5 py-2 ${GAP.backToTitle} hover:bg-white/90 transition-all duration-200 w-fit`}
             style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.06em", transform: mv(DETAIL_LAYOUT.back) }}
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform duration-200" /> 回上頁
@@ -316,7 +328,7 @@ function ServiceDetail({ slug }: { slug: string }) {
           {/* 左：標題 + 便利貼 + 英文 + 介紹 + 按鈕 */}
           <div className="max-w-[620px]">
             <Reveal delay={60}>
-              <div className="flex items-end flex-wrap gap-3 mb-2">
+              <div className={`flex items-end flex-wrap gap-3 ${GAP.titleToEn}`}>
                 <h1 className="leading-none text-white" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(2.4rem,4.5vw,4.2rem)", letterSpacing: "0.08em", transform: mv(DETAIL_LAYOUT.title) }}>
                   {s.zh}
                 </h1>
@@ -333,20 +345,20 @@ function ServiceDetail({ slug }: { slug: string }) {
             </Reveal>
 
             <Reveal delay={90}>
-              <p className="mb-8" style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.8rem,1.2vw,1.1rem)", letterSpacing: "0.28em", color: "rgba(255,255,255,0.85)", transform: mv(DETAIL_LAYOUT.en) }}>
+              <p className={GAP.enToIntro} style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.8rem,1.2vw,1.1rem)", letterSpacing: "0.28em", color: "rgba(255,255,255,0.85)", transform: mv(DETAIL_LAYOUT.en) }}>
                 {s.en}
               </p>
             </Reveal>
 
             <Reveal delay={120}>
-              <p style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.9rem,1.05vw,1.05rem)", lineHeight: 2.1, letterSpacing: "0.04em", color: "rgba(255,255,255,0.92)", transform: mv(DETAIL_LAYOUT.intro) }}>
+              <p style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.9rem,1.05vw,1.05rem)", lineHeight: 2.1, letterSpacing: "0.1em", color: "rgba(255,255,255,0.92)", transform: mv(DETAIL_LAYOUT.intro) }}>
                 {s.intro}
               </p>
             </Reveal>
 
             {/* 按鈕：有網址＝白色實心「前往 →」；沒網址＝純外框膠囊、無箭頭、不可點 */}
             <Reveal delay={160}>
-              <div className="mt-10" style={{ transform: mv(DETAIL_LAYOUT.button) }}>
+              <div className={GAP.introToBtn} style={{ transform: mv(DETAIL_LAYOUT.button) }}>
                 {hasHref ? (
                   <a
                     href={s.href}
