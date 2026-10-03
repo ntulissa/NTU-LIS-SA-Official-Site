@@ -23,6 +23,29 @@ const zhDisplay = "'Chiron Hei HK Text','Noto Sans TC', sans-serif";
 const zhFont = "'Noto Sans TC', sans-serif";
 const mono = "'Ubuntu Sans Mono', monospace";
 
+// ── 「前往」按鈕 hover 時往右滑出的目的地文字（內容寫在 servicesData.ts 的 dest）──
+// 電腦版：滑鼠移到按鈕上，文字才從按鈕背後往右滑出；
+// 手機／平板（沒有滑鼠可 hover）：直接常駐顯示在按鈕右邊，太長會自動換到下一行。
+const GO_DEST = {
+  gap: 22,      // 文字與按鈕的距離（px）
+  slideMs: 450, // 滑出動畫時間（ms）
+};
+const GO_DEST_CSS = `
+.go-wrap{ position:relative; display:inline-flex; align-items:center; }
+.go-dest-wrap{ position:absolute; left:100%; top:0; bottom:0; display:flex; align-items:center;
+  overflow:hidden; padding-left:${GO_DEST.gap}px; white-space:nowrap; pointer-events:none; }
+.go-dest{ display:inline-block; opacity:0; transform:translateX(calc(-100% - ${GO_DEST.gap}px));
+  transition: transform ${GO_DEST.slideMs}ms cubic-bezier(.22,1,.36,1), opacity ${Math.round(GO_DEST.slideMs * 0.6)}ms ease; }
+.go-btn:hover + .go-dest-wrap .go-dest,
+.go-btn:focus-visible + .go-dest-wrap .go-dest{ opacity:1; transform:translateX(0); }
+@media (hover: none){
+  .go-wrap{ flex-wrap:wrap; row-gap:10px; }
+  .go-dest-wrap{ position:static; white-space:normal; }
+  .go-dest{ opacity:1; transform:none; }
+}
+@media (prefers-reduced-motion: reduce){ .go-dest{ transition:none; } }
+`;
+
 // ── 準備中的膠囊提示語 ──
 const SERVICE_SOON = "本服務準備中，敬請期待";
 
@@ -83,6 +106,144 @@ function assetBySlug(slug: string): string | undefined {
     return f === slug;
   });
   return hit ? SERVICE_ASSETS[hit] : undefined;
+}
+
+// ── 服務圖「自動放大」設定 ─────────────────────────────────
+// 問題：Figma 匯出的 svg/png 常常「畫布很大、圖案很小」，周圍一圈透明或黑色空白，
+//      所以放進卡片後看起來大小不一、有的很小。
+// 解法：網頁載入圖片時，自動偵測「真正有畫東西的範圍」→ 把四周空白裁掉 → 再放大填滿卡片。
+//      （卡片本身是黑底，所以黑色背景也一起當空白裁掉，看起來不會有差。）
+//      svg 裁切是改 viewBox，仍然是向量圖，放大不會糊。
+const IMG_FIT = {
+  autoTrim: true,          // 自動裁空白；設 false 就回到原本「照檔案原樣顯示」
+  insetY: "max(60px, 12%)", // 圖片區離卡片「上下」邊的距離（上方要留給右上角的 i 按鈕）
+  insetX: "8%",            // 圖片區離卡片「左右」邊的距離
+  // 個別服務想再大／小一點：在這裡加 slug: 倍率（1 = 剛好填滿圖片區；0.85 = 縮小 15%）
+  override: {
+    // textbook: 0.9,
+  } as Record<string, number>,
+};
+// 偵測「有畫東西」的門檻（一般不用改）
+const TRIM = {
+  sample: 800, // 偵測時把圖縮到這個長邊（px）來掃描，越大越精準但越慢
+  alpha: 8,    // 透明度高於這個值才算有東西（0~255）
+  dark: 24,    // 顏色亮度高於這個值才算有東西（0~255）；比這更黑的在黑卡上本來就看不到
+  margin: 0.02, // 裁完後四周補一點點留白（相對圖案大小的比例）
+};
+
+const TRIM_CACHE = new Map<string, Promise<string>>();
+
+function loadImg(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const im = new Image();
+    im.decoding = "async";
+    im.onload = () => resolve(im);
+    im.onerror = reject;
+    im.src = url;
+  });
+}
+
+// 在 w×h 的畫布上掃描像素，回傳「有畫東西」的外框（像素座標）；全空白回傳 null
+function findContentBox(img: CanvasImageSource, w: number, h: number) {
+  const c = document.createElement("canvas");
+  c.width = w; c.height = h;
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  ctx.drawImage(img, 0, 0, w, h);
+  const d = ctx.getImageData(0, 0, w, h).data; // 若瀏覽器不允許讀取會丟錯 → 外層 catch 用原圖
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      if (d[i + 3] > TRIM.alpha && Math.max(d[i], d[i + 1], d[i + 2]) > TRIM.dark) {
+        if (x < x0) x0 = x; if (x > x1) x1 = x;
+        if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+    }
+  }
+  return x1 < 0 ? null : { x0, y0, x1: x1 + 1, y1: y1 + 1 };
+}
+
+// svg：算出圖案範圍後改寫 viewBox（保持向量）
+async function trimSvg(src: string): Promise<string> {
+  const text = await (await fetch(src)).text();
+  const doc = new DOMParser().parseFromString(text, "image/svg+xml");
+  const svg = doc.documentElement;
+  if (svg.nodeName.toLowerCase() !== "svg" || doc.querySelector("parsererror")) return src;
+
+  let vb = (svg.getAttribute("viewBox") || "").trim().split(/[\s,]+/).map(Number);
+  if (vb.length !== 4 || vb.some((n) => !isFinite(n)) || vb[2] <= 0 || vb[3] <= 0) {
+    const w = parseFloat(svg.getAttribute("width") || ""), h = parseFloat(svg.getAttribute("height") || "");
+    if (!(w > 0 && h > 0)) return src;
+    vb = [0, 0, w, h];
+  }
+  const [vx, vy, vw, vh] = vb;
+  svg.setAttribute("viewBox", vb.join(" "));
+
+  // 先畫成點陣圖來偵測範圍
+  const k = TRIM.sample / Math.max(vw, vh);
+  const rw = Math.max(1, Math.round(vw * k)), rh = Math.max(1, Math.round(vh * k));
+  svg.setAttribute("width", String(rw));
+  svg.setAttribute("height", String(rh));
+  const ser = new XMLSerializer();
+  const probe = await loadImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(ser.serializeToString(svg)));
+  const box = findContentBox(probe, rw, rh);
+  if (!box) return src;
+
+  const bw = (box.x1 - box.x0) / k, bh = (box.y1 - box.y0) / k;
+  const pad = Math.max(bw, bh) * TRIM.margin;
+  const nx = vx + box.x0 / k - pad, ny = vy + box.y0 / k - pad, nw = bw + pad * 2, nh = bh + pad * 2;
+  svg.setAttribute("viewBox", `${nx} ${ny} ${nw} ${nh}`);
+  svg.setAttribute("width", String(nw));
+  svg.setAttribute("height", String(nh));
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  return URL.createObjectURL(new Blob([ser.serializeToString(svg)], { type: "image/svg+xml" }));
+}
+
+// png / jpg / webp：算出範圍後直接用原解析度裁切
+async function trimRaster(src: string): Promise<string> {
+  const img = await loadImg(src);
+  const W = img.naturalWidth, H = img.naturalHeight;
+  if (!W || !H) return src;
+  const k = Math.min(1, TRIM.sample / Math.max(W, H));
+  const sw = Math.max(1, Math.round(W * k)), sh = Math.max(1, Math.round(H * k));
+  const box = findContentBox(img, sw, sh);
+  if (!box) return src;
+  const bw = (box.x1 - box.x0) / k, bh = (box.y1 - box.y0) / k;
+  const pad = Math.round(Math.max(bw, bh) * TRIM.margin);
+  const x = Math.max(0, Math.floor(box.x0 / k) - pad), y = Math.max(0, Math.floor(box.y0 / k) - pad);
+  const w = Math.min(W - x, Math.ceil(bw) + pad * 2), h = Math.min(H - y, Math.ceil(bh) + pad * 2);
+  const c = document.createElement("canvas");
+  c.width = w; c.height = h;
+  const ctx = c.getContext("2d");
+  if (!ctx) return src;
+  ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
+  return c.toDataURL("image/png");
+}
+
+function trimImage(src: string): Promise<string> {
+  const isSvg = /\.svg($|[?#])/i.test(src) || src.startsWith("data:image/svg");
+  return isSvg ? trimSvg(src) : trimRaster(src);
+}
+
+// 回傳裁好的圖網址；處理中 ready=false（先隱藏，避免看到圖片從小跳大）。失敗就用原圖。
+function useTrimmedImage(src?: string): { url?: string; ready: boolean } {
+  const [state, setState] = useState<{ src?: string; url?: string }>({});
+  useEffect(() => {
+    if (!src || !IMG_FIT.autoTrim) return;
+    let alive = true;
+    let p = TRIM_CACHE.get(src);
+    if (!p) {
+      p = trimImage(src).catch(() => src);
+      TRIM_CACHE.set(src, p);
+    }
+    p.then((url) => { if (alive) setState({ src, url }); });
+    return () => { alive = false; };
+  }, [src]);
+  if (!src) return { url: undefined, ready: false };
+  if (!IMG_FIT.autoTrim) return { url: src, ready: true };
+  const ready = state.src === src;
+  return { url: ready ? state.url : src, ready };
 }
 
 // ── 單一格 ───────────────────────────────────────────────
@@ -201,8 +362,10 @@ function ServicesGrid() {
 // 正面：黑底 + 紅藍漸層外框；上方服務圖，下方部門名稱（Ubuntu Sans Mono），右上角「i」。
 // 點「i」→ 翻到背面「服務指引」（條列，內容寫在 servicesData.ts 的 guide）；背面右上角「✕」翻回正面。
 // 沒填 guide 的服務不顯示「i」，就當一張純圖卡。
-function ServiceCard({ dept, img, zh, guide }: { dept: string; img?: string; zh: string; guide?: string[] }) {
+function ServiceCard({ slug, dept, img, zh, guide }: { slug: string; dept: string; img?: string; zh: string; guide?: string[] }) {
   const [flipped, setFlipped] = useState(false);
+  const trimmed = useTrimmedImage(img);
+  const imgScale = IMG_FIT.override[slug] ?? 1;
   const isDesktop = useIsDesktop();
   const hasGuide = !!guide && guide.length > 0;
 
@@ -239,9 +402,16 @@ function ServiceCard({ dept, img, zh, guide }: { dept: string; img?: string; zh:
               <Info size={38} strokeWidth={1.4} />
             </button>
           ) : null}
-          <div className="flex-1 flex items-center justify-center min-h-0 pt-2 pb-1">
+          {/* 圖片區：固定離卡片邊緣 IMG_FIT.insetY / insetX，圖（已裁掉空白）用 object-contain 放大填滿 */}
+          <div className="absolute flex items-center justify-center" style={{ top: IMG_FIT.insetY, bottom: IMG_FIT.insetY, left: IMG_FIT.insetX, right: IMG_FIT.insetX }}>
             {img ? (
-              <img src={img} alt={zh} className="max-w-full max-h-full object-contain select-none" />
+              <img
+                src={trimmed.url}
+                alt={zh}
+                draggable={false}
+                className="w-full h-full object-contain select-none transition-opacity duration-300"
+                style={{ opacity: trimmed.ready ? 1 : 0, transform: imgScale !== 1 ? `scale(${imgScale})` : undefined }}
+              />
             ) : (
               <div className="flex flex-col items-center justify-center gap-3 text-white/40" style={{ fontFamily: mono, letterSpacing: "0.2em" }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="w-14 h-14">
@@ -310,6 +480,7 @@ function ServiceDetail({ slug }: { slug: string }) {
 
   return (
     <section className="relative min-h-screen" style={{ background: color }}>
+      <style>{GO_DEST_CSS}</style>
       <PageEyebrow text="各種服務・各部業務" />
       <div className="relative max-w-[1400px] mx-auto px-5 sm:px-8 md:px-12 lg:px-16 pt-[var(--page-content-top)] pb-16 lg:pb-24 lg:min-h-screen lg:flex lg:flex-col lg:justify-center">
         {/* 回上頁 */}
@@ -360,14 +531,25 @@ function ServiceDetail({ slug }: { slug: string }) {
             <Reveal delay={160}>
               <div className={GAP.introToBtn} style={{ transform: mv(DETAIL_LAYOUT.button) }}>
                 {hasHref ? (
-                  <a
-                    href={s.href}
-                    {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                    className="inline-flex items-center gap-2 rounded-full bg-white text-black px-7 py-3 hover:bg-white/90 transition-all duration-200 group w-fit"
-                    style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "1rem", letterSpacing: "0.16em" }}
-                  >
-                    前往 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
-                  </a>
+                  // 「前往」按鈕 + 目的地文字（dest）：hover 按鈕時，文字從按鈕背後往右滑出
+                  <div className="go-wrap">
+                    <a
+                      href={s.href}
+                      {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      aria-label={s.dest ? `前往${s.dest}` : undefined}
+                      className="go-btn relative z-10 inline-flex items-center gap-2 rounded-full bg-white text-black px-7 py-3 hover:bg-white/90 transition-all duration-200 group w-fit"
+                      style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "1rem", letterSpacing: "0.16em" }}
+                    >
+                      前往 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
+                    </a>
+                    {s.dest ? (
+                      <span className="go-dest-wrap" aria-hidden="true">
+                        <span className="go-dest text-white" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "1rem", letterSpacing: "0.18em" }}>
+                          {s.dest}
+                        </span>
+                      </span>
+                    ) : null}
+                  </div>
                 ) : (
                   <span
                     className="inline-flex items-center rounded-full px-7 py-3 select-none cursor-default"
@@ -383,7 +565,7 @@ function ServiceDetail({ slug }: { slug: string }) {
           {/* 右：翻牌卡（正面圖 + 部門名稱 + i；背面服務指引 + ✕）。圖放 imports/services/<slug>.png */}
           <Reveal delay={100}>
             <div className="relative w-full flex items-center justify-center" style={{ transform: mv(DETAIL_LAYOUT.image) }}>
-              <ServiceCard dept={s.dept} img={img} zh={s.zh} guide={s.guide} />
+              <ServiceCard slug={s.slug} dept={s.dept} img={img} zh={s.zh} guide={s.guide} />
             </div>
           </Reveal>
         </div>
