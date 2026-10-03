@@ -52,8 +52,6 @@ const CARD = {
   flipMs: 600,          // 翻牌動畫時間（ms）
   offset: { x: 20, y: -20 }, // 卡片整體位移（px；正 x=往右、正 y=往下）。想再挪就改這裡。
 };
-// 卡片底部部門標籤文字：NTU LIS SA - <DEPT>.
-const deptTag = (dept: string) => `NTU LIS SA - ${dept.toUpperCase()}.`;
 
 // ── 讀 imports/services/ 各部門子資料夾的圖檔（部門名稱 svg：IMG-gen/gen.svg…；服務詳情圖：<slug>.png/jpg/svg）──
 // 若原始碼不在 /src 底下，改下面 glob 的路徑字串即可；舊版 Vite 把 query/import 換成 as:"url"。
@@ -209,11 +207,6 @@ function ServiceCard({ dept, img, zh, guide }: { dept: string; img?: string; zh:
   };
   // 右上角圓形按鈕（i / ✕）：黏在各自那一面，跟著卡片一起翻。
   const iconBtnClass = "absolute top-4 right-4 z-10 text-white/85 hover:text-white transition-colors";
-  const tag = (
-    <p className="text-center text-white select-none" style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.8rem,1.3vw,1.05rem)", letterSpacing: "0.28em", paddingLeft: "0.28em" }}>
-      {deptTag(dept)}
-    </p>
-  );
 
   return (
     <div className="w-full mx-auto relative" style={{ maxWidth: CARD.maxW, perspective: "1600px", transform: isDesktop ? `translate(${CARD.offset.x}px, ${CARD.offset.y}px)` : undefined }}>
@@ -248,7 +241,6 @@ function ServiceCard({ dept, img, zh, guide }: { dept: string; img?: string; zh:
               </div>
             )}
           </div>
-          {tag}
         </div>
 
         {/* 背面（旋轉 180°）：服務指引條列（靠上排，避免上方一大片黑） */}
@@ -265,7 +257,6 @@ function ServiceCard({ dept, img, zh, guide }: { dept: string; img?: string; zh:
               </div>
             ))}
           </div>
-          {tag}
         </div>
       </div>
     </div>
