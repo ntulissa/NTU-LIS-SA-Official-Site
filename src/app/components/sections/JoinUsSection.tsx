@@ -100,7 +100,7 @@ const STEP_LAYOUT = {
 const STEPS_TEXT = [
   { title: "線上登記", sub: "填寫招募意向表" },
   { title: "輕鬆面談", sub: "雙向交流與認識" },
-  { title: "正式加入", sub: "領取幹部證明" },
+  { title: "正式加入", sub: "卸任後即可領取就任證明" },
 ];
 const PHONE = { w: 300, h: 470, itemH: 62, itemGap: 14, cycle: 2000 }; // 手機外觀與清單尺寸；cycle=每幾毫秒勾掉一項
 const CERT  = { w: 380, cycle: 7500 };                                  // 幹部證明寬度；每幾毫秒重播一次動畫
