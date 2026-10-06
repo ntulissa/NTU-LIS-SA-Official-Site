@@ -67,13 +67,22 @@ const DEPT_SWITCH = {
   fadeMs: 800,              // 淡入淡出的時間（ms）
   startWith: "en" as "en" | "zh", // 一進頁面先顯示哪一個
 };
+// 字級寫法 clamp(最小, 理想, 最大)：
+//   「理想」用 vw（1vw = 螢幕寬度的 1%），所以螢幕越寬字越大；
+//   但永遠不會小於「最小」、也不會大於「最大」。1rem = 16px。
+//   想整體再小一點 → 三個數字一起調小即可。
 const DEPT_ZH_STYLE = {
-  letterSpacing: "0.5em",                    // 字距（設計稿「行　政　部」那種寬字距）
-  desktopSize: "clamp(1.1rem,1.9vw,2.1rem)", // 電腦版字級
-  mobileSize: "clamp(1.2rem,5vw,1.5rem)",    // 手機／平板字級
+  letterSpacing: "0.5em",                       // 手機版字距（設計稿「行　政　部」那種寬字距）
+  desktopLetterSpacing: "0.35em",               // 電腦版字距（格子比較擠，收窄一點）
+  desktopSize: "clamp(1rem,1.45vw,1.6rem)",     // 電腦版字級：16px ~ 25.6px（和業務格的字差不多大、略粗）
+  mobileSize: "clamp(1.2rem,5vw,1.5rem)",       // 手機／平板字級（維持不變）
 };
 // 手機版部門橫條
-const MOBILE_BANNER = { height: 64, logoH: 38 }; // 橫條高度、草寫 svg 顯示高度（px）
+const MOBILE_BANNER = { height: 54, logoH: 18 }; // 橫條高度、草寫 svg 顯示高度（px）；原本 38，嫌大／小就改這個
+// 個別部門的草寫再縮放（1 = 不變）。eve 沒有 g 那種往下的筆畫，同樣高度看起來會比較大，所以預設縮一點。
+const DEPT_LOGO_SCALE_MOBILE: Partial<Record<string, number>> = {
+  eve: 0.85,
+};
 // 手機版 svg 的旋轉角度：
 //   預設「自動」——svg 是直的（高 > 寬，代表是為電腦版直格轉過 90° 的）就自動轉回 -90°。
 //   如果某個轉的方向剛好相反（字變成倒過來），在這裡指定，例如 eve: 90；不想轉就填 0。
@@ -127,7 +136,7 @@ function useIsTallBox(ref: RefObject<HTMLElement | null>): boolean {
 }
 
 // 中文部門名稱（橫書／直書）。字距最後一個字後面也會多一格，所以在開頭補同樣的距離，讓它真正置中。
-function DeptZh({ dept, vertical, size }: { dept: string; vertical?: boolean; size: string }) {
+function DeptZh({ dept, vertical, size, spacing = DEPT_ZH_STYLE.letterSpacing }: { dept: string; vertical?: boolean; size: string; spacing?: string }) {
   return (
     <span
       className="text-white leading-none whitespace-nowrap"
@@ -135,10 +144,10 @@ function DeptZh({ dept, vertical, size }: { dept: string; vertical?: boolean; si
         fontFamily: zhDisplay,
         fontWeight: 700,
         fontSize: size,
-        letterSpacing: DEPT_ZH_STYLE.letterSpacing,
+        letterSpacing: spacing,
         ...(vertical
-          ? { writingMode: "vertical-rl", textOrientation: "upright", paddingTop: DEPT_ZH_STYLE.letterSpacing }
-          : { paddingLeft: DEPT_ZH_STYLE.letterSpacing }),
+          ? { writingMode: "vertical-rl", textOrientation: "upright", paddingTop: spacing }
+          : { paddingLeft: spacing }),
       } as CSSProperties}
     >
       {DEPT_ZH[dept] ?? dept}
@@ -171,7 +180,7 @@ function DeptCellDesktop({ dept, style, showZh }: { dept: string; style: CSSProp
         )}
       </DeptLayer>
       <DeptLayer show={showZh} className="p-3">
-        <DeptZh dept={dept} vertical={vertical} size={DEPT_ZH_STYLE.desktopSize} />
+        <DeptZh dept={dept} vertical={vertical} size={DEPT_ZH_STYLE.desktopSize} spacing={DEPT_ZH_STYLE.desktopLetterSpacing} />
       </DeptLayer>
     </div>
   );
@@ -183,10 +192,11 @@ function DeptLogoMobile({ dept, src }: { dept: string; src: string }) {
   const tall = !!size && size.w > 0 && size.h > size.w * 1.15;
   const rot = DEPT_ROTATE_MOBILE[dept] ?? (tall ? -90 : 0);
   const sideways = Math.abs(rot) % 180 === 90;
+  const h = MOBILE_BANNER.logoH * (DEPT_LOGO_SCALE_MOBILE[dept] ?? 1); // 這個部門實際的顯示高度
   // 轉 90° 時：先把「寬」設成想要的顯示高度，轉過來後剛好變成橫條裡的高度
   const style: CSSProperties = sideways
-    ? { width: MOBILE_BANNER.logoH, height: "auto", maxWidth: "none", transform: `rotate(${rot}deg)` }
-    : { maxHeight: MOBILE_BANNER.logoH, maxWidth: "70%", transform: rot ? `rotate(${rot}deg)` : undefined };
+    ? { width: h, height: "auto", maxWidth: "none", transform: `rotate(${rot}deg)` }
+    : { height: h, width: "auto", maxWidth: "70%", transform: rot ? `rotate(${rot}deg)` : undefined };
   return (
     <img
       src={src}
