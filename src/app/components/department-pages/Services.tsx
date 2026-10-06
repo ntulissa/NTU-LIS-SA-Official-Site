@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { ArrowRight, ArrowLeft, Info, XCircle } from "lucide-react";
 import { PageEyebrow, Reveal, useIsDesktop } from "../sections/shared";
 // ↑ 若 Services.tsx 不是放在跟 DepartmentPage 同一層，請改這行的相對路徑到 sections/shared。
@@ -52,6 +52,170 @@ const SERVICE_SOON = "本服務準備中，敬請期待";
 // ── 部門名稱格：svg 顯示大小（部門名稱 svg 放在 imports/services/IMG-<dept>/）──
 // 想再更小／更大，改這兩個百分比即可（相對於該格）。
 const DEPT_LOGO = { maxW: "100%", maxH: "42%" };
+
+// ── 部門名稱格：英文草寫 svg ⇄ 中文名稱 自動切換 ─────────────────
+// 中文名稱（與 departments.ts 一致）
+const DEPT_ZH: Record<string, string> = {
+  gen: "行政部",
+  eve: "活動部",
+  aca: "學術部",
+  ima: "形象宣傳部",
+  sp: "體育部",
+};
+const DEPT_SWITCH = {
+  intervalMs: 7500,         // 每隔幾毫秒切換一次（7500 = 7.5 秒）
+  fadeMs: 800,              // 淡入淡出的時間（ms）
+  startWith: "en" as "en" | "zh", // 一進頁面先顯示哪一個
+};
+const DEPT_ZH_STYLE = {
+  letterSpacing: "0.5em",                    // 字距（設計稿「行　政　部」那種寬字距）
+  desktopSize: "clamp(1.1rem,1.9vw,2.1rem)", // 電腦版字級
+  mobileSize: "clamp(1.2rem,5vw,1.5rem)",    // 手機／平板字級
+};
+// 手機版部門橫條
+const MOBILE_BANNER = { height: 64, logoH: 38 }; // 橫條高度、草寫 svg 顯示高度（px）
+// 手機版 svg 的旋轉角度：
+//   預設「自動」——svg 是直的（高 > 寬，代表是為電腦版直格轉過 90° 的）就自動轉回 -90°。
+//   如果某個轉的方向剛好相反（字變成倒過來），在這裡指定，例如 eve: 90；不想轉就填 0。
+const DEPT_ROTATE_MOBILE: Partial<Record<string, number>> = {
+  // eve: -90,
+};
+
+const DEPT_FADE_CSS = `
+.dept-layer{ transition: opacity ${DEPT_SWITCH.fadeMs}ms ease; }
+@media (prefers-reduced-motion: reduce){ .dept-layer{ transition:none; } }
+`;
+
+// 全部五格共用同一個計時器 → 會同時切換，看起來比較整齊
+function useDeptSwitch(): boolean {
+  const [zh, setZh] = useState(DEPT_SWITCH.startWith === "zh");
+  useEffect(() => {
+    const t = window.setInterval(() => setZh((v) => !v), DEPT_SWITCH.intervalMs);
+    return () => window.clearInterval(t);
+  }, []);
+  return zh;
+}
+
+// 讀出 svg 原始寬高（用來判斷它是不是「直的」）
+function useImgSize(src?: string): { w: number; h: number } | null {
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
+  useEffect(() => {
+    if (!src) return;
+    let alive = true;
+    loadImg(src)
+      .then((im) => { if (alive) setSize({ w: im.naturalWidth, h: im.naturalHeight }); })
+      .catch(() => { if (alive) setSize({ w: 1, h: 1 }); });
+    return () => { alive = false; };
+  }, [src]);
+  return size;
+}
+
+// 量格子本身是不是「直的」（電腦版直格 → 中文改直書）
+function useIsTallBox(ref: RefObject<HTMLElement | null>): boolean {
+  const [tall, setTall] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(([e]) => {
+      const { width, height } = e.contentRect;
+      setTall(height > width * 1.2);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref]);
+  return tall;
+}
+
+// 中文部門名稱（橫書／直書）。字距最後一個字後面也會多一格，所以在開頭補同樣的距離，讓它真正置中。
+function DeptZh({ dept, vertical, size }: { dept: string; vertical?: boolean; size: string }) {
+  return (
+    <span
+      className="text-white leading-none whitespace-nowrap"
+      style={{
+        fontFamily: zhDisplay,
+        fontWeight: 700,
+        fontSize: size,
+        letterSpacing: DEPT_ZH_STYLE.letterSpacing,
+        ...(vertical
+          ? { writingMode: "vertical-rl", textOrientation: "upright", paddingTop: DEPT_ZH_STYLE.letterSpacing }
+          : { paddingLeft: DEPT_ZH_STYLE.letterSpacing }),
+      } as CSSProperties}
+    >
+      {DEPT_ZH[dept] ?? dept}
+    </span>
+  );
+}
+
+// 疊在一起的兩層（英文／中文），用透明度切換
+function DeptLayer({ show, className = "", children }: { show: boolean; className?: string; children: ReactNode }) {
+  return (
+    <div className={`dept-layer absolute inset-0 flex items-center justify-center ${className}`} style={{ opacity: show ? 1 : 0 }} aria-hidden={!show}>
+      {children}
+    </div>
+  );
+}
+
+// 電腦版：Bento 裡的部門格
+function DeptCellDesktop({ dept, style, showZh }: { dept: string; style: CSSProperties; showZh: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const vertical = useIsTallBox(ref);
+  const svg = assetByFile(`${dept}.svg`);
+  const color = DEPT_COLORS[dept as keyof typeof DEPT_COLORS];
+  return (
+    <div ref={ref} className="relative rounded-2xl overflow-hidden select-none" style={{ ...style, background: color }} role="img" aria-label={DEPT_ZH[dept] ?? dept}>
+      <DeptLayer show={!showZh} className="p-3">
+        {svg ? (
+          <img src={svg} alt="" className="object-contain" style={{ maxWidth: DEPT_LOGO.maxW, maxHeight: DEPT_LOGO.maxH }} />
+        ) : (
+          <span className="text-white/90 lowercase" style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.85rem,1.3vw,1.3rem)" }}>{dept}.</span>
+        )}
+      </DeptLayer>
+      <DeptLayer show={showZh} className="p-3">
+        <DeptZh dept={dept} vertical={vertical} size={DEPT_ZH_STYLE.desktopSize} />
+      </DeptLayer>
+    </div>
+  );
+}
+
+// 手機版：草寫 svg（直的會自動轉回橫的）
+function DeptLogoMobile({ dept, src }: { dept: string; src: string }) {
+  const size = useImgSize(src);
+  const tall = !!size && size.w > 0 && size.h > size.w * 1.15;
+  const rot = DEPT_ROTATE_MOBILE[dept] ?? (tall ? -90 : 0);
+  const sideways = Math.abs(rot) % 180 === 90;
+  // 轉 90° 時：先把「寬」設成想要的顯示高度，轉過來後剛好變成橫條裡的高度
+  const style: CSSProperties = sideways
+    ? { width: MOBILE_BANNER.logoH, height: "auto", maxWidth: "none", transform: `rotate(${rot}deg)` }
+    : { maxHeight: MOBILE_BANNER.logoH, maxWidth: "70%", transform: rot ? `rotate(${rot}deg)` : undefined };
+  return (
+    <img
+      src={src}
+      alt=""
+      className="object-contain transition-opacity duration-200"
+      style={{ ...style, opacity: size ? 1 : 0 }} // 還沒判斷完方向前先藏起來，避免閃一下直的
+    />
+  );
+}
+
+// 手機版：部門橫條
+function DeptBannerMobile({ dept, showZh }: { dept: string; showZh: boolean }) {
+  const svg = assetByFile(`${dept}.svg`);
+  const color = DEPT_COLORS[dept as keyof typeof DEPT_COLORS];
+  return (
+    <div className="relative rounded-2xl overflow-hidden mb-3 select-none" style={{ background: color, height: MOBILE_BANNER.height }} role="img" aria-label={DEPT_ZH[dept] ?? dept}>
+      <DeptLayer show={!showZh} className="px-4">
+        {svg ? (
+          <DeptLogoMobile dept={dept} src={svg} />
+        ) : (
+          <span className="text-white/90 lowercase" style={{ fontFamily: mono, fontWeight: 700, fontSize: "1.1rem" }}>{dept}.</span>
+        )}
+      </DeptLayer>
+      <DeptLayer show={showZh} className="px-4">
+        <DeptZh dept={dept} size={DEPT_ZH_STYLE.mobileSize} />
+      </DeptLayer>
+    </div>
+  );
+}
 
 // ── 服務詳情頁：每個元素的 XY 位移（px；正 x=往右、正 y=往下），手動微調版面用 ──
 const DETAIL_LAYOUT = {
@@ -247,22 +411,13 @@ function useTrimmedImage(src?: string): { url?: string; ready: boolean } {
 }
 
 // ── 單一格 ───────────────────────────────────────────────
-function BentoCell({ cell }: { cell: Cell }) {
+function BentoCell({ cell, showZh }: { cell: Cell; showZh: boolean }) {
   const color = DEPT_COLORS[cell.dept];
   const style: CSSProperties = { gridColumn: cell.gc, gridRow: cell.gr };
 
   if (cell.type === "dept") {
-    const svg = assetByFile(`${cell.dept}.svg`);
-    return (
-      <div className="rounded-2xl flex items-center justify-center p-3 select-none" style={{ ...style, background: color }}>
-        {svg ? (
-          <img src={svg} alt={`${cell.dept}.`} className="object-contain" style={{ maxWidth: DEPT_LOGO.maxW, maxHeight: DEPT_LOGO.maxH }} />
-        ) : (
-          // 佔位（等你放 imports/services/IMG-<dept>/<dept>.svg 就會換掉），字級刻意做小。
-          <span className="text-white/90 lowercase" style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.85rem,1.3vw,1.3rem)" }}>{cell.dept}.</span>
-        )}
-      </div>
-    );
+    // 部門格：英文草寫 svg ⇄ 中文名稱（直格自動改直書）
+    return <DeptCellDesktop dept={cell.dept} style={style} showZh={showZh} />;
   }
 
   return (
@@ -291,22 +446,15 @@ function BentoCell({ cell }: { cell: Cell }) {
 // ── Bento Grid 總覽 ───────────────────────────────────────
 // ── 手機／平板版總覽：12×8 的 Bento 在小螢幕塞不下，改成「每個部門一組」的兩欄格子 ──
 const DEPT_ORDER = ["gen", "eve", "aca", "ima", "sp"] as const;
-function ServicesListMobile() {
+function ServicesListMobile({ showZh }: { showZh: boolean }) {
   return (
     <div className="flex flex-col gap-8">
       {DEPT_ORDER.map((d) => {
         const color = DEPT_COLORS[d];
-        const svg = assetByFile(`${d}.svg`);
         const items = BENTO.filter((c) => c.type === "service" && c.dept === d) as Extract<Cell, { type: "service" }>[];
         return (
           <div key={d}>
-            <div className="rounded-2xl flex items-center justify-center px-4 mb-3 select-none" style={{ background: color, height: 64 }}>
-              {svg ? (
-                <img src={svg} alt={`${d}.`} className="object-contain" style={{ maxHeight: "60%", maxWidth: "70%" }} />
-              ) : (
-                <span className="text-white/90 lowercase" style={{ fontFamily: mono, fontWeight: 700, fontSize: "1.1rem" }}>{d}.</span>
-              )}
-            </div>
+            <DeptBannerMobile dept={d} showZh={showZh} />
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {items.map((c) => (
                 <a
@@ -331,13 +479,14 @@ function ServicesListMobile() {
 
 function ServicesGrid() {
   const isDesktop = useIsDesktop();
+  const showZh = useDeptSwitch(); // 部門名稱：英文 ⇄ 中文（五格同步切換）
   return (
     <section className="relative bg-black min-h-screen px-4 sm:px-6 lg:px-10 pt-[var(--page-content-top)] pb-10">
-      <style>{`.svc-cell:hover{ background: var(--svc-fill); }`}</style>
+      <style>{`.svc-cell:hover{ background: var(--svc-fill); }${DEPT_FADE_CSS}`}</style>
       <PageEyebrow text="各種服務・各部業務" />
 
       {/* 手機／平板：改用分部門的兩欄清單；電腦版：原本的 Bento Grid */}
-      {!isDesktop ? <ServicesListMobile /> : (
+      {!isDesktop ? <ServicesListMobile showZh={showZh} /> : (
       <div className="overflow-x-auto">
         <div
           className="grid gap-2 sm:gap-3"
@@ -349,7 +498,7 @@ function ServicesGrid() {
           }}
         >
           {BENTO.map((cell, i) => (
-            <BentoCell key={cell.type === "dept" ? `dept-${cell.dept}` : cell.slug + i} cell={cell} />
+            <BentoCell key={cell.type === "dept" ? `dept-${cell.dept}` : cell.slug + i} cell={cell} showZh={showZh} />
           ))}
         </div>
       </div>

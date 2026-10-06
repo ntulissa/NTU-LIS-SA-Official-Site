@@ -400,7 +400,7 @@ export default function DepartmentPage({ slug }: { slug: string }) {
                           background: data.color,
                           color: "#fff",
                           fontFamily: zhFont,
-                          fontWeight: 900,
+                          fontWeight: 700,
                           fontSize: `${HASHTAG.size}px`,
                           letterSpacing: "0.08em",
                           padding: `${HASHTAG.padY}px ${HASHTAG.padX}px`,
