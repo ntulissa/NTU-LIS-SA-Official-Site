@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, MapPin, X, ArrowRight } from "lucide-react";
 import { PageEyebrow, Reveal, useIsDesktop } from "./shared";
 import {
@@ -61,6 +61,7 @@ const COUNT_NUM_SIZE = "clamp(2.4rem, 4vw, 3.4rem)";   // 倒數數字字級
 const COUNT_UNIT_SIZE = "clamp(0.72rem, 0.95vw, 0.92rem)"; // 「天後」字級
 const COUNT_INSET_X = 28;   // 倒數距卡片右緣（px）
 const COUNT_INSET_Y = 16;   // 倒數距卡片下緣（px）
+const UPCOMING_MAX_DAYS = 99; // 「下一場活動」只顯示幾天內開始的活動（倒數最多兩位數，不會擋到部門圓點）
 const EDGE_FADE = 72;       // 清單左右「漸層遮罩」寬度（px）；數字越大淡出範圍越寬
 const ARROW_SIZE = 44;      // 左右捲動箭頭圓鈕直徑（px）
 
@@ -94,7 +95,11 @@ const MODAL_BACKDROP_BLUR = 2;              // 背後模糊（px；0＝不模糊
 const TITLE_X = 25;    // 左（px）
 const TITLE_Y = 46;    // 上（px）
 const TITLE_W = 620;   // 文字區塊寬（px）；超過會自動換行
-const TITLE_SIZE = 54; // 字級（px）
+const TITLE_SIZE = 54; // 字級上限（px）；標題太長超過 TITLE_W 時，會自動縮小字體、維持一行
+const TITLE_MIN_SIZE = 24; // 自動縮小的下限（px）；縮到這裡還放不下才會換行
+const TITLE_CLOSE_GAP = 16; // 標題右緣與關閉鈕（X）之間至少留多少空隙（px）
+// 標題實際可用寬度＝「TITLE_W」與「到關閉鈕左緣為止」兩者取小的 → 永遠不會擠到 X
+//（在下方關閉鈕常數之後計算，見 TITLE_FIT_W）
 
 // ── 時間──
 const TIME_X = 26;     // 左（px）
@@ -145,6 +150,9 @@ const CLOSE_Y = 55;    // 上（px）
 const CLOSE_SIZE = 46; // 直徑（px）
 const CLOSE_BG = "#0E0E0E"; // 底色
 const CLOSE_ICON = 22; // X 圖示大小（px）
+
+// 標題可用寬度（自動算，不用改）：只要標題會延伸到關閉鈕左緣，就以關閉鈕左緣扣掉 TITLE_CLOSE_GAP 為上限。
+const TITLE_FIT_W = Math.max(100, Math.min(TITLE_W, CLOSE_X - TITLE_X - TITLE_CLOSE_GAP));
 
 // ══════════════════════════════════════════════════════════════════
 // ★★ 手機／平板版「活動資訊 Modal」手動調整區 ★★
@@ -352,7 +360,7 @@ function EventCard({ e, onOpen }: { e: CalEvent; onOpen: () => void }) {
 // ── 地點那一行（Location icon ＋ 地點文字；有 mapUrl 就變成 Google Map 連結）──
 function LocationLine({ text, url, fg, size = LOC_SIZE, iconSize = LOC_ICON }: { text: string; url?: string; fg: string; size?: number; iconSize?: number }) {
   const inner = (
-    <span className="inline-flex items-center" style={{ gap: LOC_ICON_GAP, fontFamily: zhDisplay, fontWeight: 800, fontSize: size, letterSpacing: "0.04em", color: fg, lineHeight: 1.3 }}>
+    <span className="inline-flex items-center" style={{ gap: LOC_ICON_GAP, fontFamily: zhDisplay, fontWeight: 500, fontSize: size, letterSpacing: "0.04em", color: fg, lineHeight: 1.3 }}>
       <MapPin size={iconSize} strokeWidth={2.2} style={{ flexShrink: 0 }} />
       {text}
     </span>
@@ -379,6 +387,34 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
   const [pillHover, setPillHover] = useState(false);
   const [scale, setScale] = useState(1);
   const isDesktop = useIsDesktop(); // 電腦版＝固定畫布；手機／平板＝自動排版
+
+  // ── 電腦版標題自動縮字：先用 TITLE_SIZE 量寬度，超過 TITLE_W 就等比例縮小，維持一行 ──
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [titleSize, setTitleSize] = useState(TITLE_SIZE);
+  useLayoutEffect(() => {
+    if (!isDesktop) return;
+    const fit = () => {
+      const el = titleRef.current;
+      if (!el) return;
+      el.style.fontSize = `${TITLE_SIZE}px`;  // 先回到最大字級、強制一行來量
+      el.style.whiteSpace = "nowrap";
+      const natural = el.scrollWidth;          // 不換行時的實際寬度（不受 scale 影響）
+      let next = natural > TITLE_FIT_W
+        ? Math.max(TITLE_MIN_SIZE, Math.floor((TITLE_SIZE * TITLE_FIT_W) / natural))
+        : TITLE_SIZE;
+      el.style.fontSize = `${next}px`;
+      // 比例估算可能差幾 px（字距、標點），再逐 px 微調到真的放得下為止
+      while (next > TITLE_MIN_SIZE && el.scrollWidth > TITLE_FIT_W) {
+        next -= 1;
+        el.style.fontSize = `${next}px`;
+      }
+      el.style.whiteSpace = next > TITLE_MIN_SIZE ? "nowrap" : "normal";
+      setTitleSize(next);
+    };
+    fit();
+    // 字型載入完成後寬度可能改變，再量一次
+    document.fonts?.ready.then(fit).catch(() => {});
+  }, [e.title, isDesktop]);
 
   const dots = e.depts.map((k) => DEPT_MAP[k]).filter(Boolean);
   const deptDesc = deptDescOf(e);
@@ -529,8 +565,14 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
 
         {/* 活動名稱（Chiron Hei HK Text）。pointer-events-none：純文字，方框不攔點擊。 */}
         <h3
+          ref={titleRef}
           className="absolute pointer-events-none"
-          style={{ left: TITLE_X, top: TITLE_Y, width: TITLE_W, fontFamily: zhDisplay, fontWeight: 900, fontSize: TITLE_SIZE, lineHeight: 1.1, letterSpacing: "0.04em" }}
+          style={{
+            left: TITLE_X, top: TITLE_Y, width: TITLE_FIT_W, // 寬度＝可用寬度（不會伸到關閉鈕底下）
+            fontFamily: zhDisplay, fontWeight: 900, fontSize: titleSize, lineHeight: 1.1, letterSpacing: "0.04em",
+            // 縮到下限前都維持一行；只有縮到 TITLE_MIN_SIZE 仍放不下才允許換行
+            whiteSpace: titleSize > TITLE_MIN_SIZE ? "nowrap" : "normal",
+          }}
         >
           {e.title}
         </h3>
@@ -676,6 +718,8 @@ export default function CalendarPage() {
       .map((e, idx) => ({ e, idx }))
       .filter(({ e }) => !isSchoolOnly(e))
       .filter(({ e }) => eventEnd(e) >= todayStr) // 尚未結束（含今天）＝進行中或未來
+      // 只收 UPCOMING_MAX_DAYS 天內開始的（倒數顯示 ≤ 99 天）；進行中的開始時間已過，一定會留下
+      .filter(({ e }) => eventStart(e).getTime() - Date.now() < (UPCOMING_MAX_DAYS + 1) * 86400000)
       .sort((a, b) => eventStart(a.e).getTime() - eventStart(b.e).getTime())
       .slice(0, 5);
   }, []);

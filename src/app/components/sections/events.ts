@@ -123,17 +123,29 @@ export const EVENTS: CalEvent[] = [
     signup: false,
   },
   {
-    title: "系烤 2026",
+    title: "三系聯合系烤 2026",
     date: "2026-11-13",
     time: "18:00",
     depts: ["eve"],
     location: "華中露營場",
-    mapUrl: "",
+    mapUrl: "https://maps.app.goo.gl/UxDwD8V1Mre3qghcA",
     desc:
-      "一年一度的系學會成果發表會，\n" +
-      "各部門將展示過去一年的努力與成果，\n" +
-      "並分享未來的計畫與願景。",
+      "秋夜微風吹拂，三系夥伴一起走出校園、齊聚華中露營場！\n" +
+      "這不只是一場熱鬧的烤肉聚會，更是結交跨系新朋友的最佳契機；\n" +
+      "放下忙碌與疲憊，圍繞著溫暖的營火，和身邊的夥伴一起度過美好夜晚！",
     signup: false,
+  },
+  {
+    title: "十三系聯合耶誕舞會 2026",
+    date: "2026-11-28",
+    time: "16:30",
+    depts: ["eve"],
+    location: "WAVE CLUB Taipei",
+    mapUrl: "https://maps.app.goo.gl/zmSXQzcGxFMYc7cZA",
+    desc:
+      "十三系攜手包下信義區夜店，打造專屬臺大人的聲光派對。\n" +
+      "在重低音與微醺節奏中卸下壓力，\n" +
+      "與跨系夥伴一起沸騰整個冬夜。\n",
   },
   {
     title: "杜鵑花節 2027",
