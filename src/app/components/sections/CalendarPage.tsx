@@ -26,6 +26,8 @@ import {
 // ★ 若你的檔名不是「Presented by NTU LISSA.svg」，把下面這行的檔名改成你實際的即可。
 //   （若 TS 報「找不到模組」，在 vite-env.d.ts 補一行 declare module "*.svg"; 即可。）
 import presentedBySrc from "@/imports/Calendar/Presented by NTU LISSA.svg";
+// Google Maps 官方 logo（請自行從 Google 官方品牌資源下載後放到這個位置）
+import googleMapsLogoSrc from "@/imports/Calendar/google-maps.svg";
 
 /**
  * 系學會行事曆頁（CALENDAR）── 版型／呈現邏輯
@@ -103,19 +105,30 @@ const TITLE_CLOSE_GAP = 16; // 標題右緣與關閉鈕（X）之間至少留多
 
 // ── 時間──
 const TIME_X = 26;     // 左（px）
-const TIME_Y = 135;    // 上（px）
+const TIME_Y = 158;    // 上（px）
 const TIME_SIZE = 20;  // 字級（px）
 
 // ── 地點──
 const LOC_X = 240;     // 左（px）
-const LOC_Y = 135;     // 上（px）
+const LOC_Y = 158;     // 上（px）
 const LOC_SIZE = 20;   // 文字字級（px）
 const LOC_ICON = 24;   // icon 大小（px）
 const LOC_ICON_GAP = 8;// icon 與文字間距（px）
+// ── 地點膠囊（有 mapUrl 時才出現，提示「可以點開 Google 地圖」）──
+const LOC_PILL_DARKEN = 0.3;   // 膠囊底色＝部門色再壓暗幾成（0＝同色、1＝全黑）
+const LOC_PILL_PAD_X = 22;     // 膠囊左右內距（px）
+const LOC_PILL_PAD_Y = 12;     // 膠囊上下內距（px）
+const LOC_PILL_SHADOW = "0 6px 14px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.25)"; // 漂浮陰影
+const LOC_PILL_SHADOW_HOVER = "0 10px 22px rgba(0,0,0,0.42), 0 3px 6px rgba(0,0,0,0.28)"; // 滑上去時陰影加深
+// 註：有膠囊時，LOC_X＝膠囊左緣；高度會自動算，讓膠囊裡的文字跟左邊時間那行上下對齊（LOC_Y 一樣用來調上下）。
+// ── Google Maps 官方 logo 圖檔 ──
+// ★ 請到 Google 官方品牌資源下載 Google Maps 圖示（建議 SVG），放到 src/imports/Calendar/，
+//   檔名改成「google-maps.svg」（或改下面 import 那行的檔名）。
+const MAPS_LOGO_SIZE = 26;     // logo 高度（px）
 
 // ── 活動介紹文案──
 const DESC_X = 26;     // 左（px）
-const DESC_Y = 226;    // 上（px）
+const DESC_Y = 256;    // 上（px）
 const DESC_W = 680;    // 文案區塊寬（px）；決定何時換行
 const DESC_SIZE = 18;  // 字級（px）
 const DESC_LH = 2.0;   // 行高（倍數）
@@ -365,14 +378,57 @@ function LocationLine({ text, url, fg, size = LOC_SIZE, iconSize = LOC_ICON }: {
       {text}
     </span>
   );
-  if (url) {
-    return (
-      <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline underline-offset-4 decoration-2">
-        {inner}
-      </a>
-    );
-  }
+  if (url) return null; // 有連結時改用 LocationPill（見下方）
   return inner;
+}
+
+// 把部門色壓暗（往黑色混 amount 成），給地點膠囊當底色。
+function darken(hex: string, amount: number): string {
+  const h = hex.replace("#", "");
+  const f = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const k = 1 - Math.min(1, Math.max(0, amount));
+  const ch = (i: number) => Math.round(parseInt(f.slice(i, i + 2), 16) * k).toString(16).padStart(2, "0");
+  return `#${ch(0)}${ch(2)}${ch(4)}`;
+}
+
+// ── 地點膠囊（有 Google Maps 連結時使用）──
+// 底色＝部門色再深一點；帶陰影像浮在背景上；左側放 Google Maps 官方 logo；滑上去微微上浮、陰影加深。
+function LocationPill({
+  text, url, accent, size = LOC_SIZE, logoSize = MAPS_LOGO_SIZE, padX = LOC_PILL_PAD_X, padY = LOC_PILL_PAD_Y, wrap = false,
+}: { text: string; url: string; accent: string; size?: number; logoSize?: number; padX?: number; padY?: number; wrap?: boolean }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`在 Google 地圖開啟：${text}`}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onFocus={() => setHover(true)}
+      onBlur={() => setHover(false)}
+      className="inline-flex items-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+      style={{
+        gap: LOC_ICON_GAP + 4,
+        padding: `${padY}px ${padX}px`,
+        background: darken(accent, LOC_PILL_DARKEN),
+        boxShadow: hover ? LOC_PILL_SHADOW_HOVER : LOC_PILL_SHADOW,
+        transform: hover ? "translateY(-2px)" : "translateY(0)",
+        transition: "transform 180ms ease, box-shadow 180ms ease",
+        color: "#fff",
+        fontFamily: zhDisplay,
+        fontWeight: 500,
+        fontSize: size,
+        letterSpacing: "0.06em",
+        lineHeight: 1.2,
+        whiteSpace: wrap ? "normal" : "nowrap", // 手機版地點太長可換行
+        maxWidth: "100%",
+      }}
+    >
+      <img src={googleMapsLogoSrc} alt="" aria-hidden="true" draggable={false} style={{ height: logoSize, width: "auto", flexShrink: 0 }} />
+      {text}
+    </a>
+  );
 }
 
 // ── 展開版「活動資訊 Modal」────────────────────────────────────────
@@ -479,11 +535,19 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
           </h3>
 
           {/* 時間／地點：上下排列 */}
-          <div className="mt-4 flex flex-col gap-2" style={{ opacity: 0.75 }}>
-            <span style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: M_META_SIZE, letterSpacing: "0.05em" }}>
+          <div className="mt-4 flex flex-col items-start gap-3">
+            <span style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: M_META_SIZE, letterSpacing: "0.05em", opacity: 0.75 }}>
               {modalDateText(e)}
             </span>
-            {e.location && <LocationLine text={e.location} url={e.mapUrl || undefined} fg={fg} size={M_META_SIZE} iconSize={M_LOC_ICON} />}
+            {/* 有 Google Maps 連結 → 漂浮膠囊（實色，不套透明度）；沒有 → 原本的 icon＋文字 */}
+            {e.location && e.mapUrl && (
+              <LocationPill text={e.location} url={e.mapUrl} accent={accent} size={M_META_SIZE} logoSize={M_LOC_ICON + 2} padX={16} padY={9} wrap />
+            )}
+            {e.location && !e.mapUrl && (
+              <span style={{ opacity: 0.75 }}>
+                <LocationLine text={e.location} fg={fg} size={M_META_SIZE} iconSize={M_LOC_ICON} />
+              </span>
+            )}
           </div>
 
           {/* 文案：字級固定，放不下就換行 */}
@@ -586,9 +650,23 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
         </span>
 
         {/* 地點（Location icon ＋ 文字，Chiron Hei HK Text）*/}
-        {e.location && (
+        {/* 有 Google Maps 連結 → 漂浮膠囊；沒有連結 → 維持原本的 icon＋文字 */}
+        {e.location && e.mapUrl && (
+          <div
+            className="absolute"
+            style={{
+              left: LOC_X,
+              // 讓膠囊內的文字跟左邊時間那行上下置中對齊
+              top: LOC_Y - LOC_PILL_PAD_Y - (Math.max(MAPS_LOGO_SIZE, LOC_SIZE * 1.2) - TIME_SIZE) / 2,
+              zIndex: 5,
+            }}
+          >
+            <LocationPill text={e.location} url={e.mapUrl} accent={accent} />
+          </div>
+        )}
+        {e.location && !e.mapUrl && (
           <div className="absolute" style={{ left: LOC_X, top: LOC_Y, fontFamily: zhDisplay, fontWeight: 700, lineHeight: 1, opacity: 0.7 }}>
-            <LocationLine text={e.location} url={e.mapUrl || undefined} fg={fg} />
+            <LocationLine text={e.location} fg={fg} />
           </div>
         )}
 

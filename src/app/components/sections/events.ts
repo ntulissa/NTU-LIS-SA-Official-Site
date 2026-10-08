@@ -103,7 +103,7 @@ export const EVENTS: CalEvent[] = [
     time: "18:30",
     depts: ["aca"],
     location: "系館視聽室",
-    mapUrl: "",
+    mapUrl: "https://maps.app.goo.gl/EQhTGVqFgv9bMv2z9",
     desc:
       "邀請畢業系友回來分享職涯與求學經驗，\n" +
       "從資訊產業、圖書館到研究所，帶你看看未來的各種可能。",
