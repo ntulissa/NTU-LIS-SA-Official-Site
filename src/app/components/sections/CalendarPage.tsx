@@ -146,6 +146,23 @@ const CLOSE_SIZE = 46; // 直徑（px）
 const CLOSE_BG = "#0E0E0E"; // 底色
 const CLOSE_ICON = 22; // X 圖示大小（px）
 
+// ══════════════════════════════════════════════════════════════════
+// ★★ 手機／平板版「活動資訊 Modal」手動調整區 ★★
+//    螢幕寬度小於電腦版時，不再把整個框等比例縮小（那樣字會小到看不見），
+//    改成「由上往下自動排版」：框寬＝螢幕寬（扣掉四周留白），高度依內容自動長高；
+//    內容太長時框內可以上下捲動。
+// ══════════════════════════════════════════════════════════════════
+const M_MODAL_MAX_W = 520;    // 框最大寬度（px；平板直向時不會過寬）
+const M_MODAL_PAD = 24;       // 框內距（px）
+const M_TITLE_SIZE = "clamp(1.6rem, 7.5vw, 2.4rem)"; // 標題字級：隨螢幕縮小，太長自動換行
+const M_META_SIZE = 15;       // 時間／地點字級（px）
+const M_LOC_ICON = 18;        // 地點 icon 大小（px）
+const M_DESC_SIZE = 16;       // 文案字級（px）：不再縮小，放不下就換行
+const M_DESC_LH = 1.9;        // 文案行高（倍數）
+const M_DEPT_DESC_SIZE = 14;  // 主責部門敘述字級（px；手機版直接顯示，不用 hover）
+const M_PRES_W = 140;         // Presented by 圖片寬（px）
+const M_CLOSE_SIZE = 40;      // 關閉鈕直徑（px）
+
 // ── 下方「行事曆」──
 const TOGGLE_GAP_X = 66;    // Toggle 之間的橫向間距（px）← 你要拉大就改這裡
 const TOGGLE_GAP_Y = 16;    // Toggle 換行後的直向間距（px）
@@ -333,10 +350,10 @@ function EventCard({ e, onOpen }: { e: CalEvent; onOpen: () => void }) {
 }
 
 // ── 地點那一行（Location icon ＋ 地點文字；有 mapUrl 就變成 Google Map 連結）──
-function LocationLine({ text, url, fg }: { text: string; url?: string; fg: string }) {
+function LocationLine({ text, url, fg, size = LOC_SIZE, iconSize = LOC_ICON }: { text: string; url?: string; fg: string; size?: number; iconSize?: number }) {
   const inner = (
-    <span className="inline-flex items-center" style={{ gap: LOC_ICON_GAP, fontFamily: zhDisplay, fontWeight: 800, fontSize: LOC_SIZE, letterSpacing: "0.04em", color: fg, lineHeight: 1 }}>
-      <MapPin size={LOC_ICON} strokeWidth={2.2} style={{ flexShrink: 0 }} />
+    <span className="inline-flex items-center" style={{ gap: LOC_ICON_GAP, fontFamily: zhDisplay, fontWeight: 800, fontSize: size, letterSpacing: "0.04em", color: fg, lineHeight: 1.3 }}>
+      <MapPin size={iconSize} strokeWidth={2.2} style={{ flexShrink: 0 }} />
       {text}
     </span>
   );
@@ -361,6 +378,7 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
   const descColor = light ? "rgba(0,0,0,0.88)" : "rgba(255,255,255,0.95)"; // 文案文字色
   const [pillHover, setPillHover] = useState(false);
   const [scale, setScale] = useState(1);
+  const isDesktop = useIsDesktop(); // 電腦版＝固定畫布；手機／平板＝自動排版
 
   const dots = e.depts.map((k) => DEPT_MAP[k]).filter(Boolean);
   const deptDesc = deptDescOf(e);
@@ -386,11 +404,106 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
     return () => window.removeEventListener("resize", calc);
   }, []);
 
+  const backdropStyle: React.CSSProperties = {
+    background: MODAL_BACKDROP,
+    backdropFilter: MODAL_BACKDROP_BLUR ? `blur(${MODAL_BACKDROP_BLUR}px)` : undefined,
+    WebkitBackdropFilter: MODAL_BACKDROP_BLUR ? `blur(${MODAL_BACKDROP_BLUR}px)` : undefined,
+  };
+
+  // ══════════ 手機／平板版：由上往下自動排版 ══════════
+  if (!isDesktop) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={backdropStyle}
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-label={e.title}
+      >
+        <div
+          className="relative cal-modal-in w-full overflow-y-auto"
+          style={{ maxWidth: M_MODAL_MAX_W, maxHeight: "calc(100dvh - 32px)", background: bg, borderRadius: MODAL_RADIUS, color: fg, padding: M_MODAL_PAD }}
+          onClick={(ev) => ev.stopPropagation()}
+        >
+          {/* 關閉鈕 */}
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="關閉"
+            className="absolute flex items-center justify-center rounded-full text-white"
+            style={{ top: 16, right: 16, width: M_CLOSE_SIZE, height: M_CLOSE_SIZE, background: CLOSE_BG, zIndex: 10 }}
+          >
+            <X size={20} strokeWidth={2.6} />
+          </button>
+
+          {/* 標題：右側留空間給關閉鈕；太長自動換行 */}
+          <h3 style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: M_TITLE_SIZE, lineHeight: 1.18, letterSpacing: "0.03em", paddingRight: M_CLOSE_SIZE + 8, marginTop: 8, overflowWrap: "anywhere" }}>
+            {e.title}
+          </h3>
+
+          {/* 時間／地點：上下排列 */}
+          <div className="mt-4 flex flex-col gap-2" style={{ opacity: 0.75 }}>
+            <span style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: M_META_SIZE, letterSpacing: "0.05em" }}>
+              {modalDateText(e)}
+            </span>
+            {e.location && <LocationLine text={e.location} url={e.mapUrl || undefined} fg={fg} size={M_META_SIZE} iconSize={M_LOC_ICON} />}
+          </div>
+
+          {/* 文案：字級固定，放不下就換行 */}
+          {e.desc && (
+            <p className="mt-6" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: M_DESC_SIZE, lineHeight: M_DESC_LH, letterSpacing: "0.06em", color: descColor, whiteSpace: "pre-line" }}>
+              {e.desc}
+            </p>
+          )}
+
+          {/* 報名按鈕 */}
+          {e.signup && (
+            <a
+              href={e.signupUrl || "#"}
+              target={e.signupUrl ? "_blank" : undefined}
+              rel={e.signupUrl ? "noopener noreferrer" : undefined}
+              className="mt-7 inline-flex items-center gap-3 bg-white text-black px-6 py-3 rounded-full active:bg-white/90 transition-all duration-200 w-fit"
+              style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "1rem", letterSpacing: "0.06em" }}
+            >
+              {SIGNUP_LABEL}
+              <ArrowRight size={BTN_ICON} />
+            </a>
+          )}
+
+          {/* 最下排：主責部門（敘述直接顯示）＋ Presented by */}
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-x-4 gap-y-4">
+            <div className="flex items-center flex-wrap" style={{ gap: 10 }}>
+              <div className="flex items-center shrink-0" style={{ gap: DEPT_DOT_GAP, background: DEPT_PILL_BG, padding: `${DEPT_PILL_PAD_Y}px ${DEPT_PILL_PAD_X}px`, borderRadius: 999 }}>
+                {dots.map((d, i) => (
+                  <span key={`${d.key}-${i}`} className="rounded-full" style={{ width: DEPT_DOT_SIZE, height: DEPT_DOT_SIZE, background: d.color, boxShadow: isLight(d.color) ? "inset 0 0 0 1px rgba(0,0,0,0.18)" : "none" }} />
+                ))}
+              </div>
+              {deptDesc && (
+                <span style={{ fontFamily: zhDisplay, fontWeight: 800, fontSize: M_DEPT_DESC_SIZE, letterSpacing: "0.08em", color: fg }}>
+                  {deptDesc}
+                </span>
+              )}
+            </div>
+            <img
+              src={presentedBySrc}
+              alt="Presented by NTU LIS SA"
+              className="select-none pointer-events-none ml-auto"
+              style={{ width: M_PRES_W, opacity: PRES_OPACITY }}
+              draggable={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ══════════ 電腦版：固定尺寸畫布 ══════════
   return (
     // 背景遮罩：點空白處關閉
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: MODAL_BACKDROP, backdropFilter: MODAL_BACKDROP_BLUR ? `blur(${MODAL_BACKDROP_BLUR}px)` : undefined, WebkitBackdropFilter: MODAL_BACKDROP_BLUR ? `blur(${MODAL_BACKDROP_BLUR}px)` : undefined }}
+      style={backdropStyle}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -399,7 +512,8 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
       {/* 背景框（＝畫布容器）：固定尺寸；所有元素以此為原點用絕對定位擺放。點自己不關閉。 */}
       <div
         className="relative cal-modal-in"
-        style={{ width: MODAL_W, height: MODAL_H, background: bg, borderRadius: MODAL_RADIUS, color: fg, transform: `scale(${scale})`, transformOrigin: "center center" }}
+        // flexShrink: 0 → 不讓外層 flex 把框「擠窄」（之前手機版文字跑出框外的主因）
+        style={{ width: MODAL_W, height: MODAL_H, flexShrink: 0, background: bg, borderRadius: MODAL_RADIUS, color: fg, transform: `scale(${scale})`, transformOrigin: "center center" }}
         onClick={(ev) => ev.stopPropagation()}
       >
         {/* 關閉鈕（X）：zIndex 拉到最高，整顆都保證可以點（不會被其他元素的方框蓋住） */}
@@ -605,11 +719,13 @@ export default function CalendarPage() {
     () => Object.fromEntries(DEPTS.map((d) => [d.key, true])) as Record<DeptKey, boolean>
   );
   const [hoverKey, setHoverKey] = useState<string | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null); // 手機版：點選的日子
   const [fading, setFading] = useState(false); // 換月淡出中
 
   // 換月：先淡出 → 換月 → 再淡入。
   const goMonth = (delta: number) => {
     setHoverKey(null);
+    setSelectedKey(null);
     setFading(true);
     window.setTimeout(() => {
       setView((v) => {
@@ -665,10 +781,11 @@ export default function CalendarPage() {
   return (
     <section id="calendar" className="relative bg-black min-h-screen px-5 sm:px-8 md:px-12 lg:px-16 pt-[var(--page-content-top)] pb-16 lg:pb-24">
       <style>{`
-        @keyframes calPopIn { from { opacity: 0; transform: translate(-50%, calc(var(--dy) + 6px)); } to { opacity: 1; transform: translate(-50%, var(--dy)); } }
+        @keyframes calPopIn { from { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + 6px)); } to { opacity: 1; transform: translate(var(--dx), var(--dy)); } }
         .cal-pop { animation: calPopIn 0.16s ease-out both; }
         @keyframes calModalIn { from { opacity: 0; } to { opacity: 1; } }
         .cal-modal-in { animation: calModalIn 0.2s ease-out both; }
+        .cal-pop-list { animation: calModalIn 0.18s ease-out both; }
         .cal-scroll::-webkit-scrollbar { height: 0; }
         .cal-scroll { scrollbar-width: none; }
         @media (prefers-reduced-motion: reduce) { .cal-pop, .cal-modal-in { animation: none; } .cal-fade { transition: none !important; } }
@@ -788,14 +905,19 @@ export default function CalendarPage() {
               const hasSingle = vis ? vis.events.some((e) => !spansMultipleDays(e)) : false;
               // 有實心圓：單日活動、或跨日活動的頭／尾；中間日子只坐在色條上、不加圓。
               const hasCircle = !!vis && (!multi || isStart || isEnd || hasSingle);
+              const isSelected = !isDesktop && selectedKey === key;
+              // Hover 小卡的對齊：最左兩欄靠左、最右兩欄靠右、中間置中 → 不會超出畫面
+              const col = i % 7;
+              const popAlign: "left" | "right" | "center" = col <= 1 ? "left" : col >= 5 ? "right" : "center";
 
               return (
                 <div
                   key={i}
                   className="flex items-center justify-center relative"
                   style={{ height: CAL_CELL_H }}
-                  onMouseEnter={() => vis && setHoverKey(key)}
+                  onMouseEnter={() => isDesktop && vis && setHoverKey(key)}
                   onMouseLeave={() => setHoverKey((k) => (k === key ? null : k))}
+                  onClick={() => { if (!isDesktop && vis) setSelectedKey((k) => (k === key ? null : key)); }}
                 >
                   {/* 跨多天活動的連續色條（半透明；相鄰格互相接起來像一條膠囊） */}
                   {multi && (extendLeft || extendRight) && (
@@ -821,6 +943,9 @@ export default function CalendarPage() {
                       height: CAL_CIRCLE,
                       background: hasCircle ? vis!.color : "transparent",
                       cursor: vis ? "pointer" : "default",
+                      // 手機版被點選的日子：外圈加一道白框
+                      boxShadow: isSelected ? "0 0 0 2px #000, 0 0 0 4px rgba(255,255,255,0.9)" : "none",
+                      transition: "box-shadow 150ms ease",
                     }}
                   >
                     {/* 當日：紅藍漸層外框空心圓（有活動時疊在實心圓外緣） */}
@@ -846,14 +971,17 @@ export default function CalendarPage() {
                   </div>
 
                   {/* Hover 小卡：列出當天（可顯示的）活動 */}
-                  {hoverKey === key && vis && (
+                  {isDesktop && hoverKey === key && vis && (
                     <div
-                      className="cal-pop absolute left-1/2 z-20 rounded-2xl border border-white/12 shadow-2xl shadow-black/60"
+                      className="cal-pop absolute z-20 rounded-2xl border border-white/12 shadow-2xl shadow-black/60"
                       style={{
                         // 第一週往下展開、其餘往上展開，避免超出容器上緣。
                         ["--dy" as string]: firstWeek ? "0%" : "-100%",
+                        ["--dx" as string]: popAlign === "center" ? "-50%" : "0%",
                         top: firstWeek ? "calc(100% + 8px)" : "-8px",
-                        transform: `translate(-50%, ${firstWeek ? "0%" : "-100%"})`,
+                        left: popAlign === "left" ? 0 : popAlign === "center" ? "50%" : "auto",
+                        right: popAlign === "right" ? 0 : "auto",
+                        transform: `translate(${popAlign === "center" ? "-50%" : "0%"}, ${firstWeek ? "0%" : "-100%"})`,
                         width: POP_WIDTH,
                         background: "#1c1c1e",
                         padding: "12px 14px",
@@ -876,6 +1004,49 @@ export default function CalendarPage() {
               );
             })}
           </div>
+
+          {/* ══════════ 手機／平板：點選日子後，在月曆下方列出當天活動（取代 hover 小卡）══════════ */}
+          {!isDesktop && (() => {
+            const selVis = selectedKey ? dayVisual(selectedKey) : null;
+            let header = "";
+            if (selectedKey) {
+              const [, mm, dd] = selectedKey.split("-").map(Number);
+              const wd = new Date(view.y, mm - 1, dd).getDay();
+              header = `${mm} 月 ${dd} 日（${WEEK_ZH[wd]}）`;
+            }
+            return (
+              <div className="mt-6 rounded-2xl border border-white/12" style={{ background: "#1c1c1e", padding: "16px 18px" }}>
+                {selVis ? (
+                  <div key={selectedKey} className="cal-pop-list">
+                    <p className="text-white/55 mb-2" style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.1em" }}>
+                      {header}
+                    </p>
+                    {selVis.events.map((ev, j) => (
+                      <button
+                        key={`${ev.title}-${j}`}
+                        type="button"
+                        onClick={() => { const idx = EVENTS.indexOf(ev); if (idx >= 0) setOpenIdx(idx); }}
+                        className="w-full flex items-center gap-3 py-3 text-left border-t border-white/8 first-of-type:border-t-0"
+                      >
+                        <span className="rounded-full shrink-0" style={{ width: 11, height: 11, background: accentColorOf(ev), boxShadow: isLight(accentColorOf(ev)) ? "inset 0 0 0 1px rgba(0,0,0,0.2)" : "none" }} />
+                        <span className="flex-1 min-w-0 text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "1rem", letterSpacing: "0.03em", lineHeight: 1.4 }}>
+                          {ev.title}
+                        </span>
+                        <span className="text-white/45 shrink-0" style={{ fontFamily: monoFont, fontSize: "0.8rem", letterSpacing: "0.04em" }}>
+                          {spanText(ev)}
+                        </span>
+                        <ChevronRight size={16} className="text-white/40 shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-white/40 text-center py-2" style={{ fontFamily: zhFont, fontSize: "0.9rem", letterSpacing: "0.08em" }}>
+                    點選有顏色的日子，查看當天活動
+                  </p>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
 
