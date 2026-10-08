@@ -146,6 +146,8 @@ export const EVENTS: CalEvent[] = [
       "十三系攜手包下信義區夜店，打造專屬臺大人的聲光派對。\n" +
       "在重低音與微醺節奏中卸下壓力，\n" +
       "與跨系夥伴一起沸騰整個冬夜。\n",
+    signup: true,
+    signupUrl: "https://forms.gle/nBQ2AgeNh6chaeQ8A",
   },
   {
     title: "杜鵑花節 2027",
