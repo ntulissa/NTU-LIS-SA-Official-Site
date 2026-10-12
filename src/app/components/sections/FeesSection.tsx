@@ -677,23 +677,50 @@ const LS_END = 1.2; // 結束字距：拉滿後往兩側大幅展開（想更誇
 const START_TOP_VH = 0.8; // 何時開始：元素頂端到「視窗底部」就開始（1＝很早；越小越晚）
 const END_TOP_VH = -0.35; // 何時拉滿：釘住後再往上捲這麼多屏（負值，越負越晚拉滿）
 const SCRUB_VH = 125; // 這一段總高（vh）：設成 100 + |END_TOP_VH|×100，字距一拉滿就結束、不留死區
+//
+// 手機／平板版：不顯示櫃子圖，只留四個大字（字距展開幅度較小，確保不會超出螢幕）
+const M_TITLE_SIZE = "16vw"; // 手機版字級
+const M_LS_START = -0.05; // 手機版起始字距（em）
+const M_LS_END = 0.35; // 手機版結束字距（em）；16vw 字級下最大約 0.37，再大會超出畫面
 // └──────────────────────────────────────────────────────────────────────┘
 
 function LockerScene() {
   const [plan, setPlan] = useState<"paid" | "unpaid">("paid");
   const current = LOCKER_PLANS[plan];
+  const isDesktop = useIsDesktop();
 
   const trackRef = useRef<HTMLDivElement>(null);
   const p = useScrollProgress(trackRef, START_TOP_VH, END_TOP_VH);
   // easeOutCubic 讓展開更有加速度感
   const eased = 1 - Math.pow(1 - p, 3);
-  const ls = LS_START + eased * (LS_END - LS_START); // 當前字距（em）
+  const lsStart = isDesktop ? LS_START : M_LS_START;
+  const lsEnd = isDesktop ? LS_END : M_LS_END;
+  const ls = lsStart + eased * (lsEnd - lsStart); // 當前字距（em）
 
   return (
     <div ref={trackRef} className="relative bg-black" style={{ height: `${SCRUB_VH}vh` }}>
       {/* sticky 釘住：捲動這段時畫面固定，字距隨進度改變 */}
       <section className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden px-6">
-        {/* 圖 + 大字疊放（字在後、圖在前） */}
+        {/* 手機／平板：只有大字，沒有櫃子圖 */}
+        {!isDesktop && (
+          <h2
+            className="text-white text-center whitespace-nowrap mb-14"
+            style={{
+              fontFamily: zhFont,
+              fontWeight: 900,
+              fontSize: M_TITLE_SIZE,
+              lineHeight: 1,
+              letterSpacing: `${ls}em`,
+              transform: `translateX(${ls / 2}em)`, // 補償最後一個字後面多出的字距，保持正中
+              willChange: "letter-spacing, transform",
+            }}
+          >
+            系櫃租借
+          </h2>
+        )}
+
+        {/* 電腦版：圖 + 大字疊放（字在後、圖在前） */}
+        {isDesktop && (
         <div className="relative flex items-center justify-center w-full max-w-[1100px] mb-10">
           <h2
             className="absolute inset-0 z-0 flex items-center justify-center text-white text-center pointer-events-none whitespace-nowrap"
@@ -718,6 +745,7 @@ function LockerScene() {
             draggable={false}
           />
         </div>
+        )}
 
       {/* Switch Toggle：有繳費者 / 無繳費者 */}
       <div
