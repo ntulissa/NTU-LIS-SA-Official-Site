@@ -6,6 +6,15 @@ import { ANNOUNCEMENTS } from "./announcements";
 //   <LatestUpdatesSection />            → 主頁捲動版（維持原本外觀）
 //   <LatestUpdatesSection standalone /> → 獨立列表頁（#/news）；多留頂部空間清掉固定 Header、撐滿一屏
 // 資料來源＝ announcements.ts；每張卡的「閱讀全文」連到該篇文章頁 #/news/<slug>。
+//
+// 手機版排版（依 Figma）：
+//   ┌───────────────────────────────┐
+//   │ 標題  [分類]                   │
+//   │ 摘要                           │
+//   │                                │
+//   │ 🕒 日期             [閱讀全文 →] │  ← 日期與按鈕同一列（原本是上下堆疊）
+//   └───────────────────────────────┘
+// 字級：手機版整體放大一點；桌機（lg 以上）維持原本大小。
 export default function LatestUpdatesSection({ standalone = false }: { standalone?: boolean } = {}) {
   return (
     <section
@@ -22,43 +31,55 @@ export default function LatestUpdatesSection({ standalone = false }: { standalon
           {ANNOUNCEMENTS.map((item, i) => (
             <Reveal key={item.slug} delay={i * 60}>
               <div
-                className="rounded-2xl border border-white/10 p-5 sm:p-6 md:p-8 flex flex-col justify-between gap-5 sm:gap-6 hover:border-white/20 transition-colors duration-200"
-                style={{ background: "rgba(255,255,255,0.04)", minHeight: "240px" }}
+                className="rounded-2xl border border-white/10 p-6 md:p-8 flex flex-col justify-between gap-8 min-h-[200px] lg:min-h-[240px] hover:border-white/20 transition-colors duration-200"
+                style={{ background: "rgba(255,255,255,0.04)" }}
               >
+                {/* 上半：標題＋分類、摘要 */}
                 <div>
-                  <div className="flex items-center gap-3 mb-4 flex-wrap">
-                    <p className="text-white" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "clamp(1rem, 2vw, 1.3rem)", letterSpacing: "0.09em" }}>
+                  <div className="flex items-center gap-x-3 gap-y-2 mb-4 flex-wrap">
+                    <p
+                      className="text-white"
+                      style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "clamp(1.2rem, 2vw, 1.3rem)", letterSpacing: "0.09em" }}
+                    >
                       {item.title}
                     </p>
                     <span
-                      className="shrink-0 text-white/70 text-xs px-3 py-0.5"
+                      className="shrink-0 text-white/70 text-[0.8rem] lg:text-xs px-3 py-0.5"
                       style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 400, letterSpacing: "0.1em", border: "1px solid transparent", borderRadius: "41px", background: "linear-gradient(#0d0d0d, #0d0d0d) padding-box, linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%) border-box" }}
                     >
                       {item.category}
                     </span>
                   </div>
-                  <p className="text-white/35 leading-relaxed" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "0.88rem" }}>
+                  <p
+                    className="text-white/35 leading-relaxed text-[1rem] lg:text-[0.88rem]"
+                    style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, letterSpacing: "0.06em" }}
+                  >
                     {item.excerpt}
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <svg viewBox="0 0 16 16" fill="none" stroke="white" strokeOpacity="0.35" strokeWidth="1.5" className="w-3.5 h-3.5">
-                      <circle cx="8" cy="8" r="6.5" />
-                      <path d="M8 4.5V8l2.5 2" strokeLinecap="round" />
+                {/* 下半：日期（左）＋閱讀全文（右），所有尺寸都同一列 */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {/* 實心時鐘圖示（依 Figma） */}
+                    <svg viewBox="0 0 16 16" className="w-4 h-4 lg:w-3.5 lg:h-3.5 shrink-0" aria-hidden="true">
+                      <circle cx="8" cy="8" r="7" fill="white" fillOpacity="0.35" />
+                      <path d="M8 4.5V8l2.5 2" fill="none" stroke="black" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    <span className="text-white/35 text-xs" style={{ fontFamily: "'Ubuntu Sans Mono', monospace" }}>
+                    <span
+                      className="text-white/35 text-[0.95rem] lg:text-xs truncate"
+                      style={{ fontFamily: "'Ubuntu Sans Mono', monospace", letterSpacing: "0.08em" }}
+                    >
                       {item.date}
                     </span>
                   </div>
                   <a
                     href={`#/news/${item.slug}`}
-                    className="inline-flex items-center justify-center gap-2 bg-white text-black px-5 py-2 rounded-full text-sm hover:bg-white/90 transition-all duration-200 group w-fit"
+                    className="shrink-0 inline-flex items-center justify-center gap-2 bg-white text-black px-5 py-2 rounded-full text-[0.95rem] lg:text-sm hover:bg-white/90 transition-all duration-200 group"
                     style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, letterSpacing: "0.08em" }}
                   >
                     閱讀全文
-                    <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+                    <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
                   </a>
                 </div>
               </div>

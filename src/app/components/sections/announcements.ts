@@ -38,7 +38,7 @@ export type Announcement = {
 export const ANNOUNCEMENTS: Announcement[] = [
   {
     slug: "lounge-night-usage",
-    category: "行政部",
+    category: "正副會長",
     title: "學輔室夜間使用申請",
     author: "臺大圖資系學會",
     date: "2026.10.10",
