@@ -233,14 +233,106 @@ function PayButton({ size = "md" }: { size?: "md" | "lg" }) {
   );
 }
 
+// ── 手機／平板版卡片尺寸（Apple 官網手機版風格：固定比例、不再被拉長）──────
+// ┌─ 可手動調 ───────────────────────────────────────────────────────────┐
+const M_CARD_W = "min(84vw, 520px)"; // 卡片寬
+const M_CARD_RATIO = 1.38; // 高 ÷ 寬（Apple 約 1.4；越大越長）
+const M_CARD_MAX_H = "72svh"; // 高度上限（避免橫放手機時太高）
+const M_GAP = 16; // 卡片間距（px）
+// └──────────────────────────────────────────────────────────────────────┘
+const M_CARD_H = `min(${M_CARD_MAX_H}, calc(${M_CARD_W} * ${M_CARD_RATIO}))`;
+const M_SIDE = `calc((100vw - ${M_CARD_W}) / 2)`; // 左右留白：讓第一張和最後一張都能置中
+
+// 手機版卡片：文字「置中」放在上方（標題 + 敘述），圖片放在下方剩餘空間。
+function MobileBenefitCard({ b }: { b: Benefit }) {
+  const isFill = b.type === "fill";
+  const isGradient = b.type === "gradient";
+  const showCenterImg = b.type === "center" || isGradient;
+  // 標題：一行放得下的最大字級（上限 32px）
+  const titleSize = `max(20px, min(32px, calc((${M_CARD_W} - 48px) / ${textUnits(b.title).toFixed(2)})))`;
+
+  return (
+    <article
+      data-card
+      className="relative flex-none rounded-[28px] overflow-hidden flex flex-col"
+      style={{
+        width: M_CARD_W,
+        height: M_CARD_H,
+        scrollSnapAlign: "center",
+        background: isGradient
+          ? `linear-gradient(160deg, ${RED} 0%, ${BLUE} 100%)`
+          : isFill
+          ? "#000"
+          : "#fff",
+      }}
+    >
+      {/* fill：整張大圖 + 由上往下的黑色漸層（上方文字區較暗，確保看得清楚） */}
+      {isFill && (
+        <>
+          <img src={b.img} alt="" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(180deg, rgba(0,0,0,${Math.min(0.85, (b.overlayOpacity ?? 0.45) + 0.3)}) 0%, rgba(0,0,0,${b.overlayOpacity ?? 0.45}) 40%, rgba(0,0,0,0.1) 100%)`,
+            }}
+          />
+        </>
+      )}
+
+      {/* 上方文字：置中 */}
+      <div className="relative z-10 text-center px-6 pt-8">
+        <h3
+          style={{
+            fontFamily: zhFont,
+            fontWeight: 900,
+            lineHeight: 1.25,
+            color: b.titleColor,
+            fontSize: titleSize,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {b.title}
+        </h3>
+        <p
+          className="mx-auto mt-3"
+          style={{
+            fontFamily: zhFont,
+            fontWeight: 500,
+            lineHeight: 1.6,
+            color: b.descColor,
+            opacity: 0.8,
+            fontSize: "clamp(14px, 3.7vw, 17px)",
+            maxWidth: "19em",
+            textWrap: "balance" as any, // 讓兩行長度平均，不會剩一兩個字孤零零
+          }}
+        >
+          {b.desc}
+        </p>
+      </div>
+
+      {/* 下方圖片：佔滿剩餘空間並置中 */}
+      {showCenterImg && (
+        <div className="relative flex-1 min-h-0 flex items-center justify-center px-6 pb-8 pt-4 pointer-events-none">
+          <img
+            src={b.img}
+            alt=""
+            draggable={false}
+            className="max-w-full max-h-full object-contain"
+            style={{ opacity: isGradient ? b.imgOpacity ?? 0.35 : 1 }}
+          />
+        </div>
+      )}
+    </article>
+  );
+}
+
 // ── 單張福利卡片：依 type 渲染三種版型 ────────────────────────────────────
 // 標題固定錨在「左上」、敘述錨在「右下」、草寫錨在「左下」；各自再用 X/Y 微調。
 function BenefitCard({ b }: { b: Benefit }) {
-  // 手機／平板：標題縮小到「一行放得下」、敘述允許換行、X/Y 微調不套用；電腦版完全照舊。
+  // 手機／平板：改用上面的 MobileBenefitCard（Apple 風、文字置中）；電腦版完全照舊。
   const isDesktop = useIsDesktop();
-  const titleSize = isDesktop
-    ? b.titleSize
-    : `max(22px, min(${b.titleSize}, calc((86vw - 64px) / ${textUnits(b.title).toFixed(2)})))`;
+  if (!isDesktop) return <MobileBenefitCard b={b} />;
+  const titleSize = b.titleSize;
   const isFill = b.type === "fill";
   const isGradient = b.type === "gradient";
   const showCenterImg = b.type === "center" || isGradient;
@@ -399,10 +491,16 @@ function BenefitsScene() {
     drag.current.down = false;
   };
 
+  const isDesktop = useIsDesktop();
+
   return (
-    <section className="relative min-h-screen bg-black py-16 md:py-20 overflow-hidden flex flex-col">
-      {/* 頂列：標題 */}
-      <div className="relative px-6 md:px-12 mb-8 md:mb-10">
+    <section
+      className={`relative min-h-screen bg-black py-16 md:py-20 overflow-hidden flex flex-col ${
+        isDesktop ? "" : "justify-center"
+      }`}
+    >
+      {/* 頂列：標題（手機版置中，和卡片一致） */}
+      <div className={`relative px-6 md:px-12 mb-8 md:mb-10 ${isDesktop ? "" : "text-center"}`}>
         <h2
           className="text-white"
           style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "clamp(1.5rem,3.4vw,2.6rem)" }}
@@ -411,22 +509,32 @@ function BenefitsScene() {
         </h2>
       </div>
 
-      {/* 橫向捲動軌 */}
+      {/* 橫向捲動軌（手機版：不撐滿高度、卡片維持固定比例） */}
       <div
         ref={scrollRef}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerLeave={endDrag}
-        className="flex-1 flex items-stretch gap-6 md:gap-8 overflow-x-auto px-6 md:px-12 pb-4 select-none cursor-grab active:cursor-grabbing"
-        style={{ scrollSnapType: "x mandatory", scrollbarWidth: "none" }}
+        className={`flex overflow-x-auto pb-4 select-none cursor-grab active:cursor-grabbing ${
+          isDesktop ? "flex-1 items-stretch gap-8 px-12" : "flex-none items-start"
+        }`}
+        style={{
+          scrollSnapType: "x mandatory",
+          scrollbarWidth: "none",
+          ...(isDesktop ? {} : { gap: `${M_GAP}px`, paddingLeft: M_SIDE }),
+        }}
       >
         <style>{`section > div::-webkit-scrollbar{display:none}`}</style>
         {BENEFITS.map((b, i) => (
           <BenefitCard key={i} b={b} />
         ))}
         {/* 尾端留白，讓最後一張能置中 */}
-        <div className="flex-none w-[6vw]" aria-hidden />
+        <div
+          className="flex-none"
+          aria-hidden
+          style={{ width: isDesktop ? "6vw" : `max(1px, calc(${M_SIDE} - ${M_GAP}px))` }}
+        />
       </div>
 
       {/* 膠囊數字指示器 */}

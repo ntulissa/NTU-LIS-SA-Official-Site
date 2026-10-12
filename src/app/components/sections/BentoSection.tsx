@@ -171,10 +171,15 @@ function HoverReveal({ children, className = "" }: { children: React.ReactNode; 
 
 // 右側小卡的底部置中標籤（英＋中）。絕對定位浮在卡片底部中央（脫離版面 → 平常內容照樣置中、不留空白）；
 // 平常隱藏，hover 才淡入＋輕輕上滑。pointer-events-none 避免擋到卡片點擊。
-// ★ 手機／平板（< 1024px）：格子比較小，英文＋中文會擠到黏住圖片 → 只顯示中文標題
-//   （沒有中文的社群卡，例如 INSTAGRAM，就照樣顯示英文）。電腦版維持英＋中，完全不變。
+// ★ 手機／平板（< 1024px）：有中文標題的卡片（最新動態、學習資源、工作團隊、贊助我們、ABOUT）
+//   一律「不顯示標題」，只留圖示，讓使用者自己點進去探索，畫面更乾淨。
+//   沒有中文的社群卡（INSTAGRAM／FACEBOOK／THREADS）照樣顯示英文。電腦版維持英＋中，完全不變。
+//   ※ 每張卡片的 <a> 都有 aria-label，所以標題雖然看不到，讀螢幕軟體跟搜尋引擎還是知道卡片是什麼。
+//   想讓手機版標題回來 → 把 MOBILE_HIDE_CAPTIONS 改成 false。
+const MOBILE_HIDE_CAPTIONS = true;
 function CardCaption({ en, zh }: { en: string; zh: string }) {
   const isDesktop = useIsDesktop();
+  if (!isDesktop && MOBILE_HIDE_CAPTIONS && zh) return null;
   const showEn = isDesktop || !zh;
   const showZh = !!zh;
   return (
@@ -646,11 +651,14 @@ export default function BentoSection({ standalone = false }: { standalone?: bool
                 {/* 圓環＋標題整組垂直置中；「UP NEXT」標籤絕對定位浮在卡片頂部（脫離版面 → 平常圓環＋標題照樣正中央）。
                     ▸ 間距/大小：NEXT_TITLE_GAP、NEXT_RING_SIZE、NEXT_TITLE_SIZE（都在檔案最上方）。標籤與頂部距離＝下面的 top-5/top-7。
                     ▸ 質感：hover 時標籤在頂部淡入，圓環＋標題整組往下滑一點讓位（GPU transform，不重排、不卡）；觸控裝置一律顯示。 */}
-                <HoverReveal className="absolute inset-x-0 top-5 md:top-7 flex justify-center px-4 pointer-events-none">
-                  <p className="text-white tracking-[0.24em]" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)" }}>
-                    {isDesktop ? <>UP NEXT&nbsp;&nbsp;下一場活動</> : "下一場活動"}
-                  </p>
-                </HoverReveal>
+                {/* 手機版跟其他卡片一致：不顯示「下一場活動」標籤（由 MOBILE_HIDE_CAPTIONS 控制）。 */}
+                {(isDesktop || !MOBILE_HIDE_CAPTIONS) && (
+                  <HoverReveal className="absolute inset-x-0 top-5 md:top-7 flex justify-center px-4 pointer-events-none">
+                    <p className="text-white tracking-[0.24em]" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)" }}>
+                      {isDesktop ? <>UP NEXT&nbsp;&nbsp;下一場活動</> : "下一場活動"}
+                    </p>
+                  </HoverReveal>
+                )}
                 <div className="flex flex-col items-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:translate-y-2.5">
                   <CountdownDonut target={nextEvent ? nextEvent.time : null} size={NEXT_RING_SIZE} />
                   {/* 標題：維持單行（whitespace-nowrap，比照原型）；已移除 text-ellipsis，改由上方縮小圓環＋間距讓它完整顯示、不再被切。 */}
