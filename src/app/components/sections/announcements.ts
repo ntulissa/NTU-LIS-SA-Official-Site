@@ -22,6 +22,7 @@ import farewell52image from "@/imports/LatestUpdates/farewell52.png";
 import election2026 from "@/imports/LatestUpdates/election2026.png";
 import welcome2026 from "@/imports/LatestUpdates/welcome2026.png";
 import loungeNightUsage from "@/imports/LatestUpdates/lounge night.svg";
+import recruit2026 from "@/imports/LatestUpdates/recruit2026.png";
 
 export type Announcement = {
   slug: string;
@@ -36,6 +37,30 @@ export type Announcement = {
 };
 
 export const ANNOUNCEMENTS: Announcement[] = [
+  {
+    slug: "recruitment-2026",
+    category: "學會公告",
+    title: "第 53 屆系學會招募中",
+    author: "臺大圖資系學會",
+    date: "2026.08.12",
+    excerpt: "加入我們，一起為圖資系的未來努力！",
+    paragraphs: [
+      "「圖資系學會到底在做什麼？」",
+      "我們傾聽聲音、爭取福利，也包辦系上大小活動的策劃與執行。但最重要的是，我們想把這裡打造成大家最有歸屬感的地方。",
+      "現在，我們需要你的加入，無論你是腦洞大開的點子王、負責的細節控、熱愛美感的設計人，還是單純想交新朋友，B15 系學會的五大部門，絕對有你發揮的舞台：",
+      "🎸 活動部｜包辦系上各大小活動的籌備與執行，享受從幕後策劃到萬人響應的成就感！",
+      "📖 學術部｜提前掌握課程資訊，策劃系友講座、企業參訪與杜鵑花節",
+      "📂 行政部｜支撐系學會的最強後盾，掌管財務與空間，培養對內對外的溝通技能！",
+      "🎨 形宣部｜負責社群帳號行銷與公關，用設計與排版包裝每一個精彩瞬間。",
+      "🏀 體育部｜燃燒熱血與汗水，推廣運動風氣，凝聚系上向心力！",
+      "我們會在招募結束後安排輕鬆的交流面試，期待能和你當面聊聊你的想法，若有任何對於職位的問題也非常歡迎直接私訊 IG 粉專或是留言於表單中呦 💬",
+      "⏳ 招募期限：即日起至 9/30（三）23:59 截止",
+      "👉 立刻掃描 Qrcode 或點擊主頁連結 🔗https://forms.gle/bCmHMEpPsKEKXqiP8，揪團填寫招募表單加入我們！",
+      "這絕對是一段能讓你累積經驗、結識夥伴、發揮影響力的旅程，成就不一樣的圖資系，需要的就是你 🤝"
+    ],
+    image: recruit2026,
+    imageCaption: "第 53 屆系學會招募中（圖／形宣部 石馨予）",
+  },
   {
     slug: "lounge-night-usage",
     category: "正副會長",

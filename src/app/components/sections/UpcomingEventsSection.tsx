@@ -7,15 +7,18 @@ import { BENTO, DEPT_COLORS, serviceBySlug, type ServiceCell } from "../departme
 //   若放別的地方，改上面三行的相對路徑即可。
 
 /**
- * 首頁「近一個月的系學會活動」
+ * 首頁「近期的系學會活動」
  * ─────────────────────────────────────────────────────────────
- * ● 自動從 events.ts 抓「今天起 60 天內」的系學會活動（排除純學校日程、已結束的活動）。
- * ● 每場活動會自動對應到 servicesData.ts 的某項服務：
+ * ● 自動從 events.ts 抓「今天起 DAYS_AHEAD 天內」的系學會活動（排除純學校日程、已結束的活動）。
+ * ● 每場活動會對應到 servicesData.ts 的某項服務：
  *     - 卡片底色＝該服務的部門色
- *     - 圖片＝imports/services/ 裡以該服務 slug 命名的圖（例：bbq.png）
+ *     - 圖片＝services/ 裡以該服務 slug 命名的圖（例：bbq.png）
  *     - 「深入了解」→ #/service/<slug>（Services.tsx 的詳情頁）
- * ● 對應方式：活動標題裡有出現服務名稱（例：「系烤活動 2026」含「系烤活動」→ bbq），
- *   或符合下方 ALIASES 的關鍵字。都對不到的活動 → 連到行事曆頁、用部門色、不放圖。
+ * ● 對應方式（依序，先對到的就用）：
+ *     1) events.ts 該活動的 service 欄位（★ 建議一律填這個，最準）
+ *     2) 活動標題含有服務中文名（例：「LIS Cup 小圖盃」含「小圖盃」→ lis-cup）
+ *     3) 活動標題含有下方 ALIASES 的關鍵字
+ *   都對不到 → 連到行事曆頁、用部門色、不放圖。
  * ● 最後一格固定是「探索更多活動」→ 系學會行事曆（#/calendar）。
  */
 
@@ -38,8 +41,7 @@ const CARD_RATIO = "7 / 8";                 // 寬 / 高 比例
 const CARD_RADIUS = 24;                     // 圓角（px）
 const CARD_GAP = 28;                        // 卡片間距（px）
 
-// 關鍵字 → 服務 slug（活動標題沒有完整出現服務名稱時用；不分大小寫）
-// 例：活動叫「LIS Talks: 系友講座」→ 其實已含「系友講座」，這裡只是多一層保險。
+// 關鍵字 → 服務 slug（備用：只有 events.ts 沒填 service 時才會用到；不分大小寫）
 const ALIASES: [keyword: string, slug: string][] = [
   ["LIS Talk", "alumni"],
   ["講座", "alumni"],
@@ -47,6 +49,7 @@ const ALIASES: [keyword: string, slug: string][] = [
   ["BBQ", "bbq"],
   ["宿營", "camp"],
   ["聖誕", "xmas"],
+  ["耶誕", "xmas"],
   ["迎新", "orientation"],
   ["LIS Night", "lis-night"],
   ["LIS Week", "lis-week"],
@@ -54,13 +57,15 @@ const ALIASES: [keyword: string, slug: string][] = [
   ["參訪", "corp"],
   ["LIS Cup", "lis-cup"],
   ["系服", "ooty"],
+  ["耶舞", "xmas-ball"],
 ];
 
 // 每項服務在卡片上的一句話標語（slug → 文字）。沒填的會改顯示該服務的英文名。
 const TAGLINES: Record<string, string> = {
   alumni: "在學長姐的視野裡，看見自己未來的無限可能",
   bbq: "月色下升起的炭火，把秋夜的微風與相遇",
-  "lis-cup": "球場上，圖資人盡情揮灑汗水與青春", 
+  "lis-cup": "球場上，圖資人盡情揮灑汗水與青春",
+  "xmas-ball": "歲末最令人引頸期盼的跨系狂歡派對"
 };
 // ══════════════════════════════════════════════════════════════════
 
@@ -68,7 +73,7 @@ const zhDisplay = "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif";
 const zhFont = "'Noto Sans TC', sans-serif";
 const BRAND_BORDER = "linear-gradient(180deg, #D14B4B 0%, #2F9EBD 100%)";
 
-// 讀 imports/services/ 裡的圖（同 Services.tsx 的寫法）
+// 讀 services/ 裡的圖（同 Services.tsx 的寫法）
 const SERVICE_ASSETS = import.meta.glob("/src/**/services/**/*.{svg,png,jpg,jpeg,webp}", {
   eager: true,
   query: "?url",
@@ -88,13 +93,22 @@ const SERVICES_BY_NAME = (BENTO.filter((c) => c.type === "service") as ServiceCe
   .sort((a, b) => b.zh.length - a.zh.length);
 
 function findService(e: CalEvent): ServiceCell | undefined {
-  // 若 events.ts 的活動有寫 service: "bbq"，優先使用
-  const explicit = (e as CalEvent & { service?: string }).service;
-  if (explicit) return serviceBySlug(explicit);
+  // 1) events.ts 有寫 service → 直接用
+  if (e.service) {
+    const svc = serviceBySlug(e.service);
+    if (!svc && import.meta.env.DEV) {
+      // 開發模式下提醒：slug 打錯字（瀏覽器 F12 → Console 看得到）
+      console.warn(`[UpcomingEvents] 「${e.title}」的 service: "${e.service}" 在 servicesData.ts 找不到，請檢查拼字。`);
+    }
+    if (svc) return svc;
+  }
 
+  // 2) 標題含服務中文名
   const title = e.title.toLowerCase();
   const byName = SERVICES_BY_NAME.find((s) => title.includes(s.zh.toLowerCase()));
   if (byName) return byName;
+
+  // 3) 標題含 ALIASES 關鍵字
   const alias = ALIASES.find(([k]) => title.includes(k.toLowerCase()));
   return alias ? serviceBySlug(alias[1]) : undefined;
 }
@@ -214,7 +228,7 @@ export default function UpcomingEventsSection() {
 
     return EVENTS
       .filter((e) => !isSchoolOnly(e))
-      .filter((e) => eventEnd(e) >= todayStr && e.date <= limitStr) // 還沒結束、且 30 天內開始
+      .filter((e) => eventEnd(e) >= todayStr && e.date <= limitStr) // 還沒結束、且 DAYS_AHEAD 天內開始
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, MAX_CARDS)
       .map((e, i) => {

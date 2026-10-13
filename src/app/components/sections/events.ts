@@ -15,6 +15,15 @@
 //           ▸ 跨多個部門（像「系學會發表會」全部門都參與）就把它們全列進去，
 //             卡片外框與月曆圓點會自動變成「正副會長」的黃色。
 //           ▸ 學校日程（考試週、放假等）用 "school"，只會出現在月曆、不會進上方卡片。
+//   service? ★ 這場活動對應 servicesData.ts 裡的哪一項服務（填該服務的 slug）。
+//           首頁「近期活動」卡片會用它決定：卡片底色、圖片（services/<slug>.png）、
+//           「深入了解」連到哪個服務詳情頁（#/service/<slug>）。
+//           每年活動名稱可以隨便改，只要 service 填對，圖片就一定抓得到。
+//           省略 → 程式改用標題關鍵字自動猜；猜不到就不放圖、連到行事曆。
+//           可用的 slug（活動相關）：
+//             orientation 新生迎新   camp 迎新宿營    bbq 系烤活動     xmas 聖誕大會
+//             lis-night 圖資之夜    lis-week 圖資週   alumni 系友講座  corp 企業參訪
+//             azalea 杜鵑花節       lis-cup 小圖盃    ooty 系服訂購    textbook 教科書代訂
 //
 // ── 展開版活動資訊（點開卡片後的 Modal 才會用到；以下欄位都可省略）─────────────
 //   location?  地點文字（如 "臺大二活 205 教室"）。有填才會顯示「地點」那一行。
@@ -24,9 +33,9 @@
 //   signupUrl? 報名表單連結。signup 為 true 且有填時，按下按鈕會另開這個連結。
 //
 // ── 部門與顏色（key ↔ 中文 ↔ 色碼；與全站部門色一致，可自由調整）──────────
-//   lead   正副會長   #A27F00        admin  行政      #915E3E
-//   event  活動       #9F353A        acad   學術      #42602D
-//   image  形象宣傳   #572A3F        sport  體育      #23658A
+//   pres   正副會長   #A27F00        gen    行政      #915E3E
+//   eve    活動       #9F353A        aca    學術      #42602D
+//   ima    形象宣傳   #572A3F        sp     體育      #23658A
 //   school 學校日程   #FFFFFF（白）
 // ══════════════════════════════════════════════════════════════════════════
 
@@ -68,6 +77,7 @@ export type CalEvent = {
   end?: string;   // 結束日期（含當天）"YYYY-MM-DD"；只有跨多天活動要填，單日省略
   time?: string;  // "HH:mm"（可省略）
   depts: DeptKey[]; // 一或多個部門；跨多部門會自動用正副會長黃
+  service?: string; // 對應 servicesData.ts 的服務 slug（決定首頁卡片的圖片／顏色／連結）
 
   // ── 展開版活動資訊（點開卡片後顯示；皆可省略）──
   location?: string;  // 地點文字
@@ -78,9 +88,9 @@ export type CalEvent = {
 };
 
 // ── 活動清單（可自由增減、順序不拘，畫面會自動依時間排序）───────────────
-// ★ 要新增活動：複製一行，改 title / date / time / depts 即可。
+// ★ 要新增活動：複製一筆，改 title / date / time / depts / service 即可。
 //   ▸ 全部門活動 → depts 填多個（如發表會）；月曆該日與卡片外框會變黃。
-//   ▸ 學校日程   → depts: ["school"]，只在月曆顯示、不進上方卡片。
+//   ▸ 學校日程   → depts: ["school"]，只在月曆顯示、不進上方卡片（不用填 service）。
 //   ▸ 想讓卡片「點得開」有完整資訊 → 補上 location / desc / signup 等欄位。
 export const EVENTS: CalEvent[] = [
   {
@@ -88,6 +98,7 @@ export const EVENTS: CalEvent[] = [
     date: "2026-09-20",
     time: "12:30",
     depts: ["eve"],
+    service: "orientation",
     location: "臺大二活 205 教室",
     mapUrl: "https://maps.app.goo.gl/Urh4E8u217TbJXLH9",
     desc:
@@ -102,6 +113,7 @@ export const EVENTS: CalEvent[] = [
     date: "2026-11-04",
     time: "18:30",
     depts: ["aca"],
+    service: "alumni",
     location: "系館視聽室",
     mapUrl: "https://maps.app.goo.gl/EQhTGVqFgv9bMv2z9",
     desc:
@@ -115,6 +127,7 @@ export const EVENTS: CalEvent[] = [
     date: "2026-11-08",
     time: "09:00",
     depts: ["sp"],
+    service: "lis-cup",
     location: "待定",
     mapUrl: "",
     desc:
@@ -127,6 +140,7 @@ export const EVENTS: CalEvent[] = [
     date: "2026-11-13",
     time: "18:00",
     depts: ["eve"],
+    service: "bbq",
     location: "華中露營場",
     mapUrl: "https://maps.app.goo.gl/UxDwD8V1Mre3qghcA",
     desc:
@@ -140,6 +154,7 @@ export const EVENTS: CalEvent[] = [
     date: "2026-11-28",
     time: "16:30",
     depts: ["eve"],
+    service: "xmas-ball",
     location: "WAVE CLUB Taipei",
     mapUrl: "https://maps.app.goo.gl/zmSXQzcGxFMYc7cZA",
     desc:
@@ -154,6 +169,7 @@ export const EVENTS: CalEvent[] = [
     date: "2027-03-13",
     end: "2027-03-14",
     depts: ["pres", "gen", "eve", "aca", "ima", "sp"],
+    service: "azalea",
     location: "臺大綜合體育館",
     mapUrl: "https://maps.app.goo.gl/AUNEkXhgnx4LV3zp6",
     desc:
