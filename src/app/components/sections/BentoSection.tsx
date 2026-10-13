@@ -171,15 +171,14 @@ function HoverReveal({ children, className = "" }: { children: React.ReactNode; 
 
 // 右側小卡的底部置中標籤（英＋中）。絕對定位浮在卡片底部中央（脫離版面 → 平常內容照樣置中、不留空白）；
 // 平常隱藏，hover 才淡入＋輕輕上滑。pointer-events-none 避免擋到卡片點擊。
-// ★ 手機／平板（< 1024px）：有中文標題的卡片（最新動態、學習資源、工作團隊、贊助我們、ABOUT）
-//   一律「不顯示標題」，只留圖示，讓使用者自己點進去探索，畫面更乾淨。
-//   沒有中文的社群卡（INSTAGRAM／FACEBOOK／THREADS）照樣顯示英文。電腦版維持英＋中，完全不變。
+// ★ 手機／平板（< 1024px）：所有卡片一律「不顯示標題」（包含社群卡 INSTAGRAM／FACEBOOK／THREADS），
+//   只留圖示，讓使用者自己點進去探索，畫面更乾淨。電腦版維持原本的標題，完全不變。
 //   ※ 每張卡片的 <a> 都有 aria-label，所以標題雖然看不到，讀螢幕軟體跟搜尋引擎還是知道卡片是什麼。
 //   想讓手機版標題回來 → 把 MOBILE_HIDE_CAPTIONS 改成 false。
 const MOBILE_HIDE_CAPTIONS = true;
 function CardCaption({ en, zh }: { en: string; zh: string }) {
   const isDesktop = useIsDesktop();
-  if (!isDesktop && MOBILE_HIDE_CAPTIONS && zh) return null;
+  if (!isDesktop && MOBILE_HIDE_CAPTIONS) return null;
   const showEn = isDesktop || !zh;
   const showZh = !!zh;
   return (
@@ -535,7 +534,7 @@ function PullBar() {
 function SocialCard({ label, path, vb, href, delay }: { label: string; path: string; vb: string; href: string; delay: number }) {
   return (
     <Reveal key={label} delay={delay} className="flex-1 flex flex-col">
-      <a href={href} target="_blank" rel="noopener noreferrer" className={`${BENTO_CARD} flex-1 p-4 md:p-5 cursor-pointer transition-[filter] duration-300 hover:brightness-110`} style={BENTO_BG}>
+      <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className={`${BENTO_CARD} flex-1 p-4 md:p-5 cursor-pointer transition-[filter] duration-300 hover:brightness-110`} style={BENTO_BG}>
         {/* TODO：拿到文字 logo SVG 後，把下面這個 <svg> 換成品牌文字 logo，並置中即可。 */}
         <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
           <div style={{ width: "clamp(34px, 4.5vw, 60px)", height: "clamp(34px, 4.5vw, 60px)" }}>
