@@ -42,7 +42,7 @@ export default function AcademicResourcesSection() {
     // 上內距＝--page-content-top（globals.css），內容一律從標題下方開始、不會重疊。
     <section id="resources" className="relative bg-black px-5 sm:px-8 md:px-14 pt-[var(--page-content-top)] pb-16 sm:pb-20 md:pb-24">
       {/* 標題不可包在 <Reveal> 裡（Reveal 的 transform 會讓標題跑位） */}
-      <PageEyebrow text="各種服務・學習資源" />
+      <PageEyebrow title="servicesResources" />
       <div className="max-w-[1400px] mx-auto">
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10">

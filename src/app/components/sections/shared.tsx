@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { PAGE_TITLES, PAGE_TITLE_LAYOUT, type PageTitleKey } from "./pageTitles";
 
 export function pad(n: number) {
   return String(n);
@@ -71,20 +72,20 @@ export function Reveal({ children, delay = 0, className = "" }: { children: Reac
 }
 
 // ── 頁面小標題（「— 關於我們・現任團隊」那一行）─────────────────────────────
-// 全站統一位置：一律釘在「所在區塊的頂端往下 --eyebrow-top」，左緣對齊站內 1400px 內容欄。
-// ★ 要調上下位置／內容起點，改 globals.css 的 --eyebrow-top、--page-content-top（全站一起變）。
+// 全站統一位置：位置設定集中在 pageTitles.ts。
+// ★ 要調整內容起點，改 globals.css 的 --page-content-top，內容才不會壓到標題。
 // ★ 使用規則（照做位置才會一致）：
 //   1. 直接放在 <section className="relative ..."> 裡，外面「不要」再包 <Reveal>
 //      （Reveal 有 transform，會把標題的定位基準換成 Reveal 自己，標題就會跑位）。
 //   2. 該頁內容的上內距用 pt-[var(--page-content-top)]，內容就不會壓到標題。
-export function PageEyebrow({ text }: { text: string }) {
+export function PageEyebrow({ title }: { title: PageTitleKey }) {
   return (
     <div
       className="absolute inset-x-0 z-20 pointer-events-none select-none"
-      style={{ top: "var(--eyebrow-top)" }}
+      style={{ top: PAGE_TITLE_LAYOUT.top }}
     >
       <p
-        className="max-w-[1400px] mx-auto px-5 sm:px-8 md:px-14 tracking-widest"
+        className={PAGE_TITLE_LAYOUT.textClassName}
         style={{
           fontSize: "14px",
           lineHeight: "20px",
@@ -92,7 +93,7 @@ export function PageEyebrow({ text }: { text: string }) {
           color: "#FFFFFF",
         }}
       >
-        — {text}
+        — {PAGE_TITLES[title]}
       </p>
     </div>
   );

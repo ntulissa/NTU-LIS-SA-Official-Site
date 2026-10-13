@@ -225,7 +225,7 @@ export default function SponsorSection() {
 
       {/* ══════════ A. Hero ══════════ */}
       <section className="relative min-h-screen flex items-center overflow-hidden px-5 sm:px-8 md:px-14 pt-[var(--page-content-top)] lg:pt-24 pb-28">
-        <PageEyebrow text="支持我們・贊助我們" />
+        <PageEyebrow title="supportSponsors" />
         <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* 左：文案 */}
           <div>

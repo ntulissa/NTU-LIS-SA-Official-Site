@@ -1093,7 +1093,7 @@ export default function JoinUsSection() {
 
       {/* ══════════ A. Hero ══════════ */}
       <section className="relative min-h-screen flex items-center overflow-hidden px-5 sm:px-8 md:px-14 pt-[var(--page-content-top)] lg:pt-24 pb-32">
-        <PageEyebrow text="加入我們" />
+        <PageEyebrow title="joinUs" />
         <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
             <Reveal delay={60}>

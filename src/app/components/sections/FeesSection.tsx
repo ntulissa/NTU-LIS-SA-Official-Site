@@ -920,7 +920,7 @@ export default function FeesSection() {
       {/* ── A. Hero ─────────────────────────────────────────────────── */}
       <section className="relative min-h-screen bg-black overflow-hidden">
         {/* 小標題（麵包屑） */}
-        <PageEyebrow text="支持我們・系學會費" />
+        <PageEyebrow title="supportFees" />
 
         {/* 背景草寫「fee lissa.」：真・手寫描繪（一筆一筆畫出來）+ 筆尖 */}
         <HandwrittenFee />

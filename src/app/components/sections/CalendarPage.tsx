@@ -913,7 +913,7 @@ export default function CalendarPage() {
         @media (prefers-reduced-motion: reduce) { .cal-pop, .cal-modal-in { animation: none; } .cal-fade { transition: none !important; } }
       `}</style>
 
-      <PageEyebrow text="最新動態・系學會行事曆" />
+      <PageEyebrow title="newsCalendar" />
 
       <div className="max-w-[1200px] mx-auto">
 

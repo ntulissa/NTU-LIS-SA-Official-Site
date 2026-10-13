@@ -493,7 +493,7 @@ function ServicesGrid() {
   return (
     <section className="relative bg-black min-h-screen px-4 sm:px-6 lg:px-10 pt-[var(--page-content-top)] pb-10">
       <style>{`.svc-cell:hover{ background: var(--svc-fill); }${DEPT_FADE_CSS}`}</style>
-      <PageEyebrow text="各種服務・各部業務" />
+      <PageEyebrow title="servicesDepartments" />
 
       {/* 手機／平板：改用分部門的兩欄清單；電腦版：原本的 Bento Grid */}
       {!isDesktop ? <ServicesListMobile showZh={showZh} /> : (
@@ -640,7 +640,7 @@ function ServiceDetail({ slug }: { slug: string }) {
   return (
     <section className="relative min-h-screen" style={{ background: color }}>
       <style>{GO_DEST_CSS}</style>
-      <PageEyebrow text="各種服務・各部業務" />
+      <PageEyebrow title="servicesDepartments" />
       <div className="relative max-w-[1400px] mx-auto px-5 sm:px-8 md:px-12 lg:px-16 pt-[var(--page-content-top)] pb-16 lg:pb-24 lg:min-h-screen lg:flex lg:flex-col lg:justify-center">
         {/* 回上頁 */}
         <Reveal>

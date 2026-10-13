@@ -39,7 +39,6 @@ function asset(folder: string, ...files: string[]): string | undefined {
 // ══════════════════════════════════════════════════════════════
 // ★★ 版面常數區 ★★
 // ══════════════════════════════════════════════════════════════
-const EYEBROW = "關於我們・學會簡介";
 const HEADING = { text: "你想知道的臺大圖資系學會", size: 48 };
 const CARD = {
   w: "min(600px, max(min(78vw, 380px), 34vw))", // 卡片寬：桌機約 34vw、手機約 78vw、最大 600px
@@ -423,7 +422,7 @@ export default function AboutUsSection() {
 
       {/* 標題 */}
       <div className="px-[clamp(20px,4.3vw,74px)]">
-        <PageEyebrow text={EYEBROW} />
+        <PageEyebrow title="aboutIntro" />
         <Reveal delay={60}>
           <h2 className="text-white text-center mt-[clamp(20px,5vh,64px)] mb-[clamp(24px,6vh,72px)]" style={{ fontFamily: zhHead, fontWeight: 700, fontSize: `clamp(24px, 3vw, ${HEADING.size}px)`, letterSpacing: "0.16em", paddingLeft: "0.16em" }}>
             {HEADING.text}

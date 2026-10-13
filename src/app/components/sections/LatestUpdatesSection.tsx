@@ -25,7 +25,7 @@ export default function LatestUpdatesSection({ standalone = false }: { standalon
       }`}
     >
       <div className="max-w-[1400px] mx-auto">
-        <PageEyebrow text="最新動態・近期公告" />
+        <PageEyebrow title="newsUpdates" />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
           {ANNOUNCEMENTS.map((item, i) => (

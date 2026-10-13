@@ -360,7 +360,7 @@ export default function TeamSection({ standalone = false }: { standalone?: boole
           style={{ paddingTop: "var(--page-content-top)", paddingBottom: isDesktop ? CONTENT_PADDING_Y : "40px" }}
         >
           <div>
-            <PageEyebrow text="關於我們・現任團隊" />
+            <PageEyebrow title="aboutTeam" />
             <Reveal delay={90}>
               <p className="text-white mb-10" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(1.0rem,0.95vw,24px)", lineHeight: 2, letterSpacing: "0.1em", maxWidth: "520px" }}>
                 臺大圖資系學會目前由正副會長統領，下轄行政、活動、學術、形象宣傳、體育等五個常設部門（第 52 屆始）：

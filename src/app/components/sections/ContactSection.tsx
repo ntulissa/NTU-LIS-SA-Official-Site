@@ -198,7 +198,7 @@ export default function ContactSection() {
   return (
     <section id="contact" className="relative bg-black min-h-[100svh] flex flex-col px-5 sm:px-8 md:px-14 pt-[var(--page-content-top)] pb-6 sm:pb-8 lg:pb-12">
       <div className="max-w-[1400px] w-full mx-auto flex flex-col flex-1 min-h-0">
-        <PageEyebrow text="各種服務・聯絡我們" />
+        <PageEyebrow title="servicesContact" />
 
         {/* md 以上：grid 撐滿剩餘高度、兩列各佔 1fr → 兩排卡片剛好一屏 */}
         <div className="grid grid-cols-12 gap-4 sm:gap-5 lg:gap-6 md:flex-1 md:min-h-0 md:[grid-template-rows:1fr_1fr]">

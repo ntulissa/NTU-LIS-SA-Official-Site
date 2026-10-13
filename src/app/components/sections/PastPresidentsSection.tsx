@@ -559,7 +559,7 @@ export default function PastPresidentsSection() {
             lg:min-h-screen 仍讓「團隊成員」落到第二屏，需下滑才看到。 */}
         <div className="lg:min-h-screen pt-[var(--page-content-top)] pb-16 lg:pb-24">
           <div className="max-w-[640px]">
-            <PageEyebrow text="關於我們・歷任會長" />
+            <PageEyebrow title="aboutPastPresidents" />
             <Reveal delay={80}>
               <h3
                 className="leading-tight mb-3"
