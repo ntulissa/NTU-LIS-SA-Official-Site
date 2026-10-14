@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { PageEyebrow, Reveal } from "../general/shared";
+import { defineText, useI18n } from "../i18n";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 關於我們（取代舊 HistorySection，錨點仍為 #about）
@@ -15,12 +16,63 @@ import { PageEyebrow, Reveal } from "../general/shared";
 // 素材（缺檔不會壞，會顯示替代圖）：
 //   src/imports/AboutUs/since1974.svg、ntulissaport.svg、玩.svg
 //   src/imports/JoinUs/ntulissa.svg
-// ★ 尺寸、動畫速度都集中在《版面常數區》。
+// ★ 尺寸、動畫速度都集中在《版面常數區》；文字（中英）集中在 TEXT。
 // ─────────────────────────────────────────────────────────────────────────
 
 const zhHead = "'Chiron Hei HK Text','Noto Sans TC', sans-serif";
 const zhBody = "'Noto Sans TC', sans-serif";
-const mono   = "'Ubuntu Sans Mono','Noto Sans TC', monospace";
+
+// ── 畫面文字（中英兩份；英文那份結構要和中文一樣）──────────────────────────
+// cards：五張卡片下方的敘述，每一個字串＝一行（會自動換行）。
+// links：第六張卡的三個按鈕（順序要和下面 LINK_HREFS 一樣）。
+const TEXT = defineText({
+  zh: {
+    heading: "你想知道的臺大圖資系學會",
+    cards: [
+      ["創立於 1974 年（民國 63 年）"],
+      ["提供臺大圖資系同學各種服務，做你大學四年的避風港。"],
+      ["舉辦活動、體育系隊", "熱血揮汗，凝聚系上的每份向心力。"],
+      ["公共空間、學術活動", "搭起同學們與系辦溝通的橋樑。"],
+      ["系學會帶你一起探索", "課業、系隊與大學生涯的無限可能"],
+    ],
+    links: [
+      { label: "認識現任團隊", sub: "第 53 屆系學會" },
+      { label: "認識歷屆團隊", sub: "了解臺大圖資系學會自創立以來各屆團隊事蹟" },
+      { label: "加入我們", sub: "加入工作團隊" },
+    ],
+    sinceAlt: "SINCE 1974 民國六十三年",
+    rocYear: "民國六十三年",
+    harborLabel: "避風港：小船停靠在 ntu lis sa 碼頭",
+    orbitLabel: "六個部門圍繞著 ntu lis sa",
+    bridgeLabel: "斜張橋與煙火",
+    playAlt: "玩",
+    prev: "上一張",
+    next: "下一張",
+  },
+  en: {
+    heading: "Everything you want to know about NTU LISSA",
+    cards: [
+      ["Founded in 1974"],
+      ["Serving every NTU LIS student — your safe harbor through four years of university."],
+      ["Events and sports teams", "bring our whole department together."],
+      ["Shared spaces and academic events", "bridge students and the department office."],
+      ["Explore the endless possibilities of", "classes, sports and university life with us"],
+    ],
+    links: [
+      { label: "Meet the current team", sub: "The 53rd LISSA" },
+      { label: "Meet past teams", sub: "Every LISSA team since our founding" },
+      { label: "Join us", sub: "Become part of the team" },
+    ],
+    sinceAlt: "SINCE 1974",
+    rocYear: "",
+    harborLabel: "Safe harbor: a boat docked at the ntu lis sa pier",
+    orbitLabel: "Six departments orbiting ntu lis sa",
+    bridgeLabel: "A cable-stayed bridge with fireworks",
+    playAlt: "Play",
+    prev: "Previous",
+    next: "Next",
+  },
+});
 
 // ── 素材自動讀取（舊版 Vite 請把 query/import 換成 as:"url"）──
 const ASSETS = import.meta.glob(["/src/**/AboutUs/*.{svg,png,webp}"], {
@@ -39,14 +91,14 @@ function asset(folder: string, ...files: string[]): string | undefined {
 // ══════════════════════════════════════════════════════════════
 // ★★ 版面常數區 ★★
 // ══════════════════════════════════════════════════════════════
-const HEADING = { text: "你想知道的臺大圖資系學會", size: 48 };
+const HEADING_SIZE = 48;
 const CARD = {
   w: "min(600px, max(min(78vw, 380px), 34vw))", // 卡片寬：桌機約 34vw、手機約 78vw、最大 600px
   ratio: "700 / 760",             // 卡片寬高比
   gap: 28,                        // 卡片間距(px)
   radius: 20,                     // 圓角(px)
 };
-const CARD_TEXT = { size: 24, lh: 2, ls: "0.2em" }; // 卡片敘述文字（Chiron Hei 700）
+const CARD_TEXT = { size: 24, lh: 2, ls: "0.2em", lsEn: "0.01em" }; // 卡片敘述文字（Chiron Hei 700）；lsEn＝英文字距
 const SHOW_QMARK = true;          // 若 玩.svg 已經包含「？」，改成 false
 const FIREWORK_EVERY = 520;       // 煙火發射間隔(ms)
 const ORBIT_SEC = 22;             // 向心力：繞一圈秒數
@@ -54,12 +106,8 @@ const ORBIT_SEC = 22;             // 向心力：繞一圈秒數
 // 正副會長 ＋ 五部門色（與 TeamSection / JoinUs 一致）
 const SIX = ["#A27F00", "#915E3E", "#9F353A", "#42602D", "#572A3F", "#23658A"];
 
-// 第六張卡的連結
-const LINKS = [
-  { label: "認識現任團隊", sub: "第 53 屆系學會", href: "#/current-team" },
-  { label: "認識歷屆團隊", sub: "了解臺大圖資系學會自創立以來各屆團隊事蹟", href: "#/presidents" },
-  { label: "加入我們", sub: "加入工作團隊", href: "#/join" },
-];
+// 第六張卡的連結（文字在 TEXT.links，順序要一樣）
+const LINK_HREFS = ["#/current-team", "#/presidents", "#/join"];
 
 // ══════════════════════════════════════════════════════════════
 // 共用
@@ -77,13 +125,20 @@ function useInView<T extends Element>(threshold = 0.25) {
   return [ref, inView] as const;
 }
 
-function CardText({ children, align = "center" }: { children: ReactNode; align?: "center" | "left" }) {
+// 卡片敘述：lines 每個字串一行
+function CardText({ lines, align = "center" }: { lines: string[]; align?: "center" | "left" }) {
+  const { track } = useI18n();
   return (
     <p
       className="text-black"
-      style={{ fontFamily: zhHead, fontWeight: 700, fontSize: `clamp(14px, 1.45vw, ${CARD_TEXT.size}px)`, lineHeight: CARD_TEXT.lh, letterSpacing: CARD_TEXT.ls, textAlign: align }}
+      style={{ fontFamily: zhHead, fontWeight: 700, fontSize: `clamp(14px, 1.45vw, ${CARD_TEXT.size}px)`, lineHeight: CARD_TEXT.lh, letterSpacing: track(CARD_TEXT.ls, CARD_TEXT.lsEn), textAlign: align }}
     >
-      {children}
+      {lines.map((line, i) => (
+        <Fragment key={i}>
+          {i > 0 && <br />}
+          {line}
+        </Fragment>
+      ))}
     </p>
   );
 }
@@ -105,13 +160,17 @@ function Card({ visual, text, bleed = false }: { visual: ReactNode; text?: React
 // ① SINCE 1974
 // ══════════════════════════════════════════════════════════════
 function SinceVisual() {
+  const { pick } = useI18n();
+  const tx = pick(TEXT);
   const src = asset("AboutUs", "since1974.svg", "since1974.png");
-  if (src) return <img src={src} alt="SINCE 1974 民國六十三年" className="ab-rise w-[62%] h-auto select-none" draggable={false} />;
+  if (src) return <img src={src} alt={tx.sinceAlt} className="ab-rise w-[62%] h-auto select-none" draggable={false} />;
   return (
     <div className="ab-rise text-black text-center select-none">
       <p style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 700, fontSize: "clamp(18px,2.2vw,40px)", letterSpacing: "0.2em" }}>SINCE</p>
       <p style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 700, fontSize: "clamp(56px,7vw,130px)", letterSpacing: "0.1em", lineHeight: 1.1 }}>1974</p>
-      <p style={{ fontFamily: "'Noto Serif TC', serif", fontWeight: 900, fontSize: "clamp(16px,1.8vw,32px)", letterSpacing: "0.1em" }}>民國六十三年</p>
+      {tx.rocYear && (
+        <p style={{ fontFamily: "'Noto Serif TC', serif", fontWeight: 900, fontSize: "clamp(16px,1.8vw,32px)", letterSpacing: "0.1em" }}>{tx.rocYear}</p>
+      )}
     </div>
   );
 }
@@ -127,10 +186,11 @@ function wavePath(y: number, x0: number, x1: number, amp = 13) {
 }
 
 function HarborVisual() {
+  const { pick } = useI18n();
   const port = asset("AboutUs", "ntulissaport.svg", "ntulissaport.png");
   const W1 = 205, W2 = 300, X0 = 418, X1 = 955;
   return (
-    <svg viewBox="0 0 1000 400" className="w-full h-auto overflow-visible" aria-label="避風港：小船停靠在 ntu lis sa 碼頭">
+    <svg viewBox="0 0 1000 400" className="w-full h-auto overflow-visible" aria-label={pick(TEXT).harborLabel}>
       <defs>
         <clipPath id="abWaveClip"><rect x={X0 - 2} y="0" width={X1 - X0 + 2} height="400" /></clipPath>
         <linearGradient id="abWaveFade" x1="0" x2="1">
@@ -173,10 +233,11 @@ function HarborVisual() {
 // ③ 向心力：六色球繞著 ntulissa 旋轉
 // ══════════════════════════════════════════════════════════════
 function OrbitVisual() {
+  const { pick } = useI18n();
   const logo = asset("AboutUs", "ntulissa.svg");
   const R = 190;
   return (
-    <svg viewBox="0 0 600 600" className="w-[88%] h-auto" aria-label="六個部門圍繞著 ntu lis sa">
+    <svg viewBox="0 0 600 600" className="w-[88%] h-auto" aria-label={pick(TEXT).orbitLabel}>
       <g className="ab-orbit" style={{ animationDuration: `${ORBIT_SEC}s` }}>
         {SIX.map((c, i) => {
           const a = (i / SIX.length) * Math.PI * 2 - Math.PI / 2;
@@ -227,6 +288,7 @@ function Firework({ b }: { b: Burst }) {
 }
 
 function BridgeVisual() {
+  const { pick } = useI18n();
   const [ref, inView] = useInView<SVGSVGElement>(0.3);
   const [bursts, setBursts] = useState<Burst[]>([]);
   const idRef = useRef(0);
@@ -253,7 +315,7 @@ function BridgeVisual() {
   const outer = [[20, -10], [55, -10], [95, -10]];
   const outerY = [70, 120, 215];
   return (
-    <svg ref={ref} viewBox="0 -230 1000 540" className="w-full h-auto" aria-label="斜張橋與煙火">
+    <svg ref={ref} viewBox="0 -230 1000 540" className="w-full h-auto" aria-label={pick(TEXT).bridgeLabel}>
       {/* 煙火在橋的後面 */}
       {bursts.map((b) => <Firework key={b.id} b={b} />)}
 
@@ -277,14 +339,15 @@ function BridgeVisual() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// ⑤ 玩？
+// ⑤ 玩？（「玩」字圖案中英文版都保留，當作品牌視覺）
 // ══════════════════════════════════════════════════════════════
 function PlayVisual() {
+  const { pick } = useI18n();
   const src = asset("AboutUs", "玩.svg", "play.svg", "玩.png");
   return (
     <div className="flex items-end justify-center select-none" style={{ gap: "4%" }}>
       {src ? (
-        <img src={src} alt="玩" className="ab-hop h-auto" style={{ width: SHOW_QMARK ? "46%" : "80%" }} draggable={false} />
+        <img src={src} alt={pick(TEXT).playAlt} className="ab-hop h-auto" style={{ width: SHOW_QMARK ? "46%" : "80%" }} draggable={false} />
       ) : (
         <span className="ab-hop text-black" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: "clamp(90px, 12vw, 220px)", lineHeight: 1 }}>玩</span>
       )}
@@ -296,6 +359,8 @@ function PlayVisual() {
 // ⑥ 連結
 // ══════════════════════════════════════════════════════════════
 function LinksCard() {
+  const { pick, track } = useI18n();
+  const links = pick(TEXT).links;
   return (
     <article
       className="ab-card relative shrink-0 bg-white overflow-hidden"
@@ -303,17 +368,17 @@ function LinksCard() {
     >
       {/* 內層再包一層：padding 百分比才會以「卡片寬」計算 */}
       <div className="absolute inset-0 flex flex-col justify-center" style={{ padding: "0 7%", gap: "9%" }}>
-      {LINKS.map((l) => (
-        <div key={l.href}>
+      {links.map((l, i) => (
+        <div key={LINK_HREFS[i]}>
           <a
-            href={l.href}
+            href={LINK_HREFS[i]}
             className="inline-flex items-center gap-[0.7em] whitespace-nowrap bg-black text-white rounded-full hover:bg-[#2a2a2a] transition-colors duration-200 group"
-            style={{ fontFamily: zhBody, fontWeight: 900, fontSize: "clamp(17px, 2vw, 38px)", letterSpacing: "0.06em", padding: "0.4em 1.1em" }}
+            style={{ fontFamily: zhBody, fontWeight: 900, fontSize: "clamp(17px, 2vw, 38px)", letterSpacing: track("0.06em", "0.01em"), padding: "0.4em 1.1em" }}
           >
             {l.label}
             <ArrowRight strokeWidth={3} className="group-hover:translate-x-1 transition-transform duration-200" style={{ width: "1em", height: "1em" }} />
           </a>
-          <p className="text-black mt-[0.9em]" style={{ fontFamily: zhHead, fontWeight: 700, fontSize: "clamp(12px, 1.2vw, 20px)", letterSpacing: "0.18em", paddingLeft: "0.4em" }}>
+          <p className="text-black mt-[0.9em]" style={{ fontFamily: zhHead, fontWeight: 700, fontSize: "clamp(12px, 1.2vw, 20px)", letterSpacing: track("0.18em"), paddingLeft: "0.4em" }}>
             {l.sub}
           </p>
         </div>
@@ -326,14 +391,14 @@ function LinksCard() {
 // ══════════════════════════════════════════════════════════════
 // 輪播控制鈕（Apple 式圓形箭頭）
 // ══════════════════════════════════════════════════════════════
-function NavBtn({ dir, disabled, onClick }: { dir: "prev" | "next"; disabled: boolean; onClick: () => void }) {
+function NavBtn({ dir, disabled, onClick, label }: { dir: "prev" | "next"; disabled: boolean; onClick: () => void; label: string }) {
   const Icon = dir === "prev" ? ChevronLeft : ChevronRight;
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-label={dir === "prev" ? "上一張" : "下一張"}
+      aria-label={label}
       className="flex items-center justify-center rounded-full border-2 border-white text-white transition-all duration-200 hover:bg-white hover:text-black disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-white disabled:cursor-default"
       style={{ width: 46, height: 46 }}
     >
@@ -344,6 +409,8 @@ function NavBtn({ dir, disabled, onClick }: { dir: "prev" | "next"; disabled: bo
 
 // ══════════════════════════════════════════════════════════════
 export default function AboutUs() {
+  const { pick, track } = useI18n();
+  const tx = pick(TEXT);
   const trackRef = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
@@ -367,6 +434,8 @@ export default function AboutUs() {
     const w = card ? card.offsetWidth + CARD.gap : el.clientWidth * 0.8;
     el.scrollBy({ left: dir * w, behavior: "smooth" });
   };
+
+  const headingTrack = track("0.16em", "0.01em");
 
   return (
     <section id="about" className="bg-black relative min-h-screen flex flex-col justify-center pt-[var(--page-content-top)] pb-16 overflow-hidden">
@@ -424,8 +493,8 @@ export default function AboutUs() {
       <div className="px-[clamp(20px,4.3vw,74px)]">
         <PageEyebrow title="aboutIntro" />
         <Reveal delay={60}>
-          <h2 className="text-white text-center mt-[clamp(20px,5vh,64px)] mb-[clamp(24px,6vh,72px)]" style={{ fontFamily: zhHead, fontWeight: 700, fontSize: `clamp(24px, 3vw, ${HEADING.size}px)`, letterSpacing: "0.16em", paddingLeft: "0.16em" }}>
-            {HEADING.text}
+          <h2 className="text-white text-center mt-[clamp(20px,5vh,64px)] mb-[clamp(24px,6vh,72px)]" style={{ fontFamily: zhHead, fontWeight: 700, fontSize: `clamp(24px, 3vw, ${HEADING_SIZE}px)`, letterSpacing: headingTrack, paddingLeft: headingTrack }}>
+            {tx.heading}
           </h2>
         </Reveal>
       </div>
@@ -438,11 +507,11 @@ export default function AboutUs() {
           className="ab-track flex overflow-x-auto overscroll-x-contain py-3"
           style={{ gap: CARD.gap, scrollSnapType: "x mandatory", paddingLeft: "clamp(20px,4.3vw,74px)", paddingRight: "clamp(20px,4.3vw,74px)", scrollPaddingLeft: "clamp(20px,4.3vw,74px)" }}
         >
-          <Card visual={<SinceVisual />} text={<CardText>創立於 1974 年（民國 63 年）</CardText>} />
-          <Card visual={<HarborVisual />} text={<CardText align="left">提供臺大圖資系同學各種服務，做你大學四年的避風港。</CardText>} />
-          <Card visual={<OrbitVisual />} text={<CardText>舉辦活動、體育系隊<br />熱血揮汗，凝聚系上的每份向心力。</CardText>} />
-          <Card bleed visual={<BridgeVisual />} text={<CardText>公共空間、學術活動<br />搭起同學們與系辦溝通的橋樑。</CardText>} />
-          <Card visual={<PlayVisual />} text={<CardText>系學會帶你一起探索<br />課業、系隊與大學生涯的無限可能</CardText>} />
+          <Card visual={<SinceVisual />} text={<CardText lines={tx.cards[0]} />} />
+          <Card visual={<HarborVisual />} text={<CardText lines={tx.cards[1]} align="left" />} />
+          <Card visual={<OrbitVisual />} text={<CardText lines={tx.cards[2]} />} />
+          <Card bleed visual={<BridgeVisual />} text={<CardText lines={tx.cards[3]} />} />
+          <Card visual={<PlayVisual />} text={<CardText lines={tx.cards[4]} />} />
           <LinksCard />
           {/* 右側留白，讓最後一張能完整滑入 */}
           <div className="shrink-0" style={{ width: 1 }} aria-hidden />
@@ -451,8 +520,8 @@ export default function AboutUs() {
 
       {/* 左右切換 */}
       <div className="flex items-center justify-center gap-5 mt-[clamp(20px,4vh,44px)]">
-        <NavBtn dir="prev" disabled={atStart} onClick={() => step(-1)} />
-        <NavBtn dir="next" disabled={atEnd} onClick={() => step(1)} />
+        <NavBtn dir="prev" label={tx.prev} disabled={atStart} onClick={() => step(-1)} />
+        <NavBtn dir="next" label={tx.next} disabled={atEnd} onClick={() => step(1)} />
       </div>
     </section>
   );

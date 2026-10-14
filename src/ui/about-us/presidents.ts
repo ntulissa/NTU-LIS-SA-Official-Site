@@ -10,7 +10,9 @@
 //   cls       會長系級（如 "B12"）。
 //   img       會長照片路徑；留空字串 "" ＝顯示「照片待補」佔位框（見下方「照片怎麼放」）。
 //   intro     該屆簡介（留空字串 "" ＝畫面顯示「本屆簡介整理中」）。
+//   introEn?  該屆簡介（英文版；可省略，省略＝英文版顯示「整理中」提示）。
 //   depts     團隊成員名單（陣列；沒有就給 []）。每個部門：{ en, zh, color, members:[{n,c}] }。
+//             部門的英文全名會依 en 縮寫自動帶出（見下方 DEPT_FULL_EN）。
 //   election? 該屆選舉結果（可省略；有填才會在「團隊成員」下方顯示選舉結果面板）。
 //
 // ★ 陣列 PRESIDENTS 請由「新 → 舊」排序（畫面預設顯示第一個＝現任）。任期由屆數自動推算。
@@ -38,6 +40,7 @@ export type Election = {
   electorate: number; // 選舉人數（具投票資格的總人數）
   candidates: Candidate[]; // 參選人名單（同一組正／副會長）
   source?: string; // 資料來源附註（可省略，預設「臺大圖資系學會選委會」）
+  sourceEn?: string; // 資料來源附註（英文版；可省略）
   // 有效票＝同意＋不同意（自動計算）；投票率＝有效票÷選舉人數（自動計算、四捨五入）。
 };
 
@@ -48,6 +51,7 @@ export type President = {
   cls: string; // 會長系級，如 B12
   img: string; // 會長照片（見上方「照片怎麼放」；留空字串會顯示佔位框）
   intro: string; // 該屆簡介（留空字串會顯示「資料整理中」）
+  introEn?: string; // 該屆簡介（英文版）
   depts: Dept[]; // 團隊成員（依 [GEN,SP,ACA,EVE,IMA,VP] 順序＝畫面左右兩欄排列）
   election?: Election; // 該屆選舉結果（可省略；有填才會在團隊成員下方顯示選舉結果面板）
 };
@@ -63,6 +67,20 @@ export const C = {
   SEC: "#4E6E6B", // 執秘（復古 petrol 綠）
   MKT: "#5B6E8C", // 行宣部（復古 denim 藍）
   PR: "#A9553F", // 公關部（復古磚紅）
+};
+
+// ── 部門英文全名（英文版的團隊卡片用；key＝部門的 en 縮寫）──
+export const DEPT_FULL_EN: Record<string, string> = {
+  GEN: "General Affairs",
+  SP: "Sports",
+  ACA: "Academic Affairs",
+  EVE: "Events",
+  IMA: "Media & Design",
+  VP: "Vice President",
+  SEC: "Executive Secretaries",
+  ART: "Art & Design",
+  MKT: "Promotion",
+  PR: "Public Relations",
 };
 
 // 建立「僅有會長基本資料」的一屆（簡介 intro、團隊名單 depts 日後可再補）。
@@ -81,6 +99,8 @@ const P53: President = {
   img: "/Presidents/53.png",
   intro:
     "第 53 屆系學會由會長黃子芸領軍，於 2025 年 7 月 30 日完成交接正式上任。本屆正副會長先前皆曾任第 52 屆系學會幹部，具備實務運作經驗；新團隊期望承接上一屆的基礎，推出讓系上同學更有感的活動與服務，成為圖資系學生大學四年最安心的避風港。本屆除了將持續舉辦各種活動、學術講座外，亦會做各大系隊最堅實的後盾，扮演學生、系辦與教師間的溝通橋樑，為系上帶來「看得見」的改變。",
+  introEn:
+    "The 53rd association, led by President Tzu-Yun Huang, officially took office after the handover on July 30, 2025. Both the President and Vice President served on the 52nd association and bring hands-on experience. Building on the previous term, the new team aims to offer events and services students can really feel, and to be the safest harbor for LIS students throughout university. Beyond events and academic talks, this term will stand firmly behind our sports teams and act as a bridge between students, the department office and faculty — bringing visible change to the department.",
   depts: [],
 
   election: {
@@ -106,6 +126,8 @@ const P52: President = {
   img: "/Presidents/52.jpg",
   intro:
     "第 52 屆系學會由會長曾柏翰領軍，以打造「不一樣的系學會」為核心願景，帶領系學會重新回歸由大三學生擔任會長領導的傳統。任內追求讓同學們更有感於系學會的存在，包含爭取開放學輔室冷氣使用權限、建立學生交流版社群，並為回應系上同學的期望，成功復辦睽違四年的圖資之夜。組織方面，本屆整併公關、行宣、美宣為「形象宣傳部」，並獨立出專責文書財務的「行政部」，同時廣招大一新血使團隊擴充至 40 人規模，期望讓每位圖資人無論能力或天賦，都能在系學會找到屬於自己的一席之地；此外，本屆團隊亦致力於築起學生與教職員之間的橋樑，加強系學會與教授群的緊密連結，爭取更多教授們的參與和指導。",
+  introEn:
+    "Led by President Po-Han Tseng, the 52nd association set out to build \"a different kind of student association\" and returned to the tradition of a junior-year president. The term focused on making the association's presence felt: opening the lounge air conditioning, creating a student community board, and — answering students' wishes — reviving LIS Night after four years. Organizationally, it merged public relations, promotion and design into Media & Design, created a dedicated General Affairs department for paperwork and finances, and recruited many freshmen to grow the team to 40 people, so every LIS student could find a place. The team also worked to strengthen ties with faculty and invite more professors to take part.",
   depts: [
     {
       en: "GEN",
@@ -193,6 +215,8 @@ const P51: President = {
   img: "",
   intro:
     "第 51 屆系學會於任內積極維穩會務運作，後期由副會長曾柏翰攜手團隊攜手努力完成交棒。本屆最大亮點為成功復辦睽違三年的系上體育盛事「小圖盃」，重新帶動系上的體育風氣與交流向心力；同時持續維持基礎會務服務，為系學會後續的制度重組與發展奠定基礎。",
+  introEn:
+    "The 51st association worked to keep operations steady, with Vice President Po-Han Tseng and the team completing the handover in the later part of the term. Its highlight was reviving the LIS Cup after three years, rekindling the department's sporting spirit and sense of community, while maintaining core services and laying the groundwork for the association's later restructuring.",
   depts: [
     { en: "VP", zh: "副會長", color: C.VP, members: [{ n: "曾柏翰", c: "B12" }] },
     { en: "SEC", zh: "執秘", color: C.SEC, members: [{ n: "王怡婷", c: "B12" }, { n: "洪思涵", c: "B12" }] },
@@ -239,6 +263,8 @@ const P50: President = {
   img: "",
   intro:
     "第 50 屆國立臺灣大學圖書資訊學系系學會完整延續並扎根了多項傳統學系活動，包含全校規模的杜鵑花節、傳承職涯經驗的系友講座，以及經典的「圖資週」（該指標性活動於本屆後暫時畫下句點）。本屆由副會長張方瑜協同團隊成員共同推動會務，各部門亦招募多位幹部與大一新血投入協助，確保各項傳統活動與日常服務得以順利完成，為系學會維持了穩定的營運能量。",
+  introEn:
+    "The 50th association carried on and strengthened many of the department's traditions, including the university-wide Azalea Festival, alumni career talks and the classic LIS Week (which went on hiatus after this term). Vice President Fang-Yu Chang worked with the team to drive the association forward, and every department recruited officers and freshmen to help, ensuring that traditional events and everyday services ran smoothly and keeping the association on a steady footing.",
   depts: [
     { en: "VP", zh: "副會長", color: C.VP, members: [{ n: "張方瑜", c: "B11" }] },
     { en: "SEC", zh: "執秘", color: C.SEC, members: [{ n: "陳佩玲", c: "B11" }, { n: "黃渝婷", c: "B11" }] },
@@ -288,6 +314,8 @@ const P49: President = {
   img: "",
   intro:
     "第 49 屆系學會由會長陳子勻領軍，憑藉優秀的領導力與高度凝聚的工作團隊，展現極為高效且和諧的自治能量。本屆極力專注於圖資系本身的定位與推廣，從選課指南到職涯發展皆進行深度的資源整合與輔導，幫助系上同學更清晰地理解學門價值與未來方向，為近年兼具組織執行力與實質服務的團隊之一。",
+  introEn:
+    "Led by President Tzu-Yun Chen, the 49th association showed remarkably efficient and harmonious self-governance thanks to strong leadership and a close-knit team. It focused on defining and promoting the LIS discipline itself, bringing together resources and guidance from course selection to career development, helping students better understand the value of the field and their future direction — one of the most capable and service-minded teams in recent years.",
   depts: [
     { en: "VP", zh: "副會長", color: C.VP, members: [{ n: "歐禹沛", c: "B10" }] },
     { en: "SEC", zh: "執秘", color: C.SEC, members: [{ n: "李冠毅", c: "B10" }, { n: "李政洋", c: "B10" }] },
@@ -337,6 +365,8 @@ const P48: President = {
   img: "",
   intro:
     "第 48 屆系學會由會長陳亨柔帶領，正值疫情後百廢待興的關鍵時刻，團隊積極推動系務復甦，首要任務即為重啟並整理學輔室，重新為系上同學打造一處能夠舒適休息、討論與讀書的自治空間。在學術與職涯發展上，本屆同樣專注於圖資系本身的定位推廣，針對選課策略與職涯探索提供系統化的整理與指引，協助同學釐清學習方向；同時，團隊亦舉辦了「2022 圖資之夜」、系烤等多項精彩活動，不僅在學業上給予實質協助，也在後疫情時代為系上重新注入熱絡的活力與向心力。",
+  introEn:
+    "Led by President Heng-Jou Chen at a critical moment of post-pandemic recovery, the 48th association worked to bring department life back. Its first priority was reopening and refurbishing the student lounge, giving students a comfortable place to rest, meet and study again. On the academic and career side, it also focused on promoting the LIS discipline, offering structured guidance on course strategy and career exploration. The team hosted LIS Night 2022, the department BBQ and more — helping students academically while bringing new energy and togetherness to the department after the pandemic.",
   depts: [
     { en: "VP", zh: "副會長", color: C.VP, members: [{ n: "廖庭儀", c: "B09" }] },
     { en: "SEC", zh: "執秘", color: C.SEC, members: [{ n: "高子涵", c: "B09" }, { n: "李沚庭", c: "B09" }] },

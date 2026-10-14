@@ -2,6 +2,8 @@ import { Mail } from "lucide-react";
 import imgLissaLogo from "@/imports/Footer/NTULISSAlogo.svg";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
 import { useIsDesktop } from "./shared";
+import { useI18n } from "../i18n";
+import type { Messages } from "../i18n/locales/zh-TW";
 
 // ── Logo 調整區（可手動修改）─────────────────────────────────
 // LOGO_SIZE：logo 顯示寬度（px），高度會等比例縮放
@@ -27,45 +29,47 @@ const COPYRIGHT_Y = 0;
 const EMAIL_X = 30;       // 底部 Email
 const EMAIL_Y = 0;
 
-// 每個連結改成 { label, href }，讓 Footer 也能連到對應頁面／錨點（與 Header 一致）。
-// 「現任團隊」連到獨立頁 #/current-team；「歷任會長」連到 #/presidents。
-const NAV_COLS = [
-  {
-    en: "ABOUT",
-    zh: "關於我們",
-    links: [
-      { label: "資訊總覽", href: "#/overview" },
-      { label: "學會簡介", href: "#/about" },
-      { label: "現任團隊", href: "#/current-team" },
-      { label: "歷任會長", href: "#/presidents" },
-    ],
-  },
-  {
-    en: "NEWS",
-    zh: "最新動態",
-    links: [
-      { label: "近期公告", href: "#/news" },
-      { label: "系學會行事曆", href: "#/calendar" },
-    ],
-  },
-  {
-    en: "SERVICES",
-    zh: "各種服務",
-    links: [
-      { label: "各部業務", href: "#/services" },
-      { label: "學習資源", href: "#/resources" },
-      { label: "聯絡我們", href: "#/contact" },
-    ],
-  },
-  {
-    en: "SUPPORT US",
-    zh: "支持我們",
-    links: [
-      { label: "系學會費", href: "#/fees" },
-      { label: "贊助我們", href: "#/sponsor" },
-    ],
-  },
-];
+// 選單欄：文字來自翻譯檔（i18n/locales/），連結和 Header 一致。
+// en 是欄位標題的英文大寫（中英文版都會顯示），zh 只在中文版接在後面。
+function getNavCols(t: Messages) {
+  return [
+    {
+      en: "ABOUT",
+      zh: t.nav.about,
+      links: [
+        { label: t.nav.overview, href: "#/overview" },
+        { label: t.nav.intro, href: "#/about" },
+        { label: t.nav.team, href: "#/current-team" },
+        { label: t.nav.presidents, href: "#/presidents" },
+      ],
+    },
+    {
+      en: "NEWS",
+      zh: t.nav.news,
+      links: [
+        { label: t.nav.announcements, href: "#/news" },
+        { label: t.nav.calendar, href: "#/calendar" },
+      ],
+    },
+    {
+      en: "SERVICES",
+      zh: t.nav.services,
+      links: [
+        { label: t.nav.departments, href: "#/services" },
+        { label: t.nav.resources, href: "#/resources" },
+        { label: t.nav.contact, href: "#/contact" },
+      ],
+    },
+    {
+      en: "SUPPORT US",
+      zh: t.nav.support,
+      links: [
+        { label: t.nav.fees, href: "#/fees" },
+        { label: t.nav.sponsor, href: "#/sponsor" },
+      ],
+    },
+  ];
+}
 
 function ThreadsIcon() {
   return (
@@ -104,10 +108,14 @@ const SOCIAL_ICONS = [
 ];
 
 export default function Footer() {
+  const { t, lang } = useI18n();
+  const NAV_COLS = getNavCols(t);
+  const isEn = lang === "en";
+
   // ★ 手機／平板（< 1024px）：上面這些 X/Y 位移都歸零、選單改成兩欄排列，避免被推出畫面外。
   //   電腦版（≥ 1024px）完全照舊使用上方常數。
   const isDesktop = useIsDesktop();
-  const t = (x: number, y = 0) => (isDesktop ? `translate(${x}px, ${y}px)` : undefined);
+  const shift = (x: number, y = 0) => (isDesktop ? `translate(${x}px, ${y}px)` : undefined);
   return (
     // ★ 只在電腦版（≥ 1024px）顯示：手機／平板已經有 Header 的選單，Footer 會重複又擠，所以整個隱藏。
     //   想讓手機也顯示，把 className 開頭的「hidden lg:block」刪掉即可。
@@ -140,29 +148,28 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 sm:col-span-4 lg:col-span-1 lg:max-w-[200px] lg:mr-6">
             {/* 左側 Logo 區塊向右推的距離：md:mr-8 / lg:mr-12；數字越大，Logo 會離右邊選單更遠 */}
-            {/* Logo — matches Header exactly */}
             {/* Logo（只保留上傳的 SVG；大小與位移用上方常數調整）*/}
             <div className="mb-5">
               <img
                 src={imgLissaLogo}
-                alt="臺大圖資系學會 Logo"
+                alt={t.footer.logoAlt}
                 className="object-contain"
                 style={{
                   width: `${isDesktop ? LOGO_SIZE : 150}px`,
                   height: "auto",
-                  transform: t(LOGO_OFFSET_X, LOGO_OFFSET_Y),
+                  transform: shift(LOGO_OFFSET_X, LOGO_OFFSET_Y),
                 }}
               />
             </div>
 
             <p
               className="text-white/35 leading-relaxed mb-6"
-              style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "0.8rem", transform: t(DESC_X, DESC_Y) }}
+              style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "0.8rem", transform: shift(DESC_X, DESC_Y) }}
             >
-              國立臺灣大學圖書資訊學系學生自治組織，致力於促進學術交流與同學福祉。
+              {t.footer.description}
             </p>
 
-            <div className="flex gap-2" style={{ transform: t(SOCIAL_X, SOCIAL_Y) }}>
+            <div className="flex gap-2" style={{ transform: shift(SOCIAL_X, SOCIAL_Y) }}>
               {SOCIAL_ICONS.map(({ label, href, icon }) => (
                 <a
                   key={label}
@@ -180,7 +187,7 @@ export default function Footer() {
 
           {/* Nav columns */}
           {NAV_COLS.map((col) => (
-            <div key={col.en} style={{ transform: t(NAV_SHIFT_X) }}>
+            <div key={col.en} style={{ transform: shift(NAV_SHIFT_X) }}>
               <p
                 className="footer-flow-text text-sm font-bold mb-4 lg:mb-6 whitespace-nowrap"
                 style={{
@@ -188,15 +195,21 @@ export default function Footer() {
                   letterSpacing: "0.07em",
                 }}
               >
-                {isDesktop ? <>{col.en}&nbsp;&nbsp;{col.zh}</> : <>{col.en}<br />{col.zh}</>}
+                {/* 英文版只顯示英文標題，避免「ABOUT About」重複 */}
+                {isEn ? col.en : isDesktop ? <>{col.en}&nbsp;&nbsp;{col.zh}</> : <>{col.en}<br />{col.zh}</>}
               </p>
               <ul className="space-y-3 lg:space-y-4">
                 {col.links.map((link) => (
-                  <li key={link.label}>
+                  <li key={link.href}>
                     <a
                       href={link.href}
                       className="text-white hover:text-white/50 transition-colors duration-200"
-                      style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "0.95rem", letterSpacing: "0.15em" }}
+                      style={{
+                        fontFamily: "'Noto Sans TC', sans-serif",
+                        fontWeight: 700,
+                        fontSize: "0.95rem",
+                        letterSpacing: isEn ? "0.02em" : "0.15em",
+                      }}
                     >
                       {link.label}
                     </a>
@@ -211,11 +224,11 @@ export default function Footer() {
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between pt-6 border-t border-white/8 gap-3">
           <p
             className="text-white/25 text-xs"
-            style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, transform: t(COPYRIGHT_X, COPYRIGHT_Y) }}
+            style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, transform: shift(COPYRIGHT_X, COPYRIGHT_Y) }}
           >
-            © 2026 臺大圖資系學會 NTU LIS Student Association. All rights reserved.
+            {t.footer.copyright}
           </p>
-          <div className="flex items-center gap-2 text-white/60" style={{ transform: t(EMAIL_X, EMAIL_Y) }}>
+          <div className="flex items-center gap-2 text-white/60" style={{ transform: shift(EMAIL_X, EMAIL_Y) }}>
             <Mail size={13} />
             <span
               className="text-xs"

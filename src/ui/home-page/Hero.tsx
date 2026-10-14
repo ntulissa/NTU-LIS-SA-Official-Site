@@ -6,22 +6,48 @@ import {
   useState,
   type MouseEvent as ReactMouseEvent,
 } from "react";
-import { ArrowRight, ArrowDown } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { defineText, useI18n } from "../i18n";
 
 /* ════════════════════════════════════════════════════════════════
-   ✏️ 在這裡輸入你的 Hashtag 文案（不用打「#」，程式會自動加上）
-   想加幾個都可以，一行一個，記得用 "" 包起來、後面加逗號。
+   ✏️ 首頁大標區的文字（中英兩份；英文那份結構要和中文一樣）
+   hashtags：點畫面時跳出的 Hashtag（不用打「#」，程式會自動加上），想加幾個都可以
+   phrases ：最上方打字機動畫輪流出現的句子
    ════════════════════════════════════════════════════════════════ */
-const HASHTAGS: string[] = [
-  "加入學術部",
-  "加入形象宣傳部",
-  "加入活動部",
-  "加入行政部",
-  "加入體育部",
-  "圖資人大團結",
-  "LISSA on LIVE",
-  "可以這樣玩",
-];
+const TEXT = defineText({
+  zh: {
+    hashtags: [
+      "加入學術部",
+      "加入形象宣傳部",
+      "加入活動部",
+      "加入行政部",
+      "加入體育部",
+      "圖資人大團結",
+      "LISSA on LIVE",
+      "可以這樣玩",
+    ],
+    phrases: ["→ LISSA, on LIVE.", "→ 真的可以這樣玩。"],
+    title: "系學會",
+    subtitle: "可以這樣「玩」",
+    cta: "第 53 屆系學會招募中",
+  },
+  en: {
+    hashtags: [
+      "Join Academic Affairs",
+      "Join Media & Design",
+      "Join Events",
+      "Join General Affairs",
+      "Join Sports",
+      "LIS United",
+      "LISSA on LIVE",
+      "Play It Your Way",
+    ],
+    phrases: ["→ 系學會可以這樣玩。", "→ REDEFINING LISSA."],
+    title: "LIS SA",
+    subtitle: "Truly Next Level.",
+    cta: "Now recruiting: the 53rd LISSA",
+  },
+});
 
 /* 畫面上最多同時出現幾個 Hashtag（超過會把最舊的收掉） */
 const MAX_TAGS = 10;
@@ -46,10 +72,16 @@ type Tag = {
 
 /* ── 隨機但不重複的抽籤器 ─────────────────────────────────────────
    像「抽籤筒」：把所有文案洗牌後一張張抽，全部抽完才重新洗牌。
-   所以一輪之內不會重複，而且換輪時也不會連續抽到同一句。 */
+   所以一輪之內不會重複，而且換輪時也不會連續抽到同一句。
+   切換語言時（items 換了）會自動清空籤筒，下一次就抽新語言的文案。 */
 function useShuffleBag(items: string[]) {
   const bagRef = useRef<string[]>([]);
   const lastRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    bagRef.current = [];
+    lastRef.current = null;
+  }, [items]);
 
   return useCallback(() => {
     if (items.length === 0) return "";
@@ -73,7 +105,7 @@ function useShuffleBag(items: string[]) {
 
 /* ── 單一 Hashtag 標籤 ────────────────────────────────────────────
    以點擊位置為中心出現；會先量自己的寬高，若會超出畫面邊緣就自動往內推。 */
-function HashtagChip({ tag }: { tag: Tag }) {
+function HashtagChip({ tag, letterSpacing }: { tag: Tag; letterSpacing: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ left: tag.x, top: tag.y });
 
@@ -102,7 +134,7 @@ function HashtagChip({ tag }: { tag: Tag }) {
         fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif",
         fontWeight: 900,
         fontSize: "clamp(0.95rem, 1.5vw, 1.5rem)",
-        letterSpacing: "0.15em",
+        letterSpacing,
         lineHeight: 1.2,
       }}
     >
@@ -112,12 +144,15 @@ function HashtagChip({ tag }: { tag: Tag }) {
 }
 
 export default function Hero() {
+  const { pick, track, lang } = useI18n();
+  const tx = pick(TEXT);
+
   const sectionRef = useRef<HTMLElement>(null);
   const idRef = useRef(0);
   const timersRef = useRef<Set<number>>(new Set());
   const [tags, setTags] = useState<Tag[]>([]);
   const [displayText, setDisplayText] = useState("");
-  const nextHashtag = useShuffleBag(HASHTAGS);
+  const nextHashtag = useShuffleBag(tx.hashtags);
 
   /* 點擊畫面任一處 → 在點擊位置捲出一個 Hashtag */
   const handleClick = (e: ReactMouseEvent<HTMLElement>) => {
@@ -162,16 +197,12 @@ export default function Hero() {
     };
   }, []);
 
-  /* 「往下繼續探索」→ 平滑捲到下一個區塊 */
-  const scrollToNext = () => {
-    const next = sectionRef.current?.nextElementSibling as HTMLElement | null;
-    if (next) next.scrollIntoView({ behavior: "smooth" });
-    else window.scrollBy({ top: window.innerHeight, behavior: "smooth" });
-  };
+  /* 切換語言時，把畫面上舊語言的 Hashtag 清掉 */
+  useEffect(() => { setTags([]); }, [lang]);
 
-  /* 打字機動畫：兩句輪流。打完停留約 7 秒 → 逐字刪掉 → 換下一句 */
+  /* 打字機動畫：兩句輪流。打完停留約 7 秒 → 逐字刪掉 → 換下一句（切換語言會從頭開始） */
   useEffect(() => {
-    const PHRASES = ["→ LISSA, on LIVE.", "→ 真的可以這樣玩。"];
+    const PHRASES = tx.phrases;
     const TYPE_SPEED = 90;
     const DELETE_SPEED = 45;
     const HOLD_AFTER_TYPE = 7000;
@@ -181,6 +212,7 @@ export default function Hero() {
     let charIdx = 0;
     let deleting = false;
     let timer: number;
+    setDisplayText("");
 
     const tick = () => {
       const full = PHRASES[phraseIdx];
@@ -208,7 +240,7 @@ export default function Hero() {
 
     timer = window.setTimeout(tick, TYPE_SPEED);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [tx.phrases]);
 
   return (
     <section
@@ -287,7 +319,7 @@ export default function Hero() {
             letterSpacing: "0.04em",
           }}
         >
-          系學會
+          {tx.title}
         </h1>
 
         <h2
@@ -298,7 +330,7 @@ export default function Hero() {
             fontSize: "clamp(1.2rem, 5.5vw, 3rem)",
           }}
         >
-          可以這樣「玩」
+          {tx.subtitle}
         </h2>
 
         <a
@@ -308,10 +340,10 @@ export default function Hero() {
             fontFamily: "'Noto Sans TC', sans-serif",
             fontWeight: 700,
             fontSize: "clamp(1rem, 1.6vw, 1.4rem)",
-            letterSpacing: "0.08em",
+            letterSpacing: track("0.08em"),
           }}
         >
-          第 53 屆系學會招募中
+          {tx.cta}
           <ArrowRight size={22} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform duration-200" />
         </a>
       </div>
@@ -319,7 +351,7 @@ export default function Hero() {
       {/* ── Hashtag 圖層（不擋住按鈕：pointer-events-none，點擊會穿透） ── */}
       <div className="absolute inset-0 z-20 pointer-events-none select-none" aria-hidden="true">
         {tags.map((tag) => (
-          <HashtagChip key={tag.id} tag={tag} />
+          <HashtagChip key={tag.id} tag={tag} letterSpacing={track("0.15em", "0.03em")} />
         ))}
       </div>
     </section>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { PageEyebrow, Reveal, useIsDesktop, fitLine } from "../general/shared";
+import { defineText, useI18n } from "../i18n";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 加入我們（Join Us · Apple 式捲動頁）
@@ -18,6 +19,7 @@ import { PageEyebrow, Reveal, useIsDesktop, fitLine } from "../general/shared";
 // E. 歡迎你的加入：六顆球（會長＋五部門），點一下頭頂冒出「+1」；下方「加入我們」連到 Google 表單。
 //
 // ★ 所有「大小(px)／位置(XY px)」都集中在下面的《版面常數區》，改那裡就好。
+// ★ 中英文字：介面文字在下方 TEXT；部門資料、播放清單、三步驟的英文寫在各自資料旁（nameEn / captionEn…）。
 // ─────────────────────────────────────────────────────────────────────────
 
 // ── 字型（與全站一致）──
@@ -42,6 +44,58 @@ function joinAsset(...files: string[]): string | undefined {
   }
   return undefined;
 }
+
+// ══════════════════════════════════════════════════════════════
+// 中英文字（介面文字）
+// ══════════════════════════════════════════════════════════════
+const TEXT = defineText({
+  zh: {
+    heroTitle: ["你的大學生涯", "還有這種「玩」法。"],
+    heroSub: ["成為", "臺大圖資系學會的一員"],
+    pourAria: (dept: string) => `按住倒出${dept}飲料`,
+    toggleAria: "切換封面／說明",
+    prev: "上一則",
+    next: "下一則",
+    play: "播放",
+    pause: "暫停",
+    prevDept: "上一個部門",
+    nextDept: "下一個部門",
+    gainsTitle: "在這裡，你會得到",
+    needsTitle: "我們需要這樣的你加入",
+    quizBefore: "不知道自己屬於哪個部門？",
+    quizLink: "點擊按鈕",
+    quizAfter: "讓我們幫你評估",
+    pachinkoAria: "彈珠台動畫：隨機配對部門",
+    certAria: "幹部證明",
+    leaders: "正副會長",
+    welcomeTitle: "歡迎你的加入",
+    welcomeSub: "臺大圖資系學會 — 是學生組織，也是改變與成長的起點。",
+    joinBtn: "加入我們",
+  },
+  en: {
+    heroTitle: ["Your university years,", "played a whole new way."],
+    heroSub: ["Become part of", "the NTU LIS Student Association."],
+    pourAria: (dept: string) => `Hold to pour the ${dept} drink`,
+    toggleAria: "Switch between cover and caption",
+    prev: "Previous",
+    next: "Next",
+    play: "Play",
+    pause: "Pause",
+    prevDept: "Previous department",
+    nextDept: "Next department",
+    gainsTitle: "What you'll gain",
+    needsTitle: "Who we're looking for",
+    quizBefore: "Not sure which department is for you?",
+    quizLink: "Take the quiz",
+    quizAfter: "and we'll help you find out.",
+    pachinkoAria: "Pachinko animation: randomly matching a department",
+    certAria: "Officer certificate",
+    leaders: "Presidents",
+    welcomeTitle: "Welcome aboard",
+    welcomeSub: "NTU LIS Student Association — a student organisation, and a place to grow and make a difference.",
+    joinBtn: "Join us",
+  },
+});
 
 // ══════════════════════════════════════════════════════════════
 // ★★ 版面常數區：size=字級(px)；x/y=位移(px，正x=右、正y=下) ★★
@@ -97,11 +151,18 @@ const STEP_LAYOUT = {
   title: { size: 104, x: 0, y: 0 }, // 「線上登記」等大標
   sub:   { size: 22,  x: 0, y: 0 }, // 小標
 };
-const STEPS_TEXT = [
-  { title: "線上登記", sub: "填寫招募意向表" },
-  { title: "輕鬆面談", sub: "雙向交流與認識" },
-  { title: "正式加入", sub: "卸任後即可領取就任證明" },
-];
+const STEPS_TEXT = defineText({
+  zh: [
+    { title: "線上登記", sub: "填寫招募意向表" },
+    { title: "輕鬆面談", sub: "雙向交流與認識" },
+    { title: "正式加入", sub: "卸任後即可領取就任證明" },
+  ],
+  en: [
+    { title: "Sign Up", sub: "Fill in the recruitment form" },
+    { title: "Chat", sub: "A relaxed, two-way conversation" },
+    { title: "Join", sub: "Receive your officer certificate when your term ends" },
+  ],
+});
 const PHONE = { w: 300, h: 470, itemH: 62, itemGap: 14, cycle: 2000 }; // 手機外觀與清單尺寸；cycle=每幾毫秒勾掉一項
 const CERT  = { w: 380, cycle: 7500 };                                  // 幹部證明寬度；每幾毫秒重播一次動畫
 const PACHINKO = { w: 480, pauseTop: 600, pauseEnd: 1800 };            // 彈珠台寬度；球在頂端停留／落定後停留(ms)
@@ -118,31 +179,53 @@ const LEADER_COLOR = "#A27F00"; // 正副會長色（最左那顆）
 const JOIN_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdzPM3pqgnH_osifNrCSB61iGVVZxB1FmxhWsEqZQeOdBMY0w/viewform?usp=header";
 
 // ── 五部門資料（顏色與 TeamSection 一致；條列為佔位範例，自行替換）──
+//   name / gains / needs ＝中文；nameEn / gainsEn / needsEn ＝英文版
 const DEPTS = [
-  { key: "gen", name: "行政部",     en: "GENERAL AFFAIRS",   color: "#915E3E",
+  { key: "gen", name: "行政部",     en: "GENERAL AFFAIRS",   color: "#915E3E", nameEn: "General Affairs",
     gains: ["預算編列與財務管理", "行政流程與文書實務", "統籌規劃與細節掌控"],
-    needs: ["細心謹慎", "條理分明", "值得信賴"] },
-  { key: "eve", name: "活動部",     en: "EVENTS AFFAIRS",            color: "#9F353A",
+    needs: ["細心謹慎", "條理分明", "值得信賴"],
+    gainsEn: ["Budgeting & financial management", "Admin workflows & paperwork", "Planning with an eye for detail"],
+    needsEn: ["Careful", "Well-organised", "Trustworthy"] },
+  { key: "eve", name: "活動部",     en: "EVENTS AFFAIRS",            color: "#9F353A", nameEn: "Events",
     gains: ["大型活動企劃與執行", "跨單位溝通協調", "臨場應變與團隊領導"],
-    needs: ["熱情活潑", "點子源源不絕", "享受舞台"] },
-  { key: "aca", name: "學術部",     en: "ACADEMIC AFFAIRS",  color: "#42602D",
+    needs: ["熱情活潑", "點子源源不絕", "享受舞台"],
+    gainsEn: ["Planning & running big events", "Coordinating across teams", "Thinking on your feet & leading a team"],
+    needsEn: ["Outgoing & energetic", "Full of ideas", "Loves the stage"] },
+  { key: "aca", name: "學術部",     en: "ACADEMIC AFFAIRS",  color: "#42602D", nameEn: "Academic Affairs",
     gains: ["課程資訊蒐集與統整", "學術領域知識拓展", "溝通合作與應變能力"],
-    needs: ["充滿好奇", "主動探索", "認真負責"] },
-  { key: "ima", name: "形象宣傳部", en: "IMAGE & PUBLICITY", color: "#572A3F",
+    needs: ["充滿好奇", "主動探索", "認真負責"],
+    gainsEn: ["Gathering & curating course info", "Broadening your academic horizons", "Teamwork & adaptability"],
+    needsEn: ["Curious", "Self-driven", "Responsible"] },
+  { key: "ima", name: "形象宣傳部", en: "IMAGE & PUBLICITY", color: "#572A3F", nameEn: "Media & Design",
     gains: ["視覺設計與品牌經營", "社群企劃與文案撰寫", "攝影剪輯實戰經驗"],
-    needs: ["美感敏銳", "樂於創作", "追求細節"] },
-  { key: "sp",  name: "體育部",     en: "SPORTS AFFAIRS",            color: "#23658A",
+    needs: ["美感敏銳", "樂於創作", "追求細節"],
+    gainsEn: ["Visual design & branding", "Social media & copywriting", "Hands-on photo & video work"],
+    needsEn: ["A keen eye for design", "Loves to create", "Detail-oriented"] },
+  { key: "sp",  name: "體育部",     en: "SPORTS AFFAIRS",            color: "#23658A", nameEn: "Sports",
     gains: ["系隊與賽事籌辦經驗", "團隊合作與體能挑戰", "跨系交流人脈"],
-    needs: ["熱愛運動", "積極投入", "團隊精神"] },
+    needs: ["熱愛運動", "積極投入", "團隊精神"],
+    gainsEn: ["Running teams & tournaments", "Teamwork & physical challenges", "Friends across departments"],
+    needsEn: ["Loves sport", "All in", "Team spirit"] },
 ];
 
 // ── 播放清單：cover = 封面兩直欄（各 4 字最好看）；caption = 翻面說明（佔位範例）──
+//   coverEn / captionEn ＝英文版（封面若有放 coverN.svg，兩種語言都顯示同一張圖）
 const TRACKS = [
-  { cover: ["掌握系上", "生存指南"], caption: "直接混熟各屆學長姐。從私房考古題、選課避雷指南到專題指導，有問題直接私訊問，少走兩年彎路。" },
-  { cover: ["累積實戰", "經驗履歷"], caption: "從企劃、預算到上線執行，每一場活動都是一份作品。面試時說得出口的經歷，從這裡開始累積。" },
-  { cover: ["結識跨屆", "革命夥伴"], caption: "一起熬夜趕企劃、一起在活動後收場。這群人會是你大學四年，甚至畢業後最常聯絡的朋友。" },
-  { cover: ["親手策劃", "圖資舞台"], caption: "迎新、系烈、系週、系學會網站——你的點子不只停在紙上，而是真的被全系看見。" },
-  { cover: ["搶先掌握", "系上資源"], caption: "講座、實習、系上補助與各種福利消息，第一手就在你手上，機會不再擦肩而過。" },
+  { cover: ["掌握系上", "生存指南"], coverEn: "Your LIS survival guide",
+    caption: "直接混熟各屆學長姐。從私房考古題、選課避雷指南到專題指導，有問題直接私訊問，少走兩年彎路。",
+    captionEn: "Get to know seniors from every year. From past exams and course tips to project advice — just message them and skip two years of detours." },
+  { cover: ["累積實戰", "經驗履歷"], coverEn: "Real-world experience",
+    caption: "從企劃、預算到上線執行，每一場活動都是一份作品。面試時說得出口的經歷，從這裡開始累積。",
+    captionEn: "From proposal and budget to the big day, every event becomes part of your portfolio. The experience you'll talk about in interviews starts here." },
+  { cover: ["結識跨屆", "革命夥伴"], coverEn: "Friends across the years",
+    caption: "一起熬夜趕企劃、一起在活動後收場。這群人會是你大學四年，甚至畢業後最常聯絡的朋友。",
+    captionEn: "Late nights on proposals, packing up together after every event — these are the friends you'll keep through university and beyond." },
+  { cover: ["親手策劃", "圖資舞台"], coverEn: "Build the LIS stage",
+    caption: "迎新、系烈、系週、系學會網站——你的點子不只停在紙上，而是真的被全系看見。",
+    captionEn: "Orientation, department events, LIS Week, even this website — your ideas don't stay on paper; the whole department gets to see them." },
+  { cover: ["搶先掌握", "系上資源"], coverEn: "First to every opportunity",
+    caption: "講座、實習、系上補助與各種福利消息，第一手就在你手上，機會不再擦肩而過。",
+    captionEn: "Talks, internships, subsidies and member perks — you hear about them first, so no opportunity slips past you." },
 ];
 
 // ── helpers ──
@@ -167,6 +250,8 @@ const WAVE_PATH = (() => {
 function DrinkMachine() {
   const logo = joinAsset("ntulissa.svg", "ntulissa.png");
   const isDesktop = useIsDesktop();
+  const { pick, isEn } = useI18n();
+  const tx = pick(TEXT);
   const n = DEPTS.length;
   const [levels, setLevels] = useState<number[]>(() => Array(n).fill(1));
   const [held, setHeld] = useState<boolean[]>(() => Array(n).fill(false));
@@ -280,7 +365,7 @@ function DrinkMachine() {
             <div key={d.key} className="flex flex-col items-center">
               <button
                 type="button"
-                aria-label={`按住倒出${d.name}飲料`}
+                aria-label={tx.pourAria(isEn ? d.nameEn : d.name)}
                 onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); start(i); }}
                 onPointerUp={() => stop(i)}
                 onPointerCancel={() => stop(i)}
@@ -345,12 +430,13 @@ function AlbumFace({ back = false, bg, children }: { back?: boolean; bg: string;
 
 // COVER / CAPTION 切換（比照 TeamSection 的滑動 toggle，圓鈕內放文字）
 function SideToggle({ caption, onToggle }: { caption: boolean; onToggle: () => void }) {
+  const { pick } = useI18n();
   return (
     <button
       type="button"
       role="switch"
       aria-checked={caption}
-      aria-label="切換封面／說明"
+      aria-label={pick(TEXT).toggleAria}
       onClick={(e) => { e.stopPropagation(); onToggle(); }}
       className="relative rounded-full bg-black transition-transform active:scale-95"
       style={{ width: PLAYER_LAYOUT.toggle.w, aspectRatio: "10 / 3", border: "2px solid #fff" }}
@@ -375,6 +461,8 @@ function AlbumPlayer() {
   const [inView, setInView] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const isDesktop = useIsDesktop();
+  const { pick, isEn } = useI18n();
+  const tx = pick(TEXT);
 
   // 捲到畫面內才開始計時（Apple 式：看到才播）
   useEffect(() => {
@@ -429,13 +517,18 @@ function AlbumPlayer() {
               <img
                 key={`c${idx}`}
                 src={coverSvg}
-                alt={track.cover.join(" ")}
+                alt={isEn ? track.coverEn : track.cover.join(" ")}
                 draggable={false}
                 className="jn-fade select-none"
                 style={{ maxWidth: PLAYER_LAYOUT.coverSvg, maxHeight: PLAYER_LAYOUT.coverSvg, width: "auto", height: "auto", objectFit: "contain" }}
               />
             ) : (
-              // 備用：還沒放 SVG 時用文字顯示
+              // 備用：還沒放 SVG 時用文字顯示（英文版：橫排一句）
+              isEn ? (
+                <p key={`c${idx}`} className="jn-fade text-white text-center" style={{ fontFamily: latin, fontWeight: 700, fontSize: `calc(${PLAYER_LAYOUT.coverChar} * 0.62)`, lineHeight: 1.2, padding: "0 12%" }}>
+                  {track.coverEn}
+                </p>
+              ) : (
               <div key={`c${idx}`} className="jn-fade flex" style={{ gap: `calc(${PLAYER_LAYOUT.coverChar} * 1.6)` }}>
                 {track.cover.map((col, ci) => (
                   <div key={ci} className="flex flex-col items-center" style={{ fontFamily: serif, fontWeight: 900, fontSize: PLAYER_LAYOUT.coverChar, lineHeight: 1.38, color: "#fff" }}>
@@ -443,11 +536,12 @@ function AlbumPlayer() {
                   </div>
                 ))}
               </div>
+              )
             )}
           </AlbumFace>
           <AlbumFace back bg="#1E1E1E">
-            <p key={`t${idx}`} className="jn-fade text-white" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: `clamp(15px, 1.6vw, ${PLAYER_LAYOUT.caption.size}px)`, lineHeight: PLAYER_LAYOUT.caption.lh, letterSpacing: "0.14em", padding: "0 11%", textAlign: "justify" }}>
-              {track.caption}
+            <p key={`t${idx}`} className="jn-fade text-white" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: isEn ? `clamp(14px, 1.4vw, ${PLAYER_LAYOUT.caption.size - 2}px)` : `clamp(15px, 1.6vw, ${PLAYER_LAYOUT.caption.size}px)`, lineHeight: isEn ? 1.8 : PLAYER_LAYOUT.caption.lh, letterSpacing: isEn ? "0.01em" : "0.14em", padding: "0 11%", textAlign: isEn ? "left" : "justify" }}>
+              {isEn ? track.captionEn : track.caption}
             </p>
           </AlbumFace>
         </div>
@@ -460,11 +554,11 @@ function AlbumPlayer() {
 
       {/* 播放控制 */}
       <div className="flex items-center justify-center mt-[clamp(20px,4vh,48px)]" style={{ gap: isDesktop ? "clamp(56px, 10vw, 150px)" : "clamp(36px, 10vw, 80px)" }}>
-        <button type="button" onClick={prev} aria-label="上一則" className="transition-transform active:scale-90 hover:opacity-80" style={{ width: isDesktop ? "76px" : "60px", height: isDesktop ? "58px" : "46px" }}><IconPrev /></button>
-        <button type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? "暫停" : "播放"} className="transition-transform active:scale-90 hover:opacity-80" style={{ width: isDesktop ? "58px" : "46px", height: isDesktop ? "58px" : "46px" }}>
+        <button type="button" onClick={prev} aria-label={tx.prev} className="transition-transform active:scale-90 hover:opacity-80" style={{ width: isDesktop ? "76px" : "60px", height: isDesktop ? "58px" : "46px" }}><IconPrev /></button>
+        <button type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? tx.pause : tx.play} className="transition-transform active:scale-90 hover:opacity-80" style={{ width: isDesktop ? "58px" : "46px", height: isDesktop ? "58px" : "46px" }}>
           {playing ? <IconPause /> : <IconPlay />}
         </button>
-        <button type="button" onClick={next} aria-label="下一則" className="transition-transform active:scale-90 hover:opacity-80" style={{ width: isDesktop ? "76px" : "60px", height: isDesktop ? "58px" : "46px" }}><IconNext /></button>
+        <button type="button" onClick={next} aria-label={tx.next} className="transition-transform active:scale-90 hover:opacity-80" style={{ width: isDesktop ? "76px" : "60px", height: isDesktop ? "58px" : "46px" }}><IconNext /></button>
       </div>
 
       {/* 進度條（可點擊跳轉） */}
@@ -507,6 +601,8 @@ function DeptRecruit() {
   const dept = DEPTS[active];
   const swipeX = useRef<number | null>(null);
   const isDesktop = useIsDesktop();
+  const { pick, isEn } = useI18n();
+  const tx = pick(TEXT);
 
   return (
     <div
@@ -532,7 +628,7 @@ function DeptRecruit() {
             <button
               key={d.key}
               type="button"
-              aria-label={d.name}
+              aria-label={isEn ? d.nameEn : d.name}
               onClick={() => setActive(i)}
               className="absolute top-0 rounded-full"
               style={{
@@ -556,33 +652,36 @@ function DeptRecruit() {
 
       {/* 部門名 ＋ 左右切換 */}
       <div className="flex items-center justify-center gap-4 sm:gap-20 mt-[clamp(20px,4vh,56px)]">
-        <button type="button" onClick={() => go(-1)} aria-label="上一個部門" className="text-white hover:opacity-70 transition-all active:-translate-x-1">
+        <button type="button" onClick={() => go(-1)} aria-label={tx.prevDept} className="text-white hover:opacity-70 transition-all active:-translate-x-1">
           <ChevronLeft size={44} strokeWidth={3.2} />
         </button>
         <div key={dept.key} className="jn-fade text-center min-w-0 sm:min-w-[220px]">
-          <p className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(32px, 3.6vw, ${DEPT_LAYOUT.name.size}px)` : fitLine("形象宣傳部", `clamp(32px, 3.6vw, ${DEPT_LAYOUT.name.size}px)`, { min: 24, ls: 0.18, gutter: 150 }), letterSpacing: "0.18em", paddingLeft: "0.18em", whiteSpace: isDesktop ? undefined : "nowrap" }}>
-            {dept.name}
+          {/* 英文版：名稱較長 → 字小一點、字距收窄、可換行；下方小字改顯示中文名 */}
+          <p className="text-white" style={isEn
+            ? { fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(28px, 3vw, ${DEPT_LAYOUT.name.size - 8}px)` : "clamp(24px, 7vw, 34px)", letterSpacing: "0.01em", lineHeight: 1.15 }
+            : { fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(32px, 3.6vw, ${DEPT_LAYOUT.name.size}px)` : fitLine("形象宣傳部", `clamp(32px, 3.6vw, ${DEPT_LAYOUT.name.size}px)`, { min: 24, ls: 0.18, gutter: 150 }), letterSpacing: "0.18em", paddingLeft: "0.18em", whiteSpace: isDesktop ? undefined : "nowrap" }}>
+            {isEn ? dept.nameEn : dept.name}
           </p>
           <p className="text-white mt-2" style={{ fontFamily: mono, fontWeight: 500, fontSize: `clamp(13px, 1.3vw, ${DEPT_LAYOUT.en.size}px)`, letterSpacing: "0.22em" }}>
-            {dept.en}
+            {isEn ? dept.name : dept.en}
           </p>
         </div>
-        <button type="button" onClick={() => go(1)} aria-label="下一個部門" className="text-white hover:opacity-70 transition-all active:translate-x-1">
+        <button type="button" onClick={() => go(1)} aria-label={tx.nextDept} className="text-white hover:opacity-70 transition-all active:translate-x-1">
           <ChevronRight size={44} strokeWidth={3.2} />
         </button>
       </div>
 
       {/* 招募資訊卡 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-9 mt-[clamp(24px,5vh,64px)] max-w-[640px] lg:max-w-none mx-auto">
-        {[{ title: "在這裡，你會得到", items: dept.gains }, { title: "我們需要這樣的你加入", items: dept.needs }].map((card) => (
+        {[{ title: tx.gainsTitle, items: isEn ? dept.gainsEn : dept.gains }, { title: tx.needsTitle, items: isEn ? dept.needsEn : dept.needs }].map((card) => (
           <div key={card.title}>
-            <p className="text-white text-center mb-[clamp(12px,2.5vh,32px)]" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(17px, 1.7vw, ${DEPT_LAYOUT.cardTitle.size}px)`, letterSpacing: isDesktop ? "0.3em" : "0.16em" }}>
+            <p className="text-white text-center mb-[clamp(12px,2.5vh,32px)]" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(17px, 1.7vw, ${DEPT_LAYOUT.cardTitle.size}px)`, letterSpacing: isEn ? "0.02em" : isDesktop ? "0.3em" : "0.16em" }}>
               {card.title}
             </p>
             <div className="rounded-[28px] px-6 sm:px-12 py-[clamp(20px,4vh,40px)]" style={{ background: dept.color, transition: "background-color 600ms ease" }}>
               <ul key={dept.key} className="jn-fade flex flex-col gap-[clamp(12px,2.6vh,28px)]">
                 {card.items.map((it) => (
-                  <li key={it} className="text-white flex items-center gap-4 sm:gap-5" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(17px, 1.8vw, ${DEPT_LAYOUT.item.size}px)` : fitLine("課程資訊蒐集與統整", 22, { min: 14, ls: 0.16, gutter: 130 }), letterSpacing: isDesktop ? "0.3em" : "0.16em" }}>
+                  <li key={it} className="text-white flex items-center gap-4 sm:gap-5" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isEn ? (isDesktop ? `clamp(16px, 1.5vw, ${DEPT_LAYOUT.item.size - 4}px)` : "clamp(15px, 4vw, 19px)") : isDesktop ? `clamp(17px, 1.8vw, ${DEPT_LAYOUT.item.size}px)` : fitLine("課程資訊蒐集與統整", 22, { min: 14, ls: 0.16, gutter: 130 }), letterSpacing: isEn ? "0.02em" : isDesktop ? "0.3em" : "0.16em" }}>
                     <span className="inline-block rounded-full bg-white shrink-0" style={{ width: "7px", height: "7px" }} />
                     {it}
                   </li>
@@ -596,17 +695,17 @@ function DeptRecruit() {
       {/* 部門測驗入口：電腦版一行；手機／平板版拆三行（句子／按鈕／句子）全部置中 */}
       <p
         className={`text-white text-center mt-[clamp(28px,5vh,64px)] flex items-center justify-center ${isDesktop ? "flex-wrap gap-x-8 gap-y-2" : "flex-col gap-y-4"}`}
-        style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(16px, 1.7vw, ${DEPT_LAYOUT.quizCta.size}px)`, letterSpacing: "0.14em" }}
+        style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(16px, 1.7vw, ${DEPT_LAYOUT.quizCta.size}px)`, letterSpacing: isEn ? "0.01em" : "0.14em" }}
       >
-        <span style={{ paddingLeft: isDesktop ? undefined : "0.14em" }}>不知道自己屬於哪個部門？</span>
+        <span style={{ paddingLeft: isDesktop || isEn ? undefined : "0.14em" }}>{tx.quizBefore}</span>
         <a
           href={QUIZ_HREF}
           className={`jn-quiz-link relative inline-block ${isDesktop ? "" : "jn-quiz-link-on"}`}
           style={{ fontFamily: zhHead, fontWeight: 900, background: GRADIENT_TEXT, WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent", paddingLeft: isDesktop ? undefined : "0.14em", paddingBlock: isDesktop ? undefined : "6px" }}
         >
-          點擊按鈕
+          {tx.quizLink}
         </a>
-        <span style={{ paddingLeft: isDesktop ? undefined : "0.14em" }}>讓我們幫你評估</span>
+        <span style={{ paddingLeft: isDesktop || isEn ? undefined : "0.14em" }}>{tx.quizAfter}</span>
       </p>
     </div>
   );
@@ -630,7 +729,8 @@ function useInView<T extends Element>(threshold = 0.3) {
 
 // 步驟版型：編號圓圈＋大標＋小標；reverse=true 時圖在左、字在右
 function StepSection({ num, visual, reverse = false }: { num: number; visual: ReactNode; reverse?: boolean }) {
-  const t = STEPS_TEXT[num - 1];
+  const { pick, isEn } = useI18n();
+  const t = pick(STEPS_TEXT)[num - 1];
   const isDesktop = useIsDesktop();
   return (
     <section className="relative lg:min-h-[92vh] flex items-center px-5 sm:px-8 md:px-14 py-20 lg:py-24 overflow-hidden">
@@ -642,12 +742,12 @@ function StepSection({ num, visual, reverse = false }: { num: number; visual: Re
             </span>
           </Reveal>
           <Reveal delay={80}>
-            <h3 className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(52px, 7vw, ${STEP_LAYOUT.title.size}px)` : fitLine("線上登記", `clamp(52px, 7vw, ${STEP_LAYOUT.title.size}px)`, { min: 36, ls: 0.14 }), letterSpacing: "0.14em", paddingLeft: "0.14em", lineHeight: 1.2, ...moveIf(isDesktop, STEP_LAYOUT.title) }}>
+            <h3 className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isEn ? `clamp(44px, 6vw, ${STEP_LAYOUT.title.size - 8}px)` : isDesktop ? `clamp(52px, 7vw, ${STEP_LAYOUT.title.size}px)` : fitLine("線上登記", `clamp(52px, 7vw, ${STEP_LAYOUT.title.size}px)`, { min: 36, ls: 0.14 }), letterSpacing: isEn ? "0.01em" : "0.14em", paddingLeft: isEn ? undefined : "0.14em", lineHeight: 1.2, ...moveIf(isDesktop, STEP_LAYOUT.title) }}>
               {t.title}
             </h3>
           </Reveal>
           <Reveal delay={150}>
-            <p className="text-white mt-6 lg:mt-10" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(16px, 1.6vw, ${STEP_LAYOUT.sub.size}px)`, letterSpacing: isDesktop ? "0.4em" : "0.3em", paddingLeft: isDesktop ? "0.4em" : "0.3em", ...moveIf(isDesktop, STEP_LAYOUT.sub) }}>
+            <p className="text-white mt-6 lg:mt-10" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: `clamp(16px, 1.6vw, ${STEP_LAYOUT.sub.size}px)`, letterSpacing: isEn ? "0.04em" : isDesktop ? "0.4em" : "0.3em", paddingLeft: isEn ? undefined : isDesktop ? "0.4em" : "0.3em", ...moveIf(isDesktop, STEP_LAYOUT.sub) }}>
               {t.sub}
             </p>
           </Reveal>
@@ -828,6 +928,7 @@ function Pachinko() {
   const ballRef = useRef<SVGCircleElement>(null);
   const lastBin = useRef(-1);
   const [hit, setHit] = useState<{ bin: number; n: number } | null>(null);
+  const { pick, isEn } = useI18n();
   const logo = joinAsset("ntulissa.svg", "ntulissa.png");
 
   useEffect(() => {
@@ -864,7 +965,7 @@ function Pachinko() {
 
   return (
     <div ref={ref} className="flex flex-col items-center" style={{ width: `min(88vw, ${PACHINKO.w}px)` }}>
-      <svg viewBox={`0 0 ${PB.W} ${PB.H}`} width="100%" aria-label="彈珠台動畫：隨機配對部門">
+      <svg viewBox={`0 0 ${PB.W} ${PB.H}`} width="100%" aria-label={pick(TEXT).pachinkoAria}>
         {/* 漏斗 */}
         <path d={`M30 95 L140 ${PB.binTop - 8} M450 95 L340 ${PB.binTop - 8}`} stroke="#fff" strokeWidth="2" fill="none" />
         {/* 鋼丁 */}
@@ -895,7 +996,7 @@ function Pachinko() {
       </svg>
       {/* 配對結果 */}
       <p className="h-6 mt-4 text-white/70" style={{ fontFamily: mono, fontSize: "14px", letterSpacing: "0.22em" }}>
-        {hit && <span key={hit.n} className="jn-fade inline-block">MATCHED · <span style={{ color: "#fff", fontFamily: zhHead, fontWeight: 900 }}>{DEPTS[hit.bin].name}</span></span>}
+        {hit && <span key={hit.n} className="jn-fade inline-block">MATCHED · <span style={{ color: "#fff", fontFamily: zhHead, fontWeight: 900 }}>{isEn ? DEPTS[hit.bin].nameEn : DEPTS[hit.bin].name}</span></span>}
       </p>
     </div>
   );
@@ -913,6 +1014,7 @@ const wavePath = (y0: number) => {
 function Certificate() {
   const [ref, inView] = useInView<HTMLDivElement>(0.35);
   const [cycle, setCycle] = useState(0);
+  const { pick } = useI18n();
   const logo = joinAsset("ntulissa.svg", "ntulissa.png");
 
   useEffect(() => {
@@ -926,7 +1028,7 @@ function Certificate() {
 
   return (
     <div ref={ref} className={inView ? "" : "jn-paused"} style={{ width: `min(80vw, ${CERT.w}px)` }}>
-      <svg key={cycle} viewBox="0 0 600 760" width="100%" aria-label="幹部證明">
+      <svg key={cycle} viewBox="0 0 600 760" width="100%" aria-label={pick(TEXT).certAria}>
         <defs>
           <linearGradient id="jnSeal" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="#D14B4B" />
@@ -996,7 +1098,8 @@ function PlusOneBalls() {
   const ball = isDesktop ? WELCOME_LAYOUT.ball.size : 52;
   const gap = isDesktop ? WELCOME_LAYOUT.ball.gap : 22;
   const colors = [LEADER_COLOR, ...DEPTS.map((d) => d.color)];
-  const labels = ["正副會長", ...DEPTS.map((d) => d.name)];
+  const { pick, isEn } = useI18n();
+  const labels = [pick(TEXT).leaders, ...DEPTS.map((d) => (isEn ? d.nameEn : d.name))];
   const [pops, setPops] = useState<{ id: number; i: number }[]>([]);
   const [bumps, setBumps] = useState<number[]>(() => colors.map(() => 0));
   const idRef = useRef(0);
@@ -1030,6 +1133,8 @@ function PlusOneBalls() {
 export default function Recruit() {
   const recruit = joinAsset("recruit.svg", "recruit.png", "Recruit.svg", "Recruit.png");
   const isDesktop = useIsDesktop();
+  const { pick, isEn } = useI18n();
+  const tx = pick(TEXT);
 
   return (
     <div id="join" className="bg-black">
@@ -1103,15 +1208,15 @@ export default function Recruit() {
         <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
             <Reveal delay={60}>
-              <h1 className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(36px, 5vw, ${HERO_LAYOUT.title.size}px)` : fitLine("還有這種「玩」法。", `clamp(36px, 5vw, ${HERO_LAYOUT.title.size}px)`, { min: 22, ls: 0.1 }), lineHeight: HERO_LAYOUT.title.lh, letterSpacing: "0.1em", ...moveIf(isDesktop, HERO_LAYOUT.title) }}>
-                <span className="block">你的大學生涯</span>
-                <span className="block">還有這種「玩」法。</span>
+              <h1 className="text-white" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isEn ? (isDesktop ? `clamp(34px, 4.2vw, ${HERO_LAYOUT.title.size - 6}px)` : "clamp(28px, 8vw, 40px)") : isDesktop ? `clamp(36px, 5vw, ${HERO_LAYOUT.title.size}px)` : fitLine("還有這種「玩」法。", `clamp(36px, 5vw, ${HERO_LAYOUT.title.size}px)`, { min: 22, ls: 0.1 }), lineHeight: isEn ? 1.2 : HERO_LAYOUT.title.lh, letterSpacing: isEn ? "0.005em" : "0.1em", ...moveIf(isDesktop, HERO_LAYOUT.title) }}>
+                <span className="block">{tx.heroTitle[0]}</span>
+                <span className="block">{tx.heroTitle[1]}</span>
               </h1>
             </Reveal>
             <Reveal delay={140}>
-              <p className="text-white mt-8 lg:mt-16" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(17px, 1.7vw, ${HERO_LAYOUT.sub.size}px)`, lineHeight: HERO_LAYOUT.sub.lh, letterSpacing: "0.08em", ...moveIf(isDesktop, HERO_LAYOUT.sub) }}>
-                <span className="block">成為</span>
-                <span className="block">臺大圖資系學會的一員</span>
+              <p className="text-white mt-8 lg:mt-16" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(17px, 1.7vw, ${HERO_LAYOUT.sub.size}px)`, lineHeight: isEn ? 1.7 : HERO_LAYOUT.sub.lh, letterSpacing: isEn ? "0.01em" : "0.08em", ...moveIf(isDesktop, HERO_LAYOUT.sub) }}>
+                <span className="block">{tx.heroSub[0]}</span>
+                <span className="block">{tx.heroSub[1]}</span>
               </p>
             </Reveal>
           </div>
@@ -1161,13 +1266,13 @@ export default function Recruit() {
           <PlusOneBalls />
         </Reveal>
         <Reveal delay={80}>
-          <h2 className="text-white mt-14" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `clamp(52px, 8vw, ${WELCOME_LAYOUT.title.size}px)` : fitLine("歡迎你的加入", `clamp(52px, 8vw, ${WELCOME_LAYOUT.title.size}px)`, { min: 30, ls: 0.1 }), letterSpacing: "0.1em", paddingLeft: "0.1em", lineHeight: 1.2, ...moveIf(isDesktop, WELCOME_LAYOUT.title) }}>
-            歡迎你的加入
+          <h2 className="text-white mt-14" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isEn ? (isDesktop ? `clamp(48px, 7vw, ${WELCOME_LAYOUT.title.size - 16}px)` : fitLine("Welcome aboard", "clamp(44px, 8vw, 72px)", { min: 30, ls: 0.01 })) : isDesktop ? `clamp(52px, 8vw, ${WELCOME_LAYOUT.title.size}px)` : fitLine("歡迎你的加入", `clamp(52px, 8vw, ${WELCOME_LAYOUT.title.size}px)`, { min: 30, ls: 0.1 }), letterSpacing: isEn ? "0.01em" : "0.1em", paddingLeft: isEn ? undefined : "0.1em", lineHeight: 1.2, ...moveIf(isDesktop, WELCOME_LAYOUT.title) }}>
+            {tx.welcomeTitle}
           </h2>
         </Reveal>
         <Reveal delay={150}>
-          <p className="text-white mt-8 lg:mt-10" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(15px, 1.6vw, ${WELCOME_LAYOUT.sub.size}px)`, letterSpacing: isDesktop ? "0.1em" : "0.06em", lineHeight: isDesktop ? undefined : 1.8, ...moveIf(isDesktop, WELCOME_LAYOUT.sub) }}>
-            臺大圖資系學會 — 是學生組織，也是改變與成長的起點。
+          <p className="text-white mt-8 lg:mt-10" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(15px, 1.6vw, ${WELCOME_LAYOUT.sub.size}px)`, letterSpacing: isEn ? "0.01em" : isDesktop ? "0.1em" : "0.06em", lineHeight: isDesktop ? undefined : 1.8, ...moveIf(isDesktop, WELCOME_LAYOUT.sub) }}>
+            {tx.welcomeSub}
           </p>
         </Reveal>
         <Reveal delay={220}>
@@ -1176,9 +1281,9 @@ export default function Recruit() {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-4 bg-white text-black px-10 py-4 rounded-full mt-16 hover:bg-white/90 transition-all duration-200 group"
-            style={{ fontFamily: zhBody, fontWeight: 900, fontSize: `${isDesktop ? WELCOME_LAYOUT.button.size : 18}px`, letterSpacing: "0.1em", ...moveIf(isDesktop, WELCOME_LAYOUT.button) }}
+            style={{ fontFamily: zhBody, fontWeight: 900, fontSize: `${isDesktop ? WELCOME_LAYOUT.button.size : 18}px`, letterSpacing: isEn ? "0.02em" : "0.1em", ...moveIf(isDesktop, WELCOME_LAYOUT.button) }}
           >
-            加入我們
+            {tx.joinBtn}
             <ArrowRight size={24} strokeWidth={2.8} className="group-hover:translate-x-1 transition-transform duration-200" />
           </a>
         </Reveal>

@@ -21,6 +21,7 @@ import Fee from "../support-us/Fee";
 import Sponsor from "../support-us/Sponsor";
 import Department from "../about-us/Department";
 import Services from "../services/Services";
+import { LanguageProvider } from "../i18n";
 
 // 極輕量的 hash 分頁（不需安裝 react-router；同時保留原本 #team / #news 等錨點捲動）：
 //   #/current-team    → 現任團隊獨立頁（只有 Header + Team + Footer）
@@ -40,6 +41,8 @@ import Services from "../services/Services";
 //   #/services        → 各種服務 Bento 總覽頁
 //   #/service/<slug>  → 單一服務詳情頁（slug 同 servicesData.ts）
 //   其餘              → 捲動式主頁
+//
+// 語言：放在網址的 ?lang=en（例：https://網址/?lang=en#/news），由 ../i18n 管理，跟上面的分頁互不影響。
 type Route = { name: "home" } | { name: "about" } | { name: "resources" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "dept-quiz" } | { name: "contact" } | { name: "overview" } | { name: "news" } | { name: "article"; slug: string } | { name: "calendar" } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string } | { name: "services" } | { name: "service"; slug: string };
 
 function getRoute(): Route {
@@ -68,7 +71,16 @@ function getRoute(): Route {
   return { name: "home" };
 }
 
+// 最外層：包上 LanguageProvider，裡面所有元件才能用 useI18n() 拿到目前語言。
 export default function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
+  );
+}
+
+function AppContent() {
   const [route, setRoute] = useState<Route>(getRoute());
 
   useEffect(() => {

@@ -2,6 +2,7 @@ import { type ReactNode, type CSSProperties } from "react";
 import { Mail } from "lucide-react";
 import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
 import { PageEyebrow, Reveal } from "../general/shared";
+import { defineText, useI18n } from "../i18n";
 
 // ★ 品牌 wordmark SVG（放在 src/imports/contact/ 底下）
 //   IG / FB 用 filter 強制白色；交流版右下小 facebook 重用同一個 facebook.svg。
@@ -10,15 +11,15 @@ import igWordmark from "@/imports/contact/instagram.svg";
 import fbWordmark from "@/imports/contact/facebook.svg";
 import emailLogo from "@/imports/contact/NTU LIS SA.svg";
 
+void Reveal; // 目前沒用到（保留 import，之後想加進場動畫比較方便）
+
 /**
  * 聯絡我們（CONTACT US）— Bento Grid 翻牌版
  * ─────────────────────────────────────────────────────────────
- * 互動：進入時每一格都是深灰 (#151515)，接著各自「隨機、不同步」地開始
- *      垂直翻牌（rotateX，像翻牌時鐘），持續在「Logo 面」與「彩色資訊面」
- *      之間翻動，永不同步 → 呈現亂中有序的美感。
+ * 互動：靜置＝Logo 面（深灰）→ 滑鼠移上去翻到彩色資訊面 → 移開自動翻回。
  *
  * ★ 要貼網址的地方都集中在下方 LINKS；已知的我先填好，未知的留空字串。
- *   （community＝臺大圖資系交流版 FB，尚未有連結，留白給你貼）
+ * ★ 卡片上的中英文字都在下方 TEXT。
  * 社群 icon 沿用全站同一組（@/imports/BentoGrid-1，與 Footer / Bento 一致）。
  */
 
@@ -30,6 +31,28 @@ const LINKS = {
   facebook: "https://www.facebook.com/ntulislis",         // 已知（學會粉專）
   community: "https://www.facebook.com/share/g/1DiHYRrvKz/",    // 「臺大圖資系交流版」FB 連結
 };
+
+// ── 中英文字 ──────────────────────────────────────────────────
+const TEXT = defineText({
+  zh: {
+    saName: "臺大圖資系學會",
+    communityName: "臺大圖資系交流版",
+    // 交流版資訊面：「憑 [臺大圖資系學號] 加入」→ 拆成前、粗體、後三段
+    joinBefore: "憑 ",
+    joinBold: "臺大圖資系學號",
+    joinAfter: " 加入",
+    emailAlt: "EMAIL — NTU LIS SA 臺大圖資系學會",
+  },
+  en: {
+    saName: "NTU LIS Student Association",
+    communityName: "NTU LIS Community Group",
+    joinBefore: "Join with your ",
+    joinBold: "NTU LIS student ID",
+    joinAfter: "",
+    emailAlt: "EMAIL — NTU LIS Student Association",
+  },
+});
+type ContactText = typeof TEXT.zh;
 
 const zhFont = "'Noto Sans TC', sans-serif";
 const monoFont = "'Ubuntu Sans Mono', monospace";
@@ -73,6 +96,7 @@ function FaceShell({ children, style, className = "" }: { children: ReactNode; s
 }
 
 /* ───────────────────────── 五張卡的兩個面 ───────────────────────── */
+// 有文字的面寫成函式，依目前語言（tx）產生內容。
 
 // 1) INSTAGRAM（Logo 面＝Instagram wordmark，白色、置中放大）
 const IG_LOGO = (
@@ -88,9 +112,9 @@ const IG_INFO = (
 );
 
 // 2) EMAIL（Logo 面＝你原設計轉出的 NTU LIS SA.svg，保留原色置中）
-const EMAIL_LOGO = (
+const emailLogoFace = (tx: ContactText) => (
   <FaceShell className="items-center justify-center px-6 lg:px-9" style={{ background: DARK }}>
-    <img src={emailLogo} alt="EMAIL — NTU LIS SA 臺大圖資系學會" style={{ maxWidth: "90%", maxHeight: "72%", width: "auto", height: "auto", objectFit: "contain" }} />
+    <img src={emailLogo} alt={tx.emailAlt} style={{ maxWidth: "90%", maxHeight: "72%", width: "auto", height: "auto", objectFit: "contain" }} />
   </FaceShell>
 );
 const EMAIL_INFO = (
@@ -106,11 +130,11 @@ const THREADS_LOGO = (
     <Glyph path={svgPaths.p3455000} vb="0 0 55 64" className="text-white" style={{ width: "clamp(88px,14vw,156px)", height: "clamp(88px,14vw,156px)" }} />
   </FaceShell>
 );
-const THREADS_INFO = (
+const threadsInfo = (tx: ContactText, isEn: boolean) => (
   <FaceShell className="flex-col items-center justify-center gap-3 lg:gap-4 px-4 text-center" style={{ background: DARK, border: "1.5px solid rgba(255,255,255,0.85)" }}>
     <Glyph path={svgPaths.p3455000} vb="0 0 55 64" className="text-white" style={{ width: "clamp(40px,5vw,64px)", height: "clamp(40px,5vw,64px)" }} />
     <div className="leading-tight">
-      <span className="block text-white/70" style={{ fontFamily: "'Chiron Hei HK Text'", fontWeight: 500, fontSize: "clamp(0.8rem,1.5vw,1.05rem)", letterSpacing: "0.1em" }}>臺大圖資系學會</span>
+      <span className="block text-white/70" style={{ fontFamily: "'Chiron Hei HK Text'", fontWeight: 500, fontSize: isEn ? "clamp(0.72rem,1.2vw,0.95rem)" : "clamp(0.8rem,1.5vw,1.05rem)", letterSpacing: isEn ? "0.02em" : "0.1em" }}>{tx.saName}</span>
       <span className="block text-white" style={{ fontFamily: monoFont, fontWeight: 600, fontSize: "clamp(1rem,2vw,1.5rem)", marginTop: 6 }}>ntu_lis_sa</span>
     </div>
   </FaceShell>
@@ -122,27 +146,27 @@ const FB_LOGO = (
     <Wordmark src={fbWordmark} width="76%" align="center" />
   </FaceShell>
 );
-const FB_INFO = (
+const fbInfo = (tx: ContactText, isEn: boolean) => (
   <FaceShell className="items-center gap-4 lg:gap-6 px-6 lg:px-9" style={{ background: FB_BLUE }}>
     <Glyph path={svgPaths.p1c5aa00} vb="0 0 64 64" className="shrink-0 text-white" style={{ width: "clamp(52px,7vw,90px)", height: "clamp(52px,7vw,90px)" }} />
-    <span className="text-white leading-tight" style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "clamp(1.3rem,3vw,2.4rem)", letterSpacing: "0.06em" }}>臺大圖資系學會</span>
+    <span className="text-white leading-tight" style={{ fontFamily: zhFont, fontWeight: 900, fontSize: isEn ? "clamp(1.05rem,2.2vw,1.8rem)" : "clamp(1.3rem,3vw,2.4rem)", letterSpacing: isEn ? "0.01em" : "0.06em" }}>{tx.saName}</span>
   </FaceShell>
 );
 
 // 5) COMMUNITY（交流版）
-const COMMUNITY_LOGO = (
+const communityLogo = (tx: ContactText, isEn: boolean) => (
   <FaceShell className="relative flex-col items-center justify-center gap-2 lg:gap-3 px-4 text-center" style={{ background: DARK }}>
     <span className="text-white/55" style={{ fontFamily: enDisplay, fontWeight: 600, fontSize: "clamp(0.7rem,1.2vw,0.95rem)", letterSpacing: "0.25em" }}>COMMUNITY :</span>
     <span style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.4rem,2.6vw,2.2rem)", letterSpacing: "0.14em", color: "transparent", WebkitTextStroke: "1px rgba(255,255,255,0.9)" }}>NTU LIS</span>
-    <span className="text-white/70" style={{ fontFamily: "'Chiron Hei HK Text'", fontWeight: 500, fontSize: "clamp(0.72rem,1.3vw,1rem)", letterSpacing: "0.08em", marginTop: 4 }}>臺大圖資系交流版</span>
+    <span className="text-white/70" style={{ fontFamily: "'Chiron Hei HK Text'", fontWeight: 500, fontSize: "clamp(0.72rem,1.3vw,1rem)", letterSpacing: isEn ? "0.02em" : "0.08em", marginTop: 4 }}>{tx.communityName}</span>
     {/* 底部小 facebook：白色 45% */}
     <Wordmark src={fbWordmark} height="clamp(12px,1.6vw,20px)" opacity={0.45} align="center" fill={false} className="absolute bottom-3 left-1/2 -translate-x-1/2" />
   </FaceShell>
 );
-const COMMUNITY_INFO = (
+const communityInfo = (tx: ContactText, isEn: boolean) => (
   <FaceShell className="flex-col items-center justify-center relative px-4 text-center" style={{ background: DARK, border: "1.5px solid rgba(46,92,246,0.9)" }}>
-    <span className="text-white leading-relaxed" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.9rem,1.7vw,1.35rem)", letterSpacing: "0.04em" }}>
-      憑 <b style={{ fontWeight: 900 }}>臺大圖資系學號</b> 加入
+    <span className="text-white leading-relaxed" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: isEn ? "clamp(0.85rem,1.5vw,1.15rem)" : "clamp(0.9rem,1.7vw,1.35rem)", letterSpacing: isEn ? "0.01em" : "0.04em" }}>
+      {tx.joinBefore}<b style={{ fontWeight: 900 }}>{tx.joinBold}</b>{tx.joinAfter}
     </span>
     {/* 右下小 facebook：重用同一個 facebook.svg，白色 45% */}
     <Wordmark src={fbWordmark} height="clamp(12px,1.6vw,20px)" opacity={0.45} align="right" fill={false} className="absolute bottom-3 right-4" />
@@ -186,15 +210,19 @@ function FlipCard({ card }: { card: Card }) {
 
 // 手機：min-h 給每格高度底線（頁面可捲動）。md 以上：min-h 歸零，
 // 交給 grid 的 1fr 平均分配、剛好塞滿一屏（不會被切）。
-const CARDS: Card[] = [
-  { key: "instagram", href: LINKS.instagram, label: "Instagram：ntu_lis_sa", className: "col-span-12 md:col-span-7 min-h-[200px] md:min-h-0", logo: IG_LOGO, info: IG_INFO },
-  { key: "email", href: `mailto:${LINKS.email}`, label: `Email：${LINKS.email}`, className: "col-span-12 md:col-span-5 min-h-[200px] md:min-h-0", logo: EMAIL_LOGO, info: EMAIL_INFO },
-  { key: "threads", href: LINKS.threads, label: "Threads：ntu_lis_sa", className: "col-span-5 md:col-span-3 min-h-[180px] md:min-h-0", logo: THREADS_LOGO, info: THREADS_INFO },
-  { key: "facebook", href: LINKS.facebook, label: "Facebook：臺大圖資系學會", className: "col-span-7 md:col-span-6 min-h-[180px] md:min-h-0", logo: FB_LOGO, info: FB_INFO },
-  { key: "community", href: LINKS.community, label: "臺大圖資系交流版", className: "col-span-12 md:col-span-3 min-h-[160px] md:min-h-0", logo: COMMUNITY_LOGO, info: COMMUNITY_INFO },
-];
+function buildCards(tx: ContactText, isEn: boolean): Card[] {
+  return [
+    { key: "instagram", href: LINKS.instagram, label: "Instagram: ntu_lis_sa", className: "col-span-12 md:col-span-7 min-h-[200px] md:min-h-0", logo: IG_LOGO, info: IG_INFO },
+    { key: "email", href: `mailto:${LINKS.email}`, label: `Email: ${LINKS.email}`, className: "col-span-12 md:col-span-5 min-h-[200px] md:min-h-0", logo: emailLogoFace(tx), info: EMAIL_INFO },
+    { key: "threads", href: LINKS.threads, label: "Threads: ntu_lis_sa", className: "col-span-5 md:col-span-3 min-h-[180px] md:min-h-0", logo: THREADS_LOGO, info: threadsInfo(tx, isEn) },
+    { key: "facebook", href: LINKS.facebook, label: `Facebook: ${tx.saName}`, className: "col-span-7 md:col-span-6 min-h-[180px] md:min-h-0", logo: FB_LOGO, info: fbInfo(tx, isEn) },
+    { key: "community", href: LINKS.community, label: tx.communityName, className: "col-span-12 md:col-span-3 min-h-[160px] md:min-h-0", logo: communityLogo(tx, isEn), info: communityInfo(tx, isEn) },
+  ];
+}
 
 export default function Contact() {
+  const { pick, isEn } = useI18n();
+  const cards = buildCards(pick(TEXT), isEn);
   return (
     <section id="contact" className="relative bg-black min-h-[100svh] flex flex-col px-5 sm:px-8 md:px-14 pt-[var(--page-content-top)] pb-6 sm:pb-8 lg:pb-12">
       <div className="max-w-[1400px] w-full mx-auto flex flex-col flex-1 min-h-0">
@@ -202,7 +230,7 @@ export default function Contact() {
 
         {/* md 以上：grid 撐滿剩餘高度、兩列各佔 1fr → 兩排卡片剛好一屏 */}
         <div className="grid grid-cols-12 gap-4 sm:gap-5 lg:gap-6 md:flex-1 md:min-h-0 md:[grid-template-rows:1fr_1fr]">
-          {CARDS.map((c) => (
+          {cards.map((c) => (
             <FlipCard key={c.key} card={c} />
           ))}
         </div>

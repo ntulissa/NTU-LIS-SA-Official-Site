@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowDown } from "lucide-react";
+import { useI18n } from "../i18n";
 
 const ENABLED_ROUTES = new Set(["home", "presidents", "sponsor", "news", "fees", "join"]);
 
@@ -15,6 +16,7 @@ function getCurrentRoute() {
  * - 可點擊：每次點擊平滑往下捲動約一個畫面高度。
  */
 export default function ScrollIndicator() {
+  const { t, lang } = useI18n();
   const enabled = ENABLED_ROUTES.has(getCurrentRoute());
   const [hidden, setHidden] = useState(false);
 
@@ -62,11 +64,14 @@ export default function ScrollIndicator() {
 
   if (!enabled) return null;
 
+  // 中文字距拉開比較好看；英文拉太開會難讀
+  const tracking = lang === "en" ? "0.12em" : "0.3em";
+
   return (
     <button
       type="button"
       onClick={scrollDown}
-      aria-label="往下繼續探索"
+      aria-label={t.scrollHint}
       className={`fixed left-1/2 -translate-x-1/2 bottom-6 sm:bottom-8 z-40 flex flex-col items-center gap-2 transition-all duration-500 ease-out ${
         hidden ? "opacity-0 translate-y-4 pointer-events-none" : "opacity-100 translate-y-0"
       }`}
@@ -94,11 +99,11 @@ export default function ScrollIndicator() {
           fontFamily: "'Noto Sans TC', sans-serif",
           fontWeight: 700,
           fontSize: "0.7rem",
-          letterSpacing: "0.3em",
-          paddingLeft: "0.2em", // 補償尾端字距，讓文字視覺置中
+          letterSpacing: tracking,
+          paddingLeft: tracking, // 補償尾端字距，讓文字視覺置中
         }}
       >
-        往下繼續探索
+        {t.scrollHint}
       </span>
     </button>
   );

@@ -3,8 +3,9 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Reveal } from "../general/shared";
 import { EVENTS, eventEnd, isSchoolOnly, accentColorOf, ymd, type CalEvent } from "../latest/events";
 import { BENTO, DEPT_COLORS, serviceBySlug, type ServiceCell } from "../services/servicesData";
+import { defineText, useI18n } from "../i18n";
 // ↑ 本檔位於 src/ui/home-page/。
-//   若放別的地方，改上面三行的相對路徑即可。
+//   若放別的地方，改上面幾行的相對路徑即可。
 
 /**
  * 首頁「近期的系學會活動」
@@ -20,19 +21,48 @@ import { BENTO, DEPT_COLORS, serviceBySlug, type ServiceCell } from "../services
  *     3) 活動標題含有下方 ALIASES 的關鍵字
  *   都對不到 → 連到行事曆頁、用部門色、不放圖。
  * ● 最後一格固定是「探索更多活動」→ 系學會行事曆（#/calendar）。
+ * ● 活動名稱的英文版在 events.ts 的 titleEn。
  */
 
 // ══════════════════════════════════════════════════════════════════
 // ✏️ 手動調整區
 // ══════════════════════════════════════════════════════════════════
-const SECTION_TITLE = "每月有活動，圖資生活不孤單";
+// 畫面文字（中英兩份）。taglines：每項服務在卡片上的一句話標語（slug → 文字）；沒填的會改顯示該服務的英文名。
+const TEXT = defineText({
+  zh: {
+    sectionTitle: "每月有活動，圖資生活不孤單",
+    button: "深入了解",
+    exploreTitle: "探索更多活動",
+    exploreDesc: "找不到有興趣的活動？都幫你整理好了！",
+    prev: "上一個活動",
+    next: "下一個活動",
+    taglines: {
+      alumni: "在學長姐的視野裡，看見自己未來的無限可能",
+      bbq: "月色下升起的炭火，把秋夜的微風與相遇",
+      "lis-cup": "球場上，圖資人盡情揮灑汗水與青春",
+      "xmas-ball": "歲末最令人引頸期盼的跨系狂歡派對",
+    } as Record<string, string>,
+  },
+  en: {
+    sectionTitle: "Something every month — never a dull moment in LIS",
+    button: "Learn more",
+    exploreTitle: "Explore more events",
+    exploreDesc: "Nothing caught your eye? We've rounded up everything for you!",
+    prev: "Previous event",
+    next: "Next event",
+    taglines: {
+      alumni: "See your future through the eyes of our alumni",
+      bbq: "Charcoal glowing under the moon on a breezy autumn night",
+      "lis-cup": "LIS students giving it everything on the court",
+      "xmas-ball": "The most anticipated cross-department party of the year",
+    },
+  },
+});
+
 const DAYS_AHEAD = 60;   // 抓未來幾天內的活動
 const MAX_CARDS = 8;     // 最多顯示幾張活動卡（不含「探索更多活動」）
-const BTN_LABEL = "深入了解";
 
-// 「探索更多活動」卡
-const EXPLORE_TITLE = "探索更多活動";
-const EXPLORE_DESC = "找不到有興趣的活動？都幫你整理好了！";
+// 「探索更多活動」卡連結
 const EXPLORE_LINK = "#/calendar";
 
 // 卡片尺寸（clamp(最小, 隨螢幕縮放, 最大)）
@@ -59,14 +89,6 @@ const ALIASES: [keyword: string, slug: string][] = [
   ["系服", "ooty"],
   ["耶舞", "xmas-ball"],
 ];
-
-// 每項服務在卡片上的一句話標語（slug → 文字）。沒填的會改顯示該服務的英文名。
-const TAGLINES: Record<string, string> = {
-  alumni: "在學長姐的視野裡，看見自己未來的無限可能",
-  bbq: "月色下升起的炭火，把秋夜的微風與相遇",
-  "lis-cup": "球場上，圖資人盡情揮灑汗水與青春",
-  "xmas-ball": "歲末最令人引頸期盼的跨系狂歡派對"
-};
 // ══════════════════════════════════════════════════════════════════
 
 const zhDisplay = "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif";
@@ -92,6 +114,7 @@ const SERVICES_BY_NAME = (BENTO.filter((c) => c.type === "service") as ServiceCe
   .slice()
   .sort((a, b) => b.zh.length - a.zh.length);
 
+// 比對一律用「中文原始資料」，跟目前顯示的語言無關
 function findService(e: CalEvent): ServiceCell | undefined {
   // 1) events.ts 有寫 service → 直接用
   if (e.service) {
@@ -123,7 +146,8 @@ type CardItem = {
 };
 
 // ── 活動卡 ──
-function EventCard({ item }: { item: CardItem }) {
+function EventCard({ item, button }: { item: CardItem; button: string }) {
+  const { track } = useI18n();
   return (
     <a
       href={item.href}
@@ -150,22 +174,22 @@ function EventCard({ item }: { item: CardItem }) {
 
       <h3
         className="text-white mt-4"
-        style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.25rem, 2.2vw, 2.1rem)", letterSpacing: "0.06em", lineHeight: 1.25 }}
+        style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.25rem, 2.2vw, 2.1rem)", letterSpacing: track("0.06em", "0.01em"), lineHeight: 1.25 }}
       >
         {item.title}
       </h3>
       <p
         className="text-white/80 mt-3 line-clamp-2"
-        style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.82rem, 1.1vw, 1.05rem)", letterSpacing: "0.1em", lineHeight: 1.6 }}
+        style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.82rem, 1.1vw, 1.05rem)", letterSpacing: track("0.1em"), lineHeight: 1.6 }}
       >
         {item.tagline}
       </p>
 
       <span
         className="mt-6 sm:mt-10 inline-flex items-center gap-2 bg-white text-black rounded-full px-5 sm:px-6 py-2.5 group-hover:bg-white/90 transition-colors"
-        style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: "0.1em" }}
+        style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: track("0.1em") }}
       >
-        {BTN_LABEL}
+        {button}
         <ArrowRight size={18} strokeWidth={2.6} className="transition-transform duration-200 group-hover:translate-x-1" />
       </span>
     </a>
@@ -173,7 +197,8 @@ function EventCard({ item }: { item: CardItem }) {
 }
 
 // ── 最後一格：探索更多活動（紅藍漸層外框） ──
-function ExploreCard() {
+function ExploreCard({ title, desc, button }: { title: string; desc: string; button: string }) {
+  const { track } = useI18n();
   return (
     <a
       href={EXPLORE_LINK}
@@ -196,21 +221,21 @@ function ExploreCard() {
       </div>
       <h3
         className="text-white mt-4"
-        style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.25rem, 2.2vw, 2.1rem)", letterSpacing: "0.06em", lineHeight: 1.25 }}
+        style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.25rem, 2.2vw, 2.1rem)", letterSpacing: track("0.06em", "0.01em"), lineHeight: 1.25 }}
       >
-        {EXPLORE_TITLE}
+        {title}
       </h3>
       <p
         className="text-white/80 mt-3 line-clamp-2"
-        style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.82rem, 1.1vw, 1.05rem)", letterSpacing: "0.1em", lineHeight: 1.6 }}
+        style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.82rem, 1.1vw, 1.05rem)", letterSpacing: track("0.1em"), lineHeight: 1.6 }}
       >
-        {EXPLORE_DESC}
+        {desc}
       </p>
       <span
         className="mt-6 sm:mt-10 inline-flex items-center gap-2 bg-white text-black rounded-full px-5 sm:px-6 py-2.5 group-hover:bg-white/90 transition-colors"
-        style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: "0.1em" }}
+        style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: track("0.1em") }}
       >
-        {BTN_LABEL}
+        {button}
         <ArrowRight size={18} strokeWidth={2.6} className="transition-transform duration-200 group-hover:translate-x-1" />
       </span>
     </a>
@@ -218,6 +243,9 @@ function ExploreCard() {
 }
 
 export default function Upcoming() {
+  const { pick, localize, track, lang } = useI18n();
+  const tx = pick(TEXT);
+
   // ── 抓今天起 DAYS_AHEAD 天內的系學會活動 ──
   const items = useMemo<CardItem[]>(() => {
     const now = new Date();
@@ -235,14 +263,15 @@ export default function Upcoming() {
         const svc = findService(e);
         return {
           key: `${e.title}-${e.date}-${i}`,
-          title: e.title,
-          tagline: svc ? TAGLINES[svc.slug] ?? svc.en : "",
+          title: localize(e).title,
+          tagline: svc ? tx.taglines[svc.slug] ?? svc.en : "",
           color: svc ? DEPT_COLORS[svc.dept] : accentColorOf(e),
           img: svc ? assetBySlug(svc.slug) : undefined,
           href: svc ? `#/service/${svc.slug}` : EXPLORE_LINK,
         };
       });
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   // ── 左右箭頭（桌機才顯示；手機直接用手指滑） ──
   const scroller = useRef<HTMLDivElement>(null);
@@ -284,9 +313,9 @@ export default function Upcoming() {
       <Reveal>
         <h2
           className="text-white text-center px-5 mb-10 sm:mb-16"
-          style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "clamp(1.2rem, 4vw, 3rem)", letterSpacing: "0.06em", lineHeight: 1.3 }}
+          style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "clamp(1.2rem, 4vw, 3rem)", letterSpacing: track("0.06em", "0.01em"), lineHeight: 1.3 }}
         >
-          {SECTION_TITLE}
+          {tx.sectionTitle}
         </h2>
       </Reveal>
 
@@ -298,20 +327,20 @@ export default function Upcoming() {
             style={{ gap: CARD_GAP }}
           >
             {items.map((item) => (
-              <EventCard key={item.key} item={item} />
+              <EventCard key={item.key} item={item} button={tx.button} />
             ))}
-            <ExploreCard />
+            <ExploreCard title={tx.exploreTitle} desc={tx.exploreDesc} button={tx.button} />
             {/* 右側留白，讓最後一張卡能完整捲到定位 */}
             <div className="shrink-0 w-px" aria-hidden="true" />
           </div>
 
           {canLeft && (
-            <button type="button" onClick={() => scrollByDir(-1)} aria-label="上一個活動" className={`${arrowClass} left-4`}>
+            <button type="button" onClick={() => scrollByDir(-1)} aria-label={tx.prev} className={`${arrowClass} left-4`}>
               <ChevronLeft size={24} strokeWidth={2.4} />
             </button>
           )}
           {canRight && (
-            <button type="button" onClick={() => scrollByDir(1)} aria-label="下一個活動" className={`${arrowClass} right-4`}>
+            <button type="button" onClick={() => scrollByDir(1)} aria-label={tx.next} className={`${arrowClass} right-4`}>
               <ChevronRight size={24} strokeWidth={2.4} />
             </button>
           )}

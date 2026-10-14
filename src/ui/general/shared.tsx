@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { PAGE_TITLES, PAGE_TITLE_LAYOUT, type PageTitleKey } from "./pageTitles";
+import { PAGE_TITLE_LAYOUT, type PageTitleKey } from "./pageTitles";
+import { useI18n } from "../i18n";
 
 export function pad(n: number) {
   return String(n);
@@ -72,13 +73,14 @@ export function Reveal({ children, delay = 0, className = "" }: { children: Reac
 }
 
 // ── 頁面小標題（「— 關於我們・現任團隊」那一行）─────────────────────────────
-// 全站統一位置：位置設定集中在 pageTitles.ts。
+// 全站統一位置：位置設定集中在 pageTitles.ts；文字在 i18n/locales/ 的 pageTitles（會跟著語言切換）。
 // ★ 要調整內容起點，改 globals.css 的 --page-content-top，內容才不會壓到標題。
 // ★ 使用規則（照做位置才會一致）：
 //   1. 直接放在 <section className="relative ..."> 裡，外面「不要」再包 <Reveal>
 //      （Reveal 有 transform，會把標題的定位基準換成 Reveal 自己，標題就會跑位）。
 //   2. 該頁內容的上內距用 pt-[var(--page-content-top)]，內容就不會壓到標題。
 export function PageEyebrow({ title }: { title: PageTitleKey }) {
+  const { t } = useI18n();
   return (
     <div
       className="absolute inset-x-0 z-20 pointer-events-none select-none"
@@ -93,7 +95,7 @@ export function PageEyebrow({ title }: { title: PageTitleKey }) {
           color: "#FFFFFF",
         }}
       >
-        — {PAGE_TITLES[title]}
+        — {t.pageTitles[title]}
       </p>
     </div>
   );

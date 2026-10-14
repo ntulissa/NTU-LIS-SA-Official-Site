@@ -1,11 +1,12 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft } from "lucide-react";
-import { PageEyebrow, Reveal } from "../general/shared";
-import { DEPARTMENTS, DEPT_HASHTAGS } from "./departments";
-import { svcImg, type Head } from "./deptShared";
+import { Reveal } from "../general/shared";
+import { DEPARTMENTS, deptHashtags } from "./departments";
+import { svcImg, localizeDept, type Head } from "./deptShared";
 // ★ 服務清單改由「單一資料來源」servicesData.ts 提供（與 Services 頁共用同一份）：
 //   部門頁輪播用 servicesByDept(slug) 撈該部門的所有業務，不再從各部資料檔的 services 讀。
-import { servicesByDept, type Dept, type ServiceCell } from "../services/servicesData";
+import { servicesByDept, localizeService, type Dept, type ServiceCell } from "../services/servicesData";
+import { defineText, useI18n } from "../i18n";
 
 /**
  * 部門獨立頁（共用渲染元件）
@@ -14,8 +15,44 @@ import { servicesByDept, type Dept, type ServiceCell } from "../services/service
  * 版面：Header（全域）→ 回上頁 → 上半（左：簡介＋加入鈕／右：服務輪播）
  *        → 團隊成員（幹部卡）→ 部員名單＋加入區塊 → Footer（全域）
  *
- * ★ 各部門的資料集中在 departments.ts（slug → 資料）。本檔只負責「怎麼呈現」，不含任何部門資料。
+ * ★ 各部門的資料集中在 departments.ts（slug → 資料，含英文欄位）。本檔只負責「怎麼呈現」。
  */
+
+// ── 畫面文字（中英兩份；英文那份結構要和中文一樣）──────────────────────────
+const TEXT = defineText({
+  zh: {
+    serviceHint: "深入了解",
+    prevService: "上一項服務",
+    nextService: "下一項服務",
+    enterService: "進入服務頁面",
+    imgPlaceholder: "服務圖片",
+    photoPending: "照片待補",
+    notFound: "此部門頁面尚未建立。",
+    back: "回上頁",
+    teamMembers: "團隊成員",
+    membersLabel: "-部員  MEMBERS-",
+    headSuffix: " HEAD", // 職稱後面接的英文（例：-部長 HEAD-）
+    becomePre: "成為",
+    becomePost: "的一員",
+    join: "加入我們",
+  },
+  en: {
+    serviceHint: "Learn more",
+    prevService: "Previous service",
+    nextService: "Next service",
+    enterService: "open service page",
+    imgPlaceholder: "Service image",
+    photoPending: "Photo coming soon",
+    notFound: "This department page isn't ready yet.",
+    back: "Back",
+    teamMembers: "Our Team",
+    membersLabel: "-MEMBERS-",
+    headSuffix: "",
+    becomePre: "Become part of",
+    becomePost: "",
+    join: "Join Us",
+  },
+});
 
 // ── 字型（與全站一致）──
 const zhDisplay = "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif";
@@ -24,9 +61,6 @@ const monoFont = "'Ubuntu Sans Mono', monospace";
 
 // 幹部照片底部漸層（與歷屆會長一致：下緣淡出、漂浮）
 const PHOTO_FADE = "linear-gradient(to bottom, #000 74%, transparent 100%)";
-
-// ── 服務底部提示語：已推出 vs 準備中（想改字就改這兩句）──
-const SERVICE_HINT_OPEN = "深入了解";
 
 // ══════════════════════════════════════════════════════════════
 // ★ 可調整常數區（改這裡就能微調版面，不用動下面的結構）
@@ -40,7 +74,7 @@ const HEAD_POS = {
   title: { x: 0, y: 12 }, // 職稱（如 -部長 HEAD-）
 };
 
-// ② 部門簡介底下的 Hashtag 外觀（文字內容在 departments.ts 的 DEPT_HASHTAGS）
+// ② 部門簡介底下的 Hashtag 外觀（文字內容在 departments.ts 的 DEPT_HASHTAGS / DEPT_HASHTAGS_EN）
 const HASHTAG = {
   x: 0,      // 整排水平位移（px）
   y: 0,      // 整排垂直位移（px）
@@ -109,14 +143,14 @@ function hexToRgba(hex: string, a: number): string {
 // ● 手機／平板（觸控，無 hover）：直接顯示箭頭圓鈕，外圈持續擴散漣漪、箭頭往前輕推，點下會有按壓回饋。
 // ● 已到第一項／最後一項：變暗、不再有動畫（電腦＝暗點；手機＝暗色箭頭鈕）。
 // 樣式都寫在下方 <style> 的 .dept-nav-* 區塊；想調速度／大小改那裡即可。
-function NavArrow({ dir, color, disabled, onClick }: { dir: "prev" | "next"; color: string; disabled: boolean; onClick: () => void }) {
+function NavArrow({ dir, color, disabled, onClick, label }: { dir: "prev" | "next"; color: string; disabled: boolean; onClick: () => void; label: string }) {
   const Icon = dir === "prev" ? ChevronLeft : ChevronRight;
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-label={dir === "prev" ? "上一項服務" : "下一項服務"}
+      aria-label={label}
       className={`dept-nav dept-nav--${dir} relative flex items-center justify-center shrink-0 disabled:cursor-default`}
       style={{ width: "44px", height: "44px", ["--nav-c" as string]: color, ["--nav-glow" as string]: hexToRgba(color, 0.6) } as CSSProperties}
     >
@@ -137,7 +171,7 @@ function NavArrow({ dir, color, disabled, onClick }: { dir: "prev" | "next"; col
 // ── 背景：超大草寫部門名稱（SVG 由 imports/members/<slug>-name.svg 提供）──
 // 整頁只有一個，固定（fixed）在畫面正中央；從最上捲到最下都停在視窗中間。
 // 位置與大小改上面的 NAME_BG。尚未放入該部門 SVG 時自動留空、不影響版面。
-function NameBackdrop({ slug }: { slug: string }) {
+export function NameBackdrop({ slug }: { slug: string }) {
   const url = nameSvgFor(slug);
   if (!url) return null;
   return (
@@ -161,21 +195,24 @@ function NameBackdrop({ slug }: { slug: string }) {
 // ── 服務輪播（右側；圖片可點進服務頁；兩旁圓點 hover 變箭頭切換）──
 // 服務清單改吃 servicesData.ts：傳入部門 slug，用 servicesByDept 撈該部門所有業務（與 Services 頁同一份資料）。
 function ServiceCarousel({ dept }: { dept: string }) {
+  const { pick, lang, track } = useI18n();
+  const tx = pick(TEXT);
   const services: ServiceCell[] = servicesByDept(dept as Dept);
   const [idx, setIdx] = useState(0);
-  // 提示語（深入了解／準備中）只有在滑鼠移到「名稱膠囊」上時才顯示。
+  // 提示語（深入了解）只有在滑鼠移到「名稱膠囊」上時才顯示。
   const [hintOn, setHintOn] = useState(false);
-  const s = services[idx] ?? services[0];
+  const raw = services[idx] ?? services[0];
   const canPrev = idx > 0;
   const canNext = idx < services.length - 1;
 
-  if (!s) return null;
+  if (!raw) return null;
+  const s = localizeService(raw, lang);
 
   // 服務按鈕一律「連內部服務詳情頁」#/service/<slug>（同分頁），不開外部網址。
   const detailHref = `#/service/${s.slug}`;
   const linkProps = () => ({ href: detailHref });
 
-  // 名稱與圖片：名稱用 zh；圖片以 slug 命名放 imports/services/（與詳情頁共用同一張）。
+  // 名稱與圖片：名稱用 zh（英文版已換成 nameEn）；圖片以 slug 命名放 imports/services/（與詳情頁共用同一張）。
   const label = s.zh;
   const img = svcImg(s.slug);
 
@@ -188,7 +225,7 @@ function ServiceCarousel({ dept }: { dept: string }) {
 
   // 圖片外層：一律用 <a> 連到該服務的詳情頁（同分頁）。
   const ImgTag: React.ElementType = "a";
-  const imgProps = { href: detailHref, "aria-label": `${label} — 進入服務頁面` };
+  const imgProps = { href: detailHref, "aria-label": `${label} — ${tx.enterService}` };
 
   return (
     <div className="flex flex-col items-center">
@@ -217,7 +254,7 @@ function ServiceCarousel({ dept }: { dept: string }) {
                 <rect x="4" y="3" width="16" height="18" rx="2" />
                 <path d="M8 8h8M8 12h8M8 16h5" strokeLinecap="round" />
               </svg>
-              <span className="text-xs">服務圖片</span>
+              <span className="text-xs">{tx.imgPlaceholder}</span>
             </div>
           </div>
         )}
@@ -225,26 +262,26 @@ function ServiceCarousel({ dept }: { dept: string }) {
 
       {/* 服務名稱 ＋ 左右切換點。部門頁每項服務都連到自己的詳情頁，一律白色實心可點膠囊。 */}
       <div className="flex items-center gap-4 sm:gap-5 mt-6">
-        <NavArrow dir="prev" color="#D14B4B" disabled={!canPrev} onClick={() => canPrev && setIdx((v) => v - 1)} />
+        <NavArrow dir="prev" label={tx.prevService} color="#D14B4B" disabled={!canPrev} onClick={() => canPrev && setIdx((v) => v - 1)} />
         <a
           {...linkProps()}
           onMouseEnter={() => setHintOn(true)}
           onMouseLeave={() => setHintOn(false)}
           className="rounded-full bg-white text-black px-6 py-2.5 whitespace-nowrap hover:bg-white/90 transition-colors"
-          style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.95rem,1.3vw,1.2rem)", letterSpacing: "0.16em" }}
+          style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.95rem,1.3vw,1.2rem)", letterSpacing: track("0.16em") }}
         >
           {label}
         </a>
-        <NavArrow dir="next" color="#2F9EBD" disabled={!canNext} onClick={() => canNext && setIdx((v) => v + 1)} />
+        <NavArrow dir="next" label={tx.nextService} color="#2F9EBD" disabled={!canNext} onClick={() => canNext && setIdx((v) => v + 1)} />
       </div>
 
       {/* 提示語：預設隱藏（opacity 0，但保留高度不跳版），滑到名稱膠囊上才淡入 */}
       <p
         className="mt-3 transition-opacity duration-200"
         aria-hidden={!hintOn}
-        style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.16em", color: "#FFFFFF", opacity: hintOn ? 1 : 0 }}
+        style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: track("0.16em"), color: "#FFFFFF", opacity: hintOn ? 1 : 0 }}
       >
-        {SERVICE_HINT_OPEN}
+        {tx.serviceHint}
       </p>
     </div>
   );
@@ -252,6 +289,8 @@ function ServiceCarousel({ dept }: { dept: string }) {
 
 // ── 幹部卡（照片 → 姓名＋系級 → 職稱）──
 function HeadCard({ head, delay }: { head: Head; delay: number }) {
+  const { pick, track, isEn } = useI18n();
+  const tx = pick(TEXT);
   return (
     <Reveal delay={delay}>
       <div className="flex flex-col items-center text-center">
@@ -270,14 +309,14 @@ function HeadCard({ head, delay }: { head: Head; delay: number }) {
                   <circle cx="12" cy="8" r="4" />
                   <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" strokeLinecap="round" />
                 </svg>
-                <span className="text-xs">照片待補</span>
+                <span className="text-xs">{tx.photoPending}</span>
               </div>
             </div>
           )}
         </div>
 
         <div className="flex items-end justify-center gap-3 mt-4">
-          <p className="text-white leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.8rem,3vw,2.8rem)", letterSpacing: "0.06em", transform: `translate(${HEAD_POS.name.x}px, ${HEAD_POS.name.y}px)` }}>
+          <p className="text-white leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.8rem,3vw,2.8rem)", letterSpacing: track("0.06em", "0"), transform: `translate(${HEAD_POS.name.x}px, ${HEAD_POS.name.y}px)` }}>
             {head.name}
           </p>
           <span className="mb-1 rounded-[6px] px-2.5 py-1" style={{ background: "linear-gradient(90deg,#FFF 0%,#B3B3B3 100%)", color: "#000", fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.8rem,1.1vw,1.05rem)", transform: `translate(${HEAD_POS.cls.x}px, ${HEAD_POS.cls.y}px)` }}>
@@ -285,7 +324,7 @@ function HeadCard({ head, delay }: { head: Head; delay: number }) {
           </span>
         </div>
         <p className="mt-2 text-white/55" style={{ fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.72rem,0.95vw,0.95rem)", letterSpacing: "0.18em", color: "#BEBEBE", transform: `translate(${HEAD_POS.title.x}px, ${HEAD_POS.title.y}px)` }}>
-          -{head.title}&nbsp;HEAD-
+          -{isEn ? head.title.toUpperCase() : head.title}{tx.headSuffix}-
         </p>
       </div>
     </Reveal>
@@ -294,7 +333,11 @@ function HeadCard({ head, delay }: { head: Head; delay: number }) {
 
 // ── 主要頁面 ────────────────────────────────────────────────
 export default function Department({ slug }: { slug: string }) {
-  const data = DEPARTMENTS[slug];
+  const { pick, lang, track, isEn } = useI18n();
+  const tx = pick(TEXT);
+  const raw = DEPARTMENTS[slug];
+  const data = raw ? localizeDept(raw, lang) : undefined;
+  const hashtags = deptHashtags(slug, lang);
 
   useEffect(() => {
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
@@ -309,9 +352,9 @@ export default function Department({ slug }: { slug: string }) {
   if (!data) {
     return (
       <section className="relative bg-black min-h-screen flex flex-col items-center justify-center gap-6 px-6 text-center">
-        <p className="text-white/70" style={{ fontFamily: zhFont, fontSize: "1.1rem" }}>此部門頁面尚未建立。</p>
-        <button onClick={goBack} className="rounded-full border border-white/30 text-white px-6 py-2.5 hover:bg-white/5" style={{ fontFamily: zhFont, fontWeight: 700, letterSpacing: "0.16em" }}>
-          ← 回上頁
+        <p className="text-white/70" style={{ fontFamily: zhFont, fontSize: "1.1rem" }}>{tx.notFound}</p>
+        <button onClick={goBack} className="rounded-full border border-white/30 text-white px-6 py-2.5 hover:bg-white/5" style={{ fontFamily: zhFont, fontWeight: 700, letterSpacing: track("0.16em") }}>
+          ← {tx.back}
         </button>
       </section>
     );
@@ -411,15 +454,15 @@ export default function Department({ slug }: { slug: string }) {
             <button
               onClick={goBack}
               className="group inline-flex items-center gap-2 rounded-full bg-white text-black px-5 py-2 mb-8 lg:mb-10 hover:bg-white/90 transition-all duration-200 w-fit max-w-full"
-              style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.06em" }}
+              style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: track("0.06em") }}
             >
-              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform duration-200" /> 回上頁
+              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform duration-200" /> {tx.back}
             </button>
           </Reveal>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start">
             <div className="max-w-[600px]">
               <Reveal delay={40}>
-                <h1 className="leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(2.6rem,4.5vw,4.4rem)", letterSpacing: "0.1em", color: data.color }}>
+                <h1 className="leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: isEn ? "clamp(2.2rem,3.8vw,3.8rem)" : "clamp(2.6rem,4.5vw,4.4rem)", letterSpacing: track("0.1em", "0.01em"), color: data.color }}>
                   {data.zh}
                 </h1>
                 <p className="mt-2 mb-8" style={{ fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.85rem,1.2vw,1.15rem)", letterSpacing: "0.32em", color: data.color, opacity: 0.75 }}>
@@ -427,19 +470,19 @@ export default function Department({ slug }: { slug: string }) {
                 </p>
               </Reveal>
               <Reveal delay={80}>
-                <p style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.85rem,1vw,1rem)", lineHeight: 2.1, letterSpacing: "0.06em", color: "rgba(255,255,255,0.82)" }}>
+                <p style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.85rem,1vw,1rem)", lineHeight: isEn ? 1.8 : 2.1, letterSpacing: track("0.06em", "0.005em"), color: "rgba(255,255,255,0.82)" }}>
                   {data.intro}
                 </p>
               </Reveal>
 
               {/* Hashtag（文字內容在 departments.ts 的 DEPT_HASHTAGS；外觀／位置改上面的 HASHTAG） */}
-              {DEPT_HASHTAGS[slug]?.length ? (
+              {hashtags.length ? (
                 <Reveal delay={120}>
                   <div
                     className="flex flex-wrap"
                     style={{ gap: `${HASHTAG.gap}px`, marginTop: "2rem", transform: `translate(${HASHTAG.x}px, ${HASHTAG.y}px)` }}
                   >
-                    {DEPT_HASHTAGS[slug].map((t) => (
+                    {hashtags.map((t) => (
                       <span
                         key={t}
                         style={{
@@ -448,7 +491,7 @@ export default function Department({ slug }: { slug: string }) {
                           fontFamily: zhFont,
                           fontWeight: 700,
                           fontSize: `${HASHTAG.size}px`,
-                          letterSpacing: "0.08em",
+                          letterSpacing: track("0.08em", "0.01em"),
                           padding: `${HASHTAG.padY}px ${HASHTAG.padX}px`,
                           borderRadius: `${HASHTAG.radius}px`,
                           lineHeight: 1,
@@ -462,9 +505,9 @@ export default function Department({ slug }: { slug: string }) {
               ) : null}
             </div>
 
-            {/* 右：服務輪播 */}
+            {/* 右：服務輪播（切換語言時 key 改變 → 重新從第一項開始） */}
             <Reveal delay={100}>
-              <ServiceCarousel dept={slug} />
+              <ServiceCarousel key={`${slug}-${lang}`} dept={slug} />
             </Reveal>
           </div>
         </div>
@@ -475,8 +518,8 @@ export default function Department({ slug }: { slug: string }) {
         <Reveal>
           <div className="inline-flex rounded-full mb-10 lg:mb-14" style={{ padding: "1.5px", background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)" }}>
             <div className="rounded-full bg-black px-6 py-2">
-              <span className="text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: "0.24em", paddingLeft: "0.24em" }}>
-                團隊成員
+              <span className="text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.24em", "0.06em"), paddingLeft: track("0.24em", "0.06em") }}>
+                {tx.teamMembers}
               </span>
             </div>
           </div>
@@ -500,7 +543,7 @@ export default function Department({ slug }: { slug: string }) {
           <Reveal>
             <div className="rounded-2xl border p-6 sm:p-8 h-full" style={{ borderColor: `${data.color}66`, background: "rgba(255,255,255,0.02)" }}>
               <p className="mb-6" style={{ fontFamily: monoFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)" }}>
-                -部員&nbsp;&nbsp;MEMBERS-
+                {tx.membersLabel}
               </p>
               <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                 {data.members.map((m, i) => (
@@ -508,7 +551,7 @@ export default function Department({ slug }: { slug: string }) {
                     <span className="shrink-0 text-white/70 rounded-[4px] px-1.5 py-0.5" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.62rem", background: "rgba(255,255,255,0.12)", letterSpacing: "0.04em" }}>
                       {m.c}
                     </span>
-                    <span className="text-white truncate" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: "0.1em" }}>
+                    <span className="text-white truncate" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.1em") }}>
                       {m.n}
                     </span>
                   </div>
@@ -520,21 +563,21 @@ export default function Department({ slug }: { slug: string }) {
           {/* 成為…的一員 */}
           <Reveal delay={80}>
             <div className="lissa-flow-border rounded-2xl p-6 sm:p-8 h-full flex flex-col" style={{ background: "rgba(255,255,255,0.02)" }}>
-              <h3 className="mb-4" style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "clamp(1.3rem,2vw,1.8rem)", letterSpacing: "0.06em", color: "#fff" }}>
-                成為{" "}
-                <span style={GRAD_TEXT}>{data.zh}</span>{" "}
-                的一員
+              <h3 className="mb-4" style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "clamp(1.3rem,2vw,1.8rem)", letterSpacing: track("0.06em", "0.01em"), color: "#fff" }}>
+                {tx.becomePre}{" "}
+                <span style={GRAD_TEXT}>{data.zh}</span>
+                {tx.becomePost && <>{" "}{tx.becomePost}</>}
               </h3>
-              <p className="mb-6 flex-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.85rem,1vw,0.98rem)", lineHeight: 2, letterSpacing: "0.04em", color: "rgba(255,255,255,0.6)" }}>
+              <p className="mb-6 flex-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.85rem,1vw,0.98rem)", lineHeight: isEn ? 1.8 : 2, letterSpacing: track("0.04em", "0.005em"), color: "rgba(255,255,255,0.6)" }}>
                 {data.joinBlurb}
               </p>
               <a
                 href="#/join"
                 className="self-start relative inline-flex items-center gap-2 rounded-full px-7 py-2.5 overflow-hidden text-white"
-                style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "1rem", letterSpacing: "0.16em", background: "#000" }}
+                style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "1rem", letterSpacing: track("0.16em", "0.04em"), background: "#000" }}
               >
                 <span className="absolute inset-0 rounded-full" style={{ padding: "1.5px", border: "1.5px solid transparent", background: "linear-gradient(#000,#000) padding-box, linear-gradient(90deg,#D14B4B 0%,#2F9EBD 100%) border-box" }} />
-                <span className="relative z-10 inline-flex items-center gap-2">加入我們 <ArrowRight size={15} /></span>
+                <span className="relative z-10 inline-flex items-center gap-2">{tx.join} <ArrowRight size={15} /></span>
               </a>
             </div>
           </Reveal>

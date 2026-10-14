@@ -2,11 +2,20 @@ import { useState, useEffect } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import imgLissaLogo from "@/imports/Header/NTULISSAlogo.svg";
 import { useIsDesktop } from "./shared";
+import { useI18n, type Lang } from "../i18n";
+import LanguageSwitcher from "../i18n/LanguageSwitcher";
+import type { Messages } from "../i18n/locales/zh-TW";
 
-// 導覽列中文字體（維持原設計：Noto Sans TC）。
+// 導覽列字體（維持原設計：Noto Sans TC；它也內含英文字形，所以英文版直接沿用）。
 // 若想讓 Header 也吃 Chiron Hei HK Text，改成：
 //   "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif"
 const zhFont = "'Noto Sans TC', sans-serif";
+
+// 字距：中文字要拉開才好看，英文拉太開會很難讀，所以分開設定。
+const TRACKING: Record<Lang, { top: string; sub: string; join: string }> = {
+  "zh-TW": { top: "0.32em", sub: "0.12em", join: "0.32em" },
+  en: { top: "0.06em", sub: "0.02em", join: "0.08em" },
+};
 
 // ── Logo 調整區（可手動修改）─────────────────────────────────
 // LOGO_SIZE：logo 顯示寬度（px），高度會等比例縮放
@@ -20,47 +29,53 @@ const LOGO_SIZE_MOBILE = 120;
 const LOGO_OFFSET_X_MOBILE = 0;
 const LOGO_OFFSET_Y_MOBILE = 4;
 
-// 選單子項目改為 { label, href } 物件，讓每一項都能連到對應區塊或分頁。
-// 「歷任會長」連到 #/presidents（App.tsx 的 hash 分頁）；其餘先指向主頁對應錨點。
-const NAV_ITEMS = [
-  {
-    label: "關於我們",
-    labelEn: "ABOUT",
-    sub: [
-      { label: "資訊總覽", href: "#/overview" },
-      { label: "學會簡介", href: "#/about" },
-      { label: "現任團隊", href: "#/current-team" },
-      { label: "歷任會長", href: "#/presidents" },
-    ],
-  },
-  {
-    label: "最新動態",
-    labelEn: "NEWS",
-    sub: [
-      { label: "近期公告", href: "#/news" },
-      { label: "系學會行事曆", href: "#/calendar" },
-    ],
-  },
-  {
-    label: "各種服務",
-    labelEn: "SERVICES",
-    sub: [
-      { label: "各部業務", href: "#/services" },
-      { label: "學習資源", href: "#/resources" },
-      { label: "聯絡我們", href: "#/contact" },
-    ],
-  },
-  {
-    label: "支持我們",
-    labelEn: "SUPPORT",
-    sub: [
-      { label: "系學會費", href: "#/fees" },
-      { label: "贊助我們", href: "#/sponsor" },
-    ],
-  },
-];
+// 選單內容：文字來自翻譯檔（i18n/locales/），連結維持 App.tsx 的 hash 分頁。
+// labelEn 是手機選單分類上方的小字（中英文版都顯示英文大寫，當作裝飾標籤）。
+function getNavItems(t: Messages) {
+  return [
+    {
+      label: t.nav.about,
+      labelEn: "ABOUT",
+      sub: [
+        { label: t.nav.overview, href: "#/overview" },
+        { label: t.nav.intro, href: "#/about" },
+        { label: t.nav.team, href: "#/current-team" },
+        { label: t.nav.presidents, href: "#/presidents" },
+      ],
+    },
+    {
+      label: t.nav.news,
+      labelEn: "NEWS",
+      sub: [
+        { label: t.nav.announcements, href: "#/news" },
+        { label: t.nav.calendar, href: "#/calendar" },
+      ],
+    },
+    {
+      label: t.nav.services,
+      labelEn: "SERVICES",
+      sub: [
+        { label: t.nav.departments, href: "#/services" },
+        { label: t.nav.resources, href: "#/resources" },
+        { label: t.nav.contact, href: "#/contact" },
+      ],
+    },
+    {
+      label: t.nav.support,
+      labelEn: "SUPPORT",
+      sub: [
+        { label: t.nav.fees, href: "#/fees" },
+        { label: t.nav.sponsor, href: "#/sponsor" },
+      ],
+    },
+  ];
+}
 
 export default function Header() {
+  const { t, lang } = useI18n();
+  const NAV_ITEMS = getNavItems(t);
+  const track = TRACKING[lang];
+
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
@@ -99,7 +114,7 @@ export default function Header() {
         <a href="#" className="flex items-center shrink-0">
           <img
             src={imgLissaLogo}
-            alt="臺大圖資系學會 Logo"
+            alt={t.footer.logoAlt}
             className="object-contain"
             style={{
               width: `${logoW}px`,
@@ -120,8 +135,8 @@ export default function Header() {
               onMouseLeave={() => setOpenDropdown(null)}
             >
               <button
-                className="flex items-center gap-1 px-4 py-2.5 text-white/80 hover:text-white transition-colors duration-200 rounded-md hover:bg-white/5"
-                style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.32em" }}
+                className="flex items-center gap-1 px-4 py-2.5 text-white/80 hover:text-white transition-colors duration-200 rounded-md hover:bg-white/5 whitespace-nowrap"
+                style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: track.top }}
               >
                 {item.label}
                 <ChevronDown
@@ -134,14 +149,15 @@ export default function Header() {
                 // 外層絕對定位容器：緊貼按鈕底部（top-full，無縫），
                 // 用 pt-2 當作「透明橋接區」取代原本的 mt-1 空隙，
                 // 讓可 hover 的範圍從按鈕一路連到整個面板，滑過去不會斷掉。
-                <div className="absolute top-full left-0 pt-2 w-40">
+                // min-w-40 + w-max：英文選項比較長時，面板會自動變寬，不會換行。
+                <div className="absolute top-full left-0 pt-2 min-w-40 w-max">
                   <div className="bg-[#111]/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl shadow-black/60">
                     {item.sub.map((s, j) => (
                       <a
                         key={j}
                         href={s.href}
-                        className="block px-4 py-2.5 text-white/55 hover:text-white hover:bg-white/5 transition-colors duration-150"
-                        style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.12em" }}
+                        className="block px-4 py-2.5 text-white/55 hover:text-white hover:bg-white/5 transition-colors duration-150 whitespace-nowrap"
+                        style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: track.sub }}
                       >
                         {s.label}
                       </a>
@@ -152,15 +168,18 @@ export default function Header() {
             </div>
           ))}
 
+          {/* 語言切換 */}
+          <LanguageSwitcher className="ml-1" />
+
           {/* 加入我們 — red→teal gradient pill */}
           <a
             href="#/join"
-            className="ml-1 shrink-0 relative inline-flex items-center justify-center px-6 py-2.5 rounded-full overflow-hidden"
+            className="ml-1 shrink-0 relative inline-flex items-center justify-center px-6 py-2.5 rounded-full overflow-hidden whitespace-nowrap"
             style={{
               fontFamily: zhFont,
               fontWeight: 900,
               fontSize: "0.9rem",
-              letterSpacing: "0.32em",
+              letterSpacing: track.join,
               color: "white",
               background: "#000",
               border: "1.5px solid transparent",
@@ -169,39 +188,24 @@ export default function Header() {
               position: "relative",
             }}
           >
-            <span
-              className="absolute inset-0 rounded-full"
-              style={{
-                padding: "1.5px",
-                border: "1.5px solid transparent",
-                background: "linear-gradient(#000, #000) padding-box, linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%) border-box",
-              }}
-            />
-            <span
-              className="absolute inset-0 rounded-full"
-              style={{
-                background: "conic-gradient(from 0deg, #D14B4B 0deg, #2F9EBD 180deg, #D14B4B 360deg)",
-                WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-                WebkitMaskComposite: "xor",
-                maskComposite: "exclude",
-                animation: "buttonRotate 8s linear infinite",
-                transformOrigin: "center",
-                opacity: 0.95,
-              }}
-            />
-            <span className="relative z-10">加入我們</span>
+            <JoinButtonBorder />
+            <span className="relative z-10">{t.nav.join}</span>
           </a>
         </nav>
 
-        {/* ── Mobile toggle ─────────────────────────────────────────────── */}
-        <button
-          className="lg:hidden text-white/70 hover:text-white p-2 -mr-2"
-          aria-label={mobileOpen ? "關閉選單" : "開啟選單"}
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        {/* ── Mobile：語言切換 + 選單按鈕 ─────────────────────────────── */}
+        {/* 語言按鈕直接放在 Header 上，不用打開選單就能切換 */}
+        <div className="lg:hidden flex items-center gap-2">
+          <LanguageSwitcher size="sm" />
+          <button
+            className="text-white/70 hover:text-white p-2 -mr-2"
+            aria-label={mobileOpen ? t.nav.closeMenu : t.nav.openMenu}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {/* ── Mobile menu ───────────────────────────────────────────────── */}
@@ -227,7 +231,7 @@ export default function Header() {
                   href={s.href}
                   onClick={() => setMobileOpen(false)}
                   className="block py-1.5 text-white/65 hover:text-white transition-colors"
-                  style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.9rem", letterSpacing: "0.12em" }}
+                  style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.9rem", letterSpacing: track.sub }}
                 >
                   {s.label}
                 </a>
@@ -241,36 +245,45 @@ export default function Header() {
             style={{
               fontFamily: zhFont,
               fontWeight: 900,
-              letterSpacing: "0.3em",
+              letterSpacing: track.join,
               background: "#000",
               border: "1.5px solid transparent",
               backgroundClip: "padding-box",
             }}
           >
-            <span
-              className="absolute inset-0 rounded-full"
-              style={{
-                padding: "1.5px",
-                border: "1.5px solid transparent",
-                background: "linear-gradient(#000, #000) padding-box, linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%) border-box",
-              }}
-            />
-            <span
-              className="absolute inset-0 rounded-full"
-              style={{
-                background: "conic-gradient(from 0deg, #D14B4B 0deg, #2F9EBD 180deg, #D14B4B 360deg)",
-                WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-                WebkitMaskComposite: "xor",
-                maskComposite: "exclude",
-                animation: "buttonRotate 8s linear infinite",
-                transformOrigin: "center",
-                opacity: 0.95,
-              }}
-            />
-            <span className="relative z-10">加入我們</span>
+            <JoinButtonBorder />
+            <span className="relative z-10">{t.nav.join}</span>
           </a>
         </div>
       )}
     </header>
+  );
+}
+
+// 「加入我們」按鈕的漸層描邊＋旋轉光暈（電腦版、手機版共用）
+function JoinButtonBorder() {
+  return (
+    <>
+      <span
+        className="absolute inset-0 rounded-full"
+        style={{
+          padding: "1.5px",
+          border: "1.5px solid transparent",
+          background: "linear-gradient(#000, #000) padding-box, linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%) border-box",
+        }}
+      />
+      <span
+        className="absolute inset-0 rounded-full"
+        style={{
+          background: "conic-gradient(from 0deg, #D14B4B 0deg, #2F9EBD 180deg, #D14B4B 360deg)",
+          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          WebkitMaskComposite: "xor",
+          maskComposite: "exclude",
+          animation: "buttonRotate 8s linear infinite",
+          transformOrigin: "center",
+          opacity: 0.95,
+        }}
+      />
+    </>
   );
 }

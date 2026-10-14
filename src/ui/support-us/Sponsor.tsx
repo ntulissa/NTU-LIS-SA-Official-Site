@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { PageEyebrow, Reveal, useIsDesktop, fitLine } from "../general/shared";
+import { defineText, useI18n } from "../i18n";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 贊助頁（獨立分頁 · 路由 #/sponsor）
@@ -10,12 +11,37 @@ import { PageEyebrow, Reveal, useIsDesktop, fitLine } from "../general/shared";
 // C. 感謝您的支持！：標題＋副標＋「聯絡我們」按鈕，背景是排成「向下箭頭」的浮動 Toggle。
 //
 // ★ 所有「大小(px)／位置(XY px)」都集中在下面的《版面常數區》，改那裡就好。
+// ★ 英文版：介面文字在下方 TEXT；方案與比較表的英文寫在 PLANS / COMPARE 的 nameEn / descEn / labelEn / valuesEn。
 // ─────────────────────────────────────────────────────────────────────────
 
 // ── 字型（與全站一致）──
 const zhHead = "'Chiron Hei HK Text','Noto Sans TC', sans-serif"; // 標題／敘述
 const zhBody = "'Noto Sans TC', sans-serif";                       // 按鈕
 const mono   = "'Ubuntu Sans Mono','Noto Sans TC', monospace";     // 方案名稱／數值
+
+// ── 中英文字（這一頁專用）──
+const TEXT = defineText({
+  zh: {
+    heroTitle: ["讓你的品牌，", "走入知識與資訊的核心。"],
+    heroSub: ["透過全新改版的系學會官方網站與社群渠道，", "精準對接臺大圖資系多元的專業人才與校園群體。"],
+    plansHeading: "贊助方案比較",
+    prevCat: "上一個面向",
+    nextCat: "下一個面向",
+    thanksTitle: "感謝您的支持！",
+    thanksSub: "歡迎尋找最適合您／貴司的合作方式。",
+    contact: "聯絡我們",
+  },
+  en: {
+    heroTitle: ["Bring your brand", "to the heart of knowledge and information."],
+    heroSub: ["Through our redesigned website and social channels,", "reach NTU LIS's diverse talent and campus community directly."],
+    plansHeading: "Compare Sponsorship Plans",
+    prevCat: "Previous category",
+    nextCat: "Next category",
+    thanksTitle: "Thank you for your support!",
+    thanksSub: "Let's find the partnership that works best for you or your company.",
+    contact: "Contact us",
+  },
+});
 
 // 聯絡（換成真實連結即可）
 const CONTACT = { contactHref: "#/contact" };
@@ -89,19 +115,29 @@ function sponsorSvg(file: string): string | undefined {
 }
 
 // ── 三個贊助方案（svg 放 imports/Sponsor/；名稱用 mono）──
+//   nameEn / descEn ＝英文版
 const PLANS = [
-  { key: "basic",   svg: "basic.svg",   name: "BASIC  基礎曝光",  desc: "最輕量的支持方式，在系學會官網與年度感謝中露出品牌，適合想先試水溫的夥伴。" },
-  { key: "plus",    svg: "plus.svg",    name: "PLUS  深度推廣",   desc: "跨官網、社群與活動的多點曝光，讓品牌被全系與更廣的校園社群持續看見。" },
-  { key: "partner", svg: "partner.svg", name: "PARTNER  年度夥伴", desc: "一整年的深度合作與客製化露出，成為圖資系學會最緊密的長期夥伴。" },
+  { key: "basic",   svg: "basic.svg",   name: "BASIC  基礎曝光",  desc: "最輕量的支持方式，在系學會官網與年度感謝中露出品牌，適合想先試水溫的夥伴。",
+    nameEn: "BASIC  Essential", descEn: "The lightest way to support us — your brand appears on our website and in our annual thank-you. Ideal if you'd like to test the waters." },
+  { key: "plus",    svg: "plus.svg",    name: "PLUS  深度推廣",   desc: "跨官網、社群與活動的多點曝光，讓品牌被全系與更廣的校園社群持續看見。",
+    nameEn: "PLUS  Extended Reach", descEn: "Exposure across our website, social media and events, keeping your brand in front of the whole department and the wider campus." },
+  { key: "partner", svg: "partner.svg", name: "PARTNER  年度夥伴", desc: "一整年的深度合作與客製化露出，成為圖資系學會最緊密的長期夥伴。",
+    nameEn: "PARTNER  Annual", descEn: "A full year of in-depth collaboration and custom exposure — become LISSA's closest long-term partner." },
 ];
 
 // ── 比較面向（可左右切換）；每組 values 依序對應 Basic / Plus / Partner（皆為佔位範例）──
+//   labelEn / valuesEn ＝英文版
 const COMPARE = [
-  { label: "贊助金額", values: ["NT$ 1,000 以下", "NT$ 1,000 – 5,000", "NT$ 5,000 以上"] },
-  { label: "核心形式", values: ["官方網站專區露出", "官網 ＋ 社群宣傳", "官網 ＋ 社群 ＋ 實體宣傳"] },
-  { label: "官方網站", values: ["專屬頁面品牌 Logo", "品牌 Logo ＋ 首頁宣傳版位", "品牌 Logo ＋ 首頁宣傳 ＋ 獨立夥伴介紹頁面"] },
-  { label: "社群推廣", values: ["—", "專屬宣傳貼文 1 篇 ＋ 限時動態", "專屬宣傳貼文 2 篇以上 ＋ 限時動態"] },
-  { label: "實體宣傳", values: ["—", "—", "實體活動現場宣傳（文宣品、海報發放）"] },
+  { label: "贊助金額", values: ["NT$ 1,000 以下", "NT$ 1,000 – 5,000", "NT$ 5,000 以上"],
+    labelEn: "Amount", valuesEn: ["Under NT$ 1,000", "NT$ 1,000 – 5,000", "Over NT$ 5,000"] },
+  { label: "核心形式", values: ["官方網站專區露出", "官網 ＋ 社群宣傳", "官網 ＋ 社群 ＋ 實體宣傳"],
+    labelEn: "Format", valuesEn: ["Website feature", "Website + social media", "Website + social + on-site"] },
+  { label: "官方網站", values: ["專屬頁面品牌 Logo", "品牌 Logo ＋ 首頁宣傳版位", "品牌 Logo ＋ 首頁宣傳 ＋ 獨立夥伴介紹頁面"],
+    labelEn: "Website", valuesEn: ["Logo on our sponsor page", "Logo + homepage promo slot", "Logo + homepage promo + dedicated partner page"] },
+  { label: "社群推廣", values: ["—", "專屬宣傳貼文 1 篇 ＋ 限時動態", "專屬宣傳貼文 2 篇以上 ＋ 限時動態"],
+    labelEn: "Social media", valuesEn: ["—", "1 dedicated post + Stories", "2+ dedicated posts + Stories"] },
+  { label: "實體宣傳", values: ["—", "—", "實體活動現場宣傳（文宣品、海報發放）"],
+    labelEn: "On-site", valuesEn: ["—", "—", "Promotion at our events (flyers & posters)"] },
 ];
 
 // hex → rgba（Toggle 軌道底色／圓球光暈用）
@@ -147,12 +183,14 @@ function ToggleBar({ color, w, h, dur, delay, travel, className = "", style }: {
 // ── 類別左右切換鈕（點 → 箭頭，比照 Department）──
 function NavArrow({ dir, color, disabled, onClick }: { dir: "prev" | "next"; color: string; disabled: boolean; onClick: () => void }) {
   const Icon = dir === "prev" ? ChevronLeft : ChevronRight;
+  const { pick } = useI18n();
+  const tx = pick(TEXT);
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-label={dir === "prev" ? "上一個面向" : "下一個面向"}
+      aria-label={dir === "prev" ? tx.prevCat : tx.nextCat}
       className="group relative flex items-center justify-center disabled:cursor-default"
       style={{ width: "42px", height: "42px" }}
     >
@@ -192,7 +230,10 @@ export default function Sponsor() {
   const [cat, setCat] = useState(0);
   const canPrev = cat > 0;
   const canNext = cat < COMPARE.length - 1;
-  const current = COMPARE[cat];
+  const { pick, localize, isEn, track } = useI18n();
+  const tx = pick(TEXT);
+  const current = localize(COMPARE[cat]); // 英文版：label / values 換成 labelEn / valuesEn
+  const plans = PLANS.map((p) => localize(p)); // 英文版：name / desc 換成 nameEn / descEn
   const heroLogo = sponsorSvg("sponsorLISSA.svg");
   const arrowImg = sponsorSvg("arrow.svg");
   const isDesktop = useIsDesktop();
@@ -231,15 +272,15 @@ export default function Sponsor() {
           <div>
             <div className="hidden lg:block h-[14px] mb-8" aria-hidden="true" />
             <Reveal delay={60}>
-              <h1 className="text-white mb-8" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `${HERO_LAYOUT.title.size}px` : fitLine("走入知識與資訊的核心。", HERO_LAYOUT.title.size, { min: 24, ls: 0.02 }), lineHeight: HERO_LAYOUT.title.lh, letterSpacing: "0.02em", ...moveIf(isDesktop, HERO_LAYOUT.title) }}>
-                <span className="block">讓你的品牌，</span>
-                <span className="block">走入知識與資訊的核心。</span>
+              <h1 className="text-white mb-8" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isEn ? (isDesktop ? `${HERO_LAYOUT.title.size - 10}px` : "clamp(28px, 7.5vw, 40px)") : isDesktop ? `${HERO_LAYOUT.title.size}px` : fitLine("走入知識與資訊的核心。", HERO_LAYOUT.title.size, { min: 24, ls: 0.02 }), lineHeight: isEn ? 1.15 : HERO_LAYOUT.title.lh, letterSpacing: isEn ? "0.005em" : "0.02em", ...moveIf(isDesktop, HERO_LAYOUT.title) }}>
+                <span className="block">{tx.heroTitle[0]}</span>
+                <span className="block">{tx.heroTitle[1]}</span>
               </h1>
             </Reveal>
             <Reveal delay={120}>
-              <p className="text-white/60" style={{ fontFamily: zhBody, fontWeight: 500, color: "white", fontSize: isDesktop ? `${HERO_LAYOUT.sub.size}px` : "clamp(15px, 2.2vw, 20px)", letterSpacing: "0.05em", lineHeight: HERO_LAYOUT.sub.lh, ...moveIf(isDesktop, HERO_LAYOUT.sub) }}>
-                <span className="block">透過全新改版的系學會官方網站與社群渠道，</span>
-                <span className="block">精準對接臺大圖資系多元的專業人才與校園群體。</span>
+              <p className="text-white/60" style={{ fontFamily: zhBody, fontWeight: 500, color: "white", fontSize: isDesktop ? `${HERO_LAYOUT.sub.size}px` : "clamp(15px, 2.2vw, 20px)", letterSpacing: track("0.05em", "0.01em"), lineHeight: isEn ? 1.7 : HERO_LAYOUT.sub.lh, ...moveIf(isDesktop, HERO_LAYOUT.sub) }}>
+                <span className="block">{tx.heroSub[0]}</span>
+                <span className="block">{tx.heroSub[1]}</span>
               </p>
             </Reveal>
           </div>
@@ -267,8 +308,8 @@ export default function Sponsor() {
       <section id="sponsor-plans" className="relative min-h-screen flex flex-col justify-center px-5 sm:px-8 md:px-14 py-20 lg:py-24">
         <div className="max-w-[1200px] w-full mx-auto">
           <Reveal>
-            <h2 className="text-white mb-10 lg:mb-20" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `${PLANS_LAYOUT.heading.size}px` : "clamp(28px, 5vw, 44px)", letterSpacing: "0.04em", ...moveIf(isDesktop, PLANS_LAYOUT.heading) }}>
-              贊助方案比較
+            <h2 className="text-white mb-10 lg:mb-20" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `${PLANS_LAYOUT.heading.size}px` : "clamp(28px, 5vw, 44px)", letterSpacing: track("0.04em", "0.005em"), ...moveIf(isDesktop, PLANS_LAYOUT.heading) }}>
+              {tx.plansHeading}
             </h2>
           </Reveal>
 
@@ -277,13 +318,13 @@ export default function Sponsor() {
             <div>
               <div className="flex items-center justify-center gap-3 sm:gap-5 mb-8">
                 <NavArrow dir="prev" color="#D14B4B" disabled={!canPrev} onClick={() => canPrev && setCat((v) => v - 1)} />
-                <div className="rounded-full border border-white/40 bg-black px-6 py-2.5 min-w-[130px] text-center" style={{ fontFamily: zhHead, fontWeight: 700, color: "#fff", fontSize: "17px", letterSpacing: "0.12em" }}>
+                <div className="rounded-full border border-white/40 bg-black px-6 py-2.5 min-w-[130px] text-center" style={{ fontFamily: zhHead, fontWeight: 700, color: "#fff", fontSize: "17px", letterSpacing: track("0.12em", "0.02em") }}>
                   {current.label}
                 </div>
                 <NavArrow dir="next" color="#2F9EBD" disabled={!canNext} onClick={() => canNext && setCat((v) => v + 1)} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {PLANS.map((p, i) => (
+                {plans.map((p, i) => (
                   <Reveal key={p.key} delay={i * 80}>
                     <div className="h-full rounded-2xl border border-white/12 bg-white/[0.03] px-5 py-6 flex flex-col items-center text-center">
                       <PlanArt file={p.svg} alt={p.name} compact />
@@ -293,7 +334,7 @@ export default function Sponsor() {
                       <p className="text-white mt-4 min-h-[2.8em] flex items-center justify-center" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: "clamp(17px, 2.4vw, 20px)", letterSpacing: "0.02em", lineHeight: 1.4 }}>
                         {current.values[i]}
                       </p>
-                      <p className="text-white/60 mt-4" style={{ fontFamily: zhHead, fontWeight: 500, fontSize: "14px", lineHeight: 1.9 }}>
+                      <p className="text-white/60 mt-4" style={{ fontFamily: zhHead, fontWeight: 500, fontSize: "14px", lineHeight: isEn ? 1.65 : 1.9 }}>
                         {p.desc}
                       </p>
                     </div>
@@ -311,7 +352,7 @@ export default function Sponsor() {
 
             {/* 方案圖 ＋ 名稱 */}
             <div style={planRow}>
-              {PLANS.map((p, i) => (
+              {plans.map((p, i) => (
                 <div key={p.key} style={planCol}>
                   <Reveal delay={i * 80}>
                     <div className="flex flex-col items-center text-center">
@@ -328,7 +369,7 @@ export default function Sponsor() {
             {/* 類別切換（置中） */}
             <div className="flex items-center justify-center gap-4 sm:gap-5 my-12 lg:my-16">
               <NavArrow dir="prev" color="#D14B4B" disabled={!canPrev} onClick={() => canPrev && setCat((v) => v - 1)} />
-              <div className="rounded-full border border-white/40 bg-black px-6 py-2.5 min-w-[140px] text-center" style={{ fontFamily: zhHead, fontWeight: 700, color: "#fff", fontSize: `${PLANS_LAYOUT.catLabel.size}px`, letterSpacing: "0.12em", ...move(PLANS_LAYOUT.catLabel) }}>
+              <div className="rounded-full border border-white/40 bg-black px-6 py-2.5 min-w-[140px] text-center" style={{ fontFamily: zhHead, fontWeight: 700, color: "#fff", fontSize: `${PLANS_LAYOUT.catLabel.size}px`, letterSpacing: track("0.12em", "0.02em"), ...move(PLANS_LAYOUT.catLabel) }}>
                 {current.label}
               </div>
               <NavArrow dir="next" color="#2F9EBD" disabled={!canNext} onClick={() => canNext && setCat((v) => v + 1)} />
@@ -338,7 +379,7 @@ export default function Sponsor() {
             <div style={planRow}>
               {current.values.map((v: string, i: number) => (
                 <div key={i} style={planCol} className="flex items-center justify-center text-center">
-                  <span className="text-white" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: "23px", letterSpacing: "0.02em", ...move(PLANS_LAYOUT.value) }}>
+                  <span className="text-white" style={{ fontFamily: zhBody, fontWeight: 700, fontSize: isEn ? "20px" : "23px", letterSpacing: "0.02em", lineHeight: isEn ? 1.35 : undefined, ...move(PLANS_LAYOUT.value) }}>
                     {v}
                   </span>
                 </div>
@@ -347,10 +388,10 @@ export default function Sponsor() {
 
             {/* 方案敘述 */}
             <div style={planRow} className="mt-14 lg:mt-20">
-              {PLANS.map((p, i) => (
+              {plans.map((p, i) => (
                 <div key={p.key} style={planCol}>
                   <Reveal delay={i * 80}>
-                    <p className="text-white/60 text-center" style={{ fontFamily: zhHead, fontWeight: 500, fontSize: `${PLANS_LAYOUT.desc.size}px`, lineHeight: PLANS_LAYOUT.desc.lh, ...move(PLANS_LAYOUT.desc) }}>
+                    <p className="text-white/60 text-center" style={{ fontFamily: zhHead, fontWeight: 500, fontSize: `${PLANS_LAYOUT.desc.size}px`, lineHeight: isEn ? 1.65 : PLANS_LAYOUT.desc.lh, ...move(PLANS_LAYOUT.desc) }}>
                       {p.desc}
                     </p>
                   </Reveal>
@@ -389,22 +430,22 @@ export default function Sponsor() {
 
         <div className="relative z-10 text-center max-w-3xl">
           <Reveal>
-            <h2 className="text-white mb-6" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isDesktop ? `${THANKS_LAYOUT.title.size}px` : fitLine("感謝您的支持！", THANKS_LAYOUT.title.size, { min: 30, ls: 0.08 }), letterSpacing: "0.08em", textShadow: "0 4px 30px rgba(0,0,0,0.7)", ...moveIf(isDesktop, THANKS_LAYOUT.title) }}>
-              感謝您的支持！
+            <h2 className="text-white mb-6" style={{ fontFamily: zhHead, fontWeight: 900, fontSize: isEn ? (isDesktop ? `${THANKS_LAYOUT.title.size - 24}px` : "clamp(30px, 8.5vw, 44px)") : isDesktop ? `${THANKS_LAYOUT.title.size}px` : fitLine("感謝您的支持！", THANKS_LAYOUT.title.size, { min: 30, ls: 0.08 }), letterSpacing: isEn ? "0.005em" : "0.08em", lineHeight: isEn ? 1.1 : undefined, textShadow: "0 4px 30px rgba(0,0,0,0.7)", ...moveIf(isDesktop, THANKS_LAYOUT.title) }}>
+              {tx.thanksTitle}
             </h2>
           </Reveal>
           <Reveal delay={100}>
-            <p className="text-white/80 mb-10" style={{ fontFamily: zhHead, fontWeight: 500, fontSize: isDesktop ? `${THANKS_LAYOUT.sub.size}px` : fitLine("歡迎尋找最適合您／貴司的合作方式。", THANKS_LAYOUT.sub.size, { min: 14, ls: 0.04 }), letterSpacing: "0.04em", textShadow: "0 2px 16px rgba(0,0,0,0.6)", ...moveIf(isDesktop, THANKS_LAYOUT.sub) }}>
-              歡迎尋找最適合您／貴司的合作方式。
+            <p className="text-white/80 mb-10" style={{ fontFamily: zhHead, fontWeight: 500, fontSize: isEn ? (isDesktop ? `${THANKS_LAYOUT.sub.size}px` : "clamp(15px, 4vw, 18px)") : isDesktop ? `${THANKS_LAYOUT.sub.size}px` : fitLine("歡迎尋找最適合您／貴司的合作方式。", THANKS_LAYOUT.sub.size, { min: 14, ls: 0.04 }), letterSpacing: track("0.04em", "0.01em"), lineHeight: isEn ? 1.6 : undefined, textShadow: "0 2px 16px rgba(0,0,0,0.6)", ...moveIf(isDesktop, THANKS_LAYOUT.sub) }}>
+              {tx.thanksSub}
             </p>
           </Reveal>
           <Reveal delay={180}>
             <a
               href={CONTACT.contactHref}
               className="inline-flex items-center gap-3 bg-white text-black px-7 sm:px-8 py-3.5 rounded-full hover:bg-white/90 transition-all duration-200 group w-fit max-w-full"
-              style={{ fontFamily: zhBody, fontWeight: 700, fontSize: `${THANKS_LAYOUT.button.size}px`, letterSpacing: "0.06em", ...(isDesktop ? move(THANKS_LAYOUT.button) : { transform: "translateY(16px)" }) }}
+              style={{ fontFamily: zhBody, fontWeight: 700, fontSize: `${THANKS_LAYOUT.button.size}px`, letterSpacing: track("0.06em", "0.02em"), ...(isDesktop ? move(THANKS_LAYOUT.button) : { transform: "translateY(16px)" }) }}
             >
-              聯絡我們
+              {tx.contact}
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-200" />
             </a>
           </Reveal>

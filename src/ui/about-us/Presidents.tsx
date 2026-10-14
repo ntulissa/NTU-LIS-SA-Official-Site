@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { PageEyebrow, Reveal } from "../general/shared";
-import { PRESIDENTS, type Dept, type Election } from "./presidents";
+import { PRESIDENTS, DEPT_FULL_EN, type Dept, type Election } from "./presidents";
+import { defineText, useI18n } from "../i18n";
 
 /**
  * 歷任會長頁（PAST PRESIDENTS）── 版型／呈現邏輯
@@ -16,6 +17,69 @@ import { PRESIDENTS, type Dept, type Election } from "./presidents";
  *   請改同資料夾的 presidents.ts，這支檔案（版型）通常不用動。
  */
 
+// ── 畫面文字（中英兩份；英文那份結構要和中文一樣）──────────────────────────
+// genTitle：左上大標，{gen} 會換成屆數（英文版會自動加 st/nd/rd/th）
+const TEXT = defineText({
+  zh: {
+    genTitle: "第 {gen} 屆系學會",
+    term: "任期：",
+    present: "至今",
+    introPending: "本屆簡介整理中，敬請期待。",
+    currentTeam: "現任團隊",
+    teamMembers: "團隊成員",
+    photoPending: "照片待補",
+    older: "上一屆（較早）",
+    newer: "下一屆（較新）",
+    election: "選舉結果",
+    voteDate: "投票日期：",
+    agree: "同意票",
+    disagree: "不同意票",
+    turnout: "投票率",
+    source: "資料來源：",
+    defaultSource: "臺大圖資系學會選委會",
+    valid: "有效票",
+    invalid: "無效票",
+    electorate: "選舉人數",
+    candidates: "參選人 ①",
+  },
+  en: {
+    genTitle: "The {gen} LISSA",
+    term: "Term: ",
+    present: "present",
+    introPending: "We're still writing up this term's story — stay tuned.",
+    currentTeam: "Current Team",
+    teamMembers: "Our Team",
+    photoPending: "Photo coming soon",
+    older: "Previous term (older)",
+    newer: "Next term (newer)",
+    election: "Election Results",
+    voteDate: "Voting date: ",
+    agree: "Yes",
+    disagree: "No",
+    turnout: "Turnout",
+    source: "Source: ",
+    defaultSource: "NTU LISSA Election Committee",
+    valid: "Valid votes",
+    invalid: "Invalid votes",
+    electorate: "Eligible voters",
+    candidates: "Candidates ①",
+  },
+});
+
+// 英文序數：1st、2nd、3rd、4th…、11th、12th、13th、21st…
+function ordinal(n: number): string {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+// 威妥瑪拼音「TZU-YUN, HUANG」→ 英文版顯示用的「Tzu-Yun Huang」
+function romanToDisplay(roman: string): string {
+  const [given, surname] = roman.split(",").map((s) => s.trim());
+  const cap = (w: string) => w.toLowerCase().replace(/(^|-)([a-z])/g, (_, p, c) => p + c.toUpperCase());
+  return surname ? `${cap(given)} ${cap(surname)}` : cap(given);
+}
+
 // ── 字型（與全站一致；Chiron Hei HK 為商用字體，退回 Noto Sans TC）──
 const zhDisplay = "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif"; // 姓名（中文）
 const zhFont = "'Noto Sans TC', sans-serif"; // 內文
@@ -25,16 +89,15 @@ const enDisplay = "'Josefin Sans', sans-serif"; // 英文大標
 // 現任屆＝陣列第一個（最新）。任期由屆數推算（第52屆＝2025.07~2026.07；每屆一年）；
 // 現任這屆結束改顯示「至今」，讓使用者一眼看出是新上任、任期進行中的會長。
 const CURRENT_GEN = PRESIDENTS[0]?.gen;
-function termOf(gen: number) {
+function termOf(gen: number, present: string) {
   const start = gen + 1973; // 52 -> 2025
-  if (gen === CURRENT_GEN) return `${start}.07 ～ 至今`;
+  if (gen === CURRENT_GEN) return `${start}.07 ～ ${present}`;
   return `${start}.07 ～ ${start + 1}.07`;
 }
 
 // ── 「現任團隊」按鈕：只在「現任這屆」且尚未填團隊名單（depts 為空）時，於簡介下方出現。──
-// 之後若把現任屆的 depts 補上，按鈕會自動消失、改顯示團隊名單。連結／文字要改就改這兩個。
+// 之後若把現任屆的 depts 補上，按鈕會自動消失、改顯示團隊名單。按鈕文字在上方 TEXT.currentTeam。
 const CURRENT_TEAM_HREF = "#/current-team";
-const CURRENT_TEAM_LABEL = "現任團隊";
 
 // hex → rgba（給按鈕光暈用）
 function hexToRgba(hex: string, a: number): string {
@@ -55,11 +118,13 @@ function NavArrow({
   color,
   disabled,
   onClick,
+  label,
 }: {
   dir: "prev" | "next";
   color: string;
   disabled: boolean;
   onClick: () => void;
+  label: string;
 }) {
   const Icon = dir === "prev" ? ChevronLeft : ChevronRight;
   return (
@@ -67,7 +132,7 @@ function NavArrow({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-label={dir === "prev" ? "上一屆（較早）" : "下一屆（較新）"}
+      aria-label={label}
       className={`pp-nav pp-nav--${dir} relative flex items-center justify-center shrink-0 disabled:cursor-default`}
       style={{ width: "46px", height: "46px", ["--nav-c" as string]: color, ["--nav-glow" as string]: hexToRgba(color, 0.6) } as CSSProperties}
     >
@@ -87,14 +152,16 @@ function NavArrow({
 
 // ── 單一部門卡片 ───────────────────────────────────────────
 function DeptCard({ dept }: { dept: Dept }) {
+  const { isEn, track } = useI18n();
+  const deptName = isEn ? DEPT_FULL_EN[dept.en] ?? dept.zh : dept.zh;
   return (
     <div
       className="rounded-2xl border p-4 sm:p-5"
       style={{ borderColor: dept.color, background: "rgba(255,255,255,0.02)" }}
     >
-      <p className="mb-4 whitespace-nowrap" style={{ fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.68rem,0.9vw,0.85rem)", letterSpacing: "0.12em" }}>
+      <p className="mb-4 whitespace-nowrap" style={{ fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.68rem,0.9vw,0.85rem)", letterSpacing: track("0.12em", "0.04em") }}>
         <span style={{ color: dept.color }}>{dept.en}.</span>{" "}
-        <span className="text-white/85">{dept.zh}</span>
+        <span className="text-white/85">{deptName}</span>
       </p>
       <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
         {dept.members.map((m, i) => (
@@ -142,7 +209,7 @@ const PHOTO_H = "clamp(280px, 50vh, 560px)"; // 照片區高度（與姓名/屆�
 // 想讓淡出範圍更多→把 72% 調小（例如 60%，淡出下方 40%）；想更少→調大（例如 82%）。
 const PHOTO_FADE = "linear-gradient(to bottom, #000 72%, transparent 100%)";
 
-function renderPhoto(src: string, name: string) {
+function renderPhoto(src: string, name: string, pendingLabel: string) {
   if (src) {
     return (
       <img
@@ -164,13 +231,15 @@ function renderPhoto(src: string, name: string) {
           <circle cx="12" cy="8" r="4" />
           <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" strokeLinecap="round" />
         </svg>
-        <span className="text-xs">照片待補</span>
+        <span className="text-xs">{pendingLabel}</span>
       </div>
     </div>
   );
 }
 
 function PhotoStage({ src, name }: { src: string; name: string }) {
+  const { pick } = useI18n();
+  const pendingLabel = pick(TEXT).photoPending;
   const keyRef = useRef(0);
   const [layers, setLayers] = useState<{ k: number; src: string }[]>([{ k: 0, src }]);
   const removeTimer = useRef<number | null>(null);
@@ -217,7 +286,7 @@ function PhotoStage({ src, name }: { src: string; name: string }) {
     <div className="relative w-full" style={{ height: PHOTO_H }}>
       {layers.map((layer, i) => (
         <div key={layer.k} className={i === layers.length - 1 ? "pp-photo-in" : "pp-photo-out"} style={{ position: "absolute", inset: 0 }}>
-          {renderPhoto(layer.src, name)}
+          {renderPhoto(layer.src, name, pendingLabel)}
         </div>
       ))}
     </div>
@@ -226,6 +295,7 @@ function PhotoStage({ src, name }: { src: string; name: string }) {
 
 // ── 右半：會長個人資訊面板（照片 → 姓名/系級 → 英文名 → 屆數切換器，全部置中）──
 // 桌機以 fixed 釘在右半、永遠顯示；手機則靜態顯示於頁面上方。
+// 英文版：姓名直接顯示拼音（如 Tzu-Yun Huang），下面那行拼音就不重複顯示。
 function ProfilePanel({
   name,
   cls,
@@ -247,17 +317,20 @@ function ProfilePanel({
   onOlder: () => void;
   onNewer: () => void;
 }) {
+  const { pick, isEn, track } = useI18n();
+  const tx = pick(TEXT);
+  const displayName = isEn && roman ? romanToDisplay(roman) : name;
   return (
     // 固定頂端對齊（justify-start + 固定 pt）：照片、姓名、屆數在每一屆都落在同一垂直位置，換屆不位移。
     // 手機版面板在頁面最上方，用 --page-content-top 讓照片避開頁面小標題；桌機（右半 fixed）維持 112px。
     <div className="w-full h-full flex flex-col items-center justify-start text-center px-6 sm:px-10 pt-[var(--page-content-top)] lg:pt-[112px] pb-16">
       {/* 會長照片（交叉淡入；縮小、完整顯示人物；頭頂大致與左側 ABOUT US 齊高）*/}
-      <PhotoStage src={photo} name={name} />
+      <PhotoStage src={photo} name={displayName} />
 
       {/* 姓名 + 系級徽章（置中） */}
       <div className="flex items-end justify-center gap-3 mt-7">
-        <p className="text-white leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(2.2rem,4vw,3.6rem)", letterSpacing: "0.08em" }}>
-          {name}
+        <p className="text-white leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: isEn ? "clamp(1.8rem,3vw,2.8rem)" : "clamp(2.2rem,4vw,3.6rem)", letterSpacing: track("0.08em", "0"), whiteSpace: "nowrap" }}>
+          {displayName}
         </p>
         {cls && (
           <span
@@ -269,12 +342,12 @@ function ProfilePanel({
         )}
       </div>
 
-      {/* 英文名（置中，兩側細線） */}
-      {roman && (
+      {/* 英文名（置中，兩側細線）；英文版姓名已是拼音，就改顯示中文姓名 */}
+      {(isEn ? name && name !== "—" : roman) && (
         <div className="flex items-center justify-center gap-3 mt-3">
           <span className="h-px w-8 sm:w-12" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.5))" }} />
-          <span style={{ fontFamily: monoFont, fontWeight: 400, fontSize: "clamp(0.72rem,1vw,0.95rem)", letterSpacing: "0.22em", background: "linear-gradient(90deg,#FFF 0%,#8f8f8f 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent" }}>
-            {roman}
+          <span style={{ fontFamily: isEn ? zhFont : monoFont, fontWeight: 400, fontSize: "clamp(0.72rem,1vw,0.95rem)", letterSpacing: "0.22em", background: "linear-gradient(90deg,#FFF 0%,#8f8f8f 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent" }}>
+            {isEn ? name : roman}
           </span>
           <span className="h-px w-8 sm:w-12" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.5), transparent)" }} />
         </div>
@@ -282,7 +355,7 @@ function ProfilePanel({
 
       {/* 屆數切換器：•  52  •（置中） */}
       <div className="flex items-center justify-center gap-5 sm:gap-7 mt-8">
-        <NavArrow dir="prev" color="#D14B4B" disabled={!canOlder} onClick={onOlder} />
+        <NavArrow dir="prev" label={tx.older} color="#D14B4B" disabled={!canOlder} onClick={onOlder} />
         <span
           className="tabular-nums leading-none select-none"
           style={{
@@ -299,7 +372,7 @@ function ProfilePanel({
         >
           {gen}
         </span>
-        <NavArrow dir="next" color="#2F9EBD" disabled={!canNewer} onClick={onNewer} />
+        <NavArrow dir="next" label={tx.newer} color="#2F9EBD" disabled={!canNewer} onClick={onNewer} />
       </div>
     </div>
   );
@@ -313,14 +386,18 @@ function ProfilePanel({
 const ELECTION_GRAD = "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)"; // 全站紅→藍
 
 function ElectionResult({ e }: { e: Election }) {
+  const { pick, isEn, track } = useI18n();
+  const tx = pick(TEXT);
   const valid = e.agree + e.disagree; // 有效票
   const invalid = e.invalid ?? 0; // 廢票（預設 0）
   const turnout = e.electorate > 0 ? Math.round(((valid + invalid) / e.electorate) * 100) : 0; // 投票率 %＝(有效票＋無效票)÷選舉人數（四捨五入）
   const base = Math.max(valid, 1); // 長條滿格＝有效票總數（同意＋不同意）
   const bars = [
-    { label: "同意票", value: e.agree, pct: Math.min(100, (e.agree / base) * 100) },
-    { label: "不同意票", value: e.disagree, pct: Math.min(100, (e.disagree / base) * 100) },
+    { label: tx.agree, value: e.agree, pct: Math.min(100, (e.agree / base) * 100) },
+    { label: tx.disagree, value: e.disagree, pct: Math.min(100, (e.disagree / base) * 100) },
   ];
+  const source = (isEn ? e.sourceEn : e.source) ?? tx.defaultSource;
+  const labelTrack = track("0.16em", "0.02em");
 
   // ── 投票率環的漸層字串 ───────────────────────────────────────
   // 紅＝有效票（＝投票率）、淺灰＝廢票、藍＝其餘（未投票）；三段皆以選舉人數為基準，交界用漸層柔化。
@@ -344,13 +421,13 @@ function ElectionResult({ e }: { e: Election }) {
       <div className="flex items-center gap-4 mb-10 flex-wrap">
         <div className="inline-flex rounded-full" style={{ padding: "1.5px", background: ELECTION_GRAD }}>
           <div className="rounded-full bg-black px-6 py-2">
-            <span className="text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: "0.24em", paddingLeft: "0.24em" }}>
-              選舉結果
+            <span className="text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.24em", "0.06em"), paddingLeft: track("0.24em", "0.06em") }}>
+              {tx.election}
             </span>
           </div>
         </div>
         <span className="text-white/40" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.8rem", letterSpacing: "0.12em", color: "#ffffff", opacity: 0.8 }}>
-          投票日期：{e.date}
+          {tx.voteDate}{e.date}
         </span>
       </div>
 
@@ -358,7 +435,7 @@ function ElectionResult({ e }: { e: Election }) {
       <div className="space-y-7 mb-14">
         {bars.map((row) => (
           <div key={row.label}>
-            <p className="text-white mb-3" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.05rem,1.5vw,1.35rem)", letterSpacing: "0.16em" }}>
+            <p className="text-white mb-3" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.05rem,1.5vw,1.35rem)", letterSpacing: labelTrack }}>
               {row.label}
             </p>
             <div className="flex items-center gap-5">
@@ -377,8 +454,8 @@ function ElectionResult({ e }: { e: Election }) {
       </div>
 
       {/* 投票率標題 */}
-      <p className="text-white mb-6" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.05rem,1.5vw,1.35rem)", letterSpacing: "0.16em" }}>
-        投票率
+      <p className="text-white mb-6" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.05rem,1.5vw,1.35rem)", letterSpacing: labelTrack }}>
+        {tx.turnout}
       </p>
 
       {/* Donut（左，資料來源接在其下）＋ 中：有效票／選舉人數 ＋ 右下：參選人 */}
@@ -403,8 +480,8 @@ function ElectionResult({ e }: { e: Election }) {
               </span>
             </div>
           </div>
-          <p className="text-white/30 mt-4 text-center" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.72rem", letterSpacing: "0.08em", color: "#ffffff", opacity: 0.6 }}>
-            資料來源：{e.source ?? "臺大圖資系學會選委會"}
+          <p className="text-white/30 mt-4 text-center" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.72rem", letterSpacing: track("0.08em"), color: "#ffffff", opacity: 0.6 }}>
+            {tx.source}{source}
           </p>
         </div>
 
@@ -412,25 +489,25 @@ function ElectionResult({ e }: { e: Election }) {
         <div className="flex flex-col justify-between self-start py-3" style={{ minHeight: "clamp(180px,15vw,220px)" }}>
           <div>
             <p style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.6rem,2.4vw,2.1rem)", color: "#D14B4B", lineHeight: 1, letterSpacing: "0.06em" }}>{valid}</p>
-            <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.1em" }}>有效票</p>
+            <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: track("0.1em") }}>{tx.valid}</p>
           </div>
           {invalid > 0 && (
             <div>
               <p style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.6rem,2.4vw,2.1rem)", color: GREY, lineHeight: 1, letterSpacing: "0.06em" }}>{invalid}</p>
-              <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.1em" }}>無效票</p>
+              <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: track("0.1em") }}>{tx.invalid}</p>
             </div>
           )}
           <div>
             <p style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.6rem,2.4vw,2.1rem)", color: "#2F9EBD", lineHeight: 1, letterSpacing: "0.06em" }}>{e.electorate}</p>
-            <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.1em" }}>選舉人數</p>
+            <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: track("0.1em") }}>{tx.electorate}</p>
           </div>
         </div>
 
         {/* 右下：參選人（紅藍漸層外框）；ml-auto 把方塊推到最右，右緣對齊上方票數的個位數 */}
         <div className="rounded-2xl self-end ml-auto" style={{ padding: "1.5px", background: ELECTION_GRAD }}>
           <div className="rounded-2xl px-6 py-5" style={{ background: "#0a0a0a" }}>
-            <p className="text-white/60 text-center mb-4" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: "0.24em", paddingLeft: "0.24em" }}>
-              參選人 ①
+            <p className="text-white/60 text-center mb-4" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: track("0.24em", "0.06em"), paddingLeft: track("0.24em", "0.06em") }}>
+              {tx.candidates}
             </p>
             <div className="space-y-3">
               {e.candidates.map((cd, i) => (
@@ -455,10 +532,14 @@ function ElectionResult({ e }: { e: Election }) {
 }
 
 export default function Presidents() {
+  const { pick, isEn, track } = useI18n();
+  const tx = pick(TEXT);
   const [idx, setIdx] = useState(0); // 0 = 最新一屆（陣列第一個）
   const p = PRESIDENTS[idx] ?? PRESIDENTS[0];
   const hasData = p.name.trim() !== "";
   const photo = p.img;
+  // 英文版簡介：有 introEn 用 introEn；沒有的話，有中文簡介就先顯示中文、都沒有就顯示「整理中」
+  const intro = (isEn ? p.introEn || p.intro : p.intro) || "";
 
   // 右半固定面板的「快到頁尾時往上帶」位移：平常 0（照舊釘住）；當本區塊底部升進畫面
   // （＝ Footer 開始探進來）時，用同樣的量把面板往上推，讓它停在頁尾之上、不被 Footer 蓋住。
@@ -478,7 +559,7 @@ export default function Presidents() {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [idx]); // 切換屆時內容高度會變，一併重算
+  }, [idx, isEn]); // 切換屆或語言時內容高度會變，一併重算
 
   // 陣列是「新→舊」：往前一屆（較早）＝ index+1；往後一屆（較新）＝ index-1。
   const canOlder = idx < PRESIDENTS.length - 1;
@@ -515,6 +596,8 @@ export default function Presidents() {
       onNewer={goNewer}
     />
   );
+
+  const pillTrack = track("0.24em", "0.06em");
 
   return (
     <section ref={sectionRef} id="presidents" className="relative bg-black">
@@ -617,7 +700,7 @@ export default function Presidents() {
                   fontFamily: zhDisplay,
                   fontWeight: 900,
                   fontSize: "clamp(1.8rem,3.4vw,3rem)",
-                  letterSpacing: "0.06em",
+                  letterSpacing: track("0.06em", "0.01em"),
                   background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)",
                   WebkitBackgroundClip: "text",
                   backgroundClip: "text",
@@ -625,10 +708,10 @@ export default function Presidents() {
                   color: "transparent",
                 }}
               >
-                第 {p.gen} 屆系學會
+                {tx.genTitle.replace("{gen}", isEn ? ordinal(p.gen) : String(p.gen))}
               </h3>
               <p className="text-white/50 mb-8 lg:mb-10" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "clamp(0.8rem,1vw,1rem)", letterSpacing: "0.14em" }}>
-                任期：{termOf(p.gen)}
+                {tx.term}{termOf(p.gen, tx.present)}
               </p>
             </Reveal>
 
@@ -638,12 +721,12 @@ export default function Presidents() {
                   fontFamily: zhFont,
                   fontWeight: 500,
                   fontSize: "clamp(0.85rem,1vw,1rem)",
-                  lineHeight: 2.1,
-                  letterSpacing: "0.06em",
-                  color: p.intro ? "rgba(255,255,255,0.82)" : "rgba(255,255,255,0.4)",
+                  lineHeight: isEn ? 1.85 : 2.1,
+                  letterSpacing: track("0.06em", "0.005em"),
+                  color: intro ? "rgba(255,255,255,0.82)" : "rgba(255,255,255,0.4)",
                 }}
               >
-                {p.intro ? p.intro : "本屆簡介整理中，敬請期待。"}
+                {intro ? intro : tx.introPending}
               </p>
             </Reveal>
 
@@ -653,9 +736,9 @@ export default function Presidents() {
                 <a
                   href={CURRENT_TEAM_HREF}
                   className="group inline-flex items-center gap-2 rounded-full bg-white text-black px-6 py-2.5 mt-8 lg:mt-10 hover:bg-white/90 transition-colors"
-                  style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: "0.14em" }}
+                  style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.14em", "0.03em") }}
                 >
-                  {CURRENT_TEAM_LABEL}
+                  {tx.currentTeam}
                   <ArrowRight size={17} strokeWidth={2.4} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </a>
               </Reveal>
@@ -673,8 +756,8 @@ export default function Presidents() {
                 style={{ padding: "1.5px", background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)" }}
               >
                 <div className="rounded-full bg-black px-6 py-2">
-                  <span className="text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: "0.24em", paddingLeft: "0.24em" }}>
-                    團隊成員
+                  <span className="text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: pillTrack, paddingLeft: pillTrack }}>
+                    {tx.teamMembers}
                   </span>
                 </div>
               </div>

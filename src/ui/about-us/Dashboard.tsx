@@ -9,7 +9,8 @@ import newsLogo from "@/imports/BentoGrid/NTULISSAlogo2.svg";
 import aboutLogo from "@/imports/BentoGrid/NTULISSAlogo.svg";
 import { Reveal, monoBold, monoSemi, useIsDesktop } from "../general/shared";
 import { ANNOUNCEMENTS } from "../latest/news.ts"; // NEWS 卡右上角紅點＝公告則數，跟公告列表自動對上
-import { EVENTS, eventStart, isSchoolOnly } from "../latest/events"; // 「下一場活動」倒數＝行事曆同一份資料
+import { EVENTS, eventStart, isSchoolOnly, type CalEvent } from "../latest/events"; // 「下一場活動」倒數＝行事曆同一份資料
+import { defineText, useI18n } from "../i18n";
 
 // ══════════════════════════════════════════════════════════════════════════
 // 資訊總覽 BentoGrid 的版面與品牌樣式
@@ -18,24 +19,96 @@ import { EVENTS, eventStart, isSchoolOnly } from "../latest/events"; // 「下�
 // ★ 之後最常改的東西集中在這裡：
 //   下一場活動：不用在這改了！倒數圓環會自動抓 events.ts 裡「距今最近、即將到來」的系學會活動
 //     （排除純學校日程；跨多天活動以第一天為基準）。要改活動 → 去改 events.ts。
-//   LINKS：各卡片點擊目標。support 目前為 null＝不連結（會費／贊助整合後再接）。
+//   LINKS：各卡片點擊目標。
 //   ABOUT 卡：中間放新版系學會 Logo（含 53）的 SVG，見上方 aboutLogo import。
-//   CHAT_LINES：學術資源卡的聊天泡泡文字。
+//   TEXT.chat：學術資源卡的聊天泡泡文字（中英兩份）。
 //   MEMBER_DOTS：工作團隊卡的彩色圓點顏色序列。
 //   社群卡（IG/FB/Threads）：等 SVG 文字 logo 上傳後，換掉 SocialCard 內的圖示即可。
 // ══════════════════════════════════════════════════════════════════════════
 
+// ── 畫面文字（中英兩份；英文那份結構要和中文一樣）───────────────────────────
+// chat：學術資源卡的聊天泡泡（side："in"＝藍色靠右、"out"＝白色靠左；可自由增減句數、改字，時間自動調整）
+// units：倒數圓環下方的單位（one＝數字是 1 的時候，英文要用單數）
+const TEXT = defineText({
+  zh: {
+    upNext: "下一場活動",
+    noEvent: "近期尚無活動",
+    units: {
+      day: { one: "天後", many: "天後" },
+      hour: { one: "小時後", many: "小時後" },
+      min: { one: "分鐘後", many: "分鐘後" },
+      sec: { one: "秒後", many: "秒後" },
+    },
+    homeEyebrow: "－關於我們・資訊總覽",
+    captions: { about: "臺大圖資系學會", news: "最新動態", resources: "學習資源", members: "工作團隊", support: "贊助我們" },
+    aria: {
+      next: "下一場活動 — 系學會行事曆",
+      about: "關於臺大圖資系學會 — 第 53 屆",
+      aboutLogo: "臺大圖資系學會 第 53 屆",
+      news: "最新動態",
+      resources: "學術資源",
+      members: "工作團隊",
+      support: "贊助我們",
+    },
+    chat: [
+      { side: "in" as const, text: "學長學姊您好，請問你們有家產可以借我嗎……" },
+      { side: "out" as const, text: "哪一門課？我這裡很多" },
+      { side: "in" as const, text: "我要這個，我也要那個" },
+      { side: "out" as const, text: "也太多了吧！你修這麼多課嗎？" },
+      { side: "in" as const, text: "我想要提前畢業所以每學期都修滿 25 學分" },
+      { side: "out" as const, text: "臺大圖資卷哥是你，告訴你一個地方，那裡什麼家產都有" },
+      { side: "in" as const, text: "哦？" },
+      { side: "out" as const, text: "去找系學會就對了！" },
+      { side: "in" as const, text: "LISSA！" },
+      { side: "out" as const, text: "LISSA！" },
+    ] as { side: "in" | "out"; text: string }[],
+  },
+  en: {
+    upNext: "Up next",
+    noEvent: "No upcoming events",
+    units: {
+      day: { one: "DAY", many: "DAYS" },
+      hour: { one: "HOUR", many: "HOURS" },
+      min: { one: "MIN", many: "MINS" },
+      sec: { one: "SEC", many: "SECS" },
+    },
+    homeEyebrow: "— About · Overview",
+    captions: { about: "", news: "", resources: "", members: "", support: "" },
+    aria: {
+      next: "Next event — LISSA calendar",
+      about: "About the NTU LIS Student Association — 53rd term",
+      aboutLogo: "NTU LIS Student Association, 53rd term",
+      news: "News",
+      resources: "Learning resources",
+      members: "Our team",
+      support: "Sponsor us",
+    },
+    chat: [
+      { side: "in", text: "Hi! Do you have any old notes or books I could borrow…?" },
+      { side: "out", text: "Which course? I've got loads." },
+      { side: "in", text: "I want this one… and that one too." },
+      { side: "out", text: "That's a lot! Are you taking that many classes?" },
+      { side: "in", text: "I want to graduate early, so I take the max 25 credits every semester." },
+      { side: "out", text: "Wow, overachiever. Let me tell you where to find everything you need." },
+      { side: "in", text: "Oh?" },
+      { side: "out", text: "Just go to LISSA!" },
+      { side: "in", text: "LISSA!" },
+      { side: "out", text: "LISSA!" },
+    ],
+  },
+});
+
 // ── 下一場活動：自動抓 events.ts 中「距今最近、即將到來」的系學會活動 ──────────────
 // 排除純學校日程（isSchoolOnly）；跨多天活動用 eventStart（＝第一天日期／時間）當倒數基準。
 // 回傳 null＝目前沒有即將到來的活動（畫面會顯示「近期尚無活動」、倒數顯示「—」）。
-function getNextEvent(): { name: string; time: Date } | null {
+function getNextEvent(): { event: CalEvent; time: Date } | null {
   const now = Date.now();
   const up = EVENTS
     .filter((e) => !isSchoolOnly(e))
     .map((e) => ({ e, t: eventStart(e).getTime() }))
     .filter((x) => x.t >= now)
     .sort((a, b) => a.t - b.t);
-  return up.length ? { name: up[0].e.title, time: eventStart(up[0].e) } : null;
+  return up.length ? { event: up[0].e, time: eventStart(up[0].e) } : null;
 }
 // 倒數圓環的「滿環」對應天數：距離活動 ≥ 這個天數時環是滿的，越接近越空。改這裡調整視覺節奏。
 const RING_FULL_DAYS = 30;
@@ -75,7 +148,7 @@ const NEWS_LOGO_SIZE = 62;
 const NEWS_LOGO_OFFSET_X = 0;
 const NEWS_LOGO_OFFSET_Y = 0;
 
-// 各卡片點擊目標。support=null 代表暫不連結（會費＋贊助整合後再接）。
+// 各卡片點擊目標。
 const LINKS = {
   calendar: "#/calendar", // 系學會行事曆獨立頁
   about: "#/about", // ABOUT US 卡 → 學會簡介獨立頁
@@ -85,21 +158,7 @@ const LINKS = {
   support: "#/sponsor", // SUPPORT US 卡 → 贊助獨立頁
 };
 
-// 學術資源卡的聊天泡泡（from＝對方藍色泡泡靠右；to＝自己灰色泡泡靠左）。
-const CHAT_LINES = [
-  { side: "in" as const, text: "學長學姊您好，請問你們有家產可以借我嗎……" },
-  { side: "out" as const, text: "哪一門課？我這裡很多" },
-  { side: "in" as const, text: "我要這個，我也要那個" },
-  { side: "out" as const, text: "也太多了吧！你修這麼多課嗎？" },
-  { side: "in" as const, text: "我想要提前畢業所以每學期都修滿 25 學分" },
-  { side: "out" as const, text: "臺大圖資卷哥是你，告訴你一個地方，那裡什麼家產都有" },
-  { side: "in" as const, text: "哦？" },
-  { side: "out" as const, text: "去找系學會就對了！" },
-  { side: "in" as const, text: "LISSA！" },
-  { side: "out" as const, text: "LISSA！" },
-];
-// ── 學術資源卡：聊天動畫節奏（想改快慢就改這裡；改對話直接改上方 CHAT_LINES 即可，時間會自動調整）──
-//   side："in"＝藍色靠右、"out"＝白色靠左；text＝內容。可自由增減句數、改字。
+// ── 學術資源卡：聊天動畫節奏（想改快慢就改這裡；改對話直接改上方 TEXT.chat 即可，時間會自動調整）──
 const CHAT_TIMING = {
   typingBase: 700,   // 每則「輸入中…」的基本時間（ms）
   typingPerChar: 32, // 每多一個字再加多少 ms（字越多、打字越久＝越自然）
@@ -134,7 +193,6 @@ const MEMBER_DOTS: string[] = (() => {
   return arr.slice(0, total);
 })();
 
-const BRAND_GRADIENT = "linear-gradient(to right, #D14B4B, #2F9EBD)";
 const zhBody = "'Noto Sans TC', sans-serif";
 
 // ── SUPPORT US 卡：水龍頭滴錢幣落入小豬撲滿的 hover 動畫（純內嵌 SVG）───────────
@@ -155,9 +213,7 @@ const BENTO_BG: React.CSSProperties = {
 
 // ── 「平常隱藏、hover 才淡入＋輕輕滑出」的文字（標籤／說明）──────────────────
 // ★ 只用 opacity + transform（GPU 合成、完全不碰版面）→ 不重排、不卡頓、也不會拖累其他卡片。
-//   （之前用 grid-template-rows 撐高度＝主執行緒重排動畫，那才是卡頓元兇，已移除。）
 // ★ 這個元件「脫離版面」（由呼叫端用 absolute 定位浮在卡片頂/底），所以平常內容照樣在卡片正中央、不留空白。
-//   而「內容在 hover 時滑動讓位」的質感，改由各卡片內容自己的 group-hover transform 完成（一樣是 GPU、不卡）。
 // ★ 觸控（沒有 hover 的裝置）：一律直接顯示文字。尊重「減少動態」。想調速度改 duration-500。
 function HoverReveal({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
@@ -169,12 +225,11 @@ function HoverReveal({ children, className = "" }: { children: React.ReactNode; 
   );
 }
 
-// 右側小卡的底部置中標籤（英＋中）。絕對定位浮在卡片底部中央（脫離版面 → 平常內容照樣置中、不留空白）；
-// 平常隱藏，hover 才淡入＋輕輕上滑。pointer-events-none 避免擋到卡片點擊。
-// ★ 手機／平板（< 1024px）：所有卡片一律「不顯示標題」（包含社群卡 INSTAGRAM／FACEBOOK／THREADS），
-//   只留圖示，讓使用者自己點進去探索，畫面更乾淨。電腦版維持原本的標題，完全不變。
+// 右側小卡的底部置中標籤（英＋中）。絕對定位浮在卡片底部中央；平常隱藏，hover 才淡入＋輕輕上滑。
+// ★ 手機／平板（< 1024px）：所有卡片一律「不顯示標題」，只留圖示。電腦版維持原本的標題。
 //   ※ 每張卡片的 <a> 都有 aria-label，所以標題雖然看不到，讀螢幕軟體跟搜尋引擎還是知道卡片是什麼。
 //   想讓手機版標題回來 → 把 MOBILE_HIDE_CAPTIONS 改成 false。
+// ★ 英文版：zh 傳空字串＝只顯示英文標題（避免「NEWS News」重複）。
 const MOBILE_HIDE_CAPTIONS = true;
 function CardCaption({ en, zh }: { en: string; zh: string }) {
   const isDesktop = useIsDesktop();
@@ -200,8 +255,7 @@ function CardCaption({ en, zh }: { en: string; zh: string }) {
 // ── 學術資源卡：聊天泡泡「滾動視窗」動畫 ──────────────────────────────────
 // 畫面永遠只有兩句（一藍一白）：對方先「輸入中…」（三點跳動）→ 泡泡從底部彈出；
 // 要出下一句時，最舊那句往上收合消失、其餘上移、新句子從底部進來——像跑馬燈一直往下滾，並循環。
-// 改對話直接改上方 CHAT_LINES（可增減句數、改字，時間自動調整）；改快慢改 CHAT_TIMING。
-// 尊重「減少動態」：開啟時直接靜態顯示最後兩句、不跑動畫。
+// 尊重「減少動態」：開啟時直接靜態顯示最後兩句、不跑動畫。切換語言時會從第一句重新開始。
 type ChatRow = { id: number; side: "in" | "out"; text: string; typing: boolean; leaving: boolean };
 
 function ChatBubbles({ lines }: { lines: { side: "in" | "out"; text: string }[] }) {
@@ -303,6 +357,7 @@ function ringPoint(deg: number, r = 42) {
 
 // 純視覺：frac＝剩餘比例(0~1)；value＝要顯示的數字（無活動時可為「—」）；unit＝單位（天後／小時後／分鐘後／秒後）。
 function CountdownRing({ frac, value, unit, size = NEXT_RING_SIZE }: { frac: number; value: number | string; unit: string; size?: string }) {
+  const { track } = useI18n();
   const R = 42;
   const dottedFrac = Math.max(0, Math.min(1, frac));
   const dottedAngle = dottedFrac * 360;
@@ -363,7 +418,7 @@ function CountdownRing({ frac, value, unit, size = NEXT_RING_SIZE }: { frac: num
         <span className="text-white tabular-nums" style={{ fontFamily: "'SF Pro Rounded', ui-rounded, 'Noto Sans TC', sans-serif", fontWeight: 600, fontSize: "clamp(2rem, 4vw, 3.0rem)", letterSpacing: "0.02em" }}>
           {value}
         </span>
-        <span className="text-white/60 mt-1.5" style={{ fontFamily: "'Chiron Hei HK Text'", fontWeight: 700, fontSize: "clamp(0.7rem, 0.95vw, 0.95rem)", letterSpacing: "0.3em" ,color:"#FFFFFF" }}>
+        <span className="text-white/60 mt-1.5" style={{ fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "clamp(0.7rem, 0.95vw, 0.95rem)", letterSpacing: track("0.3em", "0.2em"), color: "#FFFFFF" }}>
           {unit}
         </span>
       </div>
@@ -376,6 +431,8 @@ function CountdownRing({ frac, value, unit, size = NEXT_RING_SIZE }: { frac: num
 // 圓環比例＝剩餘時間 ÷（RING_FULL_DAYS 天），每秒連續變動（不再是整天才跳一次）。
 // ticking 獨立在這個小元件，每秒只重繪這一塊，不會拖累整個 BentoGrid。
 function CountdownDonut({ target, size = NEXT_RING_SIZE }: { target: Date | null; size?: string }) {
+  const { pick } = useI18n();
+  const units = pick(TEXT).units;
   const [nowMs, setNowMs] = useState(() => Date.now());
   useEffect(() => {
     const id = window.setInterval(() => setNowMs(Date.now()), 1000);
@@ -389,13 +446,13 @@ function CountdownDonut({ target, size = NEXT_RING_SIZE }: { target: Date | null
   const remainingMs = Math.max(0, target.getTime() - nowMs);
   const frac = Math.min(1, remainingMs / (RING_FULL_DAYS * DAY)); // 剩餘比例（滿環＝離活動還很久；空環＝到期）
 
-  let value: number, unit: string;
-  if (remainingMs >= DAY)       { value = Math.floor(remainingMs / DAY);  unit = "天後"; }
-  else if (remainingMs >= HOUR) { value = Math.floor(remainingMs / HOUR); unit = "小時後"; }
-  else if (remainingMs >= MIN)  { value = Math.floor(remainingMs / MIN);  unit = "分鐘後"; }
-  else                          { value = Math.floor(remainingMs / 1000); unit = "秒後"; }
+  let value: number, u: { one: string; many: string };
+  if (remainingMs >= DAY)       { value = Math.floor(remainingMs / DAY);  u = units.day; }
+  else if (remainingMs >= HOUR) { value = Math.floor(remainingMs / HOUR); u = units.hour; }
+  else if (remainingMs >= MIN)  { value = Math.floor(remainingMs / MIN);  u = units.min; }
+  else                          { value = Math.floor(remainingMs / 1000); u = units.sec; }
 
-  return <CountdownRing frac={frac} value={value} unit={unit} size={size} />;
+  return <CountdownRing frac={frac} value={value} unit={value === 1 ? u.one : u.many} size={size} />;
 }
 
 // 解壓漸層條（PullBar）尺寸：軌道寬度、白色把手大小。想調就改這裡。
@@ -613,12 +670,15 @@ function SupportScene() {
 // standalone=true：獨立分頁（#/overview）。註：兩個版本的版面外框與格子大小現在完全一致；
 // standalone 目前只用來決定「是否套用首頁標題開關」（見下方 SHOW_HOME_HEADER），不再影響格子高度。
 export default function Dashboard({ standalone = false }: { standalone?: boolean }) {
+  const { pick, localize, track, isEn } = useI18n();
+  const tx = pick(TEXT);
   // 下一場活動＝events.ts 中距今最近、即將到來的系學會活動（每次載入頁面重算）。
   const nextEvent = getNextEvent();
+  const nextName = nextEvent ? localize(nextEvent.event).title : tx.noEvent;
   const isDesktop = useIsDesktop();
   return (
     // 版面外框：兩個版本（首頁捲動版 & 獨立頁 #/overview）共用同一套 → 整個 section 佔滿一屏（min-h-[100svh]），
-    // 讓下面的格子在兩邊都是「完全相同的高度／大小」。以前首頁版用 py-16 + 固定 min-h[560px]，格子才會比獨立頁矮、看起來不一樣。
+    // 讓下面的格子在兩邊都是「完全相同的高度／大小」。
     // ※ pt-28 是留給固定 Header 的空間（避免最上排卡片被 Header 蓋住）；pb 是底部留白。
     <section
       id="overview"
@@ -632,13 +692,13 @@ export default function Dashboard({ standalone = false }: { standalone?: boolean
               className="tracking-[2.4px] mb-4"
               style={{ fontSize: "14px", fontFamily: "'Ubuntu Sans Mono', monospace", background: "linear-gradient(90deg, #FFF 0%, #595959 34.13%, #FFF 67.79%, #3A3A3A 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundSize: "220% 100%" }}
             >
-              －關於我們・資訊總覽
+              {tx.homeEyebrow}
             </p>
           </Reveal>
         </div>
       )}
 
-      {/* 格子容器：flex-1 撐滿 section 剩餘高度（兩個版本一致）。以前首頁版是寫死的 lg:min-h-[560px]，才會比獨立頁矮。 */}
+      {/* 格子容器：flex-1 撐滿 section 剩餘高度（兩個版本一致）。 */}
       <div className="max-w-[1680px] w-full mx-auto flex flex-col lg:flex-row gap-3 lg:gap-4 flex-1 min-h-0">
         {/* ══ 左半：UP NEXT + 漸層條 / ABOUT 53 ══ */}
         <div className="flex flex-col gap-3 lg:gap-4 lg:w-[49.8%] shrink-0">
@@ -646,7 +706,7 @@ export default function Dashboard({ standalone = false }: { standalone?: boolean
           <div className="flex-[1.1] flex gap-3 lg:gap-4 min-h-[240px] lg:min-h-[0]">
             <Reveal className="flex-1 flex flex-col">
               {/* 標籤＋圓環＋標題當成一個整體置中；卡片不論高矮都長一樣（首頁／獨立頁統一格式）。 */}
-              <a href={LINKS.calendar} aria-label="下一場活動 — 系學會行事曆" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8 cursor-pointer items-center justify-center text-center`} style={BENTO_BG}>
+              <a href={LINKS.calendar} aria-label={tx.aria.next} className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8 cursor-pointer items-center justify-center text-center`} style={BENTO_BG}>
                 {/* 圓環＋標題整組垂直置中；「UP NEXT」標籤絕對定位浮在卡片頂部（脫離版面 → 平常圓環＋標題照樣正中央）。
                     ▸ 間距/大小：NEXT_TITLE_GAP、NEXT_RING_SIZE、NEXT_TITLE_SIZE（都在檔案最上方）。標籤與頂部距離＝下面的 top-5/top-7。
                     ▸ 質感：hover 時標籤在頂部淡入，圓環＋標題整組往下滑一點讓位（GPU transform，不重排、不卡）；觸控裝置一律顯示。 */}
@@ -654,15 +714,16 @@ export default function Dashboard({ standalone = false }: { standalone?: boolean
                 {(isDesktop || !MOBILE_HIDE_CAPTIONS) && (
                   <HoverReveal className="absolute inset-x-0 top-5 md:top-7 flex justify-center px-4 pointer-events-none">
                     <p className="text-white tracking-[0.24em]" style={{ ...monoSemi, fontSize: "clamp(11px, 1.2vw, 19px)" }}>
-                      {isDesktop ? <>UP NEXT&nbsp;&nbsp;下一場活動</> : "下一場活動"}
+                      {/* 英文版只顯示「UP NEXT」，避免英文重複兩次 */}
+                      {isDesktop ? (isEn ? "UP NEXT" : <>UP NEXT&nbsp;&nbsp;{tx.upNext}</>) : tx.upNext}
                     </p>
                   </HoverReveal>
                 )}
                 <div className="flex flex-col items-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:translate-y-2.5">
                   <CountdownDonut target={nextEvent ? nextEvent.time : null} size={NEXT_RING_SIZE} />
-                  {/* 標題：維持單行（whitespace-nowrap，比照原型）；已移除 text-ellipsis，改由上方縮小圓環＋間距讓它完整顯示、不再被切。 */}
-                  <p className="text-white whitespace-nowrap max-w-full" style={{ fontFamily: "'Chiron Hei HK Text','Noto Sans TC', sans-serif", fontWeight: 900, fontSize: NEXT_TITLE_SIZE, letterSpacing: "0.08em", marginTop: NEXT_TITLE_GAP }}>
-                    {nextEvent ? nextEvent.name : "近期尚無活動"}
+                  {/* 標題：維持單行（whitespace-nowrap，比照原型）。英文標題比較長，太寬時才允許換行。 */}
+                  <p className={`text-white max-w-full ${isEn ? "text-balance" : "whitespace-nowrap"}`} style={{ fontFamily: "'Chiron Hei HK Text','Noto Sans TC', sans-serif", fontWeight: 900, fontSize: NEXT_TITLE_SIZE, letterSpacing: track("0.08em", "0.01em"), marginTop: NEXT_TITLE_GAP }}>
+                    {nextName}
                   </p>
                 </div>
               </a>
@@ -675,12 +736,12 @@ export default function Dashboard({ standalone = false }: { standalone?: boolean
 
           {/* 下排：ABOUT 53 卡 —— 中間系學會 Logo（SVG）＋ 左右大數字 5、3（SVG，你的三層堆疊設計）。 */}
           <Reveal delay={60} className="flex-[0.9] flex flex-col min-h-[160px] lg:min-h-[0]">
-            <a href={LINKS.about} aria-label="關於臺大圖資系學會 — 第 53 屆" className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8 cursor-pointer`} style={BENTO_BG}>
+            <a href={LINKS.about} aria-label={tx.aria.about} className={`${BENTO_CARD} flex-1 p-5 md:p-6 lg:p-8 cursor-pointer`} style={BENTO_BG}>
               <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
                 {/* 新版系學會 Logo（含 53）SVG，等比例置中。想調大小改 ABOUT_LOGO_MAXH。 */}
-                <img src={aboutLogo} alt="臺大圖資系學會 第 53 屆" className="w-auto max-w-[92%] object-contain select-none" style={{ maxHeight: ABOUT_LOGO_MAXH }} />
+                <img src={aboutLogo} alt={tx.aria.aboutLogo} className="w-auto max-w-[92%] object-contain select-none" style={{ maxHeight: ABOUT_LOGO_MAXH }} />
               </div>
-              <CardCaption en="ABOUT US" zh="臺大圖資系學會" />
+              <CardCaption en="ABOUT US" zh={tx.captions.about} />
             </a>
           </Reveal>
         </div>
@@ -691,7 +752,7 @@ export default function Dashboard({ standalone = false }: { standalone?: boolean
           <div className="flex-[1] flex gap-3 lg:gap-4 min-h-[150px] lg:min-h-[0]">
             {/* NEWS：App 圖示 + 紅點 */}
             <Reveal delay={80} className="flex-1 flex flex-col">
-              <a href={LINKS.news} aria-label="最新動態" className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
+              <a href={LINKS.news} aria-label={tx.aria.news} className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
                 <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
                   <div className="relative">
                     <div className="rounded-[26%] bg-[#1c1c1e] border border-white/10 flex items-center justify-center" style={{ width: "clamp(64px, 8vw, 120px)", height: "clamp(64px, 8vw, 120px)" }}>
@@ -742,18 +803,18 @@ export default function Dashboard({ standalone = false }: { standalone?: boolean
                     </span>
                   </div>
                 </div>
-                <CardCaption en="NEWS" zh="最新動態" />
+                <CardCaption en="NEWS" zh={tx.captions.news} />
               </a>
             </Reveal>
 
             {/* RESOURCES：聊天泡泡 */}
             <Reveal delay={100} className="flex-1 flex flex-col">
-              <a href={LINKS.resources} aria-label="學術資源" className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
+              <a href={LINKS.resources} aria-label={tx.aria.resources} className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
                 <div className="flex-1 flex flex-col transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
-                  {/* 聊天泡泡逐則出現動畫；改對話內容→上方 CHAT_LINES，時間自動調整。 */}
-                  <ChatBubbles lines={CHAT_LINES} />
+                  {/* 聊天泡泡逐則出現動畫；改對話內容→上方 TEXT.chat，時間自動調整。 */}
+                  <ChatBubbles lines={tx.chat} />
                 </div>
-                <CardCaption en="RESOURCES" zh="學習資源" />
+                <CardCaption en="RESOURCES" zh={tx.captions.resources} />
               </a>
             </Reveal>
           </div>
@@ -762,7 +823,7 @@ export default function Dashboard({ standalone = false }: { standalone?: boolean
           <div className="flex-[1] flex gap-3 lg:gap-4 min-h-[150px] lg:min-h-[0]">
             {/* MEMBERS：彩色圓點牆 */}
             <Reveal delay={120} className="flex-1 flex flex-col">
-              <a href={LINKS.team} aria-label="工作團隊" className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
+              <a href={LINKS.team} aria-label={tx.aria.members} className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
                 <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
                   {/* 10×4 圓點牆：每顆固定大小（TEAM_DOT_SIZE）、間距 TEAM_DOT_GAP，整體置中。 */}
                   <div className="grid" style={{ gridTemplateColumns: `repeat(${TEAM_COLS}, ${TEAM_DOT_SIZE})`, gap: TEAM_DOT_GAP, justifyContent: "center" }}>
@@ -771,17 +832,17 @@ export default function Dashboard({ standalone = false }: { standalone?: boolean
                     ))}
                   </div>
                 </div>
-                <CardCaption en="MEMBERS" zh="工作團隊" />
+                <CardCaption en="MEMBERS" zh={tx.captions.members} />
               </a>
             </Reveal>
 
             {/* SUPPORT US：水龍頭滴錢幣進撲滿 */}
             <Reveal delay={140} className="flex-1 flex flex-col">
-              <a href={LINKS.support!} aria-label="贊助我們" className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
+              <a href={LINKS.support} aria-label={tx.aria.support} className={`${BENTO_CARD} flex-1 p-5 md:p-6 cursor-pointer`} style={BENTO_BG}>
                 <div className="flex-1 flex items-center justify-center transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:-translate-y-2">
                   <SupportScene />
                 </div>
-                <CardCaption en="SUPPORT US" zh="贊助我們" />
+                <CardCaption en="SUPPORT US" zh={tx.captions.support} />
               </a>
             </Reveal>
           </div>

@@ -32,6 +32,11 @@
 //   signup?    是否顯示「報名參加」按鈕。沒有報名表單就設 false 或整個省略（＝不顯示按鈕）。
 //   signupUrl? 報名表單連結。signup 為 true 且有填時，按下按鈕會另開這個連結。
 //
+// ── 英文版（切換到 EN 時顯示；都可省略，省略＝英文版先顯示中文）──────────────
+//   titleEn?     活動名稱（英文）
+//   locationEn?  地點（英文）
+//   descEn?      活動介紹（英文，一樣可用 \n 斷行）
+//
 // ── 部門與顏色（key ↔ 中文 ↔ 色碼；與全站部門色一致，可自由調整）──────────
 //   pres   正副會長   #A27F00        gen    行政      #915E3E
 //   eve    活動       #9F353A        aca    學術      #42602D
@@ -39,30 +44,38 @@
 //   school 學校日程   #FFFFFF（白）
 // ══════════════════════════════════════════════════════════════════════════
 
+import type { Lang } from "../i18n";
+
 // ── 部門型別與色盤 ──────────────────────────────────────────────
 export type DeptKey = "pres" | "gen" | "eve" | "aca" | "ima" | "sp" | "school";
 
 export type Dept = {
   key: DeptKey;
   zh: string;   // 中文名（Toggle 標籤用）
+  en: string;   // 英文名（英文版 Toggle 標籤用）
   color: string; // 代表色
 };
 
 // 順序＝月曆上方 Toggle 由左到右的排列順序。
 export const DEPTS: Dept[] = [
-  { key: "pres",   zh: "正副會長", color: "#A27F00" },
-  { key: "gen",    zh: "行政", color: "#915E3E" },
-  { key: "eve",    zh: "活動",     color: "#9F353A" },
-  { key: "aca",    zh: "學術",     color: "#42602D" },
-  { key: "ima",    zh: "形象宣傳", color: "#572A3F" },
-  { key: "sp",     zh: "體育",     color: "#23658A" },
-  { key: "school", zh: "學校日程", color: "#FFFFFF" },
+  { key: "pres",   zh: "正副會長", en: "Presidents",   color: "#A27F00" },
+  { key: "gen",    zh: "行政",     en: "General Affairs", color: "#915E3E" },
+  { key: "eve",    zh: "活動",     en: "Events",       color: "#9F353A" },
+  { key: "aca",    zh: "學術",     en: "Academic",     color: "#42602D" },
+  { key: "ima",    zh: "形象宣傳", en: "Media & Design", color: "#572A3F" },
+  { key: "sp",     zh: "體育",     en: "Sports",       color: "#23658A" },
+  { key: "school", zh: "學校日程", en: "University",   color: "#FFFFFF" },
 ];
 
 export const DEPT_MAP: Record<DeptKey, Dept> = DEPTS.reduce(
   (m, d) => { m[d.key] = d; return m; },
   {} as Record<DeptKey, Dept>
 );
+
+// 依目前語言取部門名稱
+export function deptName(d: Dept, lang: Lang): string {
+  return lang === "en" ? d.en : d.zh;
+}
 
 // 「跨多部門」時要用的顏色＝正副會長黃（上方卡片外框、月曆圓點都吃這個）。
 export const LEAD_COLOR = DEPT_MAP.pres.color;
@@ -85,72 +98,100 @@ export type CalEvent = {
   desc?: string;      // 活動介紹文案（\n 可斷行）
   signup?: boolean;   // 是否顯示「報名參加」按鈕
   signupUrl?: string; // 報名表單連結
+
+  // ── 英文版（皆可省略）──
+  titleEn?: string;
+  locationEn?: string;
+  descEn?: string;
 };
 
 // ── 活動清單（可自由增減、順序不拘，畫面會自動依時間排序）───────────────
-// ★ 要新增活動：複製一筆，改 title / date / time / depts / service 即可。
+// ★ 要新增活動：複製一筆，改 title / date / time / depts / service 即可（英文欄位記得一起改）。
 //   ▸ 全部門活動 → depts 填多個（如發表會）；月曆該日與卡片外框會變黃。
 //   ▸ 學校日程   → depts: ["school"]，只在月曆顯示、不進上方卡片（不用填 service）。
 //   ▸ 想讓卡片「點得開」有完整資訊 → 補上 location / desc / signup 等欄位。
 export const EVENTS: CalEvent[] = [
   {
     title: "新生迎新活動",
+    titleEn: "Freshman Welcome Party",
     date: "2026-09-20",
     time: "12:30",
     depts: ["eve"],
     service: "orientation",
     location: "臺大二活 205 教室",
+    locationEn: "Room 205, Student Activity Center II, NTU",
     mapUrl: "https://maps.app.goo.gl/Urh4E8u217TbJXLH9",
     desc:
       "想跟圖資系的大家變得更熟、認識漂亮學姐跟帥學長，\n" +
       "或是單純想來吃點心、喝飲料、玩好玩的小組遊戲！\n" +
       "那這場迎新活動就是為你準備的！",
+    descEn:
+      "Want to get to know your LIS classmates and seniors better,\n" +
+      "or just come for snacks, drinks and fun group games?\n" +
+      "This welcome party is made for you!",
     signup: true,
     signupUrl: "https://forms.gle/nBQ2AgeNh6chaeQ8A",
   },
   {
     title: "LIS Talk: 系友講座",
+    titleEn: "LIS Talk: Alumni Seminar",
     date: "2026-11-04",
     time: "18:30",
     depts: ["aca"],
     service: "alumni",
     location: "系館視聽室",
+    locationEn: "AV Room, LIS Department Building",
     mapUrl: "https://maps.app.goo.gl/EQhTGVqFgv9bMv2z9",
     desc:
       "邀請畢業系友回來分享職涯與求學經驗，\n" +
       "從資訊產業、圖書館到研究所，帶你看看未來的各種可能。",
+    descEn:
+      "Alumni come back to share their career and study experiences —\n" +
+      "from the tech industry and libraries to graduate school, explore what your future could look like.",
     signup: false,
     signupUrl: "",
   },
   {
     title: "LIS Cup 小圖盃",
+    titleEn: "LIS Cup",
     date: "2026-11-08",
     time: "09:00",
     depts: ["sp"],
     service: "lis-cup",
     location: "待定",
+    locationEn: "TBA",
     mapUrl: "",
     desc:
       "一年一度的系內運動賽事，\n" +
       "籃球、排球、羽球等你來組隊，一起為榮譽而戰！",
+    descEn:
+      "Our annual department sports tournament.\n" +
+      "Form a team for basketball, volleyball or badminton and compete for glory!",
     signup: false,
   },
   {
     title: "三系聯合系烤 2026",
+    titleEn: "Joint BBQ Night 2026",
     date: "2026-11-13",
     time: "18:00",
     depts: ["eve"],
     service: "bbq",
     location: "華中露營場",
+    locationEn: "Huazhong Campground",
     mapUrl: "https://maps.app.goo.gl/UxDwD8V1Mre3qghcA",
     desc:
       "秋夜微風吹拂，三系夥伴一起走出校園、齊聚華中露營場！\n" +
       "這不只是一場熱鬧的烤肉聚會，更是結交跨系新朋友的最佳契機；\n" +
       "放下忙碌與疲憊，圍繞著溫暖的營火，和身邊的夥伴一起度過美好夜晚！",
+    descEn:
+      "On a breezy autumn night, students from three departments gather at Huazhong Campground!\n" +
+      "It's more than a lively barbecue — it's the best chance to make new friends across departments.\n" +
+      "Leave the stress behind and enjoy a warm evening around the fire together.",
     signup: false,
   },
   {
     title: "十三系聯合耶誕舞會 2026",
+    titleEn: "Joint Christmas Ball 2026",
     date: "2026-11-28",
     time: "16:30",
     depts: ["eve"],
@@ -161,32 +202,42 @@ export const EVENTS: CalEvent[] = [
       "十三系攜手包下信義區夜店，打造專屬臺大人的聲光派對。\n" +
       "在重低音與微醺節奏中卸下壓力，\n" +
       "與跨系夥伴一起沸騰整個冬夜。\n",
+    descEn:
+      "Thirteen departments book out a Xinyi nightclub for an NTU-only party of light and sound.\n" +
+      "Let go of the stress to the heavy bass,\n" +
+      "and light up the winter night with friends from across campus.\n",
   },
   {
     title: "杜鵑花節 2027",
+    titleEn: "Azalea Festival 2027",
     date: "2027-03-13",
     end: "2027-03-14",
     depts: ["pres", "gen", "eve", "aca", "ima", "sp"],
     service: "azalea",
     location: "臺大綜合體育館",
+    locationEn: "NTU Sports Center",
     mapUrl: "https://maps.app.goo.gl/AUNEkXhgnx4LV3zp6",
     desc:
       "穿梭於人文與科技之間，圖資系跟你想的完全不一樣！\n" +
       "現場提供系所課程解析、備審面試經驗分享，還有專屬互動體驗與系學會紀念品。\n" +
       "杜鵑花開的季節，我們在臺大體育館等你來相見！",
+    descEn:
+      "Bridging the humanities and technology, LIS is nothing like you imagine!\n" +
+      "Get a walkthrough of our curriculum, tips on applications and interviews, interactive activities and souvenirs.\n" +
+      "When the azaleas bloom, come meet us at the NTU Sports Center!",
     signup: false,
   },
 
   // ── 學校日程範例（只在月曆顯示，不進上方卡片）──
   //   期中考週也是跨多天，一樣用 end 表示（純學校日程 → 色條為白色）。
-  { title: "中秋節連假", date: "2026-09-25", end: "2026-09-28", depts: ["school"] },
-  { title: "國慶連假", date: "2026-10-09", end: "2026-10-11", depts: ["school"] },
-  { title: "光復節連假", date: "2026-10-24", end: "2026-10-26", depts: ["school"] },
-  { title: "期中考週", date: "2026-11-09", end: "2026-11-13", depts: ["school"] },
-  { title: "校慶放假", date: "2026-11-14", depts: ["school"] },
-  { title: "115-1 學期課程停修截止日", date: "2026-12-11", depts: ["school"] },
-  { title: "期末考週", date: "2026-12-21", end: "2026-12-25", depts: ["school"] },
-  { title: "115-2 開學日", date: "2027-02-22", depts: ["school"] },
+  { title: "中秋節連假", titleEn: "Mid-Autumn Festival Holiday", date: "2026-09-25", end: "2026-09-28", depts: ["school"] },
+  { title: "國慶連假", titleEn: "National Day Holiday", date: "2026-10-09", end: "2026-10-11", depts: ["school"] },
+  { title: "光復節連假", titleEn: "Retrocession Day Holiday", date: "2026-10-24", end: "2026-10-26", depts: ["school"] },
+  { title: "期中考週", titleEn: "Midterm Exam Week", date: "2026-11-09", end: "2026-11-13", depts: ["school"] },
+  { title: "校慶放假", titleEn: "NTU Anniversary Holiday", date: "2026-11-14", depts: ["school"] },
+  { title: "115-1 學期課程停修截止日", titleEn: "Fall 2026 Course Withdrawal Deadline", date: "2026-12-11", depts: ["school"] },
+  { title: "期末考週", titleEn: "Final Exam Week", date: "2026-12-21", end: "2026-12-25", depts: ["school"] },
+  { title: "115-2 開學日", titleEn: "Spring 2027 Semester Begins", date: "2027-02-22", depts: ["school"] },
 
 
 ];
@@ -203,14 +254,19 @@ export function deptsOf(e: CalEvent): Dept[] {
 }
 
 // 展開卡「主責部門」膠囊右側的敘述文字：
-//   ▸ 涵蓋全部六個系學會部門 → "全部門"
-//   ▸ 否則列出部門中文名（用「、」串起，如 "活動、學術"）
-//   ▸ 純學校日程 → "學校日程"
-export function deptDescOf(e: CalEvent): string {
+//   ▸ 涵蓋全部六個系學會部門 → "全部門"（英文版 "All departments"）
+//   ▸ 否則列出部門名稱（中文用「、」串起，如 "活動、學術"；英文用逗號）
+//   ▸ 純學校日程 → "學校日程"（英文版 "University calendar"）
+export function deptDescOf(e: CalEvent, lang: Lang = "zh-TW"): string {
+  const en = lang === "en";
   const real = Array.from(new Set(e.depts.filter((k) => k !== "school")));
-  if (real.length === 0) return "學校日程";
-  if (real.length >= REAL_DEPT_COUNT) return "全部門";
-  return real.map((k) => DEPT_MAP[k]?.zh).filter(Boolean).join("、");
+  if (real.length === 0) return en ? "University calendar" : "學校日程";
+  if (real.length >= REAL_DEPT_COUNT) return en ? "All departments" : "全部門";
+  return real
+    .map((k) => DEPT_MAP[k])
+    .filter(Boolean)
+    .map((d) => deptName(d, lang))
+    .join(en ? ", " : "、");
 }
 
 // 是否為「純學校日程」（只有 school）→ 這種不放上方「下一場活動」。

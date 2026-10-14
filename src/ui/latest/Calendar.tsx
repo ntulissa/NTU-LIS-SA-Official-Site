@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, MapPin, X, ArrowRight } from "lucide-react";
 import { PageEyebrow, Reveal, useIsDesktop } from "../general/shared";
+import { defineText, useI18n, type Lang } from "../i18n";
 import {
   EVENTS,
   DEPTS,
@@ -17,6 +18,7 @@ import {
   isOngoing,
   accentColorOf,
   deptDescOf,
+  deptName,
   ymd,
 } from "./events";
 
@@ -41,7 +43,55 @@ import googleMapsLogoSrc from "@/imports/Calendar/google-maps.svg";
  *   滑到該日跳出小卡列出當天活動。切換月份有淡出淡入動畫。
  *
  * ★ 要改活動內容，請改隔壁的 events.ts；要調「大小／間距／位置」，改下面的常數區。
+ * ★ 這一頁的中英文字都在下面的 TEXT；活動本身的英文寫在 events.ts 的 titleEn / locationEn / descEn。
  */
+
+// ══════════════════════════════════════════════════════════════════════════
+// 中英文字（這一頁專用）
+// ══════════════════════════════════════════════════════════════════════════
+const TEXT = defineText({
+  zh: {
+    upNext: "下一場活動",
+    calendar: "行事曆",
+    empty: "目前沒有即將到來的活動，敬請期待。",
+    prevEvent: "上一個活動",
+    nextEvent: "下一個活動",
+    prevMonth: "上個月",
+    nextMonth: "下個月",
+    ongoing: "進行中",
+    signup: "報名參加",
+    close: "關閉",
+    allDay: "整天",
+    openInMaps: "在 Google 地圖開啟：",
+    tapHint: "點選有顏色的日子，查看當天活動",
+    months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+    weekdays: ["日", "一", "二", "三", "四", "五", "六"],
+  },
+  en: {
+    upNext: "Up Next",
+    calendar: "Calendar",
+    empty: "No upcoming events yet — stay tuned.",
+    prevEvent: "Previous event",
+    nextEvent: "Next event",
+    prevMonth: "Previous month",
+    nextMonth: "Next month",
+    ongoing: "Happening now",
+    signup: "Sign up",
+    close: "Close",
+    allDay: "All day",
+    openInMaps: "Open in Google Maps: ",
+    tapHint: "Tap a coloured date to see its events",
+    months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  },
+});
+
+// 倒數單位（英文分單複數：1 day / 2 days）
+function countdownUnit(lang: Lang, unit: "d" | "h" | "m" | "s", value: number): string {
+  if (lang !== "en") return { d: "天後", h: "小時後", m: "分鐘後", s: "秒後" }[unit];
+  const word = { d: "day", h: "hour", m: "min", s: "sec" }[unit];
+  return value === 1 ? word : `${word}s`;
+}
 
 // ══════════════════════════════════════════════════════════════════════════
 // 手動調整區（改這裡就能調各元素大小／間距／位置；clamp(最小, 隨螢幕縮放, 最大)）
@@ -68,7 +118,7 @@ const EDGE_FADE = 72;       // 清單左右「漸層遮罩」寬度（px）；�
 const ARROW_SIZE = 44;      // 左右捲動箭頭圓鈕直徑（px）
 
 // ── 「進行中」卡片（活動當天）：整格填滿部門色；左下角圓點用深灰膠囊包起，右下角顯示「進行中」──
-const ONGOING_LABEL = "進行中";                          // 右下角文字
+// （「進行中」文字本身在上方 TEXT.ongoing）
 const ONGOING_LABEL_SIZE = "clamp(0.95rem, 1.3vw, 1.2rem)"; // 「進行中」字級
 const ONGOING_PILL_BG = "#151515";       // 圓點外層深灰膠囊底色
 const ONGOING_PILL_PAD_X = 11;           // 膠囊左右內距（px）
@@ -132,11 +182,12 @@ const DESC_Y = 256;    // 上（px）
 const DESC_W = 680;    // 文案區塊寬（px）；決定何時換行
 const DESC_SIZE = 18;  // 字級（px）
 const DESC_LH = 2.0;   // 行高（倍數）
+const DESC_LH_EN = 1.6; // 英文版行高（英文行高 2.0 會太鬆）
 
 // ── 報名參加按鈕（左上角＝X/Y；樣式完全比照 HeroSection，內部大小走它的 Tailwind）──
+// （按鈕文字在上方 TEXT.signup）
 const BTN_X = 26;      // 左（px）
 const BTN_Y = 420;     // 上（px）
-const SIGNUP_LABEL = "報名參加"; // 按鈕文字
 const BTN_ICON = 16;   // 箭頭大小（px；同 HeroSection）
 
 // ── 主責部門膠囊──
@@ -180,6 +231,7 @@ const M_META_SIZE = 15;       // 時間／地點字級（px）
 const M_LOC_ICON = 18;        // 地點 icon 大小（px）
 const M_DESC_SIZE = 16;       // 文案字級（px）：不再縮小，放不下就換行
 const M_DESC_LH = 1.9;        // 文案行高（倍數）
+const M_DESC_LH_EN = 1.6;     // 英文版文案行高
 const M_DEPT_DESC_SIZE = 14;  // 主責部門敘述字級（px；手機版直接顯示，不用 hover）
 const M_PRES_W = 140;         // Presented by 圖片寬（px）
 const M_CLOSE_SIZE = 40;      // 關閉鈕直徑（px）
@@ -215,8 +267,6 @@ const roundFont = "'SF Pro Rounded', ui-rounded, 'Noto Sans TC', sans-serif"; //
 
 const BRAND_GRAD = "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)";
 const CARD_BG = "#151515";
-const MONTHS_ZH = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
-const WEEK_ZH = ["日", "一", "二", "三", "四", "五", "六"];
 
 const pad = (n: number) => `${n}`.padStart(2, "0");
 function withAlpha(hex: string, a: number): string {
@@ -233,7 +283,7 @@ function isLight(hex: string): boolean {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.72;
 }
 // 小卡右側文字：跨多天顯示日期範圍（如 9/22–24）；單日顯示時間（或「整天」）。
-function spanText(e: CalEvent): string {
+function spanText(e: CalEvent, allDay: string): string {
   if (spansMultipleDays(e)) {
     const s = new Date(`${e.date}T00:00:00+08:00`);
     const en = new Date(`${eventEnd(e)}T00:00:00+08:00`);
@@ -241,7 +291,7 @@ function spanText(e: CalEvent): string {
       ? `${s.getMonth() + 1}/${s.getDate()}–${en.getDate()}`
       : `${s.getMonth() + 1}/${s.getDate()}–${en.getMonth() + 1}/${en.getDate()}`;
   }
-  return e.time ?? "整天";
+  return e.time ?? allDay;
 }
 
 // 展開卡上方那一行「日期（＋跨日範圍）＋時間」字串。
@@ -256,11 +306,13 @@ function modalDateText(e: CalEvent): string {
 
 // ── 漸層外框膠囊標題（下一場活動 / 行事曆）─────────────────────────
 function PillLabel({ children }: { children: React.ReactNode }) {
+  const { track } = useI18n();
+  const ls = track("0.22em", "0.08em");
   return (
     <span className="inline-flex rounded-full" style={{ padding: "1.5px", background: BRAND_GRAD }}>
       <span
         className="rounded-full bg-black px-6 py-2 text-white"
-        style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "clamp(0.95rem,1.2vw,1.1rem)", letterSpacing: "0.22em", paddingLeft: "calc(1.5rem + 0.22em)" }}
+        style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "clamp(0.95rem,1.2vw,1.1rem)", letterSpacing: ls, paddingLeft: `calc(1.5rem + ${ls})` }}
       >
         {children}
       </span>
@@ -270,6 +322,7 @@ function PillLabel({ children }: { children: React.ReactNode }) {
 
 // ── 倒數（每秒更新；天→小時→分鐘→秒自動切換）──────────────────────
 function Countdown({ target }: { target: Date }) {
+  const { lang, track } = useI18n();
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 1000);
@@ -278,26 +331,29 @@ function Countdown({ target }: { target: Date }) {
 
   const DAY = 86400000, HOUR = 3600000, MIN = 60000;
   const rem = Math.max(0, target.getTime() - now);
-  let value: number, unit: string;
-  if (rem >= DAY)       { value = Math.floor(rem / DAY);  unit = "天後"; }
-  else if (rem >= HOUR) { value = Math.floor(rem / HOUR); unit = "小時後"; }
-  else if (rem >= MIN)  { value = Math.floor(rem / MIN);  unit = "分鐘後"; }
-  else                  { value = Math.floor(rem / 1000); unit = "秒後"; }
+  let value: number, unitKey: "d" | "h" | "m" | "s";
+  if (rem >= DAY)       { value = Math.floor(rem / DAY);  unitKey = "d"; }
+  else if (rem >= HOUR) { value = Math.floor(rem / HOUR); unitKey = "h"; }
+  else if (rem >= MIN)  { value = Math.floor(rem / MIN);  unitKey = "m"; }
+  else                  { value = Math.floor(rem / 1000); unitKey = "s"; }
 
   return (
     <div className="flex items-end gap-1.5 leading-none">
       <span className="text-white tabular-nums" style={{ fontFamily: roundFont, fontWeight: 800, fontSize: COUNT_NUM_SIZE, letterSpacing: "0.02em" }}>
         {value}
       </span>
-      <span className="text-white/85 mb-2" style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: COUNT_UNIT_SIZE, letterSpacing: "0.2em" }}>
-        {unit}
+      <span className="text-white/85 mb-2" style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: COUNT_UNIT_SIZE, letterSpacing: track("0.2em", "0.04em") }}>
+        {countdownUnit(lang, unitKey, value)}
       </span>
     </div>
   );
 }
 
 // ── 單張「下一場活動」卡片（可點開）────────────────────────────────
-function EventCard({ e, onOpen }: { e: CalEvent; onOpen: () => void }) {
+function EventCard({ e: raw, onOpen }: { e: CalEvent; onOpen: () => void }) {
+  const { localize, pick, track } = useI18n();
+  const tx = pick(TEXT);
+  const e = localize(raw);
   const accent = accentColorOf(e); // 跨部門＝黃；單一部門＝該色
   const ongoing = isOngoing(e);    // 活動當天（進行中）＝整格填滿部門色
   const [hovered, setHovered] = useState(false);
@@ -359,8 +415,8 @@ function EventCard({ e, onOpen }: { e: CalEvent; onOpen: () => void }) {
       {/* 右下角：進行中顯示「進行中」；否則顯示倒數 */}
       <div className="absolute" style={{ right: COUNT_INSET_X, bottom: COUNT_INSET_Y }}>
         {ongoing ? (
-          <span className="text-white" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: ONGOING_LABEL_SIZE, letterSpacing: "0.14em" }}>
-            {ONGOING_LABEL}
+          <span className="text-white" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: ONGOING_LABEL_SIZE, letterSpacing: track("0.14em", "0.03em") }}>
+            {tx.ongoing}
           </span>
         ) : (
           <Countdown target={dt} />
@@ -372,8 +428,9 @@ function EventCard({ e, onOpen }: { e: CalEvent; onOpen: () => void }) {
 
 // ── 地點那一行（Location icon ＋ 地點文字；有 mapUrl 就變成 Google Map 連結）──
 function LocationLine({ text, url, fg, size = LOC_SIZE, iconSize = LOC_ICON }: { text: string; url?: string; fg: string; size?: number; iconSize?: number }) {
+  const { track } = useI18n();
   const inner = (
-    <span className="inline-flex items-center" style={{ gap: LOC_ICON_GAP, fontFamily: zhDisplay, fontWeight: 500, fontSize: size, letterSpacing: "0.04em", color: fg, lineHeight: 1.3 }}>
+    <span className="inline-flex items-center" style={{ gap: LOC_ICON_GAP, fontFamily: zhDisplay, fontWeight: 500, fontSize: size, letterSpacing: track("0.04em", "0.01em"), color: fg, lineHeight: 1.3 }}>
       <MapPin size={iconSize} strokeWidth={2.2} style={{ flexShrink: 0 }} />
       {text}
     </span>
@@ -396,13 +453,15 @@ function darken(hex: string, amount: number): string {
 function LocationPill({
   text, url, accent, size = LOC_SIZE, logoSize = MAPS_LOGO_SIZE, padX = LOC_PILL_PAD_X, padY = LOC_PILL_PAD_Y, wrap = false,
 }: { text: string; url: string; accent: string; size?: number; logoSize?: number; padX?: number; padY?: number; wrap?: boolean }) {
+  const { pick, track } = useI18n();
+  const tx = pick(TEXT);
   const [hover, setHover] = useState(false);
   return (
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`在 Google 地圖開啟：${text}`}
+      aria-label={`${tx.openInMaps}${text}`}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onFocus={() => setHover(true)}
@@ -419,7 +478,7 @@ function LocationPill({
         fontFamily: zhDisplay,
         fontWeight: 500,
         fontSize: size,
-        letterSpacing: "0.06em",
+        letterSpacing: track("0.06em", "0.01em"),
         lineHeight: 1.2,
         whiteSpace: wrap ? "normal" : "nowrap", // 手機版地點太長可換行
         maxWidth: "100%",
@@ -434,7 +493,10 @@ function LocationPill({
 // ── 展開版「活動資訊 Modal」────────────────────────────────────────
 // 背景框＝固定尺寸畫布（MODAL_W × MODAL_H）；每個元素都用「相對框左上角」的
 // left(X)/top(Y) 絕對定位，可自由搬移。螢幕太小時整個框等比例縮小、位置不變。
-function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
+function EventModal({ e: raw, onClose }: { e: CalEvent; onClose: () => void }) {
+  const { localize, pick, track, lang, isEn } = useI18n();
+  const tx = pick(TEXT);
+  const e = localize(raw); // 英文版：title / location / desc 換成英文（沒填就沿用中文）
   const accent = accentColorOf(e);
   const bg = MODAL_USE_ACCENT_BG ? accent : MODAL_BG_FIXED;
   const light = isLight(bg);
@@ -473,7 +535,7 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
   }, [e.title, isDesktop]);
 
   const dots = e.depts.map((k) => DEPT_MAP[k]).filter(Boolean);
-  const deptDesc = deptDescOf(e);
+  const deptDesc = deptDescOf(e, lang);
 
   // Esc 關閉 ＋ 開啟時鎖住背景捲動
   useEffect(() => {
@@ -522,7 +584,7 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="關閉"
+            aria-label={tx.close}
             className="absolute flex items-center justify-center rounded-full text-white"
             style={{ top: 16, right: 16, width: M_CLOSE_SIZE, height: M_CLOSE_SIZE, background: CLOSE_BG, zIndex: 10 }}
           >
@@ -530,7 +592,7 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
           </button>
 
           {/* 標題：右側留空間給關閉鈕；太長自動換行 */}
-          <h3 style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: M_TITLE_SIZE, lineHeight: 1.18, letterSpacing: "0.03em", paddingRight: M_CLOSE_SIZE + 8, marginTop: 8, overflowWrap: "anywhere" }}>
+          <h3 style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: M_TITLE_SIZE, lineHeight: 1.18, letterSpacing: track("0.03em", "0.005em"), paddingRight: M_CLOSE_SIZE + 8, marginTop: 8, overflowWrap: isEn ? "break-word" : "anywhere" }}>
             {e.title}
           </h3>
 
@@ -552,7 +614,7 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
 
           {/* 文案：字級固定，放不下就換行 */}
           {e.desc && (
-            <p className="mt-6" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: M_DESC_SIZE, lineHeight: M_DESC_LH, letterSpacing: "0.06em", color: descColor, whiteSpace: "pre-line" }}>
+            <p className="mt-6" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: M_DESC_SIZE, lineHeight: isEn ? M_DESC_LH_EN : M_DESC_LH, letterSpacing: track("0.06em", "0.01em"), color: descColor, whiteSpace: "pre-line" }}>
               {e.desc}
             </p>
           )}
@@ -564,9 +626,9 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
               target={e.signupUrl ? "_blank" : undefined}
               rel={e.signupUrl ? "noopener noreferrer" : undefined}
               className="mt-7 inline-flex items-center gap-3 bg-white text-black px-6 py-3 rounded-full active:bg-white/90 transition-all duration-200 w-fit"
-              style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "1rem", letterSpacing: "0.06em" }}
+              style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "1rem", letterSpacing: track("0.06em", "0.02em") }}
             >
-              {SIGNUP_LABEL}
+              {tx.signup}
               <ArrowRight size={BTN_ICON} />
             </a>
           )}
@@ -580,7 +642,7 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
                 ))}
               </div>
               {deptDesc && (
-                <span style={{ fontFamily: zhDisplay, fontWeight: 800, fontSize: M_DEPT_DESC_SIZE, letterSpacing: "0.08em", color: fg }}>
+                <span style={{ fontFamily: zhDisplay, fontWeight: 800, fontSize: M_DEPT_DESC_SIZE, letterSpacing: track("0.08em", "0.02em"), color: fg }}>
                   {deptDesc}
                 </span>
               )}
@@ -620,7 +682,7 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
         <button
           type="button"
           onClick={onClose}
-          aria-label="關閉"
+          aria-label={tx.close}
           className="absolute flex items-center justify-center rounded-full text-white hover:scale-105 transition-transform"
           style={{ left: CLOSE_X, top: CLOSE_Y, width: CLOSE_SIZE, height: CLOSE_SIZE, background: CLOSE_BG, zIndex: 30 }}
         >
@@ -633,7 +695,7 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
           className="absolute pointer-events-none"
           style={{
             left: TITLE_X, top: TITLE_Y, width: TITLE_FIT_W, // 寬度＝可用寬度（不會伸到關閉鈕底下）
-            fontFamily: zhDisplay, fontWeight: 900, fontSize: titleSize, lineHeight: 1.1, letterSpacing: "0.04em",
+            fontFamily: zhDisplay, fontWeight: 900, fontSize: titleSize, lineHeight: 1.1, letterSpacing: track("0.04em", "0.005em"),
             // 縮到下限前都維持一行；只有縮到 TITLE_MIN_SIZE 仍放不下才允許換行
             whiteSpace: titleSize > TITLE_MIN_SIZE ? "nowrap" : "normal",
           }}
@@ -674,7 +736,7 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
         {e.desc && (
           <p
             className="absolute pointer-events-none"
-            style={{ left: DESC_X, top: DESC_Y, width: DESC_W, fontFamily: zhFont, fontWeight: 500, letterSpacing: "0.09em", fontSize: DESC_SIZE, lineHeight: DESC_LH, color: descColor, whiteSpace: "pre-line" }}
+            style={{ left: DESC_X, top: DESC_Y, width: DESC_W, fontFamily: zhFont, fontWeight: 500, letterSpacing: track("0.09em", "0.01em"), fontSize: DESC_SIZE, lineHeight: isEn ? DESC_LH_EN : DESC_LH, color: descColor, whiteSpace: "pre-line" }}
           >
             {e.desc}
           </p>
@@ -692,10 +754,10 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
               fontFamily: zhDisplay, // ★ 依你要求：Chiron Hei HK Text（HeroSection 原本用 Noto Sans）
               fontWeight: 700,
               fontSize: "clamp(0.85rem, 1.5vw, 1.1rem)",
-              letterSpacing: "0.06em",
+              letterSpacing: track("0.06em", "0.02em"),
             }}
           >
-            {SIGNUP_LABEL}
+            {tx.signup}
             <ArrowRight size={BTN_ICON} className="group-hover:translate-x-1 transition-transform duration-200" />
           </a>
         )}
@@ -722,7 +784,7 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
               fontFamily: zhDisplay,
               fontWeight: 800,
               fontSize: DEPT_DESC_SIZE,
-              letterSpacing: "0.08em",
+              letterSpacing: track("0.08em", "0.02em"),
               color: fg,
               maxWidth: pillHover ? 520 : 0,
               opacity: pillHover ? 1 : 0,
@@ -751,6 +813,7 @@ function EventModal({ e, onClose }: { e: CalEvent; onClose: () => void }) {
 // ON：膠囊底色＝部門色左→右漸層（右側 50% 較淡），左側部門色點，白字。
 // OFF：膠囊轉灰、點與字淡化。學校日程為白色，改用中性灰底以保留可讀性。
 function Switch({ on, dept, onClick }: { on: boolean; dept: Dept; onClick: () => void }) {
+  const { lang, track } = useI18n();
   const light = isLight(dept.color);
   const base = light ? "#8A8A8A" : dept.color; // 白色部門用灰當底色
   const bg = on
@@ -771,15 +834,18 @@ function Switch({ on, dept, onClick }: { on: boolean; dept: Dept; onClick: () =>
       />
       <span
         className="whitespace-nowrap transition-colors duration-200"
-        style={{ fontFamily: zhFont, fontWeight: 800, fontSize: TOGGLE_FONT, letterSpacing: "0.1em", color: on ? "#fff" : "rgba(255,255,255,0.4)" }}
+        style={{ fontFamily: zhFont, fontWeight: 800, fontSize: TOGGLE_FONT, letterSpacing: track("0.1em", "0.02em"), color: on ? "#fff" : "rgba(255,255,255,0.4)" }}
       >
-        {dept.zh}
+        {deptName(dept, lang)}
       </span>
     </button>
   );
 }
 
 export default function Calendar() {
+  const { pick, localize, track, isEn } = useI18n();
+  const tx = pick(TEXT);
+
   // ── 展開版活動 Modal 的開關狀態 ──
   // ★ 只存「這是 EVENTS 的第幾筆」（索引），不存整包活動物件。
   //   這樣改 events.ts 存檔（Vite 熱更新）後，Modal 會直接讀最新的 EVENTS[openIdx]，
@@ -919,7 +985,7 @@ export default function Calendar() {
 
         {/* ══════════ 上半：下一場活動 ══════════ */}
         <Reveal delay={40}>
-          <div className="mb-6"><PillLabel>下一場活動</PillLabel></div>
+          <div className="mb-6"><PillLabel>{tx.upNext}</PillLabel></div>
         </Reveal>
 
         <Reveal delay={80}>
@@ -934,22 +1000,22 @@ export default function Calendar() {
                   <EventCard key={`${e.title}-${e.date}-${idx}`} e={e} onOpen={() => setOpenIdx(idx)} />
                 ))
               ) : (
-                <div className="text-white/40 py-10" style={{ fontFamily: zhFont, letterSpacing: "0.1em" }}>
-                  目前沒有即將到來的活動，敬請期待。
+                <div className="text-white/40 py-10" style={{ fontFamily: zhFont, letterSpacing: track("0.1em", "0.01em") }}>
+                  {tx.empty}
                 </div>
               )}
             </div>
 
             {/* 左右捲動箭頭（有需要才出現） */}
             {canLeft && (
-              <button type="button" onClick={() => scrollByDir(-1)} aria-label="上一個活動"
+              <button type="button" onClick={() => scrollByDir(-1)} aria-label={tx.prevEvent}
                 className="absolute top-1/2 left-0 -translate-y-1/2 lg:-translate-x-1/2 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
                 style={{ width: ARROW_SIZE, height: ARROW_SIZE }}>
                 <ChevronLeft size={22} strokeWidth={2.4} />
               </button>
             )}
             {canRight && (
-              <button type="button" onClick={() => scrollByDir(1)} aria-label="下一個活動"
+              <button type="button" onClick={() => scrollByDir(1)} aria-label={tx.nextEvent}
                 className="absolute top-1/2 right-0 -translate-y-1/2 lg:translate-x-1/2 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
                 style={{ width: ARROW_SIZE, height: ARROW_SIZE }}>
                 <ChevronRight size={22} strokeWidth={2.4} />
@@ -961,7 +1027,7 @@ export default function Calendar() {
         {/* ══════════ 下半：行事曆 ══════════ */}
         <div className="mt-16 lg:mt-20">
           <Reveal>
-            <div className="mb-6"><PillLabel>行事曆</PillLabel></div>
+            <div className="mb-6"><PillLabel>{tx.calendar}</PillLabel></div>
           </Reveal>
 
           {/* 部門 Toggle（名稱包在膠囊內） */}
@@ -976,16 +1042,17 @@ export default function Calendar() {
           {/* 月份切換 */}
           <Reveal delay={80}>
             <div className="flex items-center justify-center gap-7 mb-5">
-              <button type="button" onClick={() => goMonth(-1)} aria-label="上個月" className="text-white/70 hover:text-white transition-colors">
+              <button type="button" onClick={() => goMonth(-1)} aria-label={tx.prevMonth} className="text-white/70 hover:text-white transition-colors">
                 <ChevronLeft size={22} strokeWidth={2.4} />
               </button>
               <span
                 className="cal-fade text-white tabular-nums text-center"
-                style={{ fontFamily: monoFont, fontWeight: 700, fontSize: MONTH_FONT, letterSpacing: "0.12em", minWidth: "8.5em", opacity: fading ? 0 : 1, transition: `opacity ${MONTH_FADE_MS}ms ease` }}
+                // 英文月份（September）比中文長，最小寬度放寬，切換月份時箭頭才不會跳動
+                style={{ fontFamily: monoFont, fontWeight: 700, fontSize: MONTH_FONT, letterSpacing: track("0.12em", "0.06em"), minWidth: isEn ? "11em" : "8.5em", opacity: fading ? 0 : 1, transition: `opacity ${MONTH_FADE_MS}ms ease` }}
               >
-                {MONTHS_ZH[view.m]}, {view.y}
+                {tx.months[view.m]}, {view.y}
               </span>
-              <button type="button" onClick={() => goMonth(1)} aria-label="下個月" className="text-white/70 hover:text-white transition-colors">
+              <button type="button" onClick={() => goMonth(1)} aria-label={tx.nextMonth} className="text-white/70 hover:text-white transition-colors">
                 <ChevronRight size={22} strokeWidth={2.4} />
               </button>
             </div>
@@ -993,11 +1060,11 @@ export default function Calendar() {
 
           <div className="h-px bg-white/15 mb-5" />
 
-          {/* 星期列 */}
+          {/* 星期列（英文版在手機上只顯示首字母，避免擠在一起） */}
           <div className="grid grid-cols-7 text-center mb-3">
-            {WEEK_ZH.map((w) => (
-              <span key={w} className="text-white" style={{ fontFamily: zhDisplay, fontWeight: 800, fontSize: WEEK_FONT, letterSpacing: "0.18em" }}>
-                {w}
+            {tx.weekdays.map((w, i) => (
+              <span key={i} className="text-white" style={{ fontFamily: zhDisplay, fontWeight: 800, fontSize: WEEK_FONT, letterSpacing: track("0.18em", "0.04em") }}>
+                {isEn && !isDesktop ? w.charAt(0) : w}
               </span>
             ))}
           </div>
@@ -1112,11 +1179,11 @@ export default function Calendar() {
                       {vis.events.map((ev, j) => (
                         <div key={`${ev.title}-${j}`} className="flex items-center gap-2.5 py-1">
                           <span className="rounded-full shrink-0" style={{ width: 9, height: 9, background: accentColorOf(ev), boxShadow: isLight(accentColorOf(ev)) ? "inset 0 0 0 1px rgba(0,0,0,0.2)" : "none" }} />
-                          <span className="text-white/90 truncate" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.03em" }}>
-                            {ev.title}
+                          <span className="text-white/90 truncate" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.85rem", letterSpacing: track("0.03em", "0.005em") }}>
+                            {localize(ev).title}
                           </span>
                           <span className="ml-auto text-white/45 shrink-0" style={{ fontFamily: monoFont, fontSize: "0.72rem", letterSpacing: "0.04em" }}>
-                            {spanText(ev)}
+                            {spanText(ev, tx.allDay)}
                           </span>
                         </div>
                       ))}
@@ -1134,13 +1201,16 @@ export default function Calendar() {
             if (selectedKey) {
               const [, mm, dd] = selectedKey.split("-").map(Number);
               const wd = new Date(view.y, mm - 1, dd).getDay();
-              header = `${mm} 月 ${dd} 日（${WEEK_ZH[wd]}）`;
+              // 中文：9 月 22 日（二）；英文：Tue, September 22
+              header = isEn
+                ? `${tx.weekdays[wd]}, ${tx.months[mm - 1]} ${dd}`
+                : `${mm} 月 ${dd} 日（${tx.weekdays[wd]}）`;
             }
             return (
               <div className="mt-6 rounded-2xl border border-white/12" style={{ background: "#1c1c1e", padding: "16px 18px" }}>
                 {selVis ? (
                   <div key={selectedKey} className="cal-pop-list">
-                    <p className="text-white/55 mb-2" style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.1em" }}>
+                    <p className="text-white/55 mb-2" style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "0.85rem", letterSpacing: track("0.1em", "0.02em") }}>
                       {header}
                     </p>
                     {selVis.events.map((ev, j) => (
@@ -1151,19 +1221,19 @@ export default function Calendar() {
                         className="w-full flex items-center gap-3 py-3 text-left border-t border-white/8 first-of-type:border-t-0"
                       >
                         <span className="rounded-full shrink-0" style={{ width: 11, height: 11, background: accentColorOf(ev), boxShadow: isLight(accentColorOf(ev)) ? "inset 0 0 0 1px rgba(0,0,0,0.2)" : "none" }} />
-                        <span className="flex-1 min-w-0 text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "1rem", letterSpacing: "0.03em", lineHeight: 1.4 }}>
-                          {ev.title}
+                        <span className="flex-1 min-w-0 text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "1rem", letterSpacing: track("0.03em", "0.005em"), lineHeight: 1.4 }}>
+                          {localize(ev).title}
                         </span>
                         <span className="text-white/45 shrink-0" style={{ fontFamily: monoFont, fontSize: "0.8rem", letterSpacing: "0.04em" }}>
-                          {spanText(ev)}
+                          {spanText(ev, tx.allDay)}
                         </span>
                         <ChevronRight size={16} className="text-white/40 shrink-0" />
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-white/40 text-center py-2" style={{ fontFamily: zhFont, fontSize: "0.9rem", letterSpacing: "0.08em" }}>
-                    點選有顏色的日子，查看當天活動
+                  <p className="text-white/40 text-center py-2" style={{ fontFamily: zhFont, fontSize: "0.9rem", letterSpacing: track("0.08em", "0.01em") }}>
+                    {tx.tapHint}
                   </p>
                 )}
               </div>

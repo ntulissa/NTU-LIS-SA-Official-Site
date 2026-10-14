@@ -1,8 +1,9 @@
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
-// 從模組路徑取出套件名稱（相容 pnpm 的 node_modules/.pnpm/... 結構）
+// 從模組路徑取出套件名稱，例如 ".../node_modules/@mui/material/..." → "@mui/material"
 function getPackageName(id) {
   const parts = id.split('node_modules/')
   const last = parts[parts.length - 1]
@@ -17,7 +18,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': '/src',
+      // 讓程式碼可以寫 import x from '@/components/...'，"@" 代表 src 資料夾
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
 

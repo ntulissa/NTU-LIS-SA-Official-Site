@@ -3,9 +3,34 @@ import imgBuildingHistory from "@/imports/AboutUs/de7749452570d864c1f5c584765f09
 import imgMeiji from "@/imports/Presidents/53.png";
 import imgHongLingYa from "@/imports/CurrentTeam/53vp.png";
 import { PageEyebrow, Reveal, useIsDesktop } from "../general/shared";
+import { defineText, useI18n } from "../i18n";
+
+// ── 畫面文字（中英兩份；英文那份結構要和中文一樣）──────────────────────────
+// depts：五個部門格子下方的名稱（順序要和下面 DEPTS 一樣）
+// leaders：正副會長的頭銜／姓名／系級（順序要和下面 LEADERS 一樣）
+// termLabel：人像上方膠囊，{title} 會換成頭銜
+const TEXT = defineText({
+  zh: {
+    intro: "臺大圖資系學會目前由正副會長統領，下轄行政、活動、學術、形象宣傳、體育等五個常設部門（第 52 屆始）：",
+    depts: ["行政部", "活動部", "學術部", "形象宣傳部", "體育部"],
+    termLabel: "第 53 屆{title}",
+    leaders: [
+      { title: "會長", name: "黃子芸", year: "圖資三" },
+      { title: "副會長", name: "洪聆雅", year: "圖資三" },
+    ],
+  },
+  en: {
+    intro: "NTU LISSA is led by a President and Vice President, with five standing departments (since the 52nd term): General Affairs, Events, Academic Affairs, Media & Design, and Sports.",
+    depts: ["General Affairs", "Events", "Academic", "Media & Design", "Sports"],
+    termLabel: "53rd {title}",
+    leaders: [
+      { title: "President", name: "Tzu-Yun Huang", year: "LIS Junior" },
+      { title: "Vice President", name: "Ling-Ya Hung", year: "LIS Junior" },
+    ],
+  },
+});
 
 type DeptDef = {
-  name: string;
   color: string; // 部門色（hover 時套用到外框）
   renderIcon: (playing: boolean) => React.ReactNode; // playing=true 時播放動畫
   href?: string; // 點擊進入的部門獨立頁（有填才可點）
@@ -34,11 +59,9 @@ const FIGURE_ADJUST = {
 // 手機／平板（< 1024px）的人像大小與位置（電腦版仍用上面的 FIGURE_ADJUST，不受影響）
 //   size 用百分比＝佔人像區塊高度的比例；人像靠右，左上角留給姓名資訊。
 const FIGURE_ADJUST_MOBILE = { size: "94%", x: "0px", y: "0px" };
-const INFO_TOP_OFFSET = "40vh";
-const INFO_RIGHT_OFFSET = "4vw";
-const INFO_MAX_WIDTH = "22vw";
 const ROLE_FONT_SIZE = "clamp(0.72rem, 2.4vw, 1.3vw)";
 const NAME_FONT_SIZE = "clamp(2rem, 8vw, 5vw)";
+const NAME_FONT_SIZE_EN = "clamp(1.6rem, 6vw, 3.4vw)"; // 英文姓名比較長，字級縮小一點
 const ROMAN_FONT_SIZE = "clamp(0.8rem, 2.8vw, 1.3vw)";
 const YEAR_FONT_SIZE = "clamp(0.72rem, 2.4vw, 0.95vw)";
 const ROLE_MARGIN_BOTTOM = "5vh";
@@ -294,22 +317,24 @@ function BasketballIcon({ playing }: { playing: boolean }) {
   );
 }
 
+// 部門格子：名稱在上方 TEXT.depts（順序要一樣）
 const DEPTS: DeptDef[] = [
   // 點格子 → 對應部門獨立頁（#/dept/<slug>）。slug 與 department-pages/ 的檔名一致。
-  { name: "行政部", color: "#915E3E", renderIcon: (playing) => <AbacusIcon playing={playing} />, href: "#/dept/gen" },
-  { name: "活動部", color: "#9F353A", renderIcon: (playing) => <GuitarIcon playing={playing} />, href: "#/dept/eve" },
-  { name: "學術部", color: "#42602D", renderIcon: (playing) => <QuillIcon playing={playing} />, href: "#/dept/aca" },
-  { name: "形象宣傳部", color: "#572A3F", renderIcon: (playing) => <CameraIcon playing={playing} />, href: "#/dept/ima" },
-  { name: "體育部", color: "#23658A", renderIcon: (playing) => <BasketballIcon playing={playing} />, href: "#/dept/sp" },
+  { color: "#915E3E", renderIcon: (playing) => <AbacusIcon playing={playing} />, href: "#/dept/gen" },
+  { color: "#9F353A", renderIcon: (playing) => <GuitarIcon playing={playing} />, href: "#/dept/eve" },
+  { color: "#42602D", renderIcon: (playing) => <QuillIcon playing={playing} />, href: "#/dept/aca" },
+  { color: "#572A3F", renderIcon: (playing) => <CameraIcon playing={playing} />, href: "#/dept/ima" },
+  { color: "#23658A", renderIcon: (playing) => <BasketballIcon playing={playing} />, href: "#/dept/sp" },
 ];
 
-// 純資料：頭銜、姓名、羅馬拼音、系級、照片。大小／位置不寫在這裡，改上方 FIGURE_ADJUST。
+// 純資料：羅馬拼音、照片、對應的人像位置（key 要和上方 FIGURE_ADJUST 的名稱一樣）。
+// 頭銜／姓名／系級在上方 TEXT.leaders（順序要一樣）。大小／位置改上方 FIGURE_ADJUST。
 const LEADERS = [
-  { title: "會長", name: "黃子芸", roman: "TZU-YUN, HUANG", year: "圖資三", img: imgMeiji as string },
-  { title: "副會長", name: "洪聆雅", roman: "LING-YA, HUNG", year: "圖資三", img: imgHongLingYa as string },
+  { key: "會長" as const, roman: "TZU-YUN, HUANG", img: imgMeiji as string },
+  { key: "副會長" as const, roman: "LING-YA, HUNG", img: imgHongLingYa as string },
 ];
 
-function DeptCard({ dept }: { dept: DeptDef }) {
+function DeptCard({ dept, name }: { dept: DeptDef; name: string }) {
   const [hovered, setHovered] = useState(false);
   // 有 href 就用 <a> 讓格子可點進部門頁；沒有就維持 <div>（不可點）。
   const Box: React.ElementType = dept.href ? "a" : "div";
@@ -318,6 +343,7 @@ function DeptCard({ dept }: { dept: DeptDef }) {
     <div className="flex flex-col items-center gap-[clamp(5px,0.6vw,9px)]">
       <Box
         href={dept.href}
+        aria-label={name}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         className="relative rounded-[14px] aspect-square w-full overflow-hidden cursor-pointer border transition-all duration-300 block"
@@ -336,7 +362,7 @@ function DeptCard({ dept }: { dept: DeptDef }) {
         </div>
       </Box>
       <span className="text-white text-center leading-tight" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 700, fontSize: "clamp(0.65rem,0.82vw,13px)" }}>
-        {dept.name}
+        {name}
       </span>
     </div>
   );
@@ -345,15 +371,17 @@ function DeptCard({ dept }: { dept: DeptDef }) {
 // standalone=true：當「現任團隊」獨立頁使用（#/current-team）。此時允許內容長高、往下捲，
 // 不再用 overflow-hidden 把超出一屏的部分裁掉；預設 false 時＝主頁捲動版，呈現完全不變。
 export default function Team({ standalone = false }: { standalone?: boolean } = {}) {
+  const { pick, track, isEn } = useI18n();
+  const tx = pick(TEXT);
   const [leaderIdx, setLeaderIdx] = useState(0);
   const activeLeader = LEADERS[leaderIdx] ?? LEADERS[0];
+  const activeText = tx.leaders[leaderIdx] ?? tx.leaders[0];
   const isDesktop = useIsDesktop();
 
   return (
     <section id="team" className={`relative bg-black min-h-screen ${standalone ? "overflow-x-clip" : "overflow-hidden"}`}>
       <div className="relative w-full min-h-screen flex flex-col lg:flex-row">
-        {/* 左欄排版：捲動版與獨立頁（#/current-team）共用同一套 → 兩邊完全一致（垂直置中＋同樣留白）。
-            （之前獨立頁用 justify-start pt-28 靠上對齊，把內容擠到頂端、和捲動版不一樣，已統一。） */}
+        {/* 左欄排版：捲動版與獨立頁（#/current-team）共用同一套 → 兩邊完全一致（垂直置中＋同樣留白）。 */}
         {/* 左欄上下內距改用常數 CONTENT_PADDING_Y（在上方調整區），想調上下留白改那裡即可。 */}
         <div
           className="flex flex-col px-5 sm:px-8 md:px-[clamp(24px,4.3vw,74px)] w-full lg:w-[clamp(300px,54vw,920px)] lg:flex-shrink-0 justify-center"
@@ -362,23 +390,23 @@ export default function Team({ standalone = false }: { standalone?: boolean } = 
           <div>
             <PageEyebrow title="aboutTeam" />
             <Reveal delay={90}>
-              <p className="text-white mb-10" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(1.0rem,0.95vw,24px)", lineHeight: 2, letterSpacing: "0.1em", maxWidth: "520px" }}>
-                臺大圖資系學會目前由正副會長統領，下轄行政、活動、學術、形象宣傳、體育等五個常設部門（第 52 屆始）：
+              <p className="text-white mb-10" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 500, fontSize: "clamp(1.0rem,0.95vw,24px)", lineHeight: isEn ? 1.8 : 2, letterSpacing: track("0.1em"), maxWidth: "520px" }}>
+                {tx.intro}
               </p>
             </Reveal>
 
             <div className="flex flex-col gap-[clamp(8px,1vw,14px)] max-w-full sm:max-w-[520px] lg:max-w-[clamp(280px,42vw,700px)]">
               <div className="grid grid-cols-3 gap-[clamp(8px,1vw,14px)]">
                 {DEPTS.slice(0, 3).map((dept, i) => (
-                  <Reveal key={dept.name} delay={100 + i * 40}>
-                    <DeptCard dept={dept} />
+                  <Reveal key={dept.href} delay={100 + i * 40}>
+                    <DeptCard dept={dept} name={tx.depts[i]} />
                   </Reveal>
                 ))}
               </div>
               <div className="grid grid-cols-3 gap-[clamp(8px,1vw,14px)]">
                 {DEPTS.slice(3).map((dept, i) => (
-                  <Reveal key={dept.name} delay={220 + i * 40}>
-                    <DeptCard dept={dept} />
+                  <Reveal key={dept.href} delay={220 + i * 40}>
+                    <DeptCard dept={dept} name={tx.depts[i + 3]} />
                   </Reveal>
                 ))}
               </div>
@@ -399,11 +427,11 @@ export default function Team({ standalone = false }: { standalone?: boolean } = 
                   const isActive = i === leaderIdx;
                   // 這個人的大小／位置：去上方 FIGURE_ADJUST 找同名（會長／副會長）的那塊。
                   const adj = isDesktop
-                    ? FIGURE_ADJUST[leader.title as keyof typeof FIGURE_ADJUST] ?? Object.values(FIGURE_ADJUST)[0]
+                    ? FIGURE_ADJUST[leader.key] ?? Object.values(FIGURE_ADJUST)[0]
                     : FIGURE_ADJUST_MOBILE;
                   return (
                     <div
-                      key={leader.title}
+                      key={leader.key}
                       className="absolute inset-0 flex items-end transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]"
                       style={{
                         opacity: isActive ? 1 : 0,
@@ -417,7 +445,7 @@ export default function Team({ standalone = false }: { standalone?: boolean } = 
                       <div className="h-full flex-shrink-0 flex items-end justify-end pr-2 sm:pr-10 lg:pr-0 lg:justify-start w-full">
                         <img
                           src={leader.img}
-                          alt={leader.name}
+                          alt={tx.leaders[i]?.name ?? ""}
                           className="w-auto max-w-[70%] lg:max-w-full object-contain object-bottom"
                           style={{ height: adj.size, opacity: isActive ? 1 : 0 }}
                         />
@@ -428,19 +456,22 @@ export default function Team({ standalone = false }: { standalone?: boolean } = 
               </div>
               <div className="absolute left-4 right-4 top-4 sm:left-6 sm:right-6 lg:left-auto lg:right-[4vw] lg:top-[40vh] lg:bottom-auto flex flex-col items-start max-w-[min(55%,320px)] lg:max-w-[22vw] z-10 lg:z-auto">
                 <div style={{ padding: "1.5px", background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)", borderRadius: "999px", marginBottom: ROLE_MARGIN_BOTTOM }}>
-                  <div style={{ background: "#000", borderRadius: "999px", padding: "4px 14px", color: "white", fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 650, fontSize: ROLE_FONT_SIZE, letterSpacing: "0.16em", whiteSpace: "nowrap" }}>
-                    第 53 屆{activeLeader.title}
+                  <div style={{ background: "#000", borderRadius: "999px", padding: "4px 14px", color: "white", fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 650, fontSize: ROLE_FONT_SIZE, letterSpacing: track("0.16em", "0.04em"), whiteSpace: "nowrap" }}>
+                    {tx.termLabel.replace("{title}", activeText.title)}
                   </div>
                 </div>
-                <p className="text-white leading-none" style={{ fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: NAME_FONT_SIZE, letterSpacing: "0.04em", marginBottom: NAME_MARGIN_BOTTOM }}>
-                  {activeLeader.name}
+                <p className="text-white leading-none" style={{ fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: isEn ? NAME_FONT_SIZE_EN : NAME_FONT_SIZE, letterSpacing: track("0.04em", "0"), marginBottom: NAME_MARGIN_BOTTOM }}>
+                  {activeText.name}
                 </p>
-                <p style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 400, fontSize: ROMAN_FONT_SIZE, letterSpacing: "0.2em", background: "linear-gradient(90deg, #FFF 0%, #999 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: ROMAN_MARGIN_BOTTOM }}>
-                  {activeLeader.roman}
-                </p>
+                {/* 羅馬拼音：英文版的姓名已經是英文，就不重複顯示拼音 */}
+                {!isEn && (
+                  <p style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 400, fontSize: ROMAN_FONT_SIZE, letterSpacing: "0.2em", background: "linear-gradient(90deg, #FFF 0%, #999 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: ROMAN_MARGIN_BOTTOM }}>
+                    {activeLeader.roman}
+                  </p>
+                )}
                 <div style={{ background: "linear-gradient(90deg, #FFF 0%, #999 100%)", borderRadius: "5px", padding: "4px 14px" }}>
-                  <span style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: YEAR_FONT_SIZE, color: "#000", letterSpacing: "0.12em" }}>
-                    {activeLeader.year}
+                  <span style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: YEAR_FONT_SIZE, color: "#000", letterSpacing: track("0.12em", "0.04em") }}>
+                    {activeText.year}
                   </span>
                 </div>
               </div>
@@ -453,10 +484,11 @@ export default function Team({ standalone = false }: { standalone?: boolean } = 
             style={{ "--toggle-bottom": TOGGLE_BOTTOM_OFFSET, "--toggle-right": TOGGLE_RIGHT_OFFSET } as React.CSSProperties}
           >
             <div className="absolute top-[3px] bottom-[3px] rounded-full bg-white" style={{ width: "calc(50% - 3px)", left: leaderIdx === 0 ? "3px" : "calc(50%)", transition: "left 300ms cubic-bezier(0.4,0,0.2,1)" }} />
-            <div className="relative flex">
+            {/* grid 兩欄等寬：英文「Vice President」比較長，兩個按鈕仍一樣寬，白色滑塊才會剛好蓋住 */}
+            <div className="relative grid grid-cols-2">
               {LEADERS.map((l, i) => (
-                <button key={l.title} onClick={() => setLeaderIdx(i)} className="relative z-10 px-5 py-2 rounded-full text-center" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: leaderIdx === i ? 700 : 400, fontSize: "clamp(0.7rem,0.85vw,14px)", color: leaderIdx === i ? "black" : "rgba(255,255,255,0.35)", transition: "color 300ms ease" }}>
-                  {l.title}
+                <button key={l.key} onClick={() => setLeaderIdx(i)} className="relative z-10 px-5 py-2 rounded-full text-center whitespace-nowrap" style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: leaderIdx === i ? 700 : 400, fontSize: "clamp(0.7rem,0.85vw,14px)", color: leaderIdx === i ? "black" : "rgba(255,255,255,0.35)", transition: "color 300ms ease" }}>
+                  {tx.leaders[i]?.title}
                 </button>
               ))}
             </div>

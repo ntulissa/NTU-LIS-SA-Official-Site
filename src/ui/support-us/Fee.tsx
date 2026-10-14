@@ -11,6 +11,7 @@ import lockerImg from "@/imports/Fee/locker.png";
 import logoSvg from "@/imports/Fee/NTULISSAlogo.svg";
 import feelissaSvg from "@/imports/Fee/feelissa.svg";
 import { PageEyebrow, useIsDesktop, fitLine, textUnits } from "../general/shared";
+import { defineText, useI18n } from "../i18n";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 系學費專區（路由 #/fees）· Apple 風垂直捲動長頁
@@ -21,11 +22,44 @@ import { PageEyebrow, useIsDesktop, fitLine, textUnits } from "../general/shared
 //   E. 綠色 CTA       → 驟變綠底、大標、繳費按鈕、系學會 logo
 //
 // ★ 要改文案／數字都集中在檔案上方常數區。
+// ★ 英文版：介面文字在下方 TEXT；五張福利卡的英文寫在每張卡的 titleEn / descEn。
 // ─────────────────────────────────────────────────────────────────────────
 
 // 繳費表單連結（Google 表單）。所有「繳費」按鈕共用這一個字串。
 const PAY_FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSfmwqzlNfrtShLDTGdOBX2NuIT-NDs3Z49nJHVlLnPXcYlJ6g/viewform";
+
+// ── 中英文字（這一頁專用）──
+const TEXT = defineText({
+  zh: {
+    pay: "繳費",
+    heroTitle: ["一年會費，", "讓你可以這樣「玩」。"],
+    heroSub: "＄800 解鎖一年五大福利",
+    reasons: "五個無法拒絕的理由。",
+    cardAria: (n: number) => `第 ${n} 張`,
+    price: "$800 / 一學年",
+    period: "登記時間：即日起 ～ 115 學期末",
+    locker: "系櫃租借",
+    lockerAlt: "系櫃",
+    ctaTitle: "開通！",
+    ctaDesc: "便利圖資生活，系學會讓你這樣「玩」！",
+    logoAlt: "臺大圖資系學會",
+  },
+  en: {
+    pay: "Pay now",
+    heroTitle: ["One membership fee,", "a whole new way to play."],
+    heroSub: "$800 unlocks five member benefits for a full year",
+    reasons: "Five reasons you can't say no to.",
+    cardAria: (n: number) => `Card ${n}`,
+    price: "$800 / year",
+    period: "Sign-up: open now until the end of the 2026–27 academic year",
+    locker: "Lockers",
+    lockerAlt: "Department locker",
+    ctaTitle: "Unlock it!",
+    ctaDesc: "Make LIS life easier — this is how LISSA lets you play!",
+    logoAlt: "NTU LIS Student Association",
+  },
+});
 
 // 品牌紅藍（紅 #D14B4B、藍 #2F9EBD）
 const RED = "#D14B4B";
@@ -44,7 +78,7 @@ const scriptFont = "'Dancing Script','Brush Script MT',cursive";
 //   "fill"     ：圖片填滿整張 + 黑色遮罩（可調遮罩透明度 overlayOpacity）
 //
 // 每張共通可調：
-//   title/desc          左上標題、右下敘述的文字
+//   title/desc          左上標題、右下敘述的文字（英文版：titleEn / descEn）
 //   titleColor/descColor 文字顏色
 //   titleSize/descSize   文字大小（可用 clamp(...) 或 "40px"）
 //   titleX/titleY        標題位置微調（px；正 X=右、正 Y=下）
@@ -60,11 +94,13 @@ type Benefit = {
   type: "center" | "gradient" | "fill";
   img: string;
   title: string;
+  titleEn?: string; // 英文版標題
   titleColor: string;
   titleSize: string;
   titleX: number;
   titleY: number;
   desc: string;
+  descEn?: string; // 英文版敘述
   descColor: string;
   descSize: string;
   descX: number;
@@ -88,11 +124,13 @@ const BENEFITS: Benefit[] = [
     type: "center",
     img: benefit1,
     title: "系櫃免費租借。",
+    titleEn: "Free locker.",
     titleColor: "#000000",
     titleSize: CARD_TITLE_SIZE,
     titleX: -30,
     titleY: -15,
     desc: "免租金，僅收押金 $200 元，讓你的雙肩輕鬆無負擔！",
+    descEn: "No rent — just a $200 deposit. Give your shoulders a break!",
     descColor: "#000000",
     descSize: CARD_DESC_SIZE,
     descX: 30,
@@ -109,11 +147,13 @@ const BENEFITS: Benefit[] = [
     type: "center",
     img: benefit2,
     title: "迎新免費參加。",
+    titleEn: "Free orientation.",
     titleColor: "#000000",
     titleSize: CARD_TITLE_SIZE,
     titleX: -30,
     titleY: -15,
     desc: "圖資系內迎新直接免費參加，一起玩團康、吃披薩！",
+    descEn: "Join the LIS welcome party for free — games, fun and pizza!",
     descColor: "#000000",
     descSize: CARD_DESC_SIZE,
     descX: 30,
@@ -130,11 +170,13 @@ const BENEFITS: Benefit[] = [
     type: "gradient",
     img: benefit3,
     title: "系服訂購減免。",
+    titleEn: "Merch discount.",
     titleColor: "#FFFFFF",
     titleSize: CARD_TITLE_SIZE,
     titleX: -30,
     titleY: -15,
     desc: "用最划算的價格入手系服，展現圖資人的凝聚力。",
+    descEn: "Get the department hoodie at the best price and wear your LIS pride.",
     descColor: "#FFFFFF",
     descSize: CARD_DESC_SIZE,
     descX: 30,
@@ -152,11 +194,13 @@ const BENEFITS: Benefit[] = [
     type: "fill",
     img: benefit4,
     title: "教科書專屬折扣。",
+    titleEn: "Textbook deals.",
     titleColor: "#FFFFFF",
     titleSize: CARD_TITLE_SIZE,
     titleX: -30,
     titleY: -15,
     desc: "系學會學術部為大家談妥的專屬團購優惠價，買書省更多。",
+    descEn: "Exclusive group-buy prices negotiated by our Academic Affairs team.",
     descColor: "#FFFFFF",
     descSize: CARD_DESC_SIZE,
     descX: 30,
@@ -171,11 +215,13 @@ const BENEFITS: Benefit[] = [
     type: "fill",
     img: benefit5,
     title: "系上活動享折扣。",
+    titleEn: "Event discounts.",
     titleColor: "#FFFFFF",
     titleSize: CARD_TITLE_SIZE,
     titleX: -30,
     titleY: -15,
     desc: "系烤、舞會等各大精彩活動，皆享有專屬優惠價！",
+    descEn: "Member prices for the BBQ, the ball and every big event of the year!",
     descColor: "#FFFFFF",
     descSize: CARD_DESC_SIZE,
     descX: 30,
@@ -188,14 +234,19 @@ const BENEFITS: Benefit[] = [
 ];
 
 // ── 系櫃租借：有／無繳費方案（下方敘述會隨 Switch 切換）─────────────────────
+// labelEn / descEn ＝英文版
 const LOCKER_PLANS = {
   paid: {
     label: "有繳費者",
     desc: "免租金（僅收押金 $200 元）",
+    labelEn: "Members",
+    descEn: "Rent-free (just a $200 deposit)",
   },
   unpaid: {
     label: "無繳費者",
     desc: "酌收租金 $400 元（另收押金 $200 元）", // ← 待編輯：填無繳費者實際方案
+    labelEn: "Non-members",
+    descEn: "$400 rent (plus a $200 deposit)",
   },
 };
 
@@ -209,6 +260,7 @@ function ordinal(n: number) {
 // ── 繳費按鈕（白底黑字膠囊 + 箭頭，格式參考 HeroSection）─────────────────────
 function PayButton({ size = "md" }: { size?: "md" | "lg" }) {
   const lg = size === "lg";
+  const { pick, track } = useI18n();
   return (
     <a
       href={PAY_FORM_URL}
@@ -221,10 +273,10 @@ function PayButton({ size = "md" }: { size?: "md" | "lg" }) {
         fontFamily: zhFont,
         fontWeight: 700,
         fontSize: lg ? "clamp(1rem,1.8vw,1.25rem)" : "clamp(0.9rem,1.5vw,1.1rem)",
-        letterSpacing: "0.1em",
+        letterSpacing: track("0.1em", "0.02em"),
       }}
     >
-      繳費
+      {pick(TEXT).pay}
       <ArrowRight
         size={lg ? 22 : 18}
         className="group-hover:translate-x-1 transition-transform duration-200"
@@ -244,12 +296,14 @@ const M_CARD_H = `min(${M_CARD_MAX_H}, calc(${M_CARD_W} * ${M_CARD_RATIO}))`;
 const M_SIDE = `calc((100vw - ${M_CARD_W}) / 2)`; // 左右留白：讓第一張和最後一張都能置中
 
 // 手機版卡片：文字「置中」放在上方（標題 + 敘述），圖片放在下方剩餘空間。
-function MobileBenefitCard({ b }: { b: Benefit }) {
+function MobileBenefitCard({ b: raw }: { b: Benefit }) {
+  const { localize, isEn } = useI18n();
+  const b = localize(raw); // 英文版：title / desc 換成 titleEn / descEn
   const isFill = b.type === "fill";
   const isGradient = b.type === "gradient";
   const showCenterImg = b.type === "center" || isGradient;
   // 標題：一行放得下的最大字級（上限 32px）
-  const titleSize = `max(20px, min(32px, calc((${M_CARD_W} - 48px) / ${textUnits(b.title).toFixed(2)})))`;
+  const titleSize = isEn ? "clamp(24px, 7vw, 32px)" : `max(20px, min(32px, calc((${M_CARD_W} - 48px) / ${textUnits(b.title).toFixed(2)})))`;
 
   return (
     <article
@@ -288,7 +342,7 @@ function MobileBenefitCard({ b }: { b: Benefit }) {
             lineHeight: 1.25,
             color: b.titleColor,
             fontSize: titleSize,
-            whiteSpace: "nowrap",
+            whiteSpace: isEn ? "normal" : "nowrap",
           }}
         >
           {b.title}
@@ -328,10 +382,12 @@ function MobileBenefitCard({ b }: { b: Benefit }) {
 
 // ── 單張福利卡片：依 type 渲染三種版型 ────────────────────────────────────
 // 標題固定錨在「左上」、敘述錨在「右下」、草寫錨在「左下」；各自再用 X/Y 微調。
-function BenefitCard({ b }: { b: Benefit }) {
+function BenefitCard({ b: raw }: { b: Benefit }) {
   // 手機／平板：改用上面的 MobileBenefitCard（Apple 風、文字置中）；電腦版完全照舊。
   const isDesktop = useIsDesktop();
-  if (!isDesktop) return <MobileBenefitCard b={b} />;
+  const { localize, isEn } = useI18n();
+  if (!isDesktop) return <MobileBenefitCard b={raw} />;
+  const b = localize(raw); // 英文版：title / desc 換成 titleEn / descEn
   const titleSize = b.titleSize;
   const isFill = b.type === "fill";
   const isGradient = b.type === "gradient";
@@ -407,8 +463,9 @@ function BenefitCard({ b }: { b: Benefit }) {
         style={{
           bottom: "clamp(28px,4vw,56px)",
           right: "clamp(28px,4vw,56px)",
-          maxWidth: isDesktop ? "none" : "calc(100% - 56px)", // 電腦版不限寬；手機限制在卡片內
-          whiteSpace: isDesktop ? "nowrap" : "normal", // ← 電腦版強制不換行；手機版放不下才換行
+          // 英文版敘述較長：限制寬度、允許換行（中文電腦版維持單行）
+          maxWidth: isEn ? "62%" : isDesktop ? "none" : "calc(100% - 56px)", // 電腦版不限寬；手機限制在卡片內
+          whiteSpace: isEn ? "normal" : isDesktop ? "nowrap" : "normal", // ← 電腦版強制不換行；手機版放不下才換行
           fontFamily: zhFont,
           fontWeight: 700,
           lineHeight: 1.6,
@@ -492,6 +549,8 @@ function BenefitsScene() {
   };
 
   const isDesktop = useIsDesktop();
+  const { pick } = useI18n();
+  const tx = pick(TEXT);
 
   return (
     <section
@@ -505,7 +564,7 @@ function BenefitsScene() {
           className="text-white"
           style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "clamp(1.5rem,3.4vw,2.6rem)" }}
         >
-          五個無法拒絕的理由。
+          {tx.reasons}
         </h2>
       </div>
 
@@ -545,7 +604,7 @@ function BenefitsScene() {
             <button
               key={i}
               onClick={() => scrollToCard(i)}
-              aria-label={`第 ${i + 1} 張`}
+              aria-label={tx.cardAria(i + 1)}
               className="flex items-center justify-center rounded-full border transition-all duration-300"
               style={{
                 fontFamily: zhFont,
@@ -569,6 +628,8 @@ function BenefitsScene() {
 
 // ── C. 價格：紅藍排列的「800」背景 ────────────────────────────────────────
 function PriceScene() {
+  const { pick, track } = useI18n();
+  const tx = pick(TEXT);
   const ROWS = 6;
   const COLS = 10;
   return (
@@ -610,13 +671,13 @@ function PriceScene() {
           className="text-white"
           style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "clamp(2.8rem,9vw,7rem)", lineHeight: 1.05 }}
         >
-          $800 / 一學年
+          {tx.price}
         </h2>
         <p
           className="text-white/85 mt-6"
-          style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.9rem,1.8vw,1.2rem)", letterSpacing: "0.08em" }}
+          style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.9rem,1.8vw,1.2rem)", letterSpacing: track("0.08em", "0.01em") }}
         >
-          登記時間：即日起 ～ 115 學期末
+          {tx.period}
         </p>
       </div>
     </section>
@@ -682,11 +743,19 @@ const SCRUB_VH = 125; // 這一段總高（vh）：設成 100 + |END_TOP_VH|×10
 const M_TITLE_SIZE = "16vw"; // 手機版字級
 const M_LS_START = -0.05; // 手機版起始字距（em）
 const M_LS_END = 0.35; // 手機版結束字距（em）；16vw 字級下最大約 0.37，再大會超出畫面
+//
+// 英文版「LOCKERS」字母比較多 → 字小一點、展開幅度小一點，才不會超出畫面
+const EN_TITLE_SIZE = "clamp(3rem,10vw,9rem)"; // 電腦版字級
+const EN_LS_END = 0.45;                         // 電腦版結束字距（em）
+const M_EN_TITLE_SIZE = "12vw";                 // 手機版字級
+const M_EN_LS_END = 0.18;                       // 手機版結束字距（em）
 // └──────────────────────────────────────────────────────────────────────┘
 
 function LockerScene() {
   const [plan, setPlan] = useState<"paid" | "unpaid">("paid");
-  const current = LOCKER_PLANS[plan];
+  const { pick, localize, isEn } = useI18n();
+  const tx = pick(TEXT);
+  const current = localize(LOCKER_PLANS[plan]);
   const isDesktop = useIsDesktop();
 
   const trackRef = useRef<HTMLDivElement>(null);
@@ -694,7 +763,7 @@ function LockerScene() {
   // easeOutCubic 讓展開更有加速度感
   const eased = 1 - Math.pow(1 - p, 3);
   const lsStart = isDesktop ? LS_START : M_LS_START;
-  const lsEnd = isDesktop ? LS_END : M_LS_END;
+  const lsEnd = isEn ? (isDesktop ? EN_LS_END : M_EN_LS_END) : isDesktop ? LS_END : M_LS_END;
   const ls = lsStart + eased * (lsEnd - lsStart); // 當前字距（em）
 
   return (
@@ -708,14 +777,14 @@ function LockerScene() {
             style={{
               fontFamily: zhFont,
               fontWeight: 900,
-              fontSize: M_TITLE_SIZE,
+              fontSize: isEn ? M_EN_TITLE_SIZE : M_TITLE_SIZE,
               lineHeight: 1,
               letterSpacing: `${ls}em`,
               transform: `translateX(${ls / 2}em)`, // 補償最後一個字後面多出的字距，保持正中
               willChange: "letter-spacing, transform",
             }}
           >
-            系櫃租借
+            {tx.locker}
           </h2>
         )}
 
@@ -727,7 +796,7 @@ function LockerScene() {
             style={{
               fontFamily: zhFont,
               fontWeight: 900,
-              fontSize: "clamp(3rem,13vw,11rem)",
+              fontSize: isEn ? EN_TITLE_SIZE : "clamp(3rem,13vw,11rem)",
               lineHeight: 1,
               letterSpacing: `${ls}em`,
               // 位移 = 使用者的 XY 偏移 + 置中補償。
@@ -736,11 +805,11 @@ function LockerScene() {
               willChange: "letter-spacing, transform",
             }}
           >
-            系櫃租借
+            {tx.locker}
           </h2>
           <img
             src={lockerImg}
-            alt="系櫃"
+            alt={tx.lockerAlt}
             className="relative z-10 h-[46vh] max-h-[560px] w-auto object-contain"
             draggable={false}
           />
@@ -773,7 +842,7 @@ function LockerScene() {
               color: plan === key ? "#000" : "rgba(255,255,255,0.8)",
             }}
           >
-            {LOCKER_PLANS[key].label}
+            {localize(LOCKER_PLANS[key]).label}
           </button>
         ))}
       </div>
@@ -859,6 +928,8 @@ function GreenCTA() {
   const p = useScrollProgress(trackRef, GREEN_START_TOP_VH, GREEN_END_TOP_VH);
   const eased = p * p * (3 - 2 * p); // smoothstep 讓染色更順
   const bg = blackToGreen(eased);
+  const { pick, isEn, track } = useI18n();
+  const tx = pick(TEXT);
 
   return (
     <div ref={trackRef} className="relative" style={{ height: `${GREEN_SCRUB_VH}vh`, background: bg }}>
@@ -872,12 +943,12 @@ function GreenCTA() {
           style={{
             fontFamily: zhFont,
             fontWeight: 900,
-            fontSize: "clamp(4rem,16vw,13rem)",
+            fontSize: isEn ? "clamp(3rem,12vw,10rem)" : "clamp(4rem,16vw,13rem)",
             lineHeight: 1,
             transform: `translate(${CTA_TITLE_X}px, ${CTA_TITLE_Y}px)`,
           }}
         >
-          開通！
+          {tx.ctaTitle}
         </h2>
         <p
           className="text-white mb-12"
@@ -885,11 +956,11 @@ function GreenCTA() {
             fontFamily: zhFont,
             fontWeight: 700,
             fontSize: "clamp(1.05rem,2.4vw,1.6rem)",
-            letterSpacing: "0.04em",
+            letterSpacing: track("0.04em", "0.01em"),
             transform: `translate(${CTA_DESC_X}px, ${CTA_DESC_Y}px)`,
           }}
         >
-          便利圖資生活，系學會讓你這樣「玩」！
+          {tx.ctaDesc}
         </p>
         <div style={{ transform: `translate(${CTA_BTN_X}px, ${CTA_BTN_Y}px)` }}>
           <PayButton size="lg" />
@@ -898,7 +969,7 @@ function GreenCTA() {
         {/* 系學會 logo */}
         <img
           src={logoSvg}
-          alt="臺大圖資系學會"
+          alt={tx.logoAlt}
           className="mt-16 h-16 md:h-20 w-auto"
           style={{ transform: `translate(${CTA_LOGO_X}px, ${CTA_LOGO_Y}px)` }}
         />
@@ -910,6 +981,8 @@ function GreenCTA() {
 // ── 主元件 ────────────────────────────────────────────────────────────────
 export default function Fee() {
   const isDesktop = useIsDesktop();
+  const { pick, isEn, track } = useI18n();
+  const tx = pick(TEXT);
   return (
     <div className="bg-black">
       <style>{`
@@ -929,17 +1002,17 @@ export default function Fee() {
         <div className="relative z-10 px-6 md:px-12 min-h-screen flex flex-col justify-center max-w-[1400px] mx-auto w-full">
           <h1
             className="text-white mb-8"
-            style={{ fontFamily: zhFont, fontWeight: 900, fontSize: isDesktop ? "clamp(2.4rem,6.5vw,5.5rem)" : fitLine("讓你可以這樣「玩」。", "clamp(2.4rem,6.5vw,5.5rem)", { min: 26, gutter: 56 }), lineHeight: 1.15 }}
+            style={{ fontFamily: zhFont, fontWeight: 900, fontSize: isEn ? (isDesktop ? "clamp(2.2rem,5.2vw,4.6rem)" : "clamp(2rem,8.5vw,2.8rem)") : isDesktop ? "clamp(2.4rem,6.5vw,5.5rem)" : fitLine("讓你可以這樣「玩」。", "clamp(2.4rem,6.5vw,5.5rem)", { min: 26, gutter: 56 }), lineHeight: isEn ? 1.1 : 1.15 }}
           >
-            一年會費，
+            {tx.heroTitle[0]}
             <br />
-            讓你可以這樣「玩」。
+            {tx.heroTitle[1]}
           </h1>
           <p
             className="text-white mb-2"
-            style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(1rem,2vw,1.5rem)", letterSpacing: "0.04em" }}
+            style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(1rem,2vw,1.5rem)", letterSpacing: track("0.04em", "0.01em") }}
           >
-            ＄800 解鎖一年五大福利
+            {tx.heroSub}
           </p>
 
           {/* 繳費按鈕（靠右下，格式參考 HeroSection） */}

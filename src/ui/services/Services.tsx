@@ -2,9 +2,10 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type R
 import { ArrowRight, ArrowLeft, Info, XCircle } from "lucide-react";
 import { PageEyebrow, Reveal, useIsDesktop } from "../general/shared";
 // ↑ 此頁與 Department 分開存放，共用版型工具從 general/shared 匯入。
-import { DEPT_COLORS, BENTO, serviceBySlug, type Cell } from "./servicesData";
+import { DEPT_COLORS, DEPT_NAMES, BENTO, serviceBySlug, localizeService, type Cell, type Dept } from "./servicesData";
 // ↑ 服務資料（Bento 佈局 + 詳情頁內容）集中在 servicesData.ts；本檔只負責呈現。
 //   若不同層，改成正確的相對路徑即可。
+import { defineText, useI18n } from "../i18n";
 
 /**
  * 各種服務（Services）
@@ -16,7 +17,36 @@ import { DEPT_COLORS, BENTO, serviceBySlug, type Cell } from "./servicesData";
  *      <Services slug="textbook" /> → 顯示該服務的詳情頁
  * 路由怎麼接：在你的 hash 路由把 #/services 指到 <Services/>，
  *            #/service/xxx 指到 <Services slug="xxx"/> 即可。
+ *
+ * ★ 這一頁的介面文字（按鈕、提示語）在下面的 TEXT；
+ *   每項服務的英文（nameEn / introEn / guideEn…）寫在 servicesData.ts。
  */
+
+// ══════════════════════════════════════════════════════════════════════════
+// 中英文字（這一頁專用）
+// ══════════════════════════════════════════════════════════════════════════
+const TEXT = defineText({
+  zh: {
+    soon: "本服務準備中，敬請期待",
+    back: "回上頁",
+    go: "前往",
+    goAria: "前往",
+    notFound: "此服務頁面尚未建立。",
+    imagePlaceholder: "服務圖片",
+    openGuide: "服務指引",
+    closeGuide: "返回正面",
+  },
+  en: {
+    soon: "Coming soon — stay tuned",
+    back: "Back",
+    go: "Go",
+    goAria: "Go to ",
+    notFound: "This service page hasn't been set up yet.",
+    imagePlaceholder: "Service image",
+    openGuide: "Service guide",
+    closeGuide: "Back to front",
+  },
+});
 
 // ── 字型（與全站一致）──
 const zhDisplay = "'Chiron Hei HK Text','Noto Sans TC', sans-serif";
@@ -46,26 +76,18 @@ const GO_DEST_CSS = `
 @media (prefers-reduced-motion: reduce){ .go-dest{ transition:none; } }
 `;
 
-// ── 準備中的膠囊提示語 ──
-const SERVICE_SOON = "本服務準備中，敬請期待";
-
 // ── 部門名稱格：svg 顯示大小（部門名稱 svg 放在 imports/services/IMG-<dept>/）──
 // 想再更小／更大，改這兩個百分比即可（相對於該格）。
 const DEPT_LOGO = { maxW: "100%", maxH: "42%" };
 
-// ── 部門名稱格：英文草寫 svg ⇄ 中文名稱 自動切換 ─────────────────
-// 中文名稱（與 departments.ts 一致）
-const DEPT_ZH: Record<string, string> = {
-  gen: "行政部",
-  eve: "活動部",
-  aca: "學術部",
-  ima: "形象宣傳部",
-  sp: "體育部",
-};
+// ── 部門名稱格：英文草寫 svg ⇄ 部門名稱 自動切換 ─────────────────
+// 中文版：草寫 svg ⇄ 中文名稱（行政部…）
+// 英文版：草寫 svg ⇄ 英文名稱（GENERAL AFFAIRS…）
+// 名稱本身寫在 servicesData.ts 的 DEPT_NAMES（中英都在那裡）。
 const DEPT_SWITCH = {
   intervalMs: 7500,         // 每隔幾毫秒切換一次（7500 = 7.5 秒）
   fadeMs: 800,              // 淡入淡出的時間（ms）
-  startWith: "en" as "en" | "zh", // 一進頁面先顯示哪一個
+  startWith: "en" as "en" | "zh", // 一進頁面先顯示哪一個（en＝草寫 svg、zh＝文字名稱）
 };
 // 字級寫法 clamp(最小, 理想, 最大)：
 //   「理想」用 vw（1vw = 螢幕寬度的 1%），所以螢幕越寬字越大；
@@ -76,6 +98,12 @@ const DEPT_ZH_STYLE = {
   desktopLetterSpacing: "0.35em",               // 電腦版字距（格子比較擠，收窄一點）
   desktopSize: "clamp(1rem,1.45vw,1.6rem)",     // 電腦版字級：16px ~ 25.6px（和業務格的字差不多大、略粗）
   mobileSize: "clamp(1.2rem,5vw,1.5rem)",       // 手機／平板字級（維持不變）
+};
+// 英文版部門名稱（較長，所以字小一點、字距窄一點）
+const DEPT_EN_STYLE = {
+  letterSpacing: "0.12em",
+  desktopSize: "clamp(0.8rem,1.05vw,1.15rem)",
+  mobileSize: "clamp(1rem,4.2vw,1.25rem)",
 };
 // 手機版部門橫條
 const MOBILE_BANNER = { height: 54, logoH: 18 }; // 橫條高度、草寫 svg 顯示高度（px）；原本 38，嫌大／小就改這個
@@ -135,27 +163,38 @@ function useIsTallBox(ref: RefObject<HTMLElement | null>): boolean {
   return tall;
 }
 
-// 中文部門名稱（橫書／直書）。字距最後一個字後面也會多一格，所以在開頭補同樣的距離，讓它真正置中。
-function DeptZh({ dept, vertical, size, spacing = DEPT_ZH_STYLE.letterSpacing }: { dept: string; vertical?: boolean; size: string; spacing?: string }) {
+// 部門名稱（目前語言；中文直接回傳中文名，英文回傳英文名）
+function deptLabel(dept: string, isEn: boolean): string {
+  const n = DEPT_NAMES[dept as Dept];
+  if (!n) return dept;
+  return isEn ? n.en : n.zh;
+}
+
+// 部門名稱（橫書／直書）。字距最後一個字後面也會多一格，所以在開頭補同樣的距離，讓它真正置中。
+// 英文版：大寫、字小一點；直格時整串轉 90°（英文不適合一個字母一個字母直排）。
+function DeptName({ dept, vertical, size, spacing = DEPT_ZH_STYLE.letterSpacing }: { dept: string; vertical?: boolean; size: string; spacing?: string }) {
+  const { isEn } = useI18n();
+  const fontSize = isEn ? (size === DEPT_ZH_STYLE.mobileSize ? DEPT_EN_STYLE.mobileSize : DEPT_EN_STYLE.desktopSize) : size;
+  const ls = isEn ? DEPT_EN_STYLE.letterSpacing : spacing;
   return (
     <span
-      className="text-white leading-none whitespace-nowrap"
+      className={`text-white leading-none ${isEn ? "uppercase text-center" : "whitespace-nowrap"}`}
       style={{
-        fontFamily: zhDisplay,
+        fontFamily: isEn ? mono : zhDisplay,
         fontWeight: 700,
-        fontSize: size,
-        letterSpacing: spacing,
+        fontSize,
+        letterSpacing: ls,
         ...(vertical
-          ? { writingMode: "vertical-rl", textOrientation: "upright", paddingTop: spacing }
-          : { paddingLeft: spacing }),
+          ? { writingMode: "vertical-rl", textOrientation: isEn ? "mixed" : "upright", paddingTop: ls }
+          : { paddingLeft: ls }),
       } as CSSProperties}
     >
-      {DEPT_ZH[dept] ?? dept}
+      {deptLabel(dept, isEn)}
     </span>
   );
 }
 
-// 疊在一起的兩層（英文／中文），用透明度切換
+// 疊在一起的兩層（草寫 svg／文字名稱），用透明度切換
 function DeptLayer({ show, className = "", children }: { show: boolean; className?: string; children: ReactNode }) {
   return (
     <div className={`dept-layer absolute inset-0 flex items-center justify-center ${className}`} style={{ opacity: show ? 1 : 0 }} aria-hidden={!show}>
@@ -166,12 +205,13 @@ function DeptLayer({ show, className = "", children }: { show: boolean; classNam
 
 // 電腦版：Bento 裡的部門格
 function DeptCellDesktop({ dept, style, showZh }: { dept: string; style: CSSProperties; showZh: boolean }) {
+  const { isEn } = useI18n();
   const ref = useRef<HTMLDivElement>(null);
   const vertical = useIsTallBox(ref);
   const svg = assetByFile(`${dept}.svg`);
   const color = DEPT_COLORS[dept as keyof typeof DEPT_COLORS];
   return (
-    <div ref={ref} className="relative rounded-2xl overflow-hidden select-none" style={{ ...style, background: color }} role="img" aria-label={DEPT_ZH[dept] ?? dept}>
+    <div ref={ref} className="relative rounded-2xl overflow-hidden select-none" style={{ ...style, background: color }} role="img" aria-label={deptLabel(dept, isEn)}>
       <DeptLayer show={!showZh} className="p-3">
         {svg ? (
           <img src={svg} alt="" className="object-contain" style={{ maxWidth: DEPT_LOGO.maxW, maxHeight: DEPT_LOGO.maxH }} />
@@ -180,7 +220,7 @@ function DeptCellDesktop({ dept, style, showZh }: { dept: string; style: CSSProp
         )}
       </DeptLayer>
       <DeptLayer show={showZh} className="p-3">
-        <DeptZh dept={dept} vertical={vertical} size={DEPT_ZH_STYLE.desktopSize} spacing={DEPT_ZH_STYLE.desktopLetterSpacing} />
+        <DeptName dept={dept} vertical={vertical} size={DEPT_ZH_STYLE.desktopSize} spacing={DEPT_ZH_STYLE.desktopLetterSpacing} />
       </DeptLayer>
     </div>
   );
@@ -209,10 +249,11 @@ function DeptLogoMobile({ dept, src }: { dept: string; src: string }) {
 
 // 手機版：部門橫條
 function DeptBannerMobile({ dept, showZh }: { dept: string; showZh: boolean }) {
+  const { isEn } = useI18n();
   const svg = assetByFile(`${dept}.svg`);
   const color = DEPT_COLORS[dept as keyof typeof DEPT_COLORS];
   return (
-    <div className="relative rounded-2xl overflow-hidden mb-3 select-none" style={{ background: color, height: MOBILE_BANNER.height }} role="img" aria-label={DEPT_ZH[dept] ?? dept}>
+    <div className="relative rounded-2xl overflow-hidden mb-3 select-none" style={{ background: color, height: MOBILE_BANNER.height }} role="img" aria-label={deptLabel(dept, isEn)}>
       <DeptLayer show={!showZh} className="px-4">
         {svg ? (
           <DeptLogoMobile dept={dept} src={svg} />
@@ -221,7 +262,7 @@ function DeptBannerMobile({ dept, showZh }: { dept: string; showZh: boolean }) {
         )}
       </DeptLayer>
       <DeptLayer show={showZh} className="px-4">
-        <DeptZh dept={dept} size={DEPT_ZH_STYLE.mobileSize} />
+        <DeptName dept={dept} size={DEPT_ZH_STYLE.mobileSize} />
       </DeptLayer>
     </div>
   );
@@ -422,32 +463,37 @@ function useTrimmedImage(src?: string): { url?: string; ready: boolean } {
 
 // ── 單一格 ───────────────────────────────────────────────
 function BentoCell({ cell, showZh }: { cell: Cell; showZh: boolean }) {
+  const { lang, isEn, track } = useI18n();
   const color = DEPT_COLORS[cell.dept];
   const style: CSSProperties = { gridColumn: cell.gc, gridRow: cell.gr };
 
   if (cell.type === "dept") {
-    // 部門格：英文草寫 svg ⇄ 中文名稱（直格自動改直書）
+    // 部門格：英文草寫 svg ⇄ 部門名稱（直格自動改直書）
     return <DeptCellDesktop dept={cell.dept} style={style} showZh={showZh} />;
   }
+
+  const name = localizeService(cell, lang).zh; // 英文版＝nameEn（沒填就沿用中文）
 
   return (
     <a
       href={`#/service/${cell.slug}`}
       className="svc-cell group rounded-2xl border-[1.5px] flex items-center justify-center text-center p-2 transition-colors duration-200"
       style={{ ...style, borderColor: color, ["--svc-fill" as string]: color } as CSSProperties}
-      aria-label={cell.zh}
+      aria-label={name}
     >
       <span
         className="text-white leading-tight"
         style={{
           fontFamily: zhDisplay,
           fontWeight: 700,
-          fontSize: "clamp(0.95rem,1.5vw,1.7rem)",
-          letterSpacing: "0.08em",
-          ...(cell.vertical ? { writingMode: "vertical-rl", textOrientation: "upright" } as CSSProperties : {}),
+          // 英文名稱較長 → 字小一點，避免擠出格子
+          fontSize: isEn ? "clamp(0.8rem,1.15vw,1.3rem)" : "clamp(0.95rem,1.5vw,1.7rem)",
+          letterSpacing: track("0.08em", "0.01em"),
+          // 直格：中文一字一字直排；英文整串轉 90°
+          ...(cell.vertical ? { writingMode: "vertical-rl", textOrientation: isEn ? "mixed" : "upright" } as CSSProperties : {}),
         }}
       >
-        {cell.zh}
+        {name}
       </span>
     </a>
   );
@@ -457,6 +503,7 @@ function BentoCell({ cell, showZh }: { cell: Cell; showZh: boolean }) {
 // ── 手機／平板版總覽：12×8 的 Bento 在小螢幕塞不下，改成「每個部門一組」的兩欄格子 ──
 const DEPT_ORDER = ["gen", "eve", "aca", "ima", "sp"] as const;
 function ServicesListMobile({ showZh }: { showZh: boolean }) {
+  const { lang, isEn, track } = useI18n();
   return (
     <div className="flex flex-col gap-8">
       {DEPT_ORDER.map((d) => {
@@ -466,19 +513,22 @@ function ServicesListMobile({ showZh }: { showZh: boolean }) {
           <div key={d}>
             <DeptBannerMobile dept={d} showZh={showZh} />
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {items.map((c) => (
-                <a
-                  key={c.slug}
-                  href={`#/service/${c.slug}`}
-                  className="svc-cell rounded-2xl border-[1.5px] flex items-center justify-center text-center px-3 py-5 min-h-[84px] transition-colors duration-200"
-                  style={{ borderColor: color, ["--svc-fill" as string]: color } as CSSProperties}
-                  aria-label={c.zh}
-                >
-                  <span className="text-white leading-snug" style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "clamp(15px, 3.8vw, 18px)", letterSpacing: "0.06em" }}>
-                    {c.zh}
-                  </span>
-                </a>
-              ))}
+              {items.map((c) => {
+                const name = localizeService(c, lang).zh;
+                return (
+                  <a
+                    key={c.slug}
+                    href={`#/service/${c.slug}`}
+                    className="svc-cell rounded-2xl border-[1.5px] flex items-center justify-center text-center px-3 py-5 min-h-[84px] transition-colors duration-200"
+                    style={{ borderColor: color, ["--svc-fill" as string]: color } as CSSProperties}
+                    aria-label={name}
+                  >
+                    <span className="text-white leading-snug" style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: isEn ? "clamp(14px, 3.6vw, 17px)" : "clamp(15px, 3.8vw, 18px)", letterSpacing: track("0.06em", "0.01em") }}>
+                      {name}
+                    </span>
+                  </a>
+                );
+              })}
             </div>
           </div>
         );
@@ -489,7 +539,7 @@ function ServicesListMobile({ showZh }: { showZh: boolean }) {
 
 function ServicesGrid() {
   const isDesktop = useIsDesktop();
-  const showZh = useDeptSwitch(); // 部門名稱：英文 ⇄ 中文（五格同步切換）
+  const showZh = useDeptSwitch(); // 部門名稱：草寫 svg ⇄ 文字名稱（五格同步切換）
   return (
     <section className="relative bg-black min-h-screen px-4 sm:px-6 lg:px-10 pt-[var(--page-content-top)] pb-10">
       <style>{`.svc-cell:hover{ background: var(--svc-fill); }${DEPT_FADE_CSS}`}</style>
@@ -519,9 +569,11 @@ function ServicesGrid() {
 
 // ── 詳情頁右側「翻牌卡」──────────────────────────────────
 // 正面：黑底 + 紅藍漸層外框；上方服務圖，下方部門名稱（Ubuntu Sans Mono），右上角「i」。
-// 點「i」→ 翻到背面「服務指引」（條列，內容寫在 servicesData.ts 的 guide）；背面右上角「✕」翻回正面。
+// 點「i」→ 翻到背面「服務指引」（條列，內容寫在 servicesData.ts 的 guide / guideEn）；背面右上角「✕」翻回正面。
 // 沒填 guide 的服務不顯示「i」，就當一張純圖卡。
-function ServiceCard({ slug, dept, img, zh, guide }: { slug: string; dept: string; img?: string; zh: string; guide?: string[] }) {
+function ServiceCard({ slug, img, zh, guide }: { slug: string; dept: string; img?: string; zh: string; guide?: string[] }) {
+  const { pick, track, isEn } = useI18n();
+  const tx = pick(TEXT);
   const [flipped, setFlipped] = useState(false);
   const trimmed = useTrimmedImage(img);
   const imgScale = IMG_FIT.override[slug] ?? 1;
@@ -557,7 +609,7 @@ function ServiceCard({ slug, dept, img, zh, guide }: { slug: string; dept: strin
         {/* 正面：服務圖 + 部門名稱（rotateY(0) 讓背面剔除生效，i 才不會穿到背面） */}
         <div style={{ ...face, transform: "rotateY(0deg)" }} className="flex flex-col p-5 sm:p-6">
           {hasGuide ? (
-            <button type="button" onClick={() => setFlipped(true)} aria-label="服務指引" className={iconBtnClass}>
+            <button type="button" onClick={() => setFlipped(true)} aria-label={tx.openGuide} className={iconBtnClass}>
               <Info size={38} strokeWidth={1.4} />
             </button>
           ) : null}
@@ -572,13 +624,13 @@ function ServiceCard({ slug, dept, img, zh, guide }: { slug: string; dept: strin
                 style={{ opacity: trimmed.ready ? 1 : 0, transform: imgScale !== 1 ? `scale(${imgScale})` : undefined }}
               />
             ) : (
-              <div className="flex flex-col items-center justify-center gap-3 text-white/40" style={{ fontFamily: mono, letterSpacing: "0.2em" }}>
+              <div className="flex flex-col items-center justify-center gap-3 text-white/40" style={{ fontFamily: mono, letterSpacing: track("0.2em", "0.08em") }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="w-14 h-14">
                   <rect x="3" y="4" width="18" height="16" rx="2" />
                   <path d="M3 15l5-5 4 4 3-3 6 6" strokeLinecap="round" strokeLinejoin="round" />
                   <circle cx="8.5" cy="9" r="1.4" />
                 </svg>
-                <span className="text-xs">服務圖片</span>
+                <span className="text-xs">{tx.imagePlaceholder}</span>
               </div>
             )}
           </div>
@@ -586,7 +638,7 @@ function ServiceCard({ slug, dept, img, zh, guide }: { slug: string; dept: strin
 
         {/* 背面（旋轉 180°）：服務指引條列（靠上排，避免上方一大片黑） */}
         <div style={{ ...face, transform: "rotateY(180deg)" }} className="flex flex-col p-6 sm:p-7">
-          <button type="button" onClick={() => setFlipped(false)} aria-label="返回正面" className={iconBtnClass}>
+          <button type="button" onClick={() => setFlipped(false)} aria-label={tx.closeGuide} className={iconBtnClass}>
             <XCircle size={38} strokeWidth={1.4} />
           </button>
           <div className="flex-1 flex flex-col justify-start gap-5 min-h-0 pt-16 pr-1">
@@ -594,7 +646,7 @@ function ServiceCard({ slug, dept, img, zh, guide }: { slug: string; dept: strin
               <div key={i} className="flex items-start gap-3">
                 {/* 圓點對齊「第一行文字」的垂直中央：line-height 1.7 → 半行 0.85em，再扣圓點半徑 */}
                 <span className="shrink-0 rounded-full bg-white" style={{ width: 9, height: 9, marginTop: "calc(0.85em - 4.5px)" }} />
-                <p className="text-white" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.95rem,1.5vw,1.25rem)", lineHeight: 1.7, letterSpacing: "0.02em" }}>{g}</p>
+                <p className="text-white" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: isEn ? "clamp(0.9rem,1.35vw,1.1rem)" : "clamp(0.95rem,1.5vw,1.25rem)", lineHeight: 1.7, letterSpacing: track("0.02em", "0.005em") }}>{g}</p>
               </div>
             ))}
           </div>
@@ -606,7 +658,10 @@ function ServiceCard({ slug, dept, img, zh, guide }: { slug: string; dept: strin
 
 // ── 服務詳情頁（只有上半：左 標題/便利貼/英文/介紹/按鈕，右 翻牌卡）──
 function ServiceDetail({ slug }: { slug: string }) {
-  const s = serviceBySlug(slug);
+  const { lang, pick, track, isEn } = useI18n();
+  const tx = pick(TEXT);
+  const raw = serviceBySlug(slug);
+  const s = raw ? localizeService(raw, lang) : undefined; // 英文版：名稱／介紹／便利貼／指引換成英文
 
   useEffect(() => {
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
@@ -621,9 +676,9 @@ function ServiceDetail({ slug }: { slug: string }) {
   if (!s) {
     return (
       <section className="relative bg-black min-h-screen flex flex-col items-center justify-center gap-6 px-6 text-center">
-        <p className="text-white/70" style={{ fontFamily: zhFont, fontSize: "1.1rem" }}>此服務頁面尚未建立。</p>
-        <button onClick={goBack} className="rounded-full border border-white/30 text-white px-6 py-2.5 hover:bg-white/5" style={{ fontFamily: zhFont, fontWeight: 700, letterSpacing: "0.16em" }}>
-          ← 回上頁
+        <p className="text-white/70" style={{ fontFamily: zhFont, fontSize: "1.1rem" }}>{tx.notFound}</p>
+        <button onClick={goBack} className="rounded-full border border-white/30 text-white px-6 py-2.5 hover:bg-white/5" style={{ fontFamily: zhFont, fontWeight: 700, letterSpacing: track("0.16em", "0.04em") }}>
+          ← {tx.back}
         </button>
       </section>
     );
@@ -645,9 +700,9 @@ function ServiceDetail({ slug }: { slug: string }) {
           <button
             onClick={goBack}
             className={`group inline-flex items-center gap-2 rounded-full bg-white text-black px-5 py-2 ${GAP.backToTitle} hover:bg-white/90 transition-all duration-200 w-fit`}
-            style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.06em", transform: mv(DETAIL_LAYOUT.back) }}
+            style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: track("0.06em", "0.02em"), transform: mv(DETAIL_LAYOUT.back) }}
           >
-            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform duration-200" /> 回上頁
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform duration-200" /> {tx.back}
           </button>
         </Reveal>
 
@@ -657,10 +712,10 @@ function ServiceDetail({ slug }: { slug: string }) {
           <div className="max-w-[620px]">
             <Reveal delay={60}>
               <div className={`flex items-end flex-wrap gap-3 ${GAP.titleToEn}`}>
-                <h1 className="leading-none text-white" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(2.4rem,4.5vw,4.2rem)", letterSpacing: "0.08em", transform: mv(DETAIL_LAYOUT.title) }}>
+                <h1 className="leading-none text-white" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: isEn ? "clamp(2.1rem,4vw,3.6rem)" : "clamp(2.4rem,4.5vw,4.2rem)", lineHeight: isEn ? 1.05 : undefined, letterSpacing: track("0.08em", "0.005em"), transform: mv(DETAIL_LAYOUT.title) }}>
                   {s.zh}
                 </h1>
-                {/* 便利貼（隨機/自填文字，內容在該服務的 note） */}
+                {/* 便利貼（隨機/自填文字，內容在該服務的 note / noteEn） */}
                 {s.note ? (
                   <span
                     className="inline-block mb-2 rounded-[6px] px-3 py-1 select-none"
@@ -679,7 +734,7 @@ function ServiceDetail({ slug }: { slug: string }) {
             </Reveal>
 
             <Reveal delay={120}>
-              <p style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.9rem,1.05vw,1.05rem)", lineHeight: 2.1, letterSpacing: "0.1em", color: "rgba(255,255,255,0.92)", transform: mv(DETAIL_LAYOUT.intro) }}>
+              <p style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "clamp(0.9rem,1.05vw,1.05rem)", lineHeight: isEn ? 1.8 : 2.1, letterSpacing: track("0.1em", "0.01em"), color: "rgba(255,255,255,0.92)", transform: mv(DETAIL_LAYOUT.intro) }}>
                 {s.intro}
               </p>
             </Reveal>
@@ -695,15 +750,15 @@ function ServiceDetail({ slug }: { slug: string }) {
                       target="_blank"
                       rel="noopener noreferrer"
                       data-open-new-tab="true"
-                      aria-label={s.dest ? `前往${s.dest}` : undefined}
+                      aria-label={s.dest ? `${tx.goAria}${s.dest}` : undefined}
                       className="go-btn relative z-10 inline-flex items-center gap-2 rounded-full bg-white text-black px-7 py-3 hover:bg-white/90 transition-all duration-200 group w-fit"
-                      style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "1rem", letterSpacing: "0.16em" }}
+                      style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "1rem", letterSpacing: track("0.16em", "0.04em") }}
                     >
-                      前往 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
+                      {tx.go} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
                     </a>
                     {s.dest ? (
                       <span className="go-dest-wrap" aria-hidden="true">
-                        <span className="go-dest text-white" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "1rem", letterSpacing: "0.18em" }}>
+                        <span className="go-dest text-white" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "1rem", letterSpacing: track("0.18em", "0.02em") }}>
                           {s.dest}
                         </span>
                       </span>
@@ -712,9 +767,9 @@ function ServiceDetail({ slug }: { slug: string }) {
                 ) : (
                   <span
                     className="inline-flex items-center rounded-full px-7 py-3 select-none cursor-default"
-                    style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "1rem", letterSpacing: "0.12em", color: "#fff", background: "transparent", border: "1.5px solid rgba(255,255,255,0.7)" }}
+                    style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "1rem", letterSpacing: track("0.12em", "0.02em"), color: "#fff", background: "transparent", border: "1.5px solid rgba(255,255,255,0.7)" }}
                   >
-                    {SERVICE_SOON}
+                    {tx.soon}
                   </span>
                 )}
               </div>
@@ -724,7 +779,8 @@ function ServiceDetail({ slug }: { slug: string }) {
           {/* 右：翻牌卡（正面圖 + 部門名稱 + i；背面服務指引 + ✕）。圖放 imports/services/<slug>.png */}
           <Reveal delay={100}>
             <div className="relative w-full flex items-center justify-center" style={{ transform: mv(DETAIL_LAYOUT.image) }}>
-              <ServiceCard slug={s.slug} dept={s.dept} img={img} zh={s.zh} guide={s.guide} />
+              {/* key={lang}：切換語言時翻回正面，避免背面停在舊語言的指引 */}
+              <ServiceCard key={lang} slug={s.slug} dept={s.dept} img={img} zh={s.zh} guide={s.guide} />
             </div>
           </Reveal>
         </div>

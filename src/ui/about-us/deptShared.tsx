@@ -6,21 +6,45 @@
 //   - 部門頁右側的「服務輪播」改由 Department 直接 servicesByDept(slug) 去撈；
 //   - 部門資料不需要寫 services，本檔的 DeptData 也沒有 services 欄位。
 //   幹部照仍用 memImg；服務圖仍以 slug 命名放 imports/services/（部門頁輪播 svcImg(slug) 會用到）。
+//
+// ★ 英文版欄位（都可省略；省略＝英文版先顯示中文）：
+//   DeptData：nameEn（取代 zh）、introEn、joinBlurbEn
+//   Head：nameEn、titleEn       Member：nEn
+//   畫面上請用 localizeDept(部門, lang) 取得「目前語言版本」的資料。
+
+import type { Lang } from "../i18n";
 
 // ── 資料型別 ────────────────────────────────────────────────
-export type Head = { name: string; cls: string; title: string; img: string };
-export type Member = { n: string; c: string };
+export type Head = { name: string; cls: string; title: string; img: string; nameEn?: string; titleEn?: string };
+export type Member = { n: string; c: string; nEn?: string };
 export type DeptData = {
   slug: string; // 路由用，如 "gen"；同時也是網址 #/dept/gen
   zh: string; // 行政部
-  en: string; // GENERAL AFFAIRS
+  en: string; // GENERAL AFFAIRS（大寫裝飾字，中英文版都會顯示）
   color: string; // 部門色
   intro: string; // 部門簡介
   joinBlurb: string; // 「成為…的一員」文案
   heads: Head[]; // 幹部（部長等）
   members: Member[]; // 部員
+  // ── 英文版（可省略）──
+  nameEn?: string;
+  introEn?: string;
+  joinBlurbEn?: string;
   // ※ services 已移除：服務清單改吃 servicesData.ts（見上方說明）
 };
+
+// 取得「目前語言版本」的部門資料（欄位名稱不變，畫面程式碼照常讀 zh / intro / joinBlurb / heads…）
+export function localizeDept(d: DeptData, lang: Lang): DeptData {
+  if (lang !== "en") return d;
+  return {
+    ...d,
+    zh: d.nameEn || d.zh,
+    intro: d.introEn || d.intro,
+    joinBlurb: d.joinBlurbEn || d.joinBlurb,
+    heads: d.heads.map((h) => ({ ...h, name: h.nameEn || h.name, title: h.titleEn || h.title })),
+    members: d.members.map((m) => ({ ...m, n: m.nEn || m.n })),
+  };
+}
 
 // ══════════ 圖片自動對應（丟檔就用）══════════
 // 在 imports/ 底下開「兩個共用資料夾」：

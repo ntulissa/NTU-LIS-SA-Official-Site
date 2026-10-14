@@ -2,8 +2,17 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Reveal, useIsDesktop } from "../general/shared";
 import { getAnnouncement } from "./news.ts";
+import { defineText, useI18n } from "../i18n";
 // 背景浮水印圖：先沿用現有的建築圖（很淡）。想換成臺大校徽等，改這行 import 即可。
 import watermark from "@/imports/LatestUpdates/newsbackground.png";
+
+// 畫面文字（中英兩份）。公告內容本身的英文寫在 news.ts 的 titleEn / paragraphsEn…
+// byline：作者掛名的前綴，{author} 會換成作者名
+// zhOnly：英文版時，若這篇公告還沒有英文內文，會在內文上方顯示這句提示
+const TEXT = defineText({
+  zh: { back: "回上頁", notFound: "找不到這篇公告。", byline: "文／{author}", zhOnly: "" },
+  en: { back: "Back", notFound: "We couldn't find this announcement.", byline: "By {author}", zhOnly: "This announcement is currently available in Chinese only." },
+});
 
 // ── 字型（與全站一致）──
 const zhDisplay = "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif";
@@ -47,7 +56,7 @@ const LAYOUT = {
 const BACK    = { size: "0.9rem",  x: -25, y: 15, gap: 32 }; // 回上頁按鈕
 const TITLE   = { size: "clamp(1.9rem, 4.2vw, 3.2rem)", x: -20, y: 15, gap: 16 }; // 標題
 const BYLINE  = { size: "0.92rem", x: -15, y: 15, gap: 40 }; // 作者掛名 + 日期
-const BODY    = { size: "clamp(0.95rem, 1.05vw, 1.05rem)", lineHeight: 2.1, x: -15, y: 15, paraGap: 24, width: "60em" }; // 內文（width＝一行最寬到多少才換行）
+const BODY    = { size: "clamp(0.95rem, 1.05vw, 1.05rem)", lineHeight: 2.1, lineHeightEn: 1.8, x: -15, y: 15, paraGap: 24, width: "60em" }; // 內文（width＝一行最寬到多少才換行；lineHeightEn＝英文行距）
 // 右半插圖微調位移。★上下位置建議改上面的 IMAGE_AREA；這裡的 y 是「硬推」，推太多一樣會超出畫面。
 const IMAGE   = { x: 0, y: 0 };
 const CAPTION = { size: "0.82rem", x: 3, y: 0, gap: 15 }; // 圖說（與圖片的距離＝gap）
@@ -65,7 +74,10 @@ function goBack() {
 // 公告文章頁（獨立頁：只有本體；Header／Footer 由最外層 App 一定會出現）。
 // 由「公告列表頁」卡片的「閱讀全文」進入，網址＝ #/news/<slug>。
 export default function Article({ slug }: { slug: string }) {
-  const article = getAnnouncement(slug);
+  const { pick, localize, track, isEn } = useI18n();
+  const tx = pick(TEXT);
+  const raw = getAnnouncement(slug);
+  const article = raw ? localize(raw) : undefined;
   // 手機／平板：各元素的 X/Y 微調是照電腦版畫面調的，小螢幕一律不套用（避免按鈕被推出畫面）。
   const isDesktop = useIsDesktop();
   const mv = (x: number, y: number) => (isDesktop ? move(x, y) : {});
@@ -103,7 +115,7 @@ export default function Article({ slug }: { slug: string }) {
     readRatio(desktopImgRef.current);
   }, [slug]);
 
-  // 依右半區域大小與圖說高度計算插圖尺寸；視窗縮放、圖說換行時自動重算。
+  // 依右半區域大小與圖說高度計算插圖尺寸；視窗縮放、圖說換行（例如切換語言）時自動重算。
   useEffect(() => {
     const box = rightBoxRef.current;
     if (!box || !ratio || typeof ResizeObserver === "undefined") return;
@@ -130,7 +142,7 @@ export default function Article({ slug }: { slug: string }) {
     ro.observe(box);
     if (captionRef.current) ro.observe(captionRef.current);
     return () => ro.disconnect();
-  }, [ratio, slug]);
+  }, [ratio, slug, isEn]);
 
   // 監看捲動：endShift = min(0, 區塊底部距畫面頂 − 視窗高)。快到底才會變負（把插圖往上帶）。
   useEffect(() => {
@@ -147,15 +159,15 @@ export default function Article({ slug }: { slug: string }) {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [slug]);
+  }, [slug, isEn]);
 
   // 找不到這篇（slug 打錯或資料已刪）→ 顯示提示 + 回上頁。
-  if (!article) {
+  if (!article || !raw) {
     return (
       <section className="relative bg-black min-h-screen flex flex-col items-center justify-center gap-6 px-6 text-center">
-        <p className="text-white/70" style={{ fontFamily: zhFont, fontSize: "1.1rem" }}>找不到這篇公告。</p>
-        <button onClick={goBack} className="group inline-flex items-center gap-2 rounded-full bg-white text-black px-5 py-2 hover:bg-white/90 transition-colors" style={{ fontFamily: zhFont, fontWeight: 700, letterSpacing: "0.12em" }}>
-          <ArrowLeft size={16} strokeWidth={2.4} className="group-hover:-translate-x-1 transition-transform duration-200" /> 回上頁
+        <p className="text-white/70" style={{ fontFamily: zhFont, fontSize: "1.1rem" }}>{tx.notFound}</p>
+        <button onClick={goBack} className="group inline-flex items-center gap-2 rounded-full bg-white text-black px-5 py-2 hover:bg-white/90 transition-colors" style={{ fontFamily: zhFont, fontWeight: 700, letterSpacing: track("0.12em") }}>
+          <ArrowLeft size={16} strokeWidth={2.4} className="group-hover:-translate-x-1 transition-transform duration-200" /> {tx.back}
         </button>
       </section>
     );
@@ -163,12 +175,14 @@ export default function Article({ slug }: { slug: string }) {
 
   const hasImage = Boolean(article.image);
   const lastPara = article.paragraphs.length - 1;
+  // 英文版但這篇沒有英文內文 → 顯示提示（內文先用中文）
+  const showZhOnlyNotice = isEn && !raw.paragraphsEn?.length && tx.zhOnly;
 
   const captionStyle: CSSProperties = {
     fontFamily: zhFont,
     fontWeight: 500,
     fontSize: CAPTION.size,
-    letterSpacing: "0.04em",
+    letterSpacing: track("0.04em", "0.005em"),
     color: "#FFFFFF",
     opacity: 0.55,
     marginTop: CAPTION.gap,
@@ -228,9 +242,9 @@ export default function Article({ slug }: { slug: string }) {
         <button
           onClick={goBack}
           className="group inline-flex items-center gap-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors px-5 py-2"
-          style={{ fontFamily: zhFont, fontWeight: 700, fontSize: BACK.size, letterSpacing: "0.12em", marginBottom: BACK.gap, ...mv(BACK.x, BACK.y) }}
+          style={{ fontFamily: zhFont, fontWeight: 700, fontSize: BACK.size, letterSpacing: track("0.12em"), marginBottom: BACK.gap, ...mv(BACK.x, BACK.y) }}
         >
-          <ArrowLeft size={16} strokeWidth={2.4} className="group-hover:-translate-x-1 transition-transform duration-200" /> 回上頁
+          <ArrowLeft size={16} strokeWidth={2.4} className="group-hover:-translate-x-1 transition-transform duration-200" /> {tx.back}
         </button>
       </Reveal>
 
@@ -238,7 +252,7 @@ export default function Article({ slug }: { slug: string }) {
       <Reveal delay={70}>
         <h1
           className="text-white leading-tight"
-          style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: TITLE.size, letterSpacing: "0.02em", marginBottom: TITLE.gap, ...mv(TITLE.x, TITLE.y) }}
+          style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: TITLE.size, letterSpacing: track("0.02em", "0"), marginBottom: TITLE.gap, ...mv(TITLE.x, TITLE.y) }}
         >
           {article.title}
         </h1>
@@ -248,9 +262,9 @@ export default function Article({ slug }: { slug: string }) {
       <Reveal delay={90}>
         <div
           className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/55"
-          style={{ fontFamily: zhFont, fontWeight: 500, fontSize: BYLINE.size, letterSpacing: "0.06em", marginBottom: BYLINE.gap, ...mv(BYLINE.x, BYLINE.y) }}
+          style={{ fontFamily: zhFont, fontWeight: 500, fontSize: BYLINE.size, letterSpacing: track("0.06em"), marginBottom: BYLINE.gap, ...mv(BYLINE.x, BYLINE.y) }}
         >
-          {article.author && <span>文／{article.author}</span>}
+          {article.author && <span>{tx.byline.replace("{author}", article.author)}</span>}
           {article.author && <span className="w-px h-3.5 bg-white/20" />}
           <span style={{ fontFamily: monoFont }}>{article.date}</span>
         </div>
@@ -263,6 +277,15 @@ export default function Article({ slug }: { slug: string }) {
         </Reveal>
       )}
 
+      {/* 英文版但沒有英文內文時的提示 */}
+      {showZhOnlyNotice && (
+        <Reveal delay={105}>
+          <p className="mb-6 inline-block rounded-full border border-white/20 px-4 py-1.5 text-white/60" style={{ fontFamily: zhFont, fontSize: "0.85rem", ...mv(BODY.x, BODY.y) }}>
+            {tx.zhOnly}
+          </p>
+        </Reveal>
+      )}
+
       {/* 內文 */}
       <Reveal delay={110}>
         <div style={{ maxWidth: BODY.width, ...mv(BODY.x, BODY.y) }}>
@@ -270,7 +293,7 @@ export default function Article({ slug }: { slug: string }) {
             <p
               key={i}
               className="text-white/80"
-              style={{ fontFamily: zhFont, fontWeight: 500, fontSize: BODY.size, letterSpacing: "0.04em", lineHeight: BODY.lineHeight, marginBottom: i === lastPara ? 0 : BODY.paraGap }}
+              style={{ fontFamily: zhFont, fontWeight: 500, fontSize: BODY.size, letterSpacing: track("0.04em", "0.005em"), lineHeight: isEn ? BODY.lineHeightEn : BODY.lineHeight, marginBottom: i === lastPara ? 0 : BODY.paraGap }}
             >
               {para}
             </p>

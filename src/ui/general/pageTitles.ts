@@ -1,16 +1,10 @@
-export const PAGE_TITLES = {
-  aboutIntro: "關於我們・學會簡介",
-  aboutTeam: "關於我們・現任團隊",
-  aboutPastPresidents: "關於我們・歷任會長",
-  newsUpdates: "最新動態・近期公告",
-  newsCalendar: "最新動態・系學會行事曆",
-  servicesResources: "各種服務・學習資源",
-  servicesContact: "各種服務・聯絡我們",
-  servicesDepartments: "各種服務・各部業務",
-  supportFees: "支持我們・系學會費",
-  supportSponsors: "支持我們・贊助我們",
-  joinUs: "加入我們",
-} as const;
+import zhTW from "../i18n/locales/zh-TW";
+
+// 頁面小標題的文字已經搬到翻譯檔：
+//   中文 → src/ui/i18n/locales/zh-TW.ts 的 pageTitles
+//   英文 → src/ui/i18n/locales/en.ts 的 pageTitles
+// 這裡保留 PAGE_TITLES（中文版）只是為了相容舊程式碼。
+export const PAGE_TITLES = zhTW.pageTitles;
 
 /**
  * 全站共用的左右間距（Header 和頁面小標題都用這一個）
@@ -26,4 +20,4 @@ export const PAGE_TITLE_LAYOUT = {
   textClassName: `w-full ${SITE_GUTTER} tracking-widest`,
 } as const;
 
-export type PageTitleKey = keyof typeof PAGE_TITLES;
+export type PageTitleKey = keyof typeof zhTW.pageTitles;
