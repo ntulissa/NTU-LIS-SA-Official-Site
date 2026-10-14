@@ -632,10 +632,8 @@ function ServiceDetail({ slug }: { slug: string }) {
   const color = DEPT_COLORS[s.dept];
   const img = assetBySlug(s.slug);
   // href 已寫在 servicesData.ts 該服務那格：填了才會出現「前往」按鈕，沒填＝顯示準備中膠囊。
-  //   外部連結（http/https，如 Google 表單）→ 另開新分頁；
-  //   站內連結（#/… 開頭，如 #/fees、#/contact）→ 同分頁跳轉，不開新頁。
+  // 「前往」按鈕的目的地一律另開分頁，避免離開服務詳情頁。
   const hasHref = !!s.href && s.href !== "#";
-  const isExternal = hasHref && /^https?:\/\//i.test(s.href as string);
 
   return (
     <section className="relative min-h-screen" style={{ background: color }}>
@@ -694,7 +692,9 @@ function ServiceDetail({ slug }: { slug: string }) {
                   <div className="go-wrap">
                     <a
                       href={s.href}
-                      {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-open-new-tab="true"
                       aria-label={s.dest ? `前往${s.dest}` : undefined}
                       className="go-btn relative z-10 inline-flex items-center gap-2 rounded-full bg-white text-black px-7 py-3 hover:bg-white/90 transition-all duration-200 group w-fit"
                       style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "1rem", letterSpacing: "0.16em" }}

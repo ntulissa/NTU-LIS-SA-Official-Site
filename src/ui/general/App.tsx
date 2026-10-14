@@ -103,8 +103,9 @@ export default function App() {
         const isExternal = ["mailto:", "tel:"].includes(url.protocol)
           || ((url.protocol === "http:" || url.protocol === "https:")
             && url.origin !== window.location.origin);
+        const openInNewWindow = isExternal || link.dataset.openNewTab === "true";
 
-        if (isExternal) {
+        if (openInNewWindow) {
           link.target = "_blank";
           link.rel = "noopener noreferrer";
         } else {

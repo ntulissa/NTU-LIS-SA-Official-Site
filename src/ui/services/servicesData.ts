@@ -31,7 +31,7 @@
 export type Dept = "gen" | "eve" | "aca" | "ima" | "sp";
 
 const airconGuidePdf = new URL(
-  "../../../imports/services/IMG-gen/學輔室冷氣使用規範.pdf",
+  "../../imports/services/IMG-gen/學輔室冷氣使用規範.pdf",
   import.meta.url,
 ).href;
 

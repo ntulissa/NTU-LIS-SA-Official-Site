@@ -3,7 +3,7 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Reveal } from "../general/shared";
 import { EVENTS, eventEnd, isSchoolOnly, accentColorOf, ymd, type CalEvent } from "../latest/events";
 import { BENTO, DEPT_COLORS, serviceBySlug, type ServiceCell } from "../services/servicesData";
-// ↑ 本檔位於 src/app/components/home-page/。
+// ↑ 本檔位於 src/ui/home-page/。
 //   若放別的地方，改上面三行的相對路徑即可。
 
 /**
