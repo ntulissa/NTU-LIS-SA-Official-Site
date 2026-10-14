@@ -593,17 +593,20 @@ function DeptRecruit() {
         ))}
       </div>
 
-      {/* 部門測驗入口 */}
-      <p className="text-white text-center mt-[clamp(28px,5vh,64px)] flex flex-wrap items-center justify-center gap-x-8 gap-y-2" style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(16px, 1.7vw, ${DEPT_LAYOUT.quizCta.size}px)`, letterSpacing: "0.14em" }}>
-        <span>不知道自己屬於哪個部門？</span>
+      {/* 部門測驗入口：電腦版一行；手機／平板版拆三行（句子／按鈕／句子）全部置中 */}
+      <p
+        className={`text-white text-center mt-[clamp(28px,5vh,64px)] flex items-center justify-center ${isDesktop ? "flex-wrap gap-x-8 gap-y-2" : "flex-col gap-y-4"}`}
+        style={{ fontFamily: zhBody, fontWeight: 500, fontSize: `clamp(16px, 1.7vw, ${DEPT_LAYOUT.quizCta.size}px)`, letterSpacing: "0.14em" }}
+      >
+        <span style={{ paddingLeft: isDesktop ? undefined : "0.14em" }}>不知道自己屬於哪個部門？</span>
         <a
           href={QUIZ_HREF}
-          className="jn-quiz-link relative inline-block"
-          style={{ fontFamily: zhHead, fontWeight: 900, background: GRADIENT_TEXT, WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent" }}
+          className={`jn-quiz-link relative inline-block ${isDesktop ? "" : "jn-quiz-link-on"}`}
+          style={{ fontFamily: zhHead, fontWeight: 900, background: GRADIENT_TEXT, WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent", paddingLeft: isDesktop ? undefined : "0.14em", paddingBlock: isDesktop ? undefined : "6px" }}
         >
           點擊按鈕
         </a>
-        <span>讓我們幫你評估</span>
+        <span style={{ paddingLeft: isDesktop ? undefined : "0.14em" }}>讓我們幫你評估</span>
       </p>
     </div>
   );
@@ -1045,6 +1048,9 @@ export default function JoinUsSection() {
         @keyframes jnFlow { from { background-position: 0 0, 0 0; } to { background-position: 0 14px, 0 0; } }
         .jn-quiz-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 2px; background: ${GRADIENT_TEXT}; transform: scaleX(0); transform-origin: left; transition: transform .35s cubic-bezier(0.22,1,0.36,1); }
         .jn-quiz-link:hover::after, .jn-quiz-link:focus-visible::after { transform: scaleX(1); }
+        /* 手機版：底線常駐，讓人一眼看出是按鈕 */
+        .jn-quiz-link-on::after { transform: scaleX(1); bottom: 0; }
+        .jn-quiz-link-on:active { opacity: .7; }
         @keyframes jnFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
         .jn-fade { animation: jnFade .55s cubic-bezier(0.22,1,0.36,1) both; }
         /* ① 待辦清單 */
