@@ -24,13 +24,13 @@ export type DeptData = {
 
 // ══════════ 圖片自動對應（丟檔就用）══════════
 // 在 imports/ 底下開「兩個共用資料夾」：
-//   imports/services/ ← 服務圖，以 slug 命名（如 locker.png、fee.svg…）→ 部門頁輪播與詳情頁共用。
-//                       支援各部門子資料夾（如 imports/services/IMG-gen/locker.png），glob 會遞迴掃描（**）。
+//   src/imports/services/ ← 服務圖，以 slug 命名（如 locker.png、fee.svg…）→ 部門頁輪播與詳情頁共用。
+//                           支援各部門子資料夾（如 src/imports/services/IMG-gen/locker.png），glob 會遞迴掃描（**）。
 //   imports/members/  ← 幹部照，如 行政部：gen1.png、gen2.png、gen3.png…
-// 用相對路徑（從本檔 department-pages/ 往上三層到 imports/），避免 @/ 別名在 import.meta.glob 不生效。
+// 用相對路徑（從 src/ui/about-us/ 往上兩層到 src/），避免 @/ 別名在 import.meta.glob 不生效。
 // ★ 新增/替換圖片後，若畫面沒更新，請重啟一次 dev server（glob 於啟動時掃描資料夾）。
-const SERVICE_IMGS = import.meta.glob("../../../imports/services/**/*.{png,jpg,jpeg,webp,svg}", { eager: true, import: "default" }) as Record<string, string>;
-const MEMBER_IMGS = import.meta.glob("../../../imports/members/**/*.{png,jpg,jpeg,webp}", { eager: true, import: "default" }) as Record<string, string>;
+const SERVICE_IMGS = import.meta.glob("../../imports/services/**/*.{png,jpg,jpeg,webp,svg}", { eager: true, import: "default" }) as Record<string, string>;
+const MEMBER_IMGS = import.meta.glob("../../imports/members/**/*.{png,jpg,jpeg,webp}", { eager: true, import: "default" }) as Record<string, string>;
 
 // 依檔名（不含副檔名）取圖，找不到回空字串（會顯示佔位框）。
 // 用 /<file>. 比對「路徑結尾的檔名」，所以放在哪個子資料夾都找得到（如 IMG-gen/locker.png）。
