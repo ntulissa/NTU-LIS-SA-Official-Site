@@ -1,4 +1,4 @@
-/* ── 頁面小標題下方的內容起點（小標題位置設定見 sections/pageTitles.ts）── */
+/* ── 頁面小標題下方的內容起點（小標題位置設定見 general/pageTitles.ts）── */
 :root {
   /* 要拉開小標題與內容的距離，調大這個值。 */
   --page-content-top: 168px;
