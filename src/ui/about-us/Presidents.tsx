@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { PageEyebrow, Reveal } from "../general/shared";
 import { PRESIDENTS, type Dept, type Election } from "./presidents";
@@ -9,8 +9,8 @@ import { PRESIDENTS, type Dept, type Election } from "./presidents";
  * ● 版面：左半可捲動（標題 → 第X屆 → 任期 → 簡介 → 團隊成員名單），
  *          右半 sticky 固定（會長照片、姓名、系級、英文名、屆數切換器）。
  * ● 切換器：中間是紅→藍漸層的屆數數字；左邊紅點、右邊藍點。
- *          滑鼠移到左紅點 → 放大成紅色「<」＝上一屆（較早）；
- *          滑鼠移到右藍點 → 放大成藍色「>」＝下一屆（較新）。端點自動停用。
+ *          電腦：滑鼠移到左紅點 → 放大成紅色「<」＝上一屆（較早）；右藍點 → 藍色「>」＝下一屆（較新）。
+ *          手機／平板：直接顯示箭頭圓鈕（觸控沒有 hover）。端點自動停用。
  *
  * ★ 要新增／修改某一屆的「內容」（姓名、簡介、團隊名單、選舉結果…），
  *   請改同資料夾的 presidents.ts，這支檔案（版型）通常不用動。
@@ -36,7 +36,20 @@ function termOf(gen: number) {
 const CURRENT_TEAM_HREF = "#/current-team";
 const CURRENT_TEAM_LABEL = "現任團隊";
 
-// ── 屆數切換器上的「點 → 箭頭」按鈕 ─────────────────────────
+// hex → rgba（給按鈕光暈用）
+function hexToRgba(hex: string, a: number): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
+// ── 屆數切換器上的「點 → 箭頭」按鈕（與部門頁同一套設計）─────────
+// ● 電腦（有滑鼠）：平常是脈動圓點 ＋ 向外擴散的「聲納圈」；滑鼠移上去 → 彈出實心箭頭圓鈕。
+// ● 手機／平板（觸控）：直接顯示箭頭圓鈕，外圈擴散漣漪、箭頭往前輕推，點下有按壓回饋。
+// ● 已到最舊／最新一屆：變暗、不再有動畫。
+// 樣式寫在下方 <style> 的 .pp-nav-* 區塊。
 function NavArrow({
   dir,
   color,
@@ -55,28 +68,19 @@ function NavArrow({
       onClick={onClick}
       disabled={disabled}
       aria-label={dir === "prev" ? "上一屆（較早）" : "下一屆（較新）"}
-      className="group relative flex items-center justify-center disabled:cursor-default"
-      style={{ width: "46px", height: "46px" }}
+      className={`pp-nav pp-nav--${dir} relative flex items-center justify-center shrink-0 disabled:cursor-default`}
+      style={{ width: "46px", height: "46px", ["--nav-c" as string]: color, ["--nav-glow" as string]: hexToRgba(color, 0.6) } as CSSProperties}
     >
-      {disabled ? (
-        // 已達最舊/最新：靜態暗點，不脈動、不出現箭頭
-        <span className="absolute rounded-full" style={{ width: "11px", height: "11px", background: color, opacity: 0.18 }} />
-      ) : (
-        <>
-          {/* 平常：持續脈動的同色光暈 + 核心圓點（提示「可點擊」）；hover 時整組淡出 */}
-          <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-out group-hover:opacity-0">
-            <span className="nav-pulse-halo absolute rounded-full" style={{ width: "22px", height: "22px", background: color, filter: "blur(5px)" }} />
-            <span className="nav-pulse-dot absolute rounded-full" style={{ width: "11px", height: "11px", background: color }} />
-          </span>
-          {/* hover：放大成圓形箭頭按鈕 */}
-          <span
-            className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 scale-75 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:scale-100"
-            style={{ background: color, boxShadow: `0 8px 20px -8px ${color}` }}
-          >
-            <Icon size={22} strokeWidth={2.6} className="text-white" />
-          </span>
-        </>
-      )}
+      {/* 電腦版平常狀態：脈動圓點 ＋ 聲納圈 */}
+      <span className="pp-nav-dot absolute inset-0 flex items-center justify-center">
+        <span className="pp-nav-ring absolute rounded-full" />
+        <span className="pp-nav-core absolute rounded-full" />
+      </span>
+      {/* 箭頭圓鈕（電腦 hover 才出現；手機常駐） */}
+      <span className="pp-nav-btn absolute inset-0 rounded-full flex items-center justify-center">
+        <span className="pp-nav-ripple absolute inset-0 rounded-full" />
+        <Icon size={22} strokeWidth={2.6} className="pp-nav-icon relative text-white" />
+      </span>
     </button>
   );
 }
@@ -516,16 +520,61 @@ export default function Presidents() {
     <section ref={sectionRef} id="presidents" className="relative bg-black">
       {/* 屆數切換按鈕的「呼吸式」脈動動畫（提示可點擊）；尊重使用者的「減少動態」設定 */}
       <style>{`
-        @keyframes navPulseHalo {
-          0%, 100% { transform: scale(0.65); opacity: 0.55; }
-          50%      { transform: scale(1.6);  opacity: 0.06; }
+        /* ══ 屆數切換按鈕（點 → 箭頭）══
+           速度：改 1.6s／1.8s；聲納圈大小：ppNavRing 的 scale(3.4)；漣漪大小：ppNavRipple 的 scale(1.75)。 */
+        @keyframes ppNavCore {
+          0%, 100% { transform: scale(1);   box-shadow: 0 0 0 0 var(--nav-glow); }
+          50%      { transform: scale(1.3); box-shadow: 0 0 14px 4px var(--nav-glow); }
         }
-        @keyframes navPulseDot {
-          0%, 100% { transform: scale(1); }
-          50%      { transform: scale(1.22); }
+        @keyframes ppNavRing {
+          0%   { transform: scale(1);   opacity: 0.9; }
+          100% { transform: scale(3.4); opacity: 0; }
         }
-        .nav-pulse-halo { transform-origin: center; animation: navPulseHalo 1.8s ease-in-out infinite; }
-        .nav-pulse-dot  { transform-origin: center; animation: navPulseDot 1.8s ease-in-out infinite; }
+        @keyframes ppNavRipple {
+          0%   { transform: scale(1);    opacity: 0.75; }
+          100% { transform: scale(1.75); opacity: 0; }
+        }
+        @keyframes ppNavNudge {
+          0%, 100% { transform: translateX(0); }
+          50%      { transform: translateX(var(--nav-dx)); }
+        }
+        .pp-nav { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        .pp-nav--prev { --nav-dx: -3px; }
+        .pp-nav--next { --nav-dx: 3px; }
+        .pp-nav-dot  { transition: opacity .25s ease, transform .25s ease; }
+        .pp-nav-core { width: 13px; height: 13px; background: var(--nav-c); animation: ppNavCore 1.6s ease-in-out infinite; }
+        .pp-nav-ring { width: 13px; height: 13px; border: 2px solid var(--nav-c); animation: ppNavRing 1.6s cubic-bezier(.2,.6,.4,1) infinite; }
+        .pp-nav-btn  {
+          background: var(--nav-c);
+          box-shadow: 0 8px 22px -6px var(--nav-glow);
+          opacity: 0; transform: scale(.55);
+          transition: opacity .28s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        .pp-nav-ripple { border: 2px solid var(--nav-c); opacity: 0; pointer-events: none; }
+        /* 紅藍兩顆錯開節奏，左右交替跳動 */
+        .pp-nav--next .pp-nav-core, .pp-nav--next .pp-nav-ring,
+        .pp-nav--next .pp-nav-ripple, .pp-nav--next .pp-nav-icon { animation-delay: -.8s; }
+        /* 已到端點：暗點、無動畫 */
+        .pp-nav:disabled .pp-nav-core { opacity: .22; animation: none; box-shadow: none; }
+        .pp-nav:disabled .pp-nav-ring { display: none; }
+
+        /* 電腦（有滑鼠）：hover 時圓點收起、箭頭圓鈕彈出，箭頭往前輕推 */
+        @media (hover: hover) and (pointer: fine) {
+          .pp-nav:not(:disabled):hover .pp-nav-dot  { opacity: 0; transform: scale(.4); }
+          .pp-nav:not(:disabled):hover .pp-nav-btn  { opacity: 1; transform: scale(1); }
+          .pp-nav:not(:disabled):hover .pp-nav-icon { animation: ppNavNudge .9s ease-in-out infinite; }
+          .pp-nav:not(:disabled):active .pp-nav-btn { transform: scale(.9); }
+        }
+        /* 手機／平板（觸控）：直接顯示箭頭圓鈕 ＋ 擴散漣漪 ＋ 箭頭輕推 */
+        @media (hover: none), (pointer: coarse) {
+          .pp-nav-dot { display: none; }
+          .pp-nav-btn { opacity: 1; transform: scale(1); }
+          .pp-nav-ripple { animation: ppNavRipple 1.8s ease-out infinite; }
+          .pp-nav-icon   { animation: ppNavNudge 1.8s ease-in-out infinite; }
+          .pp-nav:not(:disabled):active .pp-nav-btn { transform: scale(.88); transition-duration: .1s; }
+          .pp-nav:disabled .pp-nav-btn { opacity: .22; box-shadow: none; }
+          .pp-nav:disabled .pp-nav-ripple, .pp-nav:disabled .pp-nav-icon { animation: none; }
+        }
 
         /* 會長照片切換：新照片淡入（略微上浮），舊照片淡出 */
         @keyframes ppPhotoIn  { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: none; } }
@@ -534,7 +583,8 @@ export default function Presidents() {
         .pp-photo-out { animation: ppPhotoOut 600ms ease both; }
 
         @media (prefers-reduced-motion: reduce) {
-          .nav-pulse-halo, .nav-pulse-dot { animation: none; }
+          .pp-nav-core, .pp-nav-ring, .pp-nav-ripple, .pp-nav-icon { animation: none !important; }
+          .pp-nav-ring { display: none; }
           .pp-photo-in, .pp-photo-out { animation-duration: 1ms; }
         }
       `}</style>

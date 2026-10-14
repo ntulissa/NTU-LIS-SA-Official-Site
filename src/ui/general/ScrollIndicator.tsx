@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { ArrowDown } from "lucide-react";
 
+const ENABLED_ROUTES = new Set(["home", "presidents", "sponsor", "news", "fees", "join"]);
+
+function getCurrentRoute() {
+  const hash = window.location.hash;
+  return hash.startsWith("#/") ? hash.slice(2).split("/")[0] || "home" : "home";
+}
+
 /**
  * 畫面下方中央的「往下繼續探索」捲動提示。
  * - 固定於視窗底部中央（fixed），使用者一路往下捲時都會顯示。
@@ -8,9 +15,12 @@ import { ArrowDown } from "lucide-react";
  * - 可點擊：每次點擊平滑往下捲動約一個畫面高度。
  */
 export default function ScrollIndicator() {
+  const enabled = ENABLED_ROUTES.has(getCurrentRoute());
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
+    if (!enabled) return;
+
     // 電腦版：Footer 一露出就把提示藏起來（同原本）。
     // 手機／平板：Footer 是隱藏的，改成「捲到頁面最底部」就藏起來。
     const check = () => {
@@ -26,7 +36,7 @@ export default function ScrollIndicator() {
       window.removeEventListener("scroll", check);
       window.removeEventListener("resize", check);
     };
-  }, []);
+  }, [enabled]);
 
   // 捲到「下一個區塊的開頭」，讓每個區塊的頁面小標題都停在畫面同一個位置。
   // 若下一個區塊還很遠（目前這塊比一個螢幕還高），先照舊往下捲約一個畫面，避免跳過內容。
@@ -49,6 +59,8 @@ export default function ScrollIndicator() {
       window.scrollBy({ top: next, behavior: "smooth" });
     }
   };
+
+  if (!enabled) return null;
 
   return (
     <button

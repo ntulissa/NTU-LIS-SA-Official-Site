@@ -104,9 +104,11 @@ function hexToRgba(hex: string, a: number): string {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-// ── 屆數切換／服務切換用的「點 → 箭頭」按鈕（比照歷屆會長）──
-// 靜態時是一顆「實心、飽和」的圓點（左紅右藍），外圈是同色柔光；
-// hover 才變成實心箭頭。刻意不用模糊光暈疊在小點上，否則中心會被洗白。
+// ── 服務切換用的「點 → 箭頭」按鈕（與歷任會長頁同一套設計）──
+// ● 電腦（有滑鼠）：平常是一顆脈動圓點 ＋ 向外擴散的「聲納圈」，提示可點；滑鼠移上去 → 彈出實心箭頭圓鈕。
+// ● 手機／平板（觸控，無 hover）：直接顯示箭頭圓鈕，外圈持續擴散漣漪、箭頭往前輕推，點下會有按壓回饋。
+// ● 已到第一項／最後一項：變暗、不再有動畫（電腦＝暗點；手機＝暗色箭頭鈕）。
+// 樣式都寫在下方 <style> 的 .dept-nav-* 區塊；想調速度／大小改那裡即可。
 function NavArrow({ dir, color, disabled, onClick }: { dir: "prev" | "next"; color: string; disabled: boolean; onClick: () => void }) {
   const Icon = dir === "prev" ? ChevronLeft : ChevronRight;
   return (
@@ -115,27 +117,19 @@ function NavArrow({ dir, color, disabled, onClick }: { dir: "prev" | "next"; col
       onClick={onClick}
       disabled={disabled}
       aria-label={dir === "prev" ? "上一項服務" : "下一項服務"}
-      className="group relative flex items-center justify-center disabled:cursor-default"
-      style={{ width: "42px", height: "42px" }}
+      className={`dept-nav dept-nav--${dir} relative flex items-center justify-center shrink-0 disabled:cursor-default`}
+      style={{ width: "44px", height: "44px", ["--nav-c" as string]: color, ["--nav-glow" as string]: hexToRgba(color, 0.6) } as CSSProperties}
     >
-      {disabled ? (
-        <span className="absolute rounded-full" style={{ width: "11px", height: "11px", background: color, opacity: 0.32 }} />
-      ) : (
-        <>
-          <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-out group-hover:opacity-0">
-            <span
-              className="dept-pulse-dot absolute rounded-full"
-              style={{ width: "12px", height: "12px", background: color, ["--dept-glow" as string]: hexToRgba(color, 0.55) } as CSSProperties}
-            />
-          </span>
-          <span
-            className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 scale-75 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:scale-100"
-            style={{ background: color, boxShadow: `0 8px 20px -8px ${color}` }}
-          >
-            <Icon size={20} strokeWidth={2.6} className="text-white" />
-          </span>
-        </>
-      )}
+      {/* 電腦版平常狀態：脈動圓點 ＋ 聲納圈 */}
+      <span className="dept-nav-dot absolute inset-0 flex items-center justify-center">
+        <span className="dept-nav-ring absolute rounded-full" />
+        <span className="dept-nav-core absolute rounded-full" />
+      </span>
+      {/* 箭頭圓鈕（電腦 hover 才出現；手機常駐） */}
+      <span className="dept-nav-btn absolute inset-0 rounded-full flex items-center justify-center">
+        <span className="dept-nav-ripple absolute inset-0 rounded-full" />
+        <Icon size={20} strokeWidth={2.6} className="dept-nav-icon relative text-white" />
+      </span>
     </button>
   );
 }
@@ -326,12 +320,65 @@ export default function Department({ slug }: { slug: string }) {
   return (
     <section className="relative bg-black">
       <style>{`
-        @keyframes deptPulseDot {
-          0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 var(--dept-glow); }
-          50%      { transform: scale(1.18); box-shadow: 0 0 10px 2px var(--dept-glow); }
+        /* ══ 服務切換按鈕（點 → 箭頭）══
+           速度：改 1.6s／1.8s；聲納圈大小：deptNavRing 的 scale(3.4)；漣漪大小：deptNavRipple 的 scale(1.75)。 */
+        @keyframes deptNavCore {
+          0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 var(--nav-glow); }
+          50%      { transform: scale(1.3);  box-shadow: 0 0 14px 4px var(--nav-glow); }
         }
-        .dept-pulse-dot { transform-origin: center; animation: deptPulseDot 1.8s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) { .dept-pulse-dot { animation: none; box-shadow: none; } }
+        @keyframes deptNavRing {
+          0%   { transform: scale(1);   opacity: 0.9; }
+          100% { transform: scale(3.4); opacity: 0; }
+        }
+        @keyframes deptNavRipple {
+          0%   { transform: scale(1);    opacity: 0.75; }
+          100% { transform: scale(1.75); opacity: 0; }
+        }
+        @keyframes deptNavNudge {
+          0%, 100% { transform: translateX(0); }
+          50%      { transform: translateX(var(--nav-dx)); }
+        }
+        .dept-nav { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        .dept-nav--prev { --nav-dx: -3px; }
+        .dept-nav--next { --nav-dx: 3px; }
+        .dept-nav-dot  { transition: opacity .25s ease, transform .25s ease; }
+        .dept-nav-core { width: 13px; height: 13px; background: var(--nav-c); animation: deptNavCore 1.6s ease-in-out infinite; }
+        .dept-nav-ring { width: 13px; height: 13px; border: 2px solid var(--nav-c); animation: deptNavRing 1.6s cubic-bezier(.2,.6,.4,1) infinite; }
+        .dept-nav-btn  {
+          background: var(--nav-c);
+          box-shadow: 0 8px 22px -6px var(--nav-glow);
+          opacity: 0; transform: scale(.55);
+          transition: opacity .28s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        .dept-nav-ripple { border: 2px solid var(--nav-c); opacity: 0; pointer-events: none; }
+        /* 紅藍兩顆錯開節奏，左右交替跳動，更容易吸引視線 */
+        .dept-nav--next .dept-nav-core, .dept-nav--next .dept-nav-ring,
+        .dept-nav--next .dept-nav-ripple, .dept-nav--next .dept-nav-icon { animation-delay: -.8s; }
+        /* 已到端點：暗點、無動畫 */
+        .dept-nav:disabled .dept-nav-core { opacity: .3; animation: none; box-shadow: none; }
+        .dept-nav:disabled .dept-nav-ring { display: none; }
+
+        /* 電腦（有滑鼠）：hover 時圓點收起、箭頭圓鈕彈出，箭頭往前輕推 */
+        @media (hover: hover) and (pointer: fine) {
+          .dept-nav:not(:disabled):hover .dept-nav-dot  { opacity: 0; transform: scale(.4); }
+          .dept-nav:not(:disabled):hover .dept-nav-btn  { opacity: 1; transform: scale(1); }
+          .dept-nav:not(:disabled):hover .dept-nav-icon { animation: deptNavNudge .9s ease-in-out infinite; }
+          .dept-nav:not(:disabled):active .dept-nav-btn { transform: scale(.9); }
+        }
+        /* 手機／平板（觸控）：直接顯示箭頭圓鈕 ＋ 擴散漣漪 ＋ 箭頭輕推 */
+        @media (hover: none), (pointer: coarse) {
+          .dept-nav-dot { display: none; }
+          .dept-nav-btn { opacity: 1; transform: scale(1); }
+          .dept-nav-ripple { animation: deptNavRipple 1.8s ease-out infinite; }
+          .dept-nav-icon   { animation: deptNavNudge 1.8s ease-in-out infinite; }
+          .dept-nav:not(:disabled):active .dept-nav-btn { transform: scale(.88); transition-duration: .1s; }
+          .dept-nav:disabled .dept-nav-btn { opacity: .25; box-shadow: none; }
+          .dept-nav:disabled .dept-nav-ripple, .dept-nav:disabled .dept-nav-icon { animation: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .dept-nav-core, .dept-nav-ring, .dept-nav-ripple, .dept-nav-icon { animation: none !important; }
+          .dept-nav-ring { display: none; }
+        }
 
         /* 「成為 XX部 的一員」方塊：紅藍漸層外框，沿著框線流動（旋轉 conic 漸層 + 只露出邊框的遮罩）。
            想調流動速度改 8s；想調外框粗細改 padding 的 1.5px。 */

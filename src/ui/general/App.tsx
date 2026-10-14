@@ -185,10 +185,7 @@ export default function App() {
       )}
 
       <Footer />
-      {route.name === "home" && (
-        // 固定於畫面下方的捲動提示；獨立頁只保留 Header、Body、Footer。
-        <ScrollIndicator />
-      )}
+      <ScrollIndicator />
     </div>
   );
 }
