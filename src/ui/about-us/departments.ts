@@ -20,14 +20,10 @@ export const DEPARTMENTS: Record<string, DeptData> = {
     joinBlurbEn:
       "Join General Affairs and become the force behind everything in the department — managing spaces, finances and administrative decisions. It's more than paperwork: it's real organizational experience and real impact. Help us build a better LIS — we just need you!",
     heads: [
-      { name: "林榮恩", cls: "B14", title: "部長", titleEn: "Director", img: memImg("gen2") },
-      { name: "劉以寬", cls: "B14", title: "部長", titleEn: "Director", img: memImg("gen3") },
+      { name: "林榮恩", cls: "B14", title: "部長", titleEn: "Head", img: memImg("gen2") },
+      { name: "劉以寬", cls: "B14", title: "部長", titleEn: "Head", img: memImg("gen3") },
     ],
-    members: [
-      { n: "謝君兒", c: "B13" },
-      { n: "羅良鎮", c: "B13" },
-      { n: "廖誼晴", c: "B13" },
-    ],
+    members: [],
   },
   eve: {
     slug: "eve",
@@ -44,8 +40,8 @@ export const DEPARTMENTS: Record<string, DeptData> = {
     joinBlurbEn:
       "Join Events and plan the department's biggest events yourself — from proposals and on-site coordination to sponsorship negotiations. It's more than running events: it's a stage to create memories with your teammates and fire up the whole department. Help light up LIS life — we just need you!",
     heads: [
-      { name: "蕭忻緹", cls: "B14", title: "部長", titleEn: "Director", img: memImg("eve1") },
-      { name: "莊雅雯", cls: "B14", title: "部長", titleEn: "Director", img: memImg("eve2") },
+      { name: "蕭忻緹", cls: "B14", title: "部長", titleEn: "Head", img: memImg("eve1") },
+      { name: "莊雅雯", cls: "B14", title: "部長", titleEn: "Head", img: memImg("eve2") },
     ],
     members: [
       { n: "張瑄予", c: "B14" },
@@ -68,7 +64,7 @@ export const DEPARTMENTS: Record<string, DeptData> = {
     joinBlurbEn:
       "Join Academic Affairs to work on the course guide, alumni talks, the Azalea Festival exhibition and the department magazine — real skills from content planning to sharing knowledge. It's more than organizing resources: you'll help everyone find their way in study and career. Help define what LIS stands for — we just need you!",
     heads: [
-      { name: "周家禾", cls: "B14", title: "部長", titleEn: "Director", img: memImg("aca1") },
+      { name: "周家禾", cls: "B14", title: "部長", titleEn: "Head", img: memImg("aca1") },
     ],
     members: [
       { n: "許瑞米", c: "B14" },
@@ -91,7 +87,7 @@ export const DEPARTMENTS: Record<string, DeptData> = {
     joinBlurbEn:
       "Join Image & Publicity to run social media, create visuals, shoot events and handle public relations — building real skills in branding and multimedia. It's more than posting and designing: your eye and your words will define the association's look and voice. Help build the most eye-catching brand in LIS — we just need you!",
     heads: [
-      { name: "葉家米", cls: "B14", title: "部長", titleEn: "Director", img: memImg("ima1") },
+      { name: "葉家米", cls: "B14", title: "部長", titleEn: "Head", img: memImg("ima1") },
     ],
     members: [
       { n: "戴愷昀", c: "B14" },
@@ -113,8 +109,8 @@ export const DEPARTMENTS: Record<string, DeptData> = {
     joinBlurbEn:
       "Join Sports and become the strongest support for our teams — organizing tournaments and managing team funding yourself. It's more than sports admin: you'll drive the department's sporting spirit and create memories on and off the court. Help ignite the LIS team spirit — we just need you!",
     heads: [
-      { name: "葛家妤", cls: "B14", title: "部長", titleEn: "Director", img: memImg("sp1") },
-      { name: "張毓琳", cls: "B14", title: "部長", titleEn: "Director", img: memImg("sp2") },
+      { name: "葛家妤", cls: "B14", title: "部長", titleEn: "Head", img: memImg("sp1") },
+      { name: "張毓琳", cls: "B14", title: "部長", titleEn: "Head", img: memImg("sp2") },
     ],
     members: [{ n: "劉以寬", c: "B14" }],
   },

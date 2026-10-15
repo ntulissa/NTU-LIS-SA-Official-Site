@@ -31,6 +31,7 @@ const TEXT = defineText({
     back: "回上頁",
     teamMembers: "團隊成員",
     membersLabel: "-部員  MEMBERS-",
+    noMembers: "目前無成員",
     headSuffix: " HEAD", // 職稱後面接的英文（例：-部長 HEAD-）
     becomePre: "成為",
     becomePost: "的一員",
@@ -47,6 +48,7 @@ const TEXT = defineText({
     back: "Back",
     teamMembers: "Our Team",
     membersLabel: "-MEMBERS-",
+    noMembers: "No members at the moment",
     headSuffix: "",
     becomePre: "Become part of",
     becomePost: "",
@@ -545,18 +547,24 @@ export default function Department({ slug }: { slug: string }) {
               <p className="mb-6" style={{ fontFamily: monoFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)" }}>
                 {tx.membersLabel}
               </p>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                {data.members.map((m, i) => (
-                  <div key={`${m.n}-${i}`} className="flex items-center gap-3 min-w-0">
-                    <span className="shrink-0 text-white/70 rounded-[4px] px-1.5 py-0.5" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.62rem", background: "rgba(255,255,255,0.12)", letterSpacing: "0.04em" }}>
-                      {m.c}
-                    </span>
-                    <span className="text-white truncate" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.1em") }}>
-                      {m.n}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              {data.members.length > 0 ? (
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  {data.members.map((m, i) => (
+                    <div key={`${m.n}-${i}`} className="flex items-center gap-3 min-w-0">
+                      <span className="shrink-0 text-white/70 rounded-[4px] px-1.5 py-0.5" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.62rem", background: "rgba(255,255,255,0.12)", letterSpacing: "0.04em" }}>
+                        {m.c}
+                      </span>
+                      <span className="text-white truncate" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.1em") }}>
+                        {m.n}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-white/50" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.95rem" }}>
+                  {tx.noMembers}
+                </p>
+              )}
             </div>
           </Reveal>
 

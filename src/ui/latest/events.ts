@@ -135,12 +135,12 @@ export const EVENTS: CalEvent[] = [
   {
     title: "LIS Talk: 系友講座",
     titleEn: "LIS Talk",
-    date: "2026-11-04",
+    date: "2026-11-10",
     time: "18:30",
     depts: ["aca"],
     service: "alumni",
     location: "系館視聽室",
-    locationEn: "Lecture Room, LIS Department Building",
+    locationEn: "Lecture Room, LIS Dept. Building",
     mapUrl: "https://maps.app.goo.gl/EQhTGVqFgv9bMv2z9",
     desc:
       "邀請畢業系友回來分享職涯與求學經驗，\n" +
