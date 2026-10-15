@@ -32,7 +32,7 @@ const en: Messages = {
     calendar: "Calendar",
 
     services: "Services",
-    departments: "Departments",
+    departments: "By Departments",
     resources: "Learning Resources",
     contact: "Contact Us",
 
@@ -63,7 +63,7 @@ const en: Messages = {
     newsCalendar: "News · Calendar",
     servicesResources: "Services · Learning Resources",
     servicesContact: "Services · Contact Us",
-    servicesDepartments: "Services · Departments",
+    servicesDepartments: "Services · By Departments",
     supportFees: "Support · Membership Fee",
     supportSponsors: "Support · Sponsor Us",
     joinUs: "Join Us",

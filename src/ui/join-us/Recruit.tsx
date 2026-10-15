@@ -159,8 +159,8 @@ const STEPS_TEXT = defineText({
   ],
   en: [
     { title: "Sign Up", sub: "Fill in the recruitment form" },
-    { title: "Chat", sub: "A relaxed, two-way conversation" },
-    { title: "Join", sub: "Receive your officer certificate when your term ends" },
+    { title: "Casual Chat", sub: "A relaxed, two-way conversation" },
+    { title: "Onboard", sub: "Receive your officer certificate when your term ends" },
   ],
 });
 const PHONE = { w: 300, h: 470, itemH: 62, itemGap: 14, cycle: 2000 }; // 手機外觀與清單尺寸；cycle=每幾毫秒勾掉一項
@@ -196,7 +196,7 @@ const DEPTS = [
     needs: ["充滿好奇", "主動探索", "認真負責"],
     gainsEn: ["Gathering & curating course info", "Broadening your academic horizons", "Teamwork & adaptability"],
     needsEn: ["Curious", "Self-driven", "Responsible"] },
-  { key: "ima", name: "形象宣傳部", en: "IMAGE & PUBLICITY", color: "#572A3F", nameEn: "Media & Design",
+  { key: "ima", name: "形象宣傳部", en: "IMAGE & PUBLICITY", color: "#572A3F", nameEn: "Image & Publicity",
     gains: ["視覺設計與品牌經營", "社群企劃與文案撰寫", "攝影剪輯實戰經驗"],
     needs: ["美感敏銳", "樂於創作", "追求細節"],
     gainsEn: ["Visual design & branding", "Social media & copywriting", "Hands-on photo & video work"],

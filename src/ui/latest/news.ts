@@ -99,7 +99,7 @@ export const ANNOUNCEMENTS: Announcement[] = [
       "🎸 Events | Plan and run department events of every size — and feel the thrill of seeing your ideas come to life!",
       "📖 Academic Affairs | Get early insight into courses and organize alumni talks, company visits and the Azalea Festival.",
       "📂 General Affairs | The backbone of the association: manage finances and spaces, and build communication skills.",
-      "🎨 Media & Design | Run our social media and public relations, and capture every great moment through design.",
+      "🎨 Image & Publicity | Run our social media and public relations, and capture every great moment through design.",
       "🏀 Sports | Bring the energy, promote an active culture and bring the department together!",
       "After recruitment closes, we'll have a relaxed chat-style interview — we'd love to hear your ideas in person. Questions about any role? DM us on Instagram or leave a note in the form 💬",
       "⏳ Deadline: now until Wed 9/30, 11:59 p.m.",
@@ -108,7 +108,7 @@ export const ANNOUNCEMENTS: Announcement[] = [
     ],
     image: recruit2026,
     imageCaption: "第 53 屆系學會招募中（圖／形宣部 石馨予）",
-    imageCaptionEn: "The 53rd LISSA is recruiting (Design: Media & Design dept.)",
+    imageCaptionEn: "The 53rd LISSA is recruiting (Design: Image & Publicity dept.)",
   },
   {
     slug: "welcome2026",
@@ -186,7 +186,7 @@ export const ANNOUNCEMENTS: Announcement[] = [
     paragraphsEn: [
       "With the handover complete, the 52nd Student Association of the Department of Library and Information Science at NTU has officially stepped down.",
       "Looking back on the year, the 52nd association, led by President Po-Han Tseng, set out to build \"a different kind of student association\" and returned to the tradition of a junior-year president. The team worked to make our services truly visible and useful: opening the lounge air conditioning, creating a student community board, and — answering a long-standing wish — reviving LIS Night 2026 after four years, leaving lasting shared memories.",
-      "Organizationally, this term made major structural changes: merging public relations, promotion and design into a professional Media & Design department, and creating a dedicated General Affairs department for finances and spaces. It also welcomed many freshmen, growing the team to 40 people so that everyone could find their own stage. The team also acted as a bridge between students and faculty, strengthening ties with professors and inviting more of them to take part.",
+      "Organizationally, this term made major structural changes: merging public relations, promotion and design into a professional Image & Publicity department, and creating a dedicated General Affairs department for finances and spaces. It also welcomed many freshmen, growing the team to 40 people so that everyone could find their own stage. The team also acted as a bridge between students and faculty, strengthening ties with professors and inviting more of them to take part.",
       "Thank you to all LIS students and faculty for your trust, participation and support this year. The 52nd association now passes the baton — may this spirit of change carry on, and we wish the new association an even more exciting next chapter for LIS!",
     ],
     image: farewell52image, // ★換成你的照片：改最上面的 import；這篇不想要圖就把這行刪掉

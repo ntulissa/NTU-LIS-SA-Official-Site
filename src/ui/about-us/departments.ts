@@ -79,17 +79,17 @@ export const DEPARTMENTS: Record<string, DeptData> = {
   ima: {
     slug: "ima",
     zh: "形象宣傳部",
-    nameEn: "Media & Design",
+    nameEn: "Image & Publicity",
     en: "IMAGE AND PUBLICITY AFFAIRS",
     color: "#9C4A6E",
     intro:
       "形象宣傳部於第 52 屆系學會由傳統的「美宣、公關、行宣」三部整併而成，專責塑造與推廣系學會的品牌形象。部門主責社群媒體營運、主視覺與各類文宣品設計、活動現場動靜態攝影，以及對外廠商與校內外單位的公關聯繫。透過跨領域資源的整合，形象宣傳部以專業視覺與精準傳播，將系學會的最新動態與優質內容傳遞給全系同學與外界。",
     introEn:
-      "Formed in the 52nd association by merging the former design, public relations and promotion departments, Media & Design shapes and promotes the association's brand. It runs our social media, designs key visuals and promotional materials, photographs and films events, and handles relations with vendors and organizations on and off campus. With strong visuals and clear communication, it brings our news and content to every student and beyond.",
+      "Formed in the 52nd association by merging the former design, public relations and promotion departments, Image & Publicity shapes and promotes the association's brand. It runs our social media, designs key visuals and promotional materials, photographs and films events, and handles relations with vendors and organizations on and off campus. With strong visuals and clear communication, it brings our news and content to every student and beyond.",
     joinBlurb:
       "加入形象宣傳部，你將親自操刀社群經營、視覺設計、活動攝影以及對外公關聯繫，全面累積品牌行銷與多媒體創作實力。這不只是發文做圖，更是用你的美感與文字定義系學會的門面與風格。一起打造最吸睛的圖資品牌，就差你一個！",
     joinBlurbEn:
-      "Join Media & Design to run social media, create visuals, shoot events and handle public relations — building real skills in branding and multimedia. It's more than posting and designing: your eye and your words will define the association's look and voice. Help build the most eye-catching brand in LIS — we just need you!",
+      "Join Image & Publicity to run social media, create visuals, shoot events and handle public relations — building real skills in branding and multimedia. It's more than posting and designing: your eye and your words will define the association's look and voice. Help build the most eye-catching brand in LIS — we just need you!",
     heads: [
       { name: "葉家米", cls: "B14", title: "部長", titleEn: "Director", img: memImg("ima1") },
     ],

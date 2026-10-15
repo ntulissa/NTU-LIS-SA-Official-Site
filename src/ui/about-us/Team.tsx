@@ -20,8 +20,8 @@ const TEXT = defineText({
     ],
   },
   en: {
-    intro: "NTU LISSA is led by a President and Vice President, with five standing departments (since the 52nd term): General Affairs, Events, Academic Affairs, Media & Design, and Sports.",
-    depts: ["General Affairs", "Events", "Academic", "Media & Design", "Sports"],
+    intro: "NTU LISSA is led by a President and Vice President, with five standing departments (since the 52nd term): General Affairs, Events, Academic Affairs, Image & Publicity, and Sports.",
+    depts: ["General Affairs", "Events", "Academic", "Image & Publicity", "Sports"],
     termLabel: "53rd {title}",
     leaders: [
       { title: "President", name: "Tzu-Yun Huang", year: "LIS Junior" },

@@ -34,10 +34,10 @@ const TEXT = defineText({
   en: {
     heroTitle: ["Bring your brand", "to the heart of knowledge and information."],
     heroSub: ["Through our redesigned website and social channels,", "reach NTU LIS's diverse talent and campus community directly."],
-    plansHeading: "Compare Sponsorship Plans",
+    plansHeading: "Sponsorship Plans",
     prevCat: "Previous category",
     nextCat: "Next category",
-    thanksTitle: "Thank you for your support!",
+    thanksTitle: "Appreciate your support!",
     thanksSub: "Let's find the partnership that works best for you or your company.",
     contact: "Contact us",
   },

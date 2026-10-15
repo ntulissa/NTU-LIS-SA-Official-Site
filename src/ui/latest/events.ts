@@ -62,9 +62,9 @@ export const DEPTS: Dept[] = [
   { key: "gen",    zh: "行政",     en: "General Affairs", color: "#915E3E" },
   { key: "eve",    zh: "活動",     en: "Events",       color: "#9F353A" },
   { key: "aca",    zh: "學術",     en: "Academic",     color: "#42602D" },
-  { key: "ima",    zh: "形象宣傳", en: "Media & Design", color: "#572A3F" },
+  { key: "ima",    zh: "形象宣傳", en: "Image & Publicity", color: "#572A3F" },
   { key: "sp",     zh: "體育",     en: "Sports",       color: "#23658A" },
-  { key: "school", zh: "學校日程", en: "University",   color: "#FFFFFF" },
+  { key: "school", zh: "學校日程", en: "School Calendar",   color: "#FFFFFF" },
 ];
 
 export const DEPT_MAP: Record<DeptKey, Dept> = DEPTS.reduce(
@@ -113,7 +113,7 @@ export type CalEvent = {
 export const EVENTS: CalEvent[] = [
   {
     title: "新生迎新活動",
-    titleEn: "Freshman Welcome Party",
+    titleEn: "Orientation 2026",
     date: "2026-09-20",
     time: "12:30",
     depts: ["eve"],
@@ -134,13 +134,13 @@ export const EVENTS: CalEvent[] = [
   },
   {
     title: "LIS Talk: 系友講座",
-    titleEn: "LIS Talk: Alumni Seminar",
+    titleEn: "LIS Talk",
     date: "2026-11-04",
     time: "18:30",
     depts: ["aca"],
     service: "alumni",
     location: "系館視聽室",
-    locationEn: "AV Room, LIS Department Building",
+    locationEn: "Lecture Room, LIS Department Building",
     mapUrl: "https://maps.app.goo.gl/EQhTGVqFgv9bMv2z9",
     desc:
       "邀請畢業系友回來分享職涯與求學經驗，\n" +
@@ -159,7 +159,7 @@ export const EVENTS: CalEvent[] = [
     depts: ["sp"],
     service: "lis-cup",
     location: "待定",
-    locationEn: "TBA",
+    locationEn: "TBD",
     mapUrl: "",
     desc:
       "一年一度的系內運動賽事，\n" +
@@ -171,7 +171,7 @@ export const EVENTS: CalEvent[] = [
   },
   {
     title: "三系聯合系烤 2026",
-    titleEn: "Joint BBQ Night 2026",
+    titleEn: "BBQ Sub Luna 2026",
     date: "2026-11-13",
     time: "18:00",
     depts: ["eve"],

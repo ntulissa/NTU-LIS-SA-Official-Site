@@ -75,7 +75,7 @@ export const DEPT_FULL_EN: Record<string, string> = {
   SP: "Sports",
   ACA: "Academic Affairs",
   EVE: "Events",
-  IMA: "Media & Design",
+  IMA: "Image & Publicity",
   VP: "Vice President",
   SEC: "Executive Secretaries",
   ART: "Art & Design",
@@ -127,7 +127,7 @@ const P52: President = {
   intro:
     "第 52 屆系學會由會長曾柏翰領軍，以打造「不一樣的系學會」為核心願景，帶領系學會重新回歸由大三學生擔任會長領導的傳統。任內追求讓同學們更有感於系學會的存在，包含爭取開放學輔室冷氣使用權限、建立學生交流版社群，並為回應系上同學的期望，成功復辦睽違四年的圖資之夜。組織方面，本屆整併公關、行宣、美宣為「形象宣傳部」，並獨立出專責文書財務的「行政部」，同時廣招大一新血使團隊擴充至 40 人規模，期望讓每位圖資人無論能力或天賦，都能在系學會找到屬於自己的一席之地；此外，本屆團隊亦致力於築起學生與教職員之間的橋樑，加強系學會與教授群的緊密連結，爭取更多教授們的參與和指導。",
   introEn:
-    "Led by President Po-Han Tseng, the 52nd association set out to build \"a different kind of student association\" and returned to the tradition of a junior-year president. The term focused on making the association's presence felt: opening the lounge air conditioning, creating a student community board, and — answering students' wishes — reviving LIS Night after four years. Organizationally, it merged public relations, promotion and design into Media & Design, created a dedicated General Affairs department for paperwork and finances, and recruited many freshmen to grow the team to 40 people, so every LIS student could find a place. The team also worked to strengthen ties with faculty and invite more professors to take part.",
+    "Led by President Po-Han Tseng, the 52nd association set out to build \"a different kind of student association\" and returned to the tradition of a junior-year president. The term focused on making the association's presence felt: opening the lounge air conditioning, creating a student community board, and — answering students' wishes — reviving LIS Night after four years. Organizationally, it merged public relations, promotion and design into Image & Publicity, created a dedicated General Affairs department for paperwork and finances, and recruited many freshmen to grow the team to 40 people, so every LIS student could find a place. The team also worked to strengthen ties with faculty and invite more professors to take part.",
   depts: [
     {
       en: "GEN",

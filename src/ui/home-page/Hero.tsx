@@ -34,7 +34,7 @@ const TEXT = defineText({
   en: {
     hashtags: [
       "Join Academic Affairs",
-      "Join Media & Design",
+      "Join Image & Publicity",
       "Join Events",
       "Join General Affairs",
       "Join Sports",
