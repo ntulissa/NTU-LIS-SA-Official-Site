@@ -19,6 +19,57 @@
     <!-- 手機瀏覽器網址列的顏色（配合網站深色背景） -->
     <meta name="theme-color" content="#060606" />
 
+    <!-- 結構化資料：告訴 Google 這是臺大圖資系學會的官方網站，以及我們的社群帳號 -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ntulissa.com/#organization",
+            "name": "國立臺灣大學圖書資訊學系系學會",
+            "alternateName": [
+              "臺大圖資系學會",
+              "台大圖資系學會",
+              "NTU LIS SA",
+              "NTU LIS Student Association"
+            ],
+            "url": "https://www.ntulissa.com/",
+            "logo": "https://www.ntulissa.com/apple-touch-icon.png",
+            "email": "ntulissa1060@gmail.com",
+            "parentOrganization": {
+              "@type": "CollegeOrUniversity",
+              "name": "國立臺灣大學",
+              "alternateName": "National Taiwan University",
+              "url": "https://www.ntu.edu.tw/"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ntu_lis_sa/",
+              "https://www.facebook.com/ntulislis",
+              "https://www.threads.com/@ntu_lis_sa"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ntulissa.com/#website",
+            "url": "https://www.ntulissa.com/",
+            "name": "臺大圖資系學會",
+            "alternateName": [
+              "NTU LIS SA",
+              "台大圖資系學會"
+            ],
+            "inLanguage": [
+              "zh-Hant-TW",
+              "en"
+            ],
+            "publisher": {
+              "@id": "https://www.ntulissa.com/#organization"
+            }
+          }
+        ]
+      }
+    </script>
+
     <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
   </head>
   <body>
