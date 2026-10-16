@@ -38,6 +38,10 @@ const URL_PARAM = "lang";
 
 const MESSAGES: Record<Lang, Messages> = { "zh-TW": zhTW, en };
 
+// 各語言的正式網址（要和 index.html、public/sitemap.xml 裡寫的一致）
+const SITE_URL = "https://www.ntulissa.com/";
+const CANONICAL: Record<Lang, string> = { "zh-TW": SITE_URL, en: `${SITE_URL}?lang=en` };
+
 // <html lang="..."> 用的語言代碼（螢幕閱讀器、搜尋引擎、瀏覽器翻譯都看這個）
 const HTML_LANG: Record<Lang, string> = { "zh-TW": "zh-Hant-TW", en: "en" };
 
@@ -129,6 +133,9 @@ function syncDocument(lang: Lang) {
   document.documentElement.lang = HTML_LANG[lang];
   document.title = m.meta.title;
   document.querySelector('meta[name="description"]')?.setAttribute("content", m.meta.description);
+  // 正式網址（canonical）跟著語言變：中文＝首頁，英文＝?lang=en。
+  // 這樣 Google 會把中英文當成兩個版本分別收錄，中文、英文都搜得到。
+  document.querySelector('link[rel="canonical"]')?.setAttribute("href", CANONICAL[lang]);
 }
 
 type I18nContextValue = {
