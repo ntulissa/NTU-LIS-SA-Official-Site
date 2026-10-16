@@ -2,6 +2,8 @@
 // 歷任會長「資料」（內容）。要新增／修改某一屆，只要改這支檔案就好，畫面會自動生效。
 // 放置位置：src/ui/about-us/presidents.ts
 //   （呈現邏輯／版型在同資料夾的 Presidents.tsx，一般不用動。）
+import president52Photo from "@/imports/Presidents/52.jpg";
+import president53Photo from "@/imports/Presidents/53.png";
 //
 // 每一屆 = 一個 President 物件，欄位說明：
 //   gen       第幾屆（數字，如 52）。
@@ -18,8 +20,7 @@
 // ★ 陣列 PRESIDENTS 請由「新 → 舊」排序（畫面預設顯示第一個＝現任）。任期由屆數自動推算。
 //
 // ── 照片怎麼放 ─────────────────────────────────────────────
-//   把照片放到 public/Presidents/ 資料夾，再在對應屆數的 img 直接填網站路徑。
-//   例如：img: "/Presidents/53.png"
+//   把照片放到 src/imports/Presidents/，再於本檔匯入並指定給對應屆數的 img。
 // ══════════════════════════════════════════════════════════════════════════
 
 // ── 資料型別 ────────────────────────────────────────────────
@@ -79,7 +80,7 @@ export const DEPT_FULL_EN: Record<string, string> = {
   VP: "Vice President",
   SEC: "Executive Secretaries",
   ART: "Art & Design",
-  MKT: "Promotion",
+  MKT: "Marketing & Promotion",
   PR: "Public Relations",
 };
 
@@ -96,7 +97,7 @@ const P53: President = {
   name: "黃子芸",
   roman: "TZU-YUN, HUANG",
   cls: "B13",
-  img: "/Presidents/53.png",
+  img: president53Photo,
   intro:
     "第 53 屆系學會由會長黃子芸領軍，於 2025 年 7 月 30 日完成交接正式上任。本屆正副會長先前皆曾任第 52 屆系學會幹部，具備實務運作經驗；新團隊期望承接上一屆的基礎，推出讓系上同學更有感的活動與服務，成為圖資系學生大學四年最安心的避風港。本屆除了將持續舉辦各種活動、學術講座外，亦會做各大系隊最堅實的後盾，扮演學生、系辦與教師間的溝通橋樑，為系上帶來「看得見」的改變。",
   introEn:
@@ -123,7 +124,7 @@ const P52: President = {
   name: "曾柏翰",
   roman: "PO-HAN, TSENG",
   cls: "B12",
-  img: "/Presidents/52.jpg",
+  img: president52Photo,
   intro:
     "第 52 屆系學會由會長曾柏翰領軍，以打造「不一樣的系學會」為核心願景，帶領系學會重新回歸由大三學生擔任會長領導的傳統。任內追求讓同學們更有感於系學會的存在，包含爭取開放學輔室冷氣使用權限、建立學生交流版社群，並為回應系上同學的期望，成功復辦睽違四年的圖資之夜。組織方面，本屆整併公關、行宣、美宣為「形象宣傳部」，並獨立出專責文書財務的「行政部」，同時廣招大一新血使團隊擴充至 40 人規模，期望讓每位圖資人無論能力或天賦，都能在系學會找到屬於自己的一席之地；此外，本屆團隊亦致力於築起學生與教職員之間的橋樑，加強系學會與教授群的緊密連結，爭取更多教授們的參與和指導。",
   introEn:
