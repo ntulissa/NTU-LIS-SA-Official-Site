@@ -21,7 +21,7 @@
 //     titleEn: "Freshman Orientation",
 //   沒填 titleEn 的話，英文版會先顯示中文，網站不會壞掉。
 //
-// 語言決定順序：網址 ?lang=en → 上次選過的（存在瀏覽器）→ 瀏覽器語言 → 預設繁中。
+// 語言決定順序：網址 ?lang=en → 上次選過的（存在瀏覽器）→ 搜尋引擎一律繁中 → 瀏覽器語言 → 預設繁中。
 // 語言放在網址的「?lang=en」，所以 #/news 這類換頁連結完全不用改，分享連結也會保留語言。
 // ══════════════════════════════════════════════════════════════════════════
 
@@ -96,12 +96,22 @@ function writeStored(lang: Lang) {
   }
 }
 
+// 判斷是不是搜尋引擎爬蟲（Google、Bing、Yahoo、DuckDuckGo、Facebook/LINE 分享預覽…）
+function isCrawler(): boolean {
+  const ua = window.navigator.userAgent || "";
+  return /bot|crawl|spider|slurp|google|bing|duckduck|baidu|yandex|facebookexternalhit|line|lighthouse/i.test(ua);
+}
+
 function detectInitialLang(): Lang {
   if (typeof window === "undefined") return DEFAULT_LANG;
   const fromUrl = normalize(new URLSearchParams(window.location.search).get(URL_PARAM));
   if (fromUrl) return fromUrl;
   const stored = readStored();
   if (stored) return stored;
+  // ★ 搜尋引擎（Googlebot 等）一律用繁中：
+  //   Googlebot 的瀏覽器語言是英文，如果不擋，Google 收錄到的會是英文版，
+  //   搜尋「臺大圖資系學會」就找不到。英文版請用 ?lang=en 網址。
+  if (isCrawler()) return DEFAULT_LANG;
   // 瀏覽器語言：只要使用者的第一偏好是英文就用英文，其餘（含中文）一律繁中
   return normalize(window.navigator.language) === "en" ? "en" : DEFAULT_LANG;
 }
