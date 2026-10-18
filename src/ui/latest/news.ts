@@ -27,6 +27,7 @@ import election2026 from "@/imports/LatestUpdates/election2026.png";
 import welcome2026 from "@/imports/LatestUpdates/welcome2026.png";
 import loungeNightUsage from "@/imports/LatestUpdates/lounge night.svg";
 import recruit2026 from "@/imports/LatestUpdates/recruit2026.png";
+import lockerclearance from "@/imports/LatestUpdates/lockerclearance.svg";
 
 export type Announcement = {
   slug: string;
@@ -48,6 +49,37 @@ export type Announcement = {
 };
 
 export const ANNOUNCEMENTS: Announcement[] = [
+  {
+    slug: "locker",
+    category: "行政部",
+    categoryEn: "General Affairs",
+    title: "系櫃清空與鑰匙歸還通知",
+    titleEn: "Locker Clearance and Key Return Notice",
+    author: "臺大圖資系學會",
+    authorEn: "NTU LIS Student Association",
+    date: "2026.10.17",
+    excerpt: "為維護本學年繳交系學會費同學的權益，尚未繳 115 學年度系學會費的同學、也未登記系櫃，但仍在使用系櫃的同學，請於以下期限內歸還鑰匙並清空櫃子。",
+    excerptEn: "To protect the rights of students who have paid the LISSA fee for this academic year, students who have not paid the 115th academic year LISSA fee and have not registered for a locker but are still using one must return their keys and clear their lockers by the following deadline.",
+    paragraphs: [
+      "【🔑系櫃清空與鑰匙歸還通知】 ",
+      "為維護本學年繳交系學會費同學的權益，尚未繳 115 學年度系學會費、也未登記系櫃，但仍在使用系櫃的同學，請於以下期限內歸還鑰匙並清空櫃子。",
+      "🕒 歸還鑰匙＆領回押金時段：",
+      "10/21（三）、10/22（四）、10/23（五） 12:30 - 13:00",
+      "🏫 地點：系館一樓學輔室",
+      "⚠️ 10/23（五）前未清空者，系學會將統一清出物品，暫存學輔室至 10/30（五），期間不負保管責任，逾期視同放棄。",
+      "若之後仍有需要租借系櫃，也歡迎登記系學會費繳交，即可享有系櫃免租金、學輔室預約、系服、小圖盃、之夜等各項活動折扣！",
+    ],
+    paragraphsEn: [
+      "【🔑Locker Clearance and Key Return Notice】",
+      "To protect the rights of students who have paid the LISSA fee for this academic year, students who have not paid the 115th academic year LISSA fee and have not registered for a locker but are still using one must return their keys and clear their lockers by the following deadline.",
+      "🕒 Key return & deposit refund time:",
+      "Wed 10/21, Thu 10/22, Fri 10/23, 12:30–13:00",
+      "🏫 Location: Student Lounge, 1st Floor, Department Building",
+      "⚠️ Students who do not clear their lockers by Fri 10/23 will have their items removed and temporarily stored in the Student Lounge until Fri 10/30. The association is not responsible for safekeeping during this period. Items left after this date will be considered abandoned.",
+      "If you still need to rent a locker in the future, you are welcome to pay the LISSA fee to enjoy free locker rental, student lounge reservations, department apparel, small trophies, and discounts for various events!",
+    ],
+    image: lockerclearance,
+  },
   {
     slug: "lounge-night-usage",
     category: "正副會長",
