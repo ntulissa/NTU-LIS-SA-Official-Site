@@ -136,7 +136,7 @@ export default function Lounge() {
         <Reveal delay={80}>
           <p
             className="text-white mt-6 sm:mt-10"
-            style={{ fontFamily: zhFont, fontWeight: 900, fontSize: "clamp(1rem, 1.6vw, 1.5rem)", letterSpacing: track("0.15em", "0.04em") }}
+            style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(1rem, 1.6vw, 1.5rem)", letterSpacing: track("0.15em", "0.04em") }}
           >
             {tx.subtitle}
           </p>

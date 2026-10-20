@@ -267,6 +267,9 @@ export const BENTO: Cell[] = [
       "The cross-department social event of the autumn! Every year we team up with friendly departments for a joint barbecue under the stars. Enjoy charcoal-grilled food, music and conversation — get closer to your classmates and make new friends from other departments.",
     note: "揪團烤肉",
     noteEn: "Grab your crew",
+    href: "https://www.instagram.com/ntubbq_meesoelis_2026/",
+    dest: "系烤活動官方 Instagram",
+    destEn: "Official Instagram",
   },
 
   // 圖資週

@@ -154,7 +154,7 @@ export const EVENTS: CalEvent[] = [
   {
     title: "LIS Cup 小圖盃",
     titleEn: "LIS Cup",
-    date: "2026-11-08",
+    date: "2026-11-30",
     time: "09:00",
     depts: ["sp"],
     service: "lis-cup",
@@ -187,7 +187,8 @@ export const EVENTS: CalEvent[] = [
       "On a breezy autumn night, students from three departments gather at Huazhong Campground!\n" +
       "It's more than a lively barbecue — it's the best chance to make new friends across departments.\n" +
       "Leave the stress behind and enjoy a warm evening around the fire together.",
-    signup: false,
+    signup: true,
+    signupUrl: "https://docs.google.com/forms/d/e/1FAIpQLSf4UH065UIlHl3LfcSW9w5KeGxFnmln6pClduJtDN5esNOa2A/viewform",
   },
   {
     title: "十三系聯合耶誕舞會 2026",

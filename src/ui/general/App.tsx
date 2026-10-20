@@ -3,6 +3,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import ScrollIndicator from "./ScrollIndicator";
 import Hero from "../home-page/Hero";
+import AnnouncementSearch from "../home-page/AnnouncementSearch";
 import Upcoming from "../home-page/Upcoming";
 import Lounge from "../home-page/Lounge";
 import SportsTeam from "../home-page/SportsTeam";
@@ -40,7 +41,7 @@ import { LanguageProvider } from "../i18n";
 //   #/dept/<slug>     → 部門獨立頁（例：#/dept/gen ＝行政部；slug 同 department-pages/ 檔名）
 //   #/services        → 各種服務 Bento 總覽頁
 //   #/service/<slug>  → 單一服務詳情頁（slug 同 servicesData.ts）
-//   其餘              → 捲動式主頁
+//   其餘              → 捲動式主頁（主頁的公告搜尋區錨點＝ #announcements）
 //
 // 語言：放在網址的 ?lang=en（例：https://網址/?lang=en#/news），由 ../i18n 管理，跟上面的分頁互不影響。
 type Route = { name: "home" } | { name: "about" } | { name: "resources" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "dept-quiz" } | { name: "contact" } | { name: "overview" } | { name: "news" } | { name: "article"; slug: string } | { name: "calendar" } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string } | { name: "services" } | { name: "service"; slug: string };
@@ -188,6 +189,8 @@ function AppContent() {
       ) : (
         <>
           <Hero />
+          {/* 公告搜尋區：緊接在 Hero 後面，讓大家一進首頁就找得到公告 */}
+          <AnnouncementSearch />
           <AboutUs />
           <Upcoming />
           <Lounge />

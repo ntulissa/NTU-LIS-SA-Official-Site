@@ -90,7 +90,7 @@ export const ANNOUNCEMENTS: Announcement[] = [
     authorEn: "NTU LIS Student Association",
     date: "2026.10.10",
     excerpt: "考前衝刺不孤單！",
-    excerptEn: "You don't have to cram alone!",
+    excerptEn: "You don't have to study alone!",
     paragraphs: [
       "系學會特別為大家向系辦爭取到期中（10/19–10/30）與期末（12/14–12/25）考前限定的學輔室夜間延長開放福利，時段為週一至週五 19:00 至 22:00；身為系學會費會員專屬福利，已繳費同學可 1 人起申請、上限 5 人一組，未繳費者亦能作為組員一同自修，但須由已繳費會員擔任主要申請人，請大家務必於使用日前一天中午 12:00 前完成表單預約，若需取消則請於使用當天中午 12:00 前來信 ntulissa1060@gmail.com 通知，快把握專屬空間與舒適環境，讓系學會陪伴你全力備戰、順利歐趴！",
     ],
