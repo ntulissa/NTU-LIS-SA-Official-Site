@@ -28,6 +28,8 @@ import welcome2026 from "@/imports/LatestUpdates/welcome2026.png";
 import loungeNightUsage from "@/imports/LatestUpdates/lounge night.svg";
 import recruit2026 from "@/imports/LatestUpdates/recruit2026.png";
 import lockerclearance from "@/imports/LatestUpdates/lockerclearance.svg";
+import airconRules from "@/imports/LatestUpdates/airconRules.svg";
+import welcomeLISSA2026 from "@/imports/LatestUpdates/welcomeLISSA2026.svg";
 
 export type Announcement = {
   slug: string;
@@ -49,6 +51,62 @@ export type Announcement = {
 };
 
 export const ANNOUNCEMENTS: Announcement[] = [
+  {
+    slug: "recruitment-end-2026",
+    category: "學會公告",
+    categoryEn: "Announcement",
+    title: "第 53 屆系學會招募結束",
+    titleEn: "Recruitment for the 53rd LISSA Ends",
+    author: "臺大圖資系學會",
+    authorEn: "NTU LIS Student Association",
+    date: "2026.10.20",
+    excerpt: "第 53 屆系學會工作團隊招募面談已於 2026/10/19（一）正式告一段落。",
+    excerptEn: "The recruitment interviews for the 53rd LISSA team have officially concluded on 2026/10/19 (Monday).",
+    paragraphs: [
+      "第 53 屆系學會工作團隊招募面談已於 2026/10/19（一）正式告一段落。",
+      "非常感謝所有撥空前來參與面談的同學，在交流的過程中，我們看見了大家對系學會的熱情、想法與對圖資系的期待，每一份心意都讓我們倍感珍惜與感動！",
+      "接下來幾天，我們將陸續寄發「錄取通知信」至大家填寫的信箱，並協助錄取夥伴加入各部門群組、正式展開系學會的工作與合作。再次感謝每一位願意踏出這一步、加入團隊的你們，期待未來一年攜手同行，一起打造更好的圖資系學會！",
+    ],
+    paragraphsEn: [
+      "The recruitment interviews for the 53rd LISSA team have officially concluded on 2026/10/19 (Monday).",
+      "We sincerely thank all the students who took the time to participate in the interviews. During our conversations, we witnessed your passion for the association, your ideas, and your expectations for the LIS department. Every bit of your enthusiasm is deeply appreciated and moving!",
+      "In the coming days, we will be sending out acceptance notification emails to the addresses you provided, and assisting accepted members in joining their respective department groups to officially begin their work and collaboration within the association.",
+      "Once again, thank you to everyone who took this step and joined the team. We look forward to working together over the next year to create an even better LIS SA!",
+    ],
+    image: welcomeLISSA2026,
+  },
+  {
+    slug: "lounge-rules",
+    category: "正副會長",
+    categoryEn: "Presidents",
+    title: "學輔室與冷氣使用須知",
+    titleEn: "Student Lounge & Air-Con Usage Guidelines",
+    author: "臺大圖資系學會",
+    authorEn: "NTU LIS Student Association",
+    date: "2026.10.20",
+    excerpt: "學輔室是系學會用心為大家維護的共同空間，提供舒適冷氣、系櫃租借以及期中期末考前的夜間延長使用福利，歡迎系上同學多加利用！為了維持優質的自修與討論環境，請大家共同遵守以下規範：",
+    excerptEn: "The student lounge is a shared space maintained by the LIS Student Association, offering comfortable air conditioning, locker rentals, and extended evening access before midterms and finals. We encourage all students to make use of this space! To maintain a high-quality study and discussion environment, please adhere to the following guidelines:",
+    paragraphs: [
+      "學輔室是系學會用心為大家維護的共同空間，提供舒適冷氣、系櫃租借以及期中期末考前的夜間延長使用福利，歡迎系上同學多加利用！為了維持優質的自修與討論環境，請大家共同遵守以下規範：",
+      "1. 輕聲細語，尊重他人",
+      "學輔室主要作為用餐、休息、研讀與自修空間，若有討論需求請放低音量，以「不影響他人」為最高原則，共同維護安靜專注的環境。",
+      "2. 隨手關閉冷氣，遙控器物歸原位",
+      "珍惜公共資源，最後一位離開學輔室的同學，務必確認室內無人並隨手關閉冷氣，並將冷氣遙控器放回原位。若屢次發現未關冷氣或隨意丟放遙控器，系學會將依規定暫停或取消冷氣使用權利。",
+      "3. 外系同學使用規範",
+      "學輔室空間資源「以圖資系學生優先」。若有外系同學陪同進入，請務必共同遵守本室所有規範，切勿喧嘩或影響本系同學權益；若經反映或屢勸不聽，系學會將禁止特定外系同學再次進入學輔室。",
+      "美好的空間需要大家共同珍惜，感謝大家的配合與支持！"
+    ],
+    paragraphsEn: [
+      "The student lounge is a shared space maintained by the LIS Student Association, offering comfortable air conditioning, locker rentals, and extended evening access before midterms and finals. We encourage all students to make use of this space! To maintain a high-quality study and discussion environment, please adhere to the following guidelines:",
+      "1. Speak softly and respect others",
+      "The student lounge is primarily intended for dining, resting, reading, and studying. If you need to discuss something, please keep your voice low and ensure that you do not disturb others, maintaining a quiet and focused environment.",
+      "2. Turn off the air conditioning and return the remote control",
+      "Cherish public resources. The last person to leave the student lounge must confirm that no one is inside and turn off the air conditioning, then return the remote control to its original place. If we repeatedly find that the air conditioning is not turned off or the remote control is discarded carelessly, the student association will suspend or cancel the right to use the air conditioning.",
+      "3. Usage guidelines for students from other departments",
+      "The student lounge's resources are 'prioritized for LIS students'. If students from other departments accompany you into the lounge, please ensure you both abide by all rules of this room, refraining from making noise or affecting the rights of LIS students; if complaints are received, the student association will ban specific students from other departments from entering the student lounge again."
+    ],
+    image: airconRules,
+  },
   {
     slug: "locker",
     category: "行政部",
