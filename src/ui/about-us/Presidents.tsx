@@ -48,7 +48,7 @@ const TEXT = defineText({
     present: "present",
     introPending: "We're still writing up this term's story — stay tuned.",
     currentTeam: "Current Team",
-    teamMembers: "Our Team",
+    teamMembers: "Team Roster",
     photoPending: "Photo coming soon",
     older: "Previous term (older)",
     newer: "Next term (newer)",
