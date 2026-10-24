@@ -274,12 +274,22 @@ const DETAIL_LAYOUT = {
   eyebrow: { x: 0, y: 0 }, // — 各種服務・各部業務
   title:   { x: 0, y: 0 }, // 主標題（中文名）
   note:    { x: 0, y: 0 }, // 便利貼
-  en:      { x: 0, y: 0 }, // 英文標題
+  en:      { x: 0, y: 0 }, // 小標（中文版＝英文、英文版＝中文）
   intro:   { x: 0, y: 0 }, // 介紹內文
   button:  { x: 0, y: 0 }, // 按鈕（前往／準備中）
   image:   { x: 0, y: 0 }, // 右側圖片
 };
 const mv = (c: { x: number; y: number }) => `translate(${c.x}px, ${c.y}px)`;
+
+// ── 詳情頁主標題下方的「小標」──
+// 中文版：小標顯示英文（servicesData.ts 的 en，等寬字體大寫）
+// 英文版：小標改顯示中文服務名稱（Chiron Hei HK Text），跟主標題互換
+const SUBTITLE = {
+  enSize: "clamp(0.8rem,1.2vw,1.1rem)",  // 英文小標字級（中文版用）
+  enSpacing: "0.28em",                   // 英文小標字距
+  zhSize: "clamp(0.95rem,1.35vw,1.25rem)", // 中文小標字級（英文版用；中文筆畫多，稍微大一點）
+  zhSpacing: "0.4em",                    // 中文小標字距
+};
 
 // ── 詳情頁右側「翻牌卡」外觀（想改卡片大小、比例、外框、翻牌速度改這裡）──
 const CARD = {
@@ -728,8 +738,9 @@ function ServiceDetail({ slug }: { slug: string }) {
             </Reveal>
 
             <Reveal delay={90}>
-              <p className={GAP.enToIntro} style={{ fontFamily: mono, fontWeight: 700, fontSize: "clamp(0.8rem,1.2vw,1.1rem)", letterSpacing: "0.28em", color: "rgba(255,255,255,0.85)", transform: mv(DETAIL_LAYOUT.en) }}>
-                {s.en}
+              {/* 小標：和主標題「互換語言」——中文版顯示英文（s.en），英文版顯示中文名稱（raw.zh），避免英文版出現兩次英文 */}
+              <p className={GAP.enToIntro} style={{ fontFamily: isEn ? zhDisplay : mono, fontWeight: 700, fontSize: isEn ? SUBTITLE.zhSize : SUBTITLE.enSize, letterSpacing: isEn ? SUBTITLE.zhSpacing : SUBTITLE.enSpacing, color: "rgba(255,255,255,0.85)", transform: mv(DETAIL_LAYOUT.en) }}>
+                {isEn ? raw!.zh : s.en}
               </p>
             </Reveal>
 

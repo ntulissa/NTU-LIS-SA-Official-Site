@@ -9,16 +9,19 @@ import { defineText, useI18n } from "../i18n";
 // depts：五個部門格子下方的名稱（順序要和下面 DEPTS 一樣）
 // leaders：正副會長的頭銜／姓名／系級（順序要和下面 LEADERS 一樣）
 // termLabel：人像上方膠囊，{title} 會換成頭銜
+// ※ 中文那份獨立成 TEXT_ZH，因為右側姓名資訊區塊「不論中英文」都要用中文版的寬度來定位。
+const TEXT_ZH = {
+  intro: "臺大圖資系學會目前由正副會長統領，下轄行政、活動、學術、形象宣傳、體育等五個常設部門（第 52 屆始）：",
+  depts: ["行政部", "活動部", "學術部", "形象宣傳部", "體育部"],
+  termLabel: "第 53 屆{title}",
+  leaders: [
+    { title: "會長", name: "黃子芸", year: "圖資三" },
+    { title: "副會長", name: "洪聆雅", year: "圖資三" },
+  ],
+};
+
 const TEXT = defineText({
-  zh: {
-    intro: "臺大圖資系學會目前由正副會長統領，下轄行政、活動、學術、形象宣傳、體育等五個常設部門（第 52 屆始）：",
-    depts: ["行政部", "活動部", "學術部", "形象宣傳部", "體育部"],
-    termLabel: "第 53 屆{title}",
-    leaders: [
-      { title: "會長", name: "黃子芸", year: "圖資三" },
-      { title: "副會長", name: "洪聆雅", year: "圖資三" },
-    ],
-  },
+  zh: TEXT_ZH,
   en: {
     intro: "NTU LISSA is led by a President and Vice President, with five standing departments (since the 52nd term): General Affairs, Events, Academic Affairs, Image & Publicity, and Sports.",
     depts: ["General Affairs", "Events", "Academic", "Image & Publicity", "Sports"],
@@ -368,6 +371,50 @@ function DeptCard({ dept, name }: { dept: DeptDef; name: string }) {
   );
 }
 
+// ── 正副會長資訊（膠囊頭銜／姓名／羅馬拼音／系級）────────────────────────────
+// 抽成元件，因為要畫兩次：
+//   1) 一份「隱形的中文版」只用來撐出區塊寬度（看不到、點不到、螢幕閱讀器也略過）
+//   2) 一份真正顯示的（目前語言）疊在上面
+// 這樣不管切成中文或英文，區塊的左邊位置都和中文版一模一樣，不會再跑掉。
+type LeaderText = { title: string; name: string; year: string };
+function LeaderInfo({
+  text,
+  termLabel,
+  roman,
+  en,
+  ls,
+}: {
+  text: LeaderText;
+  termLabel: string;
+  roman: string;
+  en: boolean;
+  ls: (zh: string, en?: string) => string; // 字距：中文版直接用第一個值
+}) {
+  return (
+    <>
+      <div style={{ padding: "1.5px", background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)", borderRadius: "999px", marginBottom: ROLE_MARGIN_BOTTOM }}>
+        <div style={{ background: "#000", borderRadius: "999px", padding: "4px 14px", color: "white", fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 650, fontSize: ROLE_FONT_SIZE, letterSpacing: ls("0.16em", "0.04em"), whiteSpace: "nowrap" }}>
+          {termLabel.replace("{title}", text.title)}
+        </div>
+      </div>
+      <p className="text-white leading-none" style={{ fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: en ? NAME_FONT_SIZE_EN : NAME_FONT_SIZE, letterSpacing: ls("0.04em", "0"), marginBottom: NAME_MARGIN_BOTTOM }}>
+        {text.name}
+      </p>
+      {/* 羅馬拼音：英文版的姓名已經是英文，就不重複顯示拼音 */}
+      {!en && (
+        <p style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 400, fontSize: ROMAN_FONT_SIZE, letterSpacing: "0.2em", background: "linear-gradient(90deg, #FFF 0%, #999 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: ROMAN_MARGIN_BOTTOM }}>
+          {roman}
+        </p>
+      )}
+      <div style={{ background: "linear-gradient(90deg, #FFF 0%, #999 100%)", borderRadius: "5px", padding: "4px 14px" }}>
+        <span style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: YEAR_FONT_SIZE, color: "#000", letterSpacing: ls("0.12em", "0.04em") }}>
+          {text.year}
+        </span>
+      </div>
+    </>
+  );
+}
+
 // standalone=true：當「現任團隊」獨立頁使用（#/current-team）。此時允許內容長高、往下捲，
 // 不再用 overflow-hidden 把超出一屏的部分裁掉；預設 false 時＝主頁捲動版，呈現完全不變。
 export default function Team({ standalone = false }: { standalone?: boolean } = {}) {
@@ -376,6 +423,7 @@ export default function Team({ standalone = false }: { standalone?: boolean } = 
   const [leaderIdx, setLeaderIdx] = useState(0);
   const activeLeader = LEADERS[leaderIdx] ?? LEADERS[0];
   const activeText = tx.leaders[leaderIdx] ?? tx.leaders[0];
+  const activeTextZh = TEXT_ZH.leaders[leaderIdx] ?? TEXT_ZH.leaders[0];
   const isDesktop = useIsDesktop();
 
   return (
@@ -454,25 +502,15 @@ export default function Team({ standalone = false }: { standalone?: boolean } = 
                   );
                 })}
               </div>
-              <div className="absolute left-4 right-4 top-4 sm:left-6 sm:right-6 lg:left-auto lg:right-[4vw] lg:top-[40vh] lg:bottom-auto flex flex-col items-start max-w-[min(55%,320px)] lg:max-w-[22vw] z-10 lg:z-auto">
-                <div style={{ padding: "1.5px", background: "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)", borderRadius: "999px", marginBottom: ROLE_MARGIN_BOTTOM }}>
-                  <div style={{ background: "#000", borderRadius: "999px", padding: "4px 14px", color: "white", fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 650, fontSize: ROLE_FONT_SIZE, letterSpacing: track("0.16em", "0.04em"), whiteSpace: "nowrap" }}>
-                    {tx.termLabel.replace("{title}", activeText.title)}
-                  </div>
+              {/* 姓名資訊區塊：寬度永遠由「隱形中文版」決定 → 中英切換時位置固定在中文版的位置 */}
+              <div className="absolute left-4 right-4 top-4 sm:left-6 sm:right-6 lg:left-auto lg:right-[4vw] lg:top-[40vh] lg:bottom-auto max-w-[min(55%,320px)] lg:max-w-[22vw] z-10 lg:z-auto">
+                {/* 1) 隱形中文版：只負責撐寬度與高度 */}
+                <div aria-hidden className="invisible flex flex-col items-start pointer-events-none select-none">
+                  <LeaderInfo text={activeTextZh} termLabel={TEXT_ZH.termLabel} roman={activeLeader.roman} en={false} ls={(zh) => zh} />
                 </div>
-                <p className="text-white leading-none" style={{ fontFamily: "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: isEn ? NAME_FONT_SIZE_EN : NAME_FONT_SIZE, letterSpacing: track("0.04em", "0"), marginBottom: NAME_MARGIN_BOTTOM }}>
-                  {activeText.name}
-                </p>
-                {/* 羅馬拼音：英文版的姓名已經是英文，就不重複顯示拼音 */}
-                {!isEn && (
-                  <p style={{ fontFamily: "'Ubuntu Sans Mono', monospace", fontWeight: 400, fontSize: ROMAN_FONT_SIZE, letterSpacing: "0.2em", background: "linear-gradient(90deg, #FFF 0%, #999 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: ROMAN_MARGIN_BOTTOM }}>
-                    {activeLeader.roman}
-                  </p>
-                )}
-                <div style={{ background: "linear-gradient(90deg, #FFF 0%, #999 100%)", borderRadius: "5px", padding: "4px 14px" }}>
-                  <span style={{ fontFamily: "'Noto Sans TC', sans-serif", fontWeight: 900, fontSize: YEAR_FONT_SIZE, color: "#000", letterSpacing: track("0.12em", "0.04em") }}>
-                    {activeText.year}
-                  </span>
+                {/* 2) 真正顯示的內容（目前語言），從同一個左上角開始排 */}
+                <div className="absolute left-0 top-0 w-full flex flex-col items-start">
+                  <LeaderInfo text={activeText} termLabel={tx.termLabel} roman={activeLeader.roman} en={isEn} ls={track} />
                 </div>
               </div>
             </div>
