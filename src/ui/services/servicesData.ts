@@ -296,6 +296,8 @@ export const BENTO: Cell[] = [
     introEn:
       "The most anticipated cross-department party of the year! Together with departments across NTU, we book out a landmark nightclub for a night of dazzling lights and heavy bass. Signature drinks and live performances — dress up, hit the dance floor and celebrate Christmas with new friends.",
     href: "https://www.instagram.com/ivresse_2026/",
+    dest: "耶誕舞會官方 Instagram",
+    destEn: "Official Instagram",
   },
 
   // ══ aca 學術（綠） ══

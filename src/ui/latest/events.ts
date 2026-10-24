@@ -207,6 +207,9 @@ export const EVENTS: CalEvent[] = [
       "Thirteen departments book out a Xinyi nightclub for an NTU-only party of light and sound.\n" +
       "Let go of the stress to the heavy bass,\n" +
       "and light up the winter night with friends from across campus.\n",
+
+    signup: true,
+    signupUrl: "https://forms.gle/mhrFCUDVgn72L4za8",
   },
   {
     title: "杜鵑花節 2027",
