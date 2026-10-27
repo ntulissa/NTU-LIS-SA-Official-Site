@@ -22,55 +22,23 @@ import Fee from "../support-us/Fee";
 import Sponsor from "../support-us/Sponsor";
 import Department from "../about-us/Department";
 import Services from "../services/Services";
-import { LanguageProvider } from "../i18n";
+import { LanguageProvider, useI18n } from "../i18n";
+import {
+  NAVIGATE_EVENT,
+  currentRoute,
+  currentUrlLang,
+  navigate,
+  resolveSpaHref,
+  splitLang,
+  upgradeLegacyUrl,
+  withLang,
+  type Route,
+} from "./routing";
+import { applyHeadToDocument, buildHead } from "../../seo/seo";
 
-// 極輕量的 hash 分頁（不需安裝 react-router；同時保留原本 #team / #news 等錨點捲動）：
-//   #/current-team    → 現任團隊獨立頁（只有 Header + Team + Footer）
-//   #/presidents      → 歷任會長頁（Presidents）
-//   #/about           → 學會簡介獨立頁（只有 Header + AboutUs + Footer）
-//   #/resources       → 學術資源獨立頁（只有 Header + Sources + Footer）
-//   #/join            → 加入我們獨立頁（只有 Header + Recruit + Footer）
-//   #/dept-quiz       → 部門適性測驗頁（從加入我們的「點擊按鈕」進入）
-//   #/contact         → 聯絡我們獨立頁（只有 Header + Contact + Footer）
-//   #/overview        → 資訊總覽獨立頁（只有 Header + Dashboard + Footer）
-//   #/news            → 公告列表頁（只有 Header + 公告列表 + Footer）
-//   #/news/<slug>     → 單篇公告文章頁（只有 Header + 文章 + Footer；slug 同 news.ts）
-//   #/calendar        → 系學會行事曆頁（只有 Header + 行事曆 + Footer）
-//   #/fees            → 系學會費專區（捲動式 · Apple 風動畫）
-//   #/sponsor         → 贊助頁（對外招募贊助 · 捲動式）
-//   #/dept/<slug>     → 部門獨立頁（例：#/dept/gen ＝行政部；slug 同 department-pages/ 檔名）
-//   #/services        → 各種服務 Bento 總覽頁
-//   #/service/<slug>  → 單一服務詳情頁（slug 同 servicesData.ts）
-//   其餘              → 捲動式主頁（主頁的公告搜尋區錨點＝ #announcements）
-//
-// 語言：放在網址的 ?lang=en（例：https://網址/?lang=en#/news），由 ../i18n 管理，跟上面的分頁互不影響。
-type Route = { name: "home" } | { name: "about" } | { name: "resources" } | { name: "current-team" } | { name: "presidents" } | { name: "join" } | { name: "dept-quiz" } | { name: "contact" } | { name: "overview" } | { name: "news" } | { name: "article"; slug: string } | { name: "calendar" } | { name: "fees" } | { name: "sponsor" } | { name: "dept"; slug: string } | { name: "services" } | { name: "service"; slug: string };
-
-function getRoute(): Route {
-  const h = window.location.hash;
-  if (h.startsWith("#/about")) return { name: "about" };
-  if (h.startsWith("#/resources")) return { name: "resources" };
-  if (h.startsWith("#/current-team")) return { name: "current-team" };
-  if (h.startsWith("#/presidents")) return { name: "presidents" };
-  if (h.startsWith("#/join")) return { name: "join" };
-  if (h.startsWith("#/dept-quiz")) return { name: "dept-quiz" };
-  if (h.startsWith("#/contact")) return { name: "contact" };
-  if (h.startsWith("#/overview")) return { name: "overview" };
-  // 注意：文章頁（#/news/<slug>）要在列表頁（#/news）之前比對，否則會被列表頁吃掉。
-  const ma = h.match(/^#\/news\/([\w-]+)/);
-  if (ma) return { name: "article", slug: ma[1] };
-  if (h.startsWith("#/news")) return { name: "news" };
-  if (h.startsWith("#/calendar")) return { name: "calendar" };
-  if (h.startsWith("#/fees")) return { name: "fees" };
-  if (h.startsWith("#/sponsor")) return { name: "sponsor" };
-  // 注意：單一服務頁（#/service/<slug>）要在總覽頁（#/services）之前比對。
-  const msvc = h.match(/^#\/service\/([\w-]+)/);
-  if (msvc) return { name: "service", slug: msvc[1] };
-  if (h.startsWith("#/services")) return { name: "services" };
-  const m = h.match(/^#\/dept\/([\w-]+)/);
-  if (m) return { name: "dept", slug: m[1] };
-  return { name: "home" };
-}
+// 分頁網址（/news、/en/news …）的規則都在 ./routing.ts。
+// ★ 各頁元件裡舊的 href="#/xxx"、window.location.hash = "#/xxx" 不用改，下面會自動轉成新網址。
+// ★ 每一頁的分頁標題、Google 描述、canonical 在 ../../seo/seo.ts。
 
 // 最外層：包上 LanguageProvider，裡面所有元件才能用 useI18n() 拿到目前語言。
 export default function App() {
@@ -82,36 +50,109 @@ export default function App() {
 }
 
 function AppContent() {
-  const [route, setRoute] = useState<Route>(getRoute());
+  const { lang } = useI18n();
+  const [route, setRoute] = useState<Route>(currentRoute);
 
+  // ── 換頁：監聽「站內換頁」「瀏覽器上一頁／下一頁」「網址 # 改變」──
   useEffect(() => {
-    const onHash = () => {
-      const r = getRoute();
+    const sync = () => {
+      // 舊寫法相容：有元件執行 window.location.hash = "#/news" → 轉成 /news
+      upgradeLegacyUrl();
+
+      // 在其他頁點了主頁的錨點（例如 /news 頁點 #team）→ 回主頁再捲到該區塊
+      const { hash } = window.location;
+      const anchor = hash.length > 1 && !hash.startsWith("#/") ? hash.slice(1) : "";
+      const { path } = splitLang(window.location.pathname);
+      if (anchor && path !== "/") {
+        window.history.replaceState(window.history.state, "", `${withLang("/", currentUrlLang())}${hash}`);
+      }
+
+      const r = currentRoute();
       setRoute(r);
-      if (r.name !== "home") {
+      if (r.name !== "home" || !anchor) {
         window.scrollTo({ top: 0 });
         return;
       }
-      // 從獨立頁點主頁錨點（#team 等）時，等主頁重繪後再捲動。
-      const id = window.location.hash.slice(1);
-      if (id && !id.startsWith("/")) {
-        requestAnimationFrame(() =>
-          requestAnimationFrame(() => {
-            document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-          })
-        );
-      }
+      // 等主頁重繪後再捲到錨點
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          document.getElementById(anchor)?.scrollIntoView({ behavior: "smooth" });
+        })
+      );
     };
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
+    window.addEventListener(NAVIGATE_EVENT, sync);
+    window.addEventListener("popstate", sync);
+    window.addEventListener("hashchange", sync);
+    return () => {
+      window.removeEventListener(NAVIGATE_EVENT, sync);
+      window.removeEventListener("popstate", sync);
+      window.removeEventListener("hashchange", sync);
+    };
   }, []);
 
+  // ── 點連結：站內分頁連結不重新整理，直接換頁 ──
   useEffect(() => {
-    const openLinksInNewWindow = () => {
-      document.querySelectorAll<HTMLAnchorElement>("a").forEach((link) => {
-        const href = link.getAttribute("href");
-        if (!href) return;
+    const onClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const link = (e.target as Element | null)?.closest?.("a");
+      if (!link || link.hasAttribute("download")) return;
+      if (link.target && link.target !== "_self") return;
+      const href = link.getAttribute("href");
+      if (!href) return;
 
+      // 主頁錨點（#team 等）：在主頁時交給瀏覽器捲動；在其他頁時先回主頁
+      if (href.startsWith("#") && !href.startsWith("#/") && href !== "#") {
+        if (splitLang(window.location.pathname).path !== "/") {
+          e.preventDefault();
+          navigate(`/${href}`);
+        }
+        return;
+      }
+
+      const url = new URL(link.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+      // 檔案（PDF、圖片…）照常開啟，不當成分頁
+      if (/\.[a-z0-9]{2,5}$/i.test(url.pathname)) return;
+      e.preventDefault();
+      const { path } = splitLang(url.pathname);
+      const sameUrl = url.pathname === window.location.pathname && url.search === window.location.search && !url.hash;
+      if (sameUrl) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      navigate(`${path}${url.search}${url.hash}`);
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+
+  // ── 每一頁的分頁標題、Google 描述、canonical、分享預覽 ──
+  useEffect(() => {
+    applyHeadToDocument(buildHead(route, lang));
+  }, [route, lang]);
+
+  // ── 整理全站連結 ──
+  //   1. 舊的 href="#/news" → 真正的網址 "/news"（英文版 "/en/news"），Google 才找得到每一頁
+  //   2. 外部網址、mailto:、tel: → 另開分頁
+  useEffect(() => {
+    const fixLinks = () => {
+      document.querySelectorAll<HTMLAnchorElement>("a").forEach((link) => {
+        const raw = link.getAttribute("href");
+        if (!raw) return;
+
+        // 記住元件原本寫的連結（例如 "#/news"），切換語言時才能重新算出正確網址
+        const original = link.dataset.spaWritten === raw ? link.dataset.spaHref ?? raw : raw;
+        const resolved = resolveSpaHref(original, lang);
+        if (resolved) {
+          link.dataset.spaHref = original;
+          link.dataset.spaWritten = resolved;
+          if (raw !== resolved) link.setAttribute("href", resolved);
+        } else if (link.dataset.spaHref) {
+          delete link.dataset.spaHref;
+          delete link.dataset.spaWritten;
+        }
+
+        const href = link.getAttribute("href") ?? "";
         const url = new URL(href, window.location.href);
         const isExternal = ["mailto:", "tel:"].includes(url.protocol)
           || ((url.protocol === "http:" || url.protocol === "https:")
@@ -128,12 +169,12 @@ function AppContent() {
       });
     };
 
-    openLinksInNewWindow();
-    const observer = new MutationObserver(openLinksInNewWindow);
-    observer.observe(document.body, { childList: true, subtree: true });
+    fixLinks();
+    const observer = new MutationObserver(fixLinks);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["href"] });
 
     return () => observer.disconnect();
-  }, [route]);
+  }, [route, lang]);
 
   return (
     <div className="bg-black text-white overflow-x-hidden">

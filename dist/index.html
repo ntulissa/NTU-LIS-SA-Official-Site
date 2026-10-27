@@ -3,21 +3,102 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>臺大圖資系學會 NTU LIS SA Official Site</title>
-    <meta name="description" content="國立臺灣大學圖書資訊學系系學會官方網站：最新公告、活動行事曆、學術資源、系學會費與加入我們。" />
     <meta name="robots" content="index, follow" />
 
+    <!-- ★ SEO 區塊：build 時會自動換成「每一頁自己的」標題、描述、canonical 與分享預覽
+         （內容由 src/seo/seo.ts 決定）。下面是首頁的版本，開發模式時使用。
+         ⚠ 請不要刪掉 seo:start / seo:end 這兩行註解。 -->
+    <!-- seo:start -->
+    <title>臺大圖資系學會｜國立臺灣大學圖書資訊學系學生會 NTU LIS SA</title>
+    <meta name="description" content="國立臺灣大學圖書資訊學系系學會（臺大圖資系學會、台大圖資學生會、NTU LIS SA）官方網站：最新公告、活動行事曆、學習資源、系學會費與加入我們。" />
+    <link rel="canonical" href="https://www.ntulissa.com/" />
+    <link rel="alternate" hreflang="zh-Hant-TW" href="https://www.ntulissa.com/" />
+    <link rel="alternate" hreflang="en" href="https://www.ntulissa.com/en" />
+    <link rel="alternate" hreflang="x-default" href="https://www.ntulissa.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="臺大圖資系學會" />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:title" content="臺大圖資系學會｜國立臺灣大學圖書資訊學系學生會 NTU LIS SA" />
+    <meta property="og:description" content="國立臺灣大學圖書資訊學系系學會（臺大圖資系學會、台大圖資學生會、NTU LIS SA）官方網站：最新公告、活動行事曆、學習資源、系學會費與加入我們。" />
+    <meta property="og:url" content="https://www.ntulissa.com/" />
+    <meta property="og:image" content="https://www.ntulissa.com/apple-touch-icon.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="臺大圖資系學會｜國立臺灣大學圖書資訊學系學生會 NTU LIS SA" />
+    <meta name="twitter:description" content="國立臺灣大學圖書資訊學系系學會（臺大圖資系學會、台大圖資學生會、NTU LIS SA）官方網站：最新公告、活動行事曆、學習資源、系學會費與加入我們。" />
+    <meta name="twitter:image" content="https://www.ntulissa.com/apple-touch-icon.png" />
+    <!-- seo:end -->
+
     <!-- Favicon（圖檔放在 public/ 資料夾） -->
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href="/favicon.ico?v=2" sizes="32x32" />
+    <link rel="icon" href="/icon.svg?v=2" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
     <!-- 手機瀏覽器網址列的顏色（配合網站深色背景） -->
     <meta name="theme-color" content="#060606" />
 
+    <!-- 結構化資料：告訴 Google 這是臺大圖資系學會的官方網站，以及我們的社群帳號 -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ntulissa.com/#organization",
+            "name": "國立臺灣大學圖書資訊學系系學會",
+            "alternateName": [
+              "臺大圖資系學會",
+              "台大圖資系學會",
+              "臺大圖資學生會",
+              "台大圖資學生會",
+              "臺大圖書資訊學系系學會",
+              "台大圖書資訊學系學生會",
+              "NTU LIS SA",
+              "NTU LISSA",
+              "NTU LIS Student Association"
+            ],
+            "url": "https://www.ntulissa.com/",
+            "logo": "https://www.ntulissa.com/apple-touch-icon.png",
+            "email": "ntulissa1060@gmail.com",
+            "parentOrganization": {
+              "@type": "CollegeOrUniversity",
+              "name": "國立臺灣大學",
+              "alternateName": "National Taiwan University",
+              "url": "https://www.ntu.edu.tw/"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ntu_lis_sa/",
+              "https://www.facebook.com/ntulislis",
+              "https://www.threads.com/@ntu_lis_sa"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ntulissa.com/#website",
+            "url": "https://www.ntulissa.com/",
+            "name": "臺大圖資系學會",
+            "alternateName": [
+              "台大圖資系學會",
+              "臺大圖資學生會",
+              "NTU LIS SA"
+            ],
+            "inLanguage": [
+              "zh-Hant-TW",
+              "en"
+            ],
+            "publisher": {
+              "@id": "https://www.ntulissa.com/#organization"
+            }
+          }
+        ]
+      }
+    </script>
+
     <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
+    <script type="module" crossorigin src="/assets/index-BNjaOtnN.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor-BVujZ77b.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-ctI39usT.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-BIB3iwLX.css">
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>

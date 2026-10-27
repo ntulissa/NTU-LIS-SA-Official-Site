@@ -3,14 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>臺大圖資系學會 NTU LIS SA Official Site</title>
-    <meta name="description" content="國立臺灣大學圖書資訊學系系學會官方網站：最新公告、活動行事曆、學術資源、系學會費與加入我們。" />
     <meta name="robots" content="index, follow" />
+
+    <!-- ★ SEO 區塊：build 時會自動換成「每一頁自己的」標題、描述、canonical 與分享預覽
+         （內容由 src/seo/seo.ts 決定）。下面是首頁的版本，開發模式時使用。
+         ⚠ 請不要刪掉 seo:start / seo:end 這兩行註解。 -->
+    <!-- seo:start -->
+    <title>臺大圖資系學會｜國立臺灣大學圖書資訊學系學生會 NTU LIS SA</title>
+    <meta name="description" content="國立臺灣大學圖書資訊學系系學會（臺大圖資系學會、台大圖資學生會、NTU LIS SA）官方網站：最新公告、活動行事曆、學習資源、系學會費與加入我們。" />
     <link rel="canonical" href="https://www.ntulissa.com/" />
-    <!-- 中英文版本：告訴 Google 這兩個網址是同一個網站的不同語言 -->
     <link rel="alternate" hreflang="zh-Hant-TW" href="https://www.ntulissa.com/" />
-    <link rel="alternate" hreflang="en" href="https://www.ntulissa.com/?lang=en" />
+    <link rel="alternate" hreflang="en" href="https://www.ntulissa.com/en" />
     <link rel="alternate" hreflang="x-default" href="https://www.ntulissa.com/" />
+    <!-- seo:end -->
 
     <!-- Favicon（圖檔放在 public/ 資料夾） -->
     <link rel="icon" href="/favicon.ico?v=2" sizes="32x32" />
@@ -31,7 +36,12 @@
             "alternateName": [
               "臺大圖資系學會",
               "台大圖資系學會",
+              "臺大圖資學生會",
+              "台大圖資學生會",
+              "臺大圖書資訊學系系學會",
+              "台大圖書資訊學系學生會",
               "NTU LIS SA",
+              "NTU LISSA",
               "NTU LIS Student Association"
             ],
             "url": "https://www.ntulissa.com/",
@@ -55,8 +65,9 @@
             "url": "https://www.ntulissa.com/",
             "name": "臺大圖資系學會",
             "alternateName": [
-              "NTU LIS SA",
-              "台大圖資系學會"
+              "台大圖資系學會",
+              "臺大圖資學生會",
+              "NTU LIS SA"
             ],
             "inLanguage": [
               "zh-Hant-TW",
@@ -74,6 +85,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

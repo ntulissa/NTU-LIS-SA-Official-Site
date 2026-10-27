@@ -445,7 +445,7 @@ export const BENTO: Cell[] = [
   {
     type: "service", dept: "sp", slug: "team-aid", zh: "系隊補助",
     nameEn: "Team Aid",
-    gc: "11 / span 1", gr: "5 / span 4", vertical: true,
+    gc: "11 / span 2", gr: "4 / span 1",
     en: "TEAM AID",
     intro:
       "揮灑汗水、爭取榮譽的最佳後盾！為了鼓勵系上各系隊蓬勃發展，只要隊內成員依規定繳納系學會費，系學會每學期皆會依比例提供專屬的「系隊經費補助」；這筆經費用於支持各隊租借場地、添購耗材或添補訓練裝備，減輕同學們的運動負擔，讓大家在球場上能全心全力拼搏，盡情展現圖資人的熱血精神！",
@@ -497,11 +497,23 @@ export const BENTO: Cell[] = [
     ],
   },
 
+  //臺大圖資女籃
+  {
+    type: "service", dept: "sp", slug: "women-basketball", zh: "臺大圖資女籃",
+    nameEn: "LIS Women's Basketball",
+    gc: "11 / span 1", gr: "5 / span 4", vertical: true,
+    en: "NTU LIS WOMEN'S BASKETBALL",
+    intro:
+      "想在球場上盡情奔跑、揮灑汗水，享受籃球的熱血快感嗎？「臺大圖資女籃」讓你在切磋球技中不斷進化，場外更有歡樂滿點的隊聚與隊遊活動，緊密凝聚每一位隊員的好感情！無論你是具備實力的各路好手，還是單純熱愛籃球的熱血新血，我們都張開雙臂歡迎你的加入！",
+    introEn:
+      "Love running the court and working up a sweat? NTU LIS Women's Basketball is a joint team of the Japanese and LIS departments. We train twice a week and bond through team dinners and trips. Experienced players and passionate beginners are all welcome — and we're also recruiting team managers to support us from the sidelines.",
+  },
+
   // 臺大圖資女排
   {
     type: "service", dept: "sp", slug: "volleyball", zh: "臺大圖資女排",
     nameEn: "LIS Women's Volleyball",
-    gc: "11", gr: "1 / span 4", vertical: true,
+    gc: "11", gr: "1 / span 3", vertical: true,
     en: "NTU LIS WOMEN'S VOLLEYBALL",
     intro:
       "球不落地、絕不放棄！「臺大圖資女排」在去年正式重新建隊，帶著滿滿的活力與衝勁強勢回歸球場！無論你是擁有排球底子、想繼續在場上扣殺撲救的高手，還是完全零基礎但對排球抱有熱情的新手，球隊都非常歡迎妳的加入；在這裡，大家在練球中互相扶持、從托球墊球一步步累積默契，場下更有溫暖歡樂的隊友陪伴彼此成長，快加入圖資女排的大家庭，一起為每一顆好球奮力喝采、寫下熱血的青春篇章！",
@@ -514,7 +526,7 @@ export const BENTO: Cell[] = [
   {
     type: "service", dept: "sp", slug: "badminton", zh: "臺大圖資羽球",
     nameEn: "LIS Badminton",
-    gc: "12", gr: "1 / span 4", vertical: true,
+    gc: "12", gr: "1 / span 3", vertical: true,
     en: "NTU LIS BADMINTON",
     intro:
       "想在課餘時間揮拍流汗、享受羽球破風的俐落快感嗎？「臺大圖資羽球隊」不限性別、男女生都熱烈歡迎！不論你是身經百戰的場上高手，還是剛拿起球拍想運動健身的初學者，這裡都有最友善耐心的學長姐陪伴你一起練習、精進球技；除了定期的練球時間外，隊上溫馨歡樂的氛圍更是系胞們放鬆交流、培養深厚情誼的最佳所在，快帶著你的球拍加入我們，在球場上一同揮灑青春汗水！",

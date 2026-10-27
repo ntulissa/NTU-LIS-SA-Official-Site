@@ -21,26 +21,27 @@
 //     titleEn: "Freshman Orientation",
 //   沒填 titleEn 的話，英文版會先顯示中文，網站不會壞掉。
 //
-// 語言決定順序：網址 ?lang=en → 上次選過的（存在瀏覽器）→ 搜尋引擎一律繁中 → 瀏覽器語言 → 預設繁中。
-// 語言放在網址的「?lang=en」，所以 #/news 這類換頁連結完全不用改，分享連結也會保留語言。
+// ★ 語言放在網址路徑：中文 /news，英文 /en/news（規則在 ../general/routing.ts）。
+//   這樣 Google 會把中英文當成兩個獨立的網頁分別收錄。
+//   舊的 ?lang=en 網址會自動轉成 /en。
+//
+// 語言決定順序：網址有 /en → 英文；
+//   中文網址時：上次選過的（存在瀏覽器）→ 搜尋引擎一律繁中 → 瀏覽器語言 → 預設繁中。
+// ★ 分頁標題、Google 描述、canonical 已經搬到 src/seo/seo.ts，這裡不再處理。
 // ══════════════════════════════════════════════════════════════════════════
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import zhTW, { type Messages } from "./locales/zh-TW";
 import en from "./locales/en";
+import { splitLang, withLang } from "../general/routing";
 
 export type Lang = "zh-TW" | "en";
 
 export const LANGS: Lang[] = ["zh-TW", "en"];
 const DEFAULT_LANG: Lang = "zh-TW";
 const STORAGE_KEY = "ntulissa-lang";
-const URL_PARAM = "lang";
 
 const MESSAGES: Record<Lang, Messages> = { "zh-TW": zhTW, en };
-
-// 各語言的正式網址（要和 index.html、public/sitemap.xml 裡寫的一致）
-const SITE_URL = "https://www.ntulissa.com/";
-const CANONICAL: Record<Lang, string> = { "zh-TW": SITE_URL, en: `${SITE_URL}?lang=en` };
 
 // <html lang="..."> 用的語言代碼（螢幕閱讀器、搜尋引擎、瀏覽器翻譯都看這個）
 const HTML_LANG: Record<Lang, string> = { "zh-TW": "zh-Hant-TW", en: "en" };
@@ -108,34 +109,29 @@ function isCrawler(): boolean {
 
 function detectInitialLang(): Lang {
   if (typeof window === "undefined") return DEFAULT_LANG;
-  const fromUrl = normalize(new URLSearchParams(window.location.search).get(URL_PARAM));
-  if (fromUrl) return fromUrl;
+  // 網址是 /en/... → 英文（舊的 ?lang=en 已在 main.tsx 轉成 /en）
+  if (splitLang(window.location.pathname).lang === "en") return "en";
+  // ★ 搜尋引擎（Googlebot 等）一律照網址顯示：中文網址就是中文。
+  //   不然 Googlebot 的瀏覽器語言是英文，收錄到的中文網址會變成英文內容。
+  if (isCrawler()) return DEFAULT_LANG;
   const stored = readStored();
   if (stored) return stored;
-  // ★ 搜尋引擎（Googlebot 等）一律用繁中：
-  //   Googlebot 的瀏覽器語言是英文，如果不擋，Google 收錄到的會是英文版，
-  //   搜尋「臺大圖資系學會」就找不到。英文版請用 ?lang=en 網址。
-  if (isCrawler()) return DEFAULT_LANG;
   // 瀏覽器語言：只要使用者的第一偏好是英文就用英文，其餘（含中文）一律繁中
   return normalize(window.navigator.language) === "en" ? "en" : DEFAULT_LANG;
 }
 
-// 把語言寫進網址（?lang=en），不重新整理頁面，也不影響 # 後面的分頁
+// 把語言寫進網址（/news ↔ /en/news），不重新整理頁面，也保留網址後面的 ?… 和 #…
 function syncUrl(lang: Lang) {
-  const url = new URL(window.location.href);
-  if (lang === DEFAULT_LANG) url.searchParams.delete(URL_PARAM);
-  else url.searchParams.set(URL_PARAM, lang);
-  if (url.href !== window.location.href) window.history.replaceState(window.history.state, "", url);
+  const { pathname, search, hash } = window.location;
+  const { path } = splitLang(pathname);
+  const nextPath = withLang(path, lang);
+  if (nextPath !== pathname) {
+    window.history.replaceState(window.history.state, "", `${nextPath}${search}${hash}`);
+  }
 }
 
 function syncDocument(lang: Lang) {
-  const m = MESSAGES[lang];
   document.documentElement.lang = HTML_LANG[lang];
-  document.title = m.meta.title;
-  document.querySelector('meta[name="description"]')?.setAttribute("content", m.meta.description);
-  // 正式網址（canonical）跟著語言變：中文＝首頁，英文＝?lang=en。
-  // 這樣 Google 會把中英文當成兩個版本分別收錄，中文、英文都搜得到。
-  document.querySelector('link[rel="canonical"]')?.setAttribute("href", CANONICAL[lang]);
 }
 
 type I18nContextValue = {
@@ -164,11 +160,21 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     syncDocument(lang);
   }, [lang]);
 
-  // 換頁（#/xxx）時，有些瀏覽器會把 ?lang 弄掉，這裡補回去
+  // 換頁或按「上一頁」時，網址的語言可能跟畫面不同：
+  //   - 換頁時網址掉了 /en → 補回去
+  //   - 按上一頁回到另一個語言的網址 → 畫面跟著網址切換
   useEffect(() => {
     const onHash = () => syncUrl(lang);
+    const onPop = () => {
+      const urlLang = splitLang(window.location.pathname).lang;
+      if (urlLang !== lang) setLangState(urlLang);
+    };
     window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("hashchange", onHash);
+      window.removeEventListener("popstate", onPop);
+    };
   }, [lang]);
 
   const value = useMemo<I18nContextValue>(

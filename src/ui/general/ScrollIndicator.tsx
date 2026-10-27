@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { ArrowDown } from "lucide-react";
 import { useI18n } from "../i18n";
+import { currentPath } from "./routing";
 
 const ENABLED_ROUTES = new Set(["home", "presidents", "sponsor", "news", "fees", "join"]);
 
+// 目前網址的第一段：/news/welcome2026 → "news"，/ → "home"（英文版的 /en 會自動略過）
 function getCurrentRoute() {
-  const hash = window.location.hash;
-  return hash.startsWith("#/") ? hash.slice(2).split("/")[0] || "home" : "home";
+  return currentPath().split("/")[1] || "home";
 }
 
 /**

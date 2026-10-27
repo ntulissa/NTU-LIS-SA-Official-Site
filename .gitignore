@@ -1,0 +1,4 @@
+node_modules
+dist
+.seo-build
+.DS_Store
