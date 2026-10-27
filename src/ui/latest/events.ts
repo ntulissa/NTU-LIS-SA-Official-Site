@@ -135,7 +135,7 @@ export const EVENTS: CalEvent[] = [
   {
     title: "LIS Talk: 系友講座",
     titleEn: "LIS Talk",
-    date: "2026-11-10",
+    date: "2026-11-17",
     time: "18:30",
     depts: ["aca"],
     service: "alumni",
