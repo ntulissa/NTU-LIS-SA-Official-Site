@@ -21,7 +21,7 @@
 // 範例文章的照片：先「暫時借用」現有的建築圖當佔位，確保專案能編譯、也能直接看到「有圖版型」。
 // 換成真的照片：把照片放到 src/imports/LatestUpdates/ 後，改成 import 你的檔案即可，例如：
 //   import inaugurationPhoto from "@/imports/LatestUpdates/53-inauguration.jpg";
-import inaugurationPhoto from "@/imports/LatestUpdates/inauguration.png";
+import inaugurationPhoto from "@/imports/LatestUpdates/inaugurationPhoto.svg";
 import farewell52image from "@/imports/LatestUpdates/farewell52.png";
 import election2026 from "@/imports/LatestUpdates/election2026.png";
 import welcome2026 from "@/imports/LatestUpdates/welcome2026.png";
@@ -351,8 +351,6 @@ export const ANNOUNCEMENTS: Announcement[] = [
       "The NTU LIS Student Association isn't a closed organization — it truly belongs to every LIS student. The new team will break with convention, try new things and launch projects that are both useful and fun, showing everyone that a student association really can be played like this!",
     ],
     image: inaugurationPhoto, // ★換成你的照片：改最上面的 import；這篇不想要圖就把這行刪掉
-    imageCaption: "第 52 屆會長曾柏翰（左）與第 53 屆會長黃子芸（右），於系主任羅思嘉教授（中）見證下順利完成印信交接儀式。（圖／臺大圖資系學會）",
-    imageCaptionEn: "52nd President Po-Han Tseng (left) hands over the official seal to 53rd President Tzu-Yun Huang (right), witnessed by Department Chair Prof. Szu-Chia Lo (center). (Photo: NTU LISSA)",
   },
 
   {
