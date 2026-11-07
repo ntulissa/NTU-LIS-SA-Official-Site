@@ -14,7 +14,8 @@ import { defineText, useI18n } from "../i18n";
  * ● 點卡片 →「系學會行事曆」頁，並直接打開那場活動的資訊框（網址 /calendar?event=<編號>）。
  * ● 每場活動會對應到 servicesData.ts 的某項服務（只用來決定外觀）：
  *     - 卡片底色＝該服務的部門色
- *     - 圖片＝services/ 裡以該服務 slug 命名的圖（例：bbq.png）
+ *     - 圖片：events.ts 有填 image → 用那張（src/imports/Events/ 裡的檔案或網址）；
+ *             沒填（或檔名找不到）→ services/ 裡以該服務 slug 命名的圖（例：bbq.png）
  * ● 對應方式（依序，先對到的就用）：
  *     1) events.ts 該活動的 service 欄位（★ 建議一律填這個，最準）
  *     2) 活動標題含有服務中文名（例：「LIS Cup 小圖盃」含「小圖盃」→ lis-cup）
@@ -47,7 +48,7 @@ const TEXT = defineText({
     sectionTitle: "Something every month — never a dull moment in LIS",
     button: "Learn more",
     exploreTitle: "Explore more events",
-    exploreDesc: "Nothing catching your eye? We've rounded up everything for you!",
+    exploreDesc: "Nothing caught your eye? We've rounded up everything for you!",
     prev: "Previous event",
     next: "Next event",
     taglines: {
@@ -109,6 +110,31 @@ function assetBySlug(slug: string): string | undefined {
     return f === slug;
   });
   return hit ? SERVICE_ASSETS[hit] : undefined;
+}
+
+// 讀 src/imports/Events/ 裡的「活動專屬圖」（events.ts 的 image 欄位用）
+// ★ 資料夾名稱要一致；想換資料夾，改下面這行的路徑即可。
+const EVENT_ASSETS = import.meta.glob("/src/imports/Events/**/*.{svg,png,jpg,jpeg,webp}", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
+
+// events.ts 的 image → 圖片網址。可寫檔名（含或不含副檔名）或完整網址；找不到回 undefined。
+function eventImage(e: CalEvent): string | undefined {
+  const name = e.image?.trim();
+  if (!name) return undefined;
+  if (/^(https?:)?\/\//.test(name) || name.startsWith("data:")) return name; // 完整網址直接用
+  const base = (p: string) => (p.split("/").pop() || "").toLowerCase();
+  const want = base(name);
+  const hit = Object.keys(EVENT_ASSETS).find((p) => {
+    const f = base(p);
+    return f === want || f.replace(/\.[^.]+$/, "") === want;
+  });
+  if (!hit && import.meta.env.DEV) {
+    console.warn(`[Upcoming] 「${e.title}」的 image: "${e.image}" 在 src/imports/Events/ 找不到，先改用服務圖。`);
+  }
+  return hit ? EVENT_ASSETS[hit] : undefined;
 }
 
 // 服務依名稱長度排序（長的先比對，避免「迎新」搶走「迎新宿營」）
@@ -269,7 +295,8 @@ export default function Upcoming() {
           title: localize(e).title,
           tagline: svc ? tx.taglines[svc.slug] ?? svc.en : "",
           color: svc ? DEPT_COLORS[svc.dept] : accentColorOf(e),
-          img: svc ? assetBySlug(svc.slug) : undefined,
+          // ★ 圖片：events.ts 有指定 image 就用它；否則用服務圖
+          img: eventImage(e) ?? (svc ? assetBySlug(svc.slug) : undefined),
           href: eventLink(idx), // ★ 一律連到行事曆頁的這場活動（不再連到 Services 詳情頁）
         };
       });

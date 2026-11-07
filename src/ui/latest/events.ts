@@ -22,14 +22,20 @@
 //             卡片外框與月曆圓點會自動變成「正副會長」的黃色。
 //           ▸ 學校日程（考試週、放假等）用 "school"，只會出現在月曆、不會進上方卡片。
 //   service? ★ 這場活動對應 servicesData.ts 裡的哪一項服務（填該服務的 slug）。
-//           首頁「近期活動」卡片會用它決定：卡片底色、圖片（services/<slug>.png）、
-//           「深入了解」連到哪個服務詳情頁（#/service/<slug>）。
+//           首頁「近期活動」卡片會用它決定：卡片底色、預設圖片（services/<slug>.png）、標語。
+//           （點卡片一律連到行事曆頁、直接打開這場活動。）
 //           每年活動名稱可以隨便改，只要 service 填對，圖片就一定抓得到。
-//           省略 → 程式改用標題關鍵字自動猜；猜不到就不放圖、連到行事曆。
+//           省略 → 程式改用標題關鍵字自動猜；猜不到就不放圖。
 //           可用的 slug（活動相關）：
 //             orientation 新生迎新   camp 迎新宿營    bbq 系烤活動     xmas 聖誕大會
 //             lis-night 圖資之夜    lis-week 圖資週   alumni 系友講座  corp 企業參訪
 //             azalea 杜鵑花節       lis-cup 小圖盃    ooty 系服訂購    textbook 教科書代訂
+//   image?  ★ 這場活動「專屬」的首頁卡片圖片（可省略）。
+//           ▸ 沒填 → 用 service 對應的服務圖（跟以前一樣）。
+//           ▸ 有填 → 以這張為主。把圖檔放到 src/imports/Events/，這裡只要寫檔名：
+//               image: "lis-cup-badminton.png"   （副檔名可省略："lis-cup-badminton"）
+//             也可以直接貼完整網址：image: "https://...."
+//           ▸ 支援 png / jpg / jpeg / webp / svg。檔名打錯找不到時，會自動退回服務圖。
 //
 // ── 展開版活動資訊（點開卡片後的 Modal 才會用到；以下欄位都可省略）─────────────
 //   location?  地點文字（如 "臺大二活 205 教室"）。有填才會顯示「地點」那一行。
@@ -97,7 +103,8 @@ export type CalEvent = {
   moreDates?: string[]; // 「不相連」的其他日期（如 ["2026-11-17"]）；和 date 合起來就是全部場次
   time?: string;  // "HH:mm"（可省略）
   depts: DeptKey[]; // 一或多個部門；跨多部門會自動用正副會長黃
-  service?: string; // 對應 servicesData.ts 的服務 slug（決定首頁卡片的圖片／顏色／連結）
+  service?: string; // 對應 servicesData.ts 的服務 slug（決定首頁卡片的顏色／預設圖片／標語）
+  image?: string;   // 專屬圖片檔名（放 src/imports/Events/）或完整網址；有填就優先用這張
 
   // ── 展開版活動資訊（點開卡片後顯示；皆可省略）──
   location?: string;  // 地點文字
@@ -117,6 +124,7 @@ export type CalEvent = {
 //   ▸ 全部門活動 → depts 填多個（如發表會）；月曆該日與卡片外框會變黃。
 //   ▸ 學校日程   → depts: ["school"]，只在月曆顯示、不進上方卡片（不用填 service）。
 //   ▸ 不相連的多天 → date 填第一天、moreDates 填其他天（例：moreDates: ["2026-12-07"]）。
+//   ▸ 想換首頁卡片的圖 → 圖檔放 src/imports/Events/，加 image: "檔名.png"。
 //   ▸ 想讓卡片「點得開」有完整資訊 → 補上 location / desc / signup 等欄位。
 export const EVENTS: CalEvent[] = [
   {
@@ -167,6 +175,7 @@ export const EVENTS: CalEvent[] = [
     time: "16:00",
     depts: ["sp"],
     service: "lis-cup",
+    image: "lis-cup-badminton.svg",
     location: "臺大新體 1F 多功能球場",
     locationEn: "1F, NTU Sports Center",
     mapUrl: "https://maps.app.goo.gl/sH2Lm1gbASiihfeg6",
@@ -228,6 +237,7 @@ export const EVENTS: CalEvent[] = [
     time: "13:00",
     depts: ["sp"],
     service: "lis-cup",
+    image: "lis-cup-volleyball.svg",
     location: "臺大排球場",
     locationEn: "NTU Volleyball Court",
     mapUrl: "https://maps.app.goo.gl/ueY87TnPjX3oGgt38",
