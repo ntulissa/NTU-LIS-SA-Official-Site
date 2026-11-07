@@ -149,7 +149,7 @@ const TEXT = defineText({
     battle: {
       title: "Battle LA.",
       subtitle: "NTU CLA Basketball Invitational",
-      info: "Dec 6 · NTU Medical Gym · Game on",
+      info: "Dec 6 · NTU Medical Gym · TIP-OFF",
       team: "Our team",
     },
   },
