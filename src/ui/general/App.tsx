@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
-import ScrollIndicator from "./ScrollIndicator";
 import Hero from "../home-page/Hero";
 import AnnouncementSearch from "../home-page/AnnouncementSearch";
 import Upcoming from "../home-page/Upcoming";
@@ -241,7 +240,6 @@ function AppContent() {
       )}
 
       <Footer />
-      <ScrollIndicator />
     </div>
   );
 }

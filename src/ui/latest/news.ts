@@ -34,6 +34,7 @@ import welcomeLISSA2026 from "@/imports/LatestUpdates/welcomeLISSA2026.svg";
 import listalk2026fall from "@/imports/LatestUpdates/listalk2026fall.png";
 import battleLA2026 from "@/imports/LatestUpdates/battleLA2026.png";
 import lisCup2026badminton from "@/imports/LatestUpdates/lisCup2026badminton.png";
+import LISSAofficialsite from "@/imports/LatestUpdates/LISSAofficialsite.svg";
 
 export type Announcement = {
   slug: string;
@@ -56,6 +57,33 @@ export type Announcement = {
 
 export const ANNOUNCEMENTS: Announcement[] = [
   {
+    slug: "official-site",
+    category: "學會公告",
+    categoryEn: "Announcement",
+    title: "臺大圖資系學會官網上線",
+    titleEn: "NTU LIS SA Official Website Launched",
+    author: "臺大圖資系學會",
+    authorEn: "NTU LIS Student Association",
+    date: "2026.11.08",
+    excerpt: "臺大圖資系學會全新官方網站正式上線！UI/UX 與資訊架構向來是圖資系的核心專業之一，系學會始終相信，與其將專業概念停留在口頭討論或紙上藍圖，不如真正挽起袖子「學以致用」，把它實踐成經得起檢驗的完整產品。",
+    excerptEn: "The NTU LIS Student Association's new official website is now live! UI/UX and information architecture have always been core competencies of the NTU LIS department. The student association firmly believes that instead of keeping professional concepts in verbal discussions or on paper, it's better to put them into practice, creating a complete product that can withstand scrutiny.",
+    paragraphs: [
+      "臺大圖資系學會全新官方網站正式上線！UI/UX 與資訊架構向來是圖資系的核心專業之一，系學會始終相信，與其將專業概念停留在口頭討論或紙上藍圖，不如真正挽起袖子「學以致用」，把它實踐成經得起檢驗的完整產品。",
+      "本次新版官網從介面設計、前端工程到搜尋引擎最佳化（SEO）全由系學會團隊自主獨立打造，現在只要在 Google 搜尋「臺大圖資系學會」就能直接找到我們，用實打實的落地成果展現圖資人的技術能耐。",
+      "而打造這個網站最初也最重要的一份初心，是希望能好好記錄下所有曾經為系學會無私付出、默默耕耘的團隊夥伴，讓每一份心血與熱忱都能被看見、留下痕跡而不被輕易抹煞，因此我們特別建立了「歷任會長」與團隊紀實頁面，不讓任何人的努力白費。",
+      "目前網站仍在持續優化中，若大家在瀏覽或使用時有發現任何設計與體驗上的問題，都非常歡迎隨時聯絡系學會提供寶貴意見，讓我們一起把屬於圖資人的平台磨得更好！",
+    ],
+    paragraphsEn: [
+      "The NTU LIS Student Association's new official website is now live! UI/UX and information architecture have always been core competencies of the NTU LIS department. The student association firmly believes that instead of keeping professional concepts in verbal discussions or on paper, it's better to put them into practice, creating a complete product that can withstand scrutiny.",
+      "This new website was independently built by the NTU LIS SA team, from interface design and front-end engineering to search engine optimization. Now, simply searching for 'NTU LIS SA' on Google will lead you directly to our site, showcasing the technical prowess of LIS students through tangible results.",
+      "The motivation behind creating this website was to properly document all the team members who have selflessly contributed and worked tirelessly for the student association. We wanted to ensure that every bit of effort and passion is recognized and preserved, which is why we established pages for 'Past Presidents' and team chronicles, ensuring that no one's contributions are overlooked.",
+      "The website is still undergoing continuous optimization. If you encounter any design or user experience issues while browsing or using the site, we warmly welcome you to contact the student association with your valuable feedback, so we can work together to make this platform even better for LIS students!",
+    ],
+    image: LISSAofficialsite,
+    imageCaption: "臺大圖資系學會全新官網上線（圖／臺大圖資系學會）",
+    imageCaptionEn: "NTU LIS SA Official Website Launched! (Photo: NTU LIS Student Association)",
+  },
+  {
     slug: "battle-la-2026",
     category: "體育部",
     categoryEn: "Sports",
@@ -67,9 +95,9 @@ export const ANNOUNCEMENTS: Announcement[] = [
     excerpt: "Battle LA. 決戰文學院！今年原定由院學會主辦的文學院新生盃因故未能舉行，由「臺大日文圖資男籃」挺身主動承辦，將於 12/6（日）18:00 至 22:00 在臺大醫學院體育館（醫體）正式開打！",
     excerptEn: "Battle LA. The ultimate showdown in the NTU CLA! Originally scheduled to be hosted by the CLA Student Association, this year's CLA Freshman Cup was canceled. Stepping up to the challenge, the NTU J-LIS Men's Basketball team will host the event on Dec. 6 (Sun) from 6–10 p.m. at the NTU Gymnasium of ChengZhong Campus.",
     paragraphs: [
-      "Battle LA. 決戰文學院！今年原定由院學會主辦的文學院新生盃因故未能舉行，將由臺大日文圖資男籃挺身主動承辦，將於 12/6（日）18:00 至 22:00 在臺大醫學院體育館（臺大醫體）正式開打！",
+      "Battle LA. 決戰文學院！今年原定由院學會主辦的文學院新生盃因故未能舉行，將由臺大日文圖資男籃挺身主動承辦，於 12/6（日）18:00 至 22:00 在臺大醫學院體育館（臺大醫體）正式開打！",
       "本次除了文院各系隊較勁，更廣邀畢業 OB 與外系同學組隊切磋，想參賽的球友可直接掃描海報右下角 QR Code 報名，同時熱愛籃球、想在場上奔馳的系胞們也歡迎隨時加入系男籃的大家庭；當天更歡迎大家親臨醫體觀眾席，一起為圖資男籃賣力吶喊、熱血應援！",
-      "更多活動資訊請關注臺大日文圖資男籃Instagram。",
+      "更多活動資訊請關注臺大日文圖資男籃 Instagram。",
     ],
     paragraphsEn: [
       "Battle LA. The ultimate showdown in the NTU CLA! Originally scheduled to be hosted by the CLA Student Association, this year's CLA Freshman Cup was canceled. Stepping up to the challenge, the NTU J-LIS Men's Basketball team will host the event on Dec. 6 (Sun) from 6–10 p.m. at the NTU Gymnasium of ChengZhong Campus.",
