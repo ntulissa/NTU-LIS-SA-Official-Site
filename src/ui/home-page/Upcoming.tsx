@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Reveal } from "../general/shared";
-import { EVENTS, eventEnd, isSchoolOnly, accentColorOf, ymd, type CalEvent } from "../latest/events";
+import { EVENTS, eventEnd, eventStart, isSchoolOnly, accentColorOf, ymd, type CalEvent } from "../latest/events";
 import { BENTO, DEPT_COLORS, serviceBySlug, type ServiceCell } from "../services/servicesData";
 import { defineText, useI18n } from "../i18n";
 // ↑ 本檔位於 src/ui/home-page/。
@@ -11,15 +11,15 @@ import { defineText, useI18n } from "../i18n";
  * 首頁「近期的系學會活動」
  * ─────────────────────────────────────────────────────────────
  * ● 自動從 events.ts 抓「今天起 DAYS_AHEAD 天內」的系學會活動（排除純學校日程、已結束的活動）。
- * ● 每場活動會對應到 servicesData.ts 的某項服務：
+ * ● 點卡片 →「系學會行事曆」頁，並直接打開那場活動的資訊框（網址 /calendar?event=<編號>）。
+ * ● 每場活動會對應到 servicesData.ts 的某項服務（只用來決定外觀）：
  *     - 卡片底色＝該服務的部門色
  *     - 圖片＝services/ 裡以該服務 slug 命名的圖（例：bbq.png）
- *     - 「深入了解」→ #/service/<slug>（Services.tsx 的詳情頁）
  * ● 對應方式（依序，先對到的就用）：
  *     1) events.ts 該活動的 service 欄位（★ 建議一律填這個，最準）
  *     2) 活動標題含有服務中文名（例：「LIS Cup 小圖盃」含「小圖盃」→ lis-cup）
  *     3) 活動標題含有下方 ALIASES 的關鍵字
- *   都對不到 → 連到行事曆頁、用部門色、不放圖。
+ *   都對不到 → 用部門色、不放圖（連結一樣到行事曆的這場活動）。
  * ● 最後一格固定是「探索更多活動」→ 系學會行事曆（#/calendar）。
  * ● 活動名稱的英文版在 events.ts 的 titleEn。
  */
@@ -47,7 +47,7 @@ const TEXT = defineText({
     sectionTitle: "Something every month — never a dull moment in LIS",
     button: "Learn more",
     exploreTitle: "Explore more events",
-    exploreDesc: "Nothing caught your eye? We've rounded up everything for you!",
+    exploreDesc: "Nothing catching your eye? We've rounded up everything for you!",
     prev: "Previous event",
     next: "Next event",
     taglines: {
@@ -64,6 +64,8 @@ const MAX_CARDS = 8;     // 最多顯示幾張活動卡（不含「探索更多�
 
 // 「探索更多活動」卡連結
 const EXPLORE_LINK = "#/calendar";
+// 每張活動卡的連結：行事曆頁＋自動打開該活動（idx＝它在 events.ts 的 EVENTS 第幾筆）
+const eventLink = (idx: number) => `#/calendar?event=${idx}`;
 
 // 卡片尺寸（clamp(最小, 隨螢幕縮放, 最大)）
 const CARD_W = "clamp(270px, 34vw, 560px)"; // 卡片寬
@@ -255,19 +257,20 @@ export default function Upcoming() {
     const limitStr = ymd(limit);
 
     return EVENTS
-      .filter((e) => !isSchoolOnly(e))
-      .filter((e) => eventEnd(e) >= todayStr && e.date <= limitStr) // 還沒結束、且 DAYS_AHEAD 天內開始
-      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((e, idx) => ({ e, idx })) // 記住在 EVENTS 的第幾筆，點進行事曆時用來打開這場活動
+      .filter(({ e }) => !isSchoolOnly(e))
+      .filter(({ e }) => eventEnd(e) >= todayStr && e.date <= limitStr) // 還沒結束、且 DAYS_AHEAD 天內開始
+      .sort((a, b) => eventStart(a.e).getTime() - eventStart(b.e).getTime()) // 不相連多天會用「下一場」排序
       .slice(0, MAX_CARDS)
-      .map((e, i) => {
+      .map(({ e, idx }) => {
         const svc = findService(e);
         return {
-          key: `${e.title}-${e.date}-${i}`,
+          key: `${e.title}-${e.date}-${idx}`,
           title: localize(e).title,
           tagline: svc ? tx.taglines[svc.slug] ?? svc.en : "",
           color: svc ? DEPT_COLORS[svc.dept] : accentColorOf(e),
           img: svc ? assetBySlug(svc.slug) : undefined,
-          href: svc ? `#/service/${svc.slug}` : EXPLORE_LINK,
+          href: eventLink(idx), // ★ 一律連到行事曆頁的這場活動（不再連到 Services 詳情頁）
         };
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps

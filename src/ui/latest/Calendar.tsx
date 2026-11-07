@@ -13,6 +13,8 @@ import {
   eventStart,
   eventEnd,
   spansMultipleDays,
+  hasMoreDates,
+  sessionDates,
   eventDayKeys,
   isSchoolOnly,
   isOngoing,
@@ -175,6 +177,9 @@ const LOC_PILL_SHADOW_HOVER = "0 10px 22px rgba(0,0,0,0.42), 0 3px 6px rgba(0,0,
 // ★ 請到 Google 官方品牌資源下載 Google Maps 圖示（建議 SVG），放到 src/imports/Calendar/，
 //   檔名改成「google-maps.svg」（或改下面 import 那行的檔名）。
 const MAPS_LOGO_SIZE = 26;     // logo 高度（px）
+// ★ 不相連多天活動（日期比較長）時，地點會自動排在「時間右邊 LOC_AFTER_TIME_GAP px」的位置，
+//   不會跟日期重疊；一般活動仍用上面的 LOC_X。
+const LOC_AFTER_TIME_GAP = 36; // 時間文字右緣到地點的距離（px）
 
 // ── 活動介紹文案──
 const DESC_X = 26;     // 左（px）
@@ -282,7 +287,7 @@ function isLight(hex: string): boolean {
   const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.72;
 }
-// 小卡右側文字：跨多天顯示日期範圍（如 9/22–24）；單日顯示時間（或「整天」）。
+// 小卡右側文字：跨多天顯示日期範圍（如 9/22–24）；單日（含不相連多天的每一場）顯示時間（或「整天」）。
 function spanText(e: CalEvent, allDay: string): string {
   if (spansMultipleDays(e)) {
     const s = new Date(`${e.date}T00:00:00+08:00`);
@@ -294,14 +299,27 @@ function spanText(e: CalEvent, allDay: string): string {
   return e.time ?? allDay;
 }
 
-// 展開卡上方那一行「日期（＋跨日範圍）＋時間」字串。
-function modalDateText(e: CalEvent): string {
-  const dt = eventStart(e);
-  const dateStr = `${dt.getFullYear()}.${pad(dt.getMonth() + 1)}.${pad(dt.getDate())}`;
-  const en = new Date(`${eventEnd(e)}T00:00:00+08:00`);
-  const rangeStr = spansMultipleDays(e) ? ` ～ ${pad(en.getMonth() + 1)}.${pad(en.getDate())}` : "";
+// 日期文字（卡片與展開卡共用）：
+//   ▸ 單日：「2026.11.04」
+//   ▸ 連續跨天：「2027.03.13 ～ 03.14」
+//   ▸ 不相連多天（moreDates）：「2026.11.10、11.17」（英文版用逗號；跨年的那一場會補上年份）
+function datesText(e: CalEvent, isEn: boolean): string {
+  const full = (d: string) => d.replace(/-/g, ".");          // 2026.11.10
+  const short = (d: string) => d.slice(5).replace("-", "."); // 11.17
+  if (hasMoreDates(e)) {
+    const all = sessionDates(e);
+    return all
+      .map((d, i) => (i === 0 || d.slice(0, 4) !== all[i - 1].slice(0, 4) ? full(d) : short(d)))
+      .join(isEn ? ", " : "、");
+  }
+  if (spansMultipleDays(e)) return `${full(e.date)} ～ ${short(eventEnd(e))}`;
+  return full(e.date);
+}
+
+// 展開卡上方那一行「日期（＋跨日範圍／其他場次）＋時間」字串。
+function modalDateText(e: CalEvent, isEn: boolean): string {
   const timeStr = e.time ? `  ${e.time}` : "";
-  return `${dateStr}${rangeStr}${timeStr}`;
+  return `${datesText(e, isEn)}${timeStr}`;
 }
 
 // ── 漸層外框膠囊標題（下一場活動 / 行事曆）─────────────────────────
@@ -351,18 +369,14 @@ function Countdown({ target }: { target: Date }) {
 
 // ── 單張「下一場活動」卡片（可點開）────────────────────────────────
 function EventCard({ e: raw, onOpen }: { e: CalEvent; onOpen: () => void }) {
-  const { localize, pick, track } = useI18n();
+  const { localize, pick, track, isEn } = useI18n();
   const tx = pick(TEXT);
   const e = localize(raw);
   const accent = accentColorOf(e); // 跨部門＝黃；單一部門＝該色
   const ongoing = isOngoing(e);    // 活動當天（進行中）＝整格填滿部門色
   const [hovered, setHovered] = useState(false);
   const filled = ongoing || hovered; // 進行中「或」滑鼠移上去 → 整張卡片填滿部門色
-  const dt = eventStart(e);
-  const dateStr = `${dt.getFullYear()}.${pad(dt.getMonth() + 1)}.${pad(dt.getDate())}`;
-  // 跨多天：日期後面接「～ MM.DD」；單日則接時間。
-  const en = new Date(`${eventEnd(e)}T00:00:00+08:00`);
-  const rangeStr = spansMultipleDays(e) ? ` ～ ${pad(en.getMonth() + 1)}.${pad(en.getDate())}` : "";
+  const dt = eventStart(e); // 倒數目標：不相連多天會自動是「下一場」
   const timeStr = e.time ? `　${e.time}` : "";
   const dots = e.depts.map((k) => DEPT_MAP[k]).filter(Boolean);
 
@@ -390,7 +404,7 @@ function EventCard({ e: raw, onOpen }: { e: CalEvent; onOpen: () => void }) {
         {e.title}
       </h3>
       <p className="mt-3" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: CARD_DATE_SIZE, letterSpacing: "0.08em", color: filled ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.45)" }}>
-        {dateStr}{rangeStr}{timeStr}
+        {datesText(e, isEn)}{timeStr}
       </p>
 
       {/* 左下角：部門色圓點。圓點位置固定不動；填色時（進行中 / hover）只是深灰膠囊「淡入」包住它，
@@ -534,6 +548,21 @@ function EventModal({ e: raw, onClose }: { e: CalEvent; onClose: () => void }) {
     document.fonts?.ready.then(fit).catch(() => {});
   }, [e.title, isDesktop]);
 
+  // ── 電腦版：日期比較長（不相連多天）時，地點自動往右讓開，不會壓到日期 ──
+  const timeRef = useRef<HTMLSpanElement>(null);
+  const [locX, setLocX] = useState(LOC_X);
+  useLayoutEffect(() => {
+    if (!isDesktop) return;
+    const place = () => {
+      const el = timeRef.current;
+      if (!el) return;
+      // offsetWidth 不受外層 scale 影響，跟 X/Y 同一套座標
+      setLocX(Math.max(LOC_X, TIME_X + el.offsetWidth + LOC_AFTER_TIME_GAP));
+    };
+    place();
+    document.fonts?.ready.then(place).catch(() => {});
+  }, [e.date, e.moreDates, e.time, isDesktop, isEn]);
+
   const dots = e.depts.map((k) => DEPT_MAP[k]).filter(Boolean);
   const deptDesc = deptDescOf(e, lang);
 
@@ -599,7 +628,7 @@ function EventModal({ e: raw, onClose }: { e: CalEvent; onClose: () => void }) {
           {/* 時間／地點：上下排列 */}
           <div className="mt-4 flex flex-col items-start gap-3">
             <span style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: M_META_SIZE, letterSpacing: "0.05em", opacity: 0.75 }}>
-              {modalDateText(e)}
+              {modalDateText(e, isEn)}
             </span>
             {/* 有 Google Maps 連結 → 漂浮膠囊（實色，不套透明度）；沒有 → 原本的 icon＋文字 */}
             {e.location && e.mapUrl && (
@@ -705,10 +734,11 @@ function EventModal({ e: raw, onClose }: { e: CalEvent; onClose: () => void }) {
 
         {/* 時間（Chiron Hei HK Text）*/}
         <span
+          ref={timeRef}
           className="absolute whitespace-nowrap pointer-events-none"
           style={{ left: TIME_X, top: TIME_Y, fontFamily: zhDisplay, fontWeight: 700, fontSize: TIME_SIZE, letterSpacing: "0.05em", lineHeight: 1, opacity: 0.7 }}
         >
-          {modalDateText(e)}
+          {modalDateText(e, isEn)}
         </span>
 
         {/* 地點（Location icon ＋ 文字，Chiron Hei HK Text）*/}
@@ -717,7 +747,7 @@ function EventModal({ e: raw, onClose }: { e: CalEvent; onClose: () => void }) {
           <div
             className="absolute"
             style={{
-              left: LOC_X,
+              left: locX,
               // 讓膠囊內的文字跟左邊時間那行上下置中對齊
               top: LOC_Y - LOC_PILL_PAD_Y - (Math.max(MAPS_LOGO_SIZE, LOC_SIZE * 1.2) - TIME_SIZE) / 2,
               zIndex: 5,
@@ -727,7 +757,7 @@ function EventModal({ e: raw, onClose }: { e: CalEvent; onClose: () => void }) {
           </div>
         )}
         {e.location && !e.mapUrl && (
-          <div className="absolute" style={{ left: LOC_X, top: LOC_Y, fontFamily: zhDisplay, fontWeight: 700, lineHeight: 1, opacity: 0.7 }}>
+          <div className="absolute" style={{ left: locX, top: LOC_Y, fontFamily: zhDisplay, fontWeight: 700, lineHeight: 1, opacity: 0.7 }}>
             <LocationLine text={e.location} fg={fg} />
           </div>
         )}
@@ -852,6 +882,25 @@ export default function Calendar() {
   //   內容即時同步；不用關掉重開。null＝關閉。
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const openEvent = openIdx != null ? EVENTS[openIdx] : null;
+
+  // ── 從首頁「近期活動」點進來：網址會帶 ?event=<編號>（＝EVENTS 的第幾筆），一進來就直接打開那場活動 ──
+  useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get("event");
+    if (raw == null) return;
+    const idx = Number(raw);
+    if (Number.isInteger(idx) && idx >= 0 && idx < EVENTS.length) setOpenIdx(idx);
+  }, []);
+
+  // 關閉資訊框時，順手把網址上的 ?event= 拿掉（不然重新整理又會跳出來）
+  const closeModal = () => {
+    setOpenIdx(null);
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("event")) {
+      params.delete("event");
+      const q = params.toString();
+      window.history.replaceState(window.history.state, "", `${window.location.pathname}${q ? `?${q}` : ""}${window.location.hash}`);
+    }
+  };
 
   // ── 上方：最近五場系學會活動（排除純學校日程）──
   // 收「進行中或未來」的活動（已完全結束的排除），依開始時間由近到遠；進行中的會排在最前面。
@@ -1243,7 +1292,7 @@ export default function Calendar() {
       </div>
 
       {/* ══════════ 展開版活動資訊 Modal（點卡片才出現）══════════ */}
-      {openEvent && <EventModal e={openEvent} onClose={() => setOpenIdx(null)} />}
+      {openEvent && <EventModal e={openEvent} onClose={closeModal} />}
     </section>
   );
 }

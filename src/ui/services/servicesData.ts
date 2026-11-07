@@ -336,6 +336,9 @@ export const BENTO: Cell[] = [
     introEn:
       "Where can an LIS degree take you? Our LIS Talks invite alumni from software, data analytics, digital marketing, research, publishing, curation and cultural institutions to share their job-hunting stories, real-world experience and industry trends. Ask questions, find direction and start building your network for internships and jobs.",
     note: false,
+    href: "https://reurl.cc/MWKeKX",
+    dest: "系友講座報名表單",
+    destEn: "LIS Talks registration form",
   },
 
   // 企業參訪
@@ -466,6 +469,9 @@ export const BENTO: Cell[] = [
     introEn:
       "Revived two years ago after a long break, the LIS Cup is our biggest sports event of the year. It's open to everyone — LIS students, friends from other departments and even our professors. Past tournaments featured basketball, badminton and volleyball, with more sports to come. Compete for glory, enjoy student-vs-professor matches or just come and cheer.",
     note: false,
+    href: "/#/calendar?event=2",
+    dest: "小圖盃羽球賽 2026 資訊",
+    destEn: "LIS Cup 2026: Badminton Info",
   },
 
   // 臺大日文圖資男籃

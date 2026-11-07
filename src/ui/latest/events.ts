@@ -10,6 +10,12 @@
 //   end?    結束日期（含當天），格式同 date。★ 只有「跨多天」的活動要填；單日活動省略即可。
 //           例：圖資週 09/22～09/24 → date:"2026-09-22", end:"2026-09-24"。
 //           月曆會自動把這幾天連成一條色條（頭尾實心圓、中間坐在色條上）。
+//   moreDates? ★ 「不相連」的多天活動用這個：除了 date 那天之外，還有哪幾天（陣列）。
+//           例：11/10 和 11/17 → date:"2026-11-10", moreDates:["2026-11-17"]。
+//           ▸ 月曆上每一天各自一顆實心圓（不會連成色條）。
+//           ▸ 上方卡片會顯示「2026.11.10、11.17」，倒數自動算「下一場」：
+//             第一場當天顯示「進行中」，隔天起改倒數到下一場，最後一場結束後才消失。
+//           ▸ 每一天都用同一個 time。和 end 不要同時用（有 moreDates 時會忽略 end）。
 //   time?   時間，24 小時制 "HH:mm"（如 "14:00"）。可省略；省略＝當天整天、倒數以 00:00 計。
 //   depts   這個活動屬於哪些部門（陣列，至少一個）。用下方 DeptKey 的「key」。
 //           ▸ 跨多個部門（像「系學會發表會」全部門都參與）就把它們全列進去，
@@ -87,7 +93,8 @@ export const REAL_DEPT_COUNT = DEPTS.filter((d) => d.key !== "school").length; /
 export type CalEvent = {
   title: string;
   date: string;   // 開始日期 "YYYY-MM-DD"
-  end?: string;   // 結束日期（含當天）"YYYY-MM-DD"；只有跨多天活動要填，單日省略
+  end?: string;   // 結束日期（含當天）"YYYY-MM-DD"；只有「連續」跨多天活動要填，單日省略
+  moreDates?: string[]; // 「不相連」的其他日期（如 ["2026-11-17"]）；和 date 合起來就是全部場次
   time?: string;  // "HH:mm"（可省略）
   depts: DeptKey[]; // 一或多個部門；跨多部門會自動用正副會長黃
   service?: string; // 對應 servicesData.ts 的服務 slug（決定首頁卡片的圖片／顏色／連結）
@@ -109,6 +116,7 @@ export type CalEvent = {
 // ★ 要新增活動：複製一筆，改 title / date / time / depts / service 即可（英文欄位記得一起改）。
 //   ▸ 全部門活動 → depts 填多個（如發表會）；月曆該日與卡片外框會變黃。
 //   ▸ 學校日程   → depts: ["school"]，只在月曆顯示、不進上方卡片（不用填 service）。
+//   ▸ 不相連的多天 → date 填第一天、moreDates 填其他天（例：moreDates: ["2026-12-07"]）。
 //   ▸ 想讓卡片「點得開」有完整資訊 → 補上 location / desc / signup 等欄位。
 export const EVENTS: CalEvent[] = [
   {
@@ -148,26 +156,28 @@ export const EVENTS: CalEvent[] = [
     descEn:
       "Alumni come back to share their career and study experiences —\n" +
       "from the tech industry and libraries to graduate school, explore what your future could look like.",
-    signup: false,
-    signupUrl: "",
+    signup: true,
+    signupUrl: "https://reurl.cc/MWKeKX",
   },
   {
-    title: "LIS Cup 小圖盃",
-    titleEn: "LIS Cup",
-    date: "2026-11-30",
-    time: "09:00",
+    title: "LIS Cup 小圖盃：羽球",
+    titleEn: "LIS Cup: Badminton",
+    date: "2026-11-10",
+    moreDates: ["2026-11-17"],
+    time: "16:00",
     depts: ["sp"],
     service: "lis-cup",
-    location: "待定",
-    locationEn: "TBD",
-    mapUrl: "",
+    location: "臺大新體 1F 多功能球場",
+    locationEn: "1F, NTU Sports Center",
+    mapUrl: "https://maps.app.goo.gl/sH2Lm1gbASiihfeg6",
     desc:
       "一年一度的系內運動賽事，\n" +
       "籃球、排球、羽球等你來組隊，一起為榮譽而戰！",
     descEn:
       "Our annual department sports tournament.\n" +
       "Form a team for basketball, volleyball or badminton and compete for glory!",
-    signup: false,
+    signup: true,
+    signupUrl: "https://forms.gle/A4LBeSZaAyt7LBfH8",
   },
   {
     title: "三系聯合系烤 2026",
@@ -212,6 +222,24 @@ export const EVENTS: CalEvent[] = [
     signupUrl: "https://forms.gle/mhrFCUDVgn72L4za8",
   },
   {
+    title: "LIS Cup 小圖盃：排球",
+    titleEn: "LIS Cup: Volleyball",
+    date: "2026-11-28",
+    time: "13:00",
+    depts: ["sp"],
+    service: "lis-cup",
+    location: "臺大排球場",
+    locationEn: "NTU Volleyball Court",
+    mapUrl: "https://maps.app.goo.gl/ueY87TnPjX3oGgt38",
+    desc:
+      "一年一度的系內運動賽事，\n" +
+      "籃球、排球、羽球等你來組隊，一起為榮譽而戰！",
+    descEn:
+      "Our annual department sports tournament.\n" +
+      "Form a team for basketball, volleyball or badminton and compete for glory!",
+    signup: false
+  },
+  {
     title: "杜鵑花節 2027",
     titleEn: "Azalea Festival 2027",
     date: "2027-03-13",
@@ -237,9 +265,9 @@ export const EVENTS: CalEvent[] = [
   { title: "中秋節連假", titleEn: "Mid-Autumn Festival Holiday", date: "2026-09-25", end: "2026-09-28", depts: ["school"] },
   { title: "國慶連假", titleEn: "National Day Holiday", date: "2026-10-09", end: "2026-10-11", depts: ["school"] },
   { title: "光復節連假", titleEn: "Retrocession Day Holiday", date: "2026-10-24", end: "2026-10-26", depts: ["school"] },
-  { title: "期中考週", titleEn: "Midterm Exam Week", date: "2026-11-09", end: "2026-11-13", depts: ["school"] },
+  { title: "期中考週", titleEn: "Midterm Exam Week", date: "2026-10-26", end: "2026-10-30", depts: ["school"] },
   { title: "校慶放假", titleEn: "NTU Anniversary Holiday", date: "2026-11-14", depts: ["school"] },
-  { title: "115-1 學期課程停修截止日", titleEn: "Fall 2026 Course Withdrawal Deadline", date: "2026-12-11", depts: ["school"] },
+  { title: "115-1 學期課程停修截止日", titleEn: "Course Withdrawal Deadline", date: "2026-12-11", depts: ["school"] },
   { title: "期末考週", titleEn: "Final Exam Week", date: "2026-12-21", end: "2026-12-25", depts: ["school"] },
   { title: "115-2 開學日", titleEn: "Spring 2027 Semester Begins", date: "2027-02-22", depts: ["school"] },
 
@@ -247,9 +275,37 @@ export const EVENTS: CalEvent[] = [
 ];
 
 // ── 共用小工具（上方卡片與月曆都會用到）──────────────────────────────
-// 台灣時區 +08:00；省略 time 視為當天 00:00。
-export function eventStart(e: CalEvent): Date {
-  return new Date(`${e.date}T${e.time ?? "00:00"}:00+08:00`);
+// 本地日期字串 "YYYY-MM-DD"（用來比對某活動是否落在某一天）。
+export function ymd(d: Date): string {
+  const y = d.getFullYear();
+  const m = `${d.getMonth() + 1}`.padStart(2, "0");
+  const day = `${d.getDate()}`.padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+// ── 不相連多天（moreDates）相關 ─────────────────────────────────────
+// 是否為「不相連多天」活動（有填 moreDates）。
+export function hasMoreDates(e: CalEvent): boolean {
+  return !!e.moreDates && e.moreDates.length > 0;
+}
+
+// 這個活動的所有「場次日期」（由早到晚、去掉重複）。
+//   ▸ 不相連多天：date ＋ moreDates
+//   ▸ 其他活動：只有 date 一天（連續跨天的請用 eventDayKeys 取每一天）
+export function sessionDates(e: CalEvent): string[] {
+  if (!hasMoreDates(e)) return [e.date];
+  return Array.from(new Set([e.date, ...(e.moreDates ?? [])])).sort();
+}
+
+// 倒數／排序用的「開始時間」。台灣時區 +08:00；省略 time 視為當天 00:00。
+//   ▸ 一般活動、連續跨天活動：＝第一天（跟以前一樣）。
+//   ▸ 不相連多天：＝「今天或之後最近的那一場」；全部都過了就回最後一場。
+export function eventStart(e: CalEvent, now: Date = new Date()): Date {
+  const at = (d: string) => new Date(`${d}T${e.time ?? "00:00"}:00+08:00`);
+  if (!hasMoreDates(e)) return at(e.date);
+  const today = ymd(now);
+  const all = sessionDates(e);
+  return at(all.find((d) => d >= today) ?? all[all.length - 1]);
 }
 
 // 把 depts 的 key 轉成完整部門物件（過濾掉打錯的 key）。
@@ -285,35 +341,38 @@ export function accentColorOf(e: CalEvent): string {
   return DEPT_MAP[e.depts[0]]?.color ?? LEAD_COLOR;
 }
 
-// 本地日期字串 "YYYY-MM-DD"（用來比對某活動是否落在某一天）。
-export function ymd(d: Date): string {
-  const y = d.getFullYear();
-  const m = `${d.getMonth() + 1}`.padStart(2, "0");
-  const day = `${d.getDate()}`.padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
 // ── 跨多天活動相關 ──────────────────────────────────────────────
-// 結束日（沒填 end＝當天單日）。
+// 結束日：連續跨天＝end；不相連多天＝最後一場；單日＝當天。
+// （「還沒結束」的判斷都看這個，所以不相連多天要等最後一場過完才會從卡片消失。）
 export function eventEnd(e: CalEvent): string {
+  if (hasMoreDates(e)) {
+    const all = sessionDates(e);
+    return all[all.length - 1];
+  }
   return e.end ?? e.date;
 }
 
-// 是否跨多天（有 end 且和開始日不同）。
+// 是否「連續」跨多天（有 end 且和開始日不同）→ 月曆畫成連續色條。
+// 不相連多天（moreDates）不算，月曆上每天各自一顆圓。
 export function spansMultipleDays(e: CalEvent): boolean {
-  return !!e.end && e.end !== e.date;
+  return !hasMoreDates(e) && !!e.end && e.end !== e.date;
 }
 
-// 是否「進行中」：今天（含頭尾）落在 date ~ end 之間。單日活動＝就是當天。
+// 是否「進行中」：
+//   ▸ 連續跨天／單日：今天（含頭尾）落在 date ~ end 之間。
+//   ▸ 不相連多天：今天剛好是其中一場。
 // 用 "YYYY-MM-DD" 字串比大小（字典序＝時間序），避開時區換算。
 export function isOngoing(e: CalEvent, now: Date = new Date()): boolean {
   const t = ymd(now);
+  if (hasMoreDates(e)) return sessionDates(e).includes(t);
   return t >= e.date && t <= eventEnd(e);
 }
 
-// 這個活動涵蓋的每一天（含頭尾）的日期字串陣列，用來標記月曆上每一格。
-// 用 UTC 逐日推進，避開夏令／時區造成的日期誤差。
+// 這個活動涵蓋的每一天的日期字串陣列，用來標記月曆上每一格。
+//   ▸ 不相連多天：就是每一場的日期。
+//   ▸ 連續跨天：頭到尾每一天（用 UTC 逐日推進，避開時區造成的日期誤差）。
 export function eventDayKeys(e: CalEvent): string[] {
+  if (hasMoreDates(e)) return sessionDates(e);
   const keys: string[] = [];
   const cur = new Date(`${e.date}T00:00:00Z`);
   const end = new Date(`${eventEnd(e)}T00:00:00Z`);
