@@ -25,11 +25,15 @@ import inaugurationPhoto from "@/imports/LatestUpdates/inauguration.png";
 import farewell52image from "@/imports/LatestUpdates/farewell52.png";
 import election2026 from "@/imports/LatestUpdates/election2026.png";
 import welcome2026 from "@/imports/LatestUpdates/welcome2026.png";
+import ooty2027 from "@/imports/LatestUpdates/ooty2027.png";
 import loungeNightUsage from "@/imports/LatestUpdates/lounge night.svg";
 import recruit2026 from "@/imports/LatestUpdates/recruit2026.png";
 import lockerclearance from "@/imports/LatestUpdates/lockerclearance.svg";
 import airconRules from "@/imports/LatestUpdates/airconRules.svg";
 import welcomeLISSA2026 from "@/imports/LatestUpdates/welcomeLISSA2026.svg";
+import listalk2026fall from "@/imports/LatestUpdates/listalk2026fall.png";
+import battleLA2026 from "@/imports/LatestUpdates/battleLA2026.png";
+import lisCup2026badminton from "@/imports/LatestUpdates/lisCup2026badminton.png";
 
 export type Announcement = {
   slug: string;
@@ -51,6 +55,77 @@ export type Announcement = {
 };
 
 export const ANNOUNCEMENTS: Announcement[] = [
+  {
+    slug: "battle-la-2026",
+    category: "體育部",
+    categoryEn: "Sports",
+    title: "臺大文學院籃球邀請賽 12/6 開打",
+    titleEn: "Battle LA 2026: NTU CLA Basketball Invitational on Dec. 6",
+    author: "臺大日文圖資男籃",
+    authorEn: "NTU J-LIS Men's Basketball",
+    date: "2026.11.07",
+    excerpt: "Battle LA. 決戰文學院！今年原定由院學會主辦的文學院新生盃因故未能舉行，由「臺大日文圖資男籃」挺身主動承辦，將於 12/6（日）18:00 至 22:00 在臺大醫學院體育館（醫體）正式開打！",
+    excerptEn: "Battle LA. The ultimate showdown in the NTU CLA! Originally scheduled to be hosted by the CLA Student Association, this year's CLA Freshman Cup was canceled. Stepping up to the challenge, the NTU J-LIS Men's Basketball team will host the event on Dec. 6 (Sun) from 6–10 p.m. at the NTU Gymnasium of ChengZhong Campus.",
+    paragraphs: [
+      "Battle LA. 決戰文學院！今年原定由院學會主辦的文學院新生盃因故未能舉行，將由臺大日文圖資男籃挺身主動承辦，將於 12/6（日）18:00 至 22:00 在臺大醫學院體育館（臺大醫體）正式開打！",
+      "本次除了文院各系隊較勁，更廣邀畢業 OB 與外系同學組隊切磋，想參賽的球友可直接掃描海報右下角 QR Code 報名，同時熱愛籃球、想在場上奔馳的系胞們也歡迎隨時加入系男籃的大家庭；當天更歡迎大家親臨醫體觀眾席，一起為圖資男籃賣力吶喊、熱血應援！",
+      "更多活動資訊請關注臺大日文圖資男籃Instagram。",
+    ],
+    paragraphsEn: [
+      "Battle LA. The ultimate showdown in the NTU CLA! Originally scheduled to be hosted by the CLA Student Association, this year's CLA Freshman Cup was canceled. Stepping up to the challenge, the NTU J-LIS Men's Basketball team will host the event on Dec. 6 (Sun) from 6–10 p.m. at the NTU Gymnasium of ChengZhong Campus.",
+      "In addition to competitions among departments in the CLA, we also invite alumni and students from other departments to form teams and compete. Interested players can sign up by scanning the QR code in the bottom right corner of the poster. Also, we welcome all students who love to hoop and want to run on the court to join our department's basketball team. We also encourage everyone to attend the game at the medical gymnasium and cheer for our J-LIS men's basketball team!",
+      "For more information, please follow the NTU J-LIS Men's Basketball Instagram account.",
+    ],
+    image: battleLA2026,
+    imageCaption: "臺大日文圖資男籃邀請大家 12/6 一同來觀賽、熱血應援！（圖／臺大日文圖資男籃）",
+    imageCaptionEn: "The NTU J-LIS Men's Basketball invites everyone to come and cheer on Dec. 6! (Photo: NTU J-LIS Men's Basketball)",
+  },
+  {
+    slug: "lis-cup-2026-badminton",
+    category: "體育部",
+    categoryEn: "Sports",
+    title: "2026 小圖盃羽球賽點燃戰火",
+    titleEn: "LIS Cup Badminton 2026 Gets Underway",
+    author: "臺大圖資系學會",
+    authorEn: "NTU LIS Student Association",
+    date: "2026.11.06",
+    excerpt: "為促進系上運動風氣、凝聚圖資人的情誼與團隊精神，系學會體育部特別主辦一年一度的小圖盃羽球項目。",
+    excerptEn: "To promote physical excercise, and build team spirit among LIS students, the NTU LIS SA Sports is proud to host the annual LIS Cup Badminton Tournament.",
+    paragraphs: [
+      "【2026 小圖盃羽球賽報名開跑】為促進系上運動風氣、凝聚圖資人的情誼與團隊精神，系學會特別主辦一年一度的小圖盃羽球項目。",
+      "今年競賽涵蓋男單、女單、男雙、女雙與混雙五大組別，比賽將於 11/10（二）及 11/17（二）16:00 至 18:00 在新體 1F 多功能球場熱血開打；為回饋系上同學，凡繳交 115 學年度系學會費者享有完全免費參賽福利，未繳費者報名費用為 50 元，雙打隊伍僅需由一人代表填表即可。",
+      "報名截止至 11/7（六）止，歡迎大家點擊報名表單（https://forms.gle/A4LBeSZaAyt7LBfH8 ）或直接掃描海報 QR Code 踴躍報名，一起在球場上切磋球技、揮灑汗水！",
+    ],
+    paragraphsEn: [
+      "To promote physical excercise, and build team spirit among LIS students, the NTU LIS SA Sports is proud to host the annual LIS Cup Badminton Tournament.",
+      "This year's tournament includes five categories: Men's Singles, Women's Singles, Men's Doubles, Women's Doubles, and Mixed Doubles. The matches will take place on Nov. 10 (Tue.) and Nov. 17 (Tue.) from 4:00 p.m. to 6:00 p.m. at the NTU Gymnasium 1F Multi-Purpose Court. As a token of appreciation for our students, those who have paid the LISSA fee for the 115th academic year can participate for free, while non-members will be charged a registration fee of NT$50. For doubles teams, only one member needs to fill out the registration form.",
+      "The registration deadline is Nov. 7 (Sat). We encourage everyone to click on the registration form (https://forms.gle/A4LBeSZaAyt7LBfH8) or scan the QR code on the poster to sign up and join us on the court for some friendly competition and fun!",
+    ],
+    image: lisCup2026badminton,
+  },
+  {
+    slug: "lis-talk-2026-fall",
+    category: "學術部",
+    categoryEn: "Academic Affairs",
+    title: "115-1 系友講座",
+    titleEn: "LIS Talk, Fall 2026",
+    author: "臺大圖資系學會",
+    authorEn: "NTU LIS Student Association",
+    date: "2026.11.07",
+    excerpt: "跳脫以往多偏向圖書館與傳統典藏領域的職涯分享，這一次系學會特別邀請本系楊東謀老師協助牽線，力邀兩位跨足頂尖科技與國際管理顧問領域的優秀學姐返校交流！",
+    excerptEn: "Breaking away from the traditional focus on libraries and archival fields, this time the LIS Student Association has invited Professor Tung-Mou Yang to help connect us with two outstanding alumni who have ventured into top technology and international management consulting fields for an engaging exchange!",
+    paragraphs: [
+      "跳脫以往多偏向圖書館與傳統典藏領域的職涯分享，這一次系學會特別邀請本系楊東謀老師協助牽線，力邀兩位跨足頂尖科技與國際管理顧問領域的優秀學姐返校交流！",
+      "從圖資出發，傅嬿羽學姐歷經痞客邦資料分析、清大服科所歷練，一路走到美光科技（Micron）擔任 AI 全端工程師，將分享她如何化身「資料計程車司機」，在巨量數據中開拓屬於資料科學的實戰旅程；而雙主修經濟並攻讀台大資管所的陳庭姍學姐，則深入 IBM Consulting 擔任企業轉型顧問，帶領大家了解如何從「尋找答案」躍升至「定義問題」，用商業思維與資訊專業替跨國企業解題。",
+      "不論你正對未來的跨領域發展感到迷惘，或是好奇圖資背景如何無縫接軌前端科技業與管顧圈，都別錯過這場視野截然不同的跨界對談，一起看見圖資人的無限可能！",
+    ],
+    paragraphsEn: [
+      "Breaking away from the traditional focus on libraries and archival fields, this time the LIS Student Association has invited Professor Tung-Mou Yang to help connect us with two outstanding alumni who have ventured into top technology and international management consulting fields for an engaging exchange!",
+      "Starting from LIS, Senior Yan-Yu Fu has experienced data analysis at Pixnet and training at the Institute of Service Science at NTHU, eventually becoming an AI full-stack engineer at Micron Technology. She will share how she transformed into a 'data taxi driver,' navigating through massive datasets to carve out a practical journey in data science. Meanwhile, Senior Ting-Shan Chen, who double-majored in Economics and pursued her studies at NTU's Department of Information Management, works as a business transformation consultant at IBM Consulting. She will lead us to understand how to transition from 'finding answers' to 'defining problems,' using business acumen and information expertise to solve challenges for multinational corporations.",
+      "Whether you're feeling uncertain about your future in interdisciplinary development or curious about how a LIS background can seamlessly transition into the tech industry and management consulting, don't miss this cross-disciplinary dialogue that offers a completely different perspective. Let's explore the limitless possibilities for LIS professionals together!",
+    ],
+    image: listalk2026fall,
+  },
   {
     slug: "recruitment-end-2026",
     category: "學會公告",
@@ -137,6 +212,29 @@ export const ANNOUNCEMENTS: Announcement[] = [
       "If you still need to rent a locker in the future, you are welcome to pay the LISSA fee to enjoy free locker rental, student lounge reservations, department apparel, small trophies, and discounts for various events!",
     ],
     image: lockerclearance,
+  },
+  {
+    slug: "ooty-2026-27",
+    category: "形象宣傳部",
+    categoryEn: "Image & Publicity",
+    title: "2026-27 系服徵稿開始",
+    titleEn: "Call for OOTY 2026-27 Designs",
+    author: "臺大圖資系學會",
+    authorEn: "NTU LIS Student Association",
+    date: "2026.10.12",
+    excerpt: "今年的系服由你來設計！歡迎大家踴躍投稿，將你心目中屬於圖資系的樣子畫下來，讓它成為大家穿在身上的驕傲，別錯過領取豐厚獎金的機會啦！",
+    excerptEn: "This year's OOTY LIS is designed by you LIS mates! We welcome everyone to submit their designs, capturing the essence of the LIS department and turning it into something we can proudly wear. Don't miss the chance to win generous prizes!",
+    paragraphs: [
+      "今年的系服由你來設計！歡迎大家踴躍投稿，將你心目中屬於圖資系的樣子畫下來，讓它成為大家穿在身上的驕傲，別錯過領取豐厚獎金的機會啦！",
+      "歡迎圖資系全體在學同學踴躍發揮創意，把你心中屬於圖資系的模樣與故事化作視覺，讓它成為大家穿在身上的專屬驕傲；今年系學會特別額外加碼新台幣 1,000 元獎金，徵稿截止日至 11/11（三）止，別錯過展現設計才華與領取豐厚獎金的機會，立即進入報名連結（https://reurl.cc/GgqKgy ）投稿，用你的作品點亮今年的圖資系服！"
+    ],
+    paragraphsEn: [
+      "This year's OOTY LIS is designed by you LIS mates! We welcome everyone to submit their designs, capturing the essence of the LIS department and turning it into something we can proudly wear. Don't miss the chance to win generous prizes!",
+      "We invite all students of the LIS department to unleash their creativity, transforming your vision and stories of the LIS department into visual designs that we can proudly wear. This year, the student association has added an extra NT$1,000 prize. The submission deadline is Wed 11/11, so don't miss this opportunity to showcase your design talent and win generous prizes. Click the registration link (https://reurl.cc/GgqKgy) to submit your work and illuminate this year's OOTY LIS with your creations!",
+    ],
+    image: ooty2027,
+    imageCaption: "2026-27 系服徵稿開始（圖／形宣部 杜芸非）",
+    imageCaptionEn: "Call for OOTY 2026-27 Designs (Image: Image & Publicity dept.)",
   },
   {
     slug: "lounge-night-usage",
