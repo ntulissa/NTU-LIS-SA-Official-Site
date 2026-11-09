@@ -36,6 +36,15 @@ import battleLA2026 from "@/imports/latest/battleLA2026.png";
 import lisCup2026badminton from "@/imports/latest/lisCup2026badminton.png";
 import LISSAofficialsite from "@/imports/latest/LISSAofficialsite.svg";
 
+// 相關連結按鈕（文章內文最下方的玻璃框）
+export type AnnouncementLink = {
+  label: string;                // 按鈕文字
+  labelEn?: string;             // 英文版按鈕文字
+  href: string;                 // https:// 開頭＝外部網址（開新分頁）；#/ 開頭＝站內頁面
+  style?: "primary" | "accent"; // 白色或綠色；不填＝第一顆白、其餘綠
+  color?: string;               // 綠色按鈕想換顏色才填，例如體育部藍 "#23658A"
+};
+
 export type Announcement = {
   slug: string;
   category: string;
@@ -46,6 +55,7 @@ export type Announcement = {
   paragraphs: string[];
   image?: string;
   imageCaption?: string;
+  links?: AnnouncementLink[];   // ★ 相關連結按鈕；不填＝這篇沒有按鈕
   // ── 英文版（可省略）──
   categoryEn?: string;
   titleEn?: string;
@@ -82,6 +92,9 @@ export const ANNOUNCEMENTS: Announcement[] = [
     image: LISSAofficialsite,
     imageCaption: "臺大圖資系學會全新官網上線（圖／臺大圖資系學會）",
     imageCaptionEn: "NTU LIS SA Official Website Launched! (Photo: NTU LIS Student Association)",
+    links: [
+      { label: "關於官方網站", labelEn: "About the Official Website", href: "#/service/website" },
+    ],
   },
   {
     slug: "battle-la-2026",
@@ -107,6 +120,10 @@ export const ANNOUNCEMENTS: Announcement[] = [
     image: battleLA2026,
     imageCaption: "臺大日文圖資男籃邀請大家 12/6 一同來觀賽、熱血應援！（圖／臺大日文圖資男籃）",
     imageCaptionEn: "The NTU J-LIS Men's Basketball invites everyone to come and cheer on Dec. 6! (Photo: NTU J-LIS Men's Basketball)",
+    links: [
+      { label: "立即報名", labelEn: "Sign Up", href: "https://forms.gle/nkYVbxVF9jtHteQVA" },
+      { label: "關於臺大日文圖資男籃", labelEn: "About NTU J-LIS Men's Basketball", href: "#/service/basketball" }
+    ]
   },
   {
     slug: "lis-cup-2026-badminton",
@@ -130,6 +147,9 @@ export const ANNOUNCEMENTS: Announcement[] = [
       "The registration deadline is Nov. 7 (Sat). We encourage everyone to click on the registration form (https://forms.gle/A4LBeSZaAyt7LBfH8) or scan the QR code on the poster to sign up and join us on the court for some friendly competition and fun!",
     ],
     image: lisCup2026badminton,
+    links: [
+      { label: "關於小圖盃", labelEn: "About LIS Cup", href: "#/service/lis-cup" },
+    ],
   },
   {
     slug: "lis-talk-2026-fall",
@@ -153,6 +173,10 @@ export const ANNOUNCEMENTS: Announcement[] = [
       "Whether you're feeling uncertain about your future in interdisciplinary development or curious about how a LIS background can seamlessly transition into the tech industry and management consulting, don't miss this cross-disciplinary dialogue that offers a completely different perspective. Let's explore the limitless possibilities for LIS professionals together!",
     ],
     image: listalk2026fall,
+    links: [
+      { label: "立即報名", labelEn: "Sign up", href: "https://reurl.cc/MWKeKX" },
+      { label: "關於系友講座", labelEn: "About LIS Talks", href: "#/service/alumni" },
+    ],
   },
   {
     slug: "recruitment-end-2026",
@@ -209,6 +233,9 @@ export const ANNOUNCEMENTS: Announcement[] = [
       "The student lounge's resources are 'prioritized for LIS students'. If students from other departments accompany you into the lounge, please ensure you both abide by all rules of this room, refraining from making noise or affecting the rights of LIS students; if complaints are received, the student association will ban specific students from other departments from entering the student lounge again."
     ],
     image: airconRules,
+    links: [
+      { label: "關於學輔室冷氣使用", labelEn: "About Lounge Air-Con", href: "#/service/aircon" },
+    ]
   },
   {
     slug: "locker",
@@ -240,6 +267,9 @@ export const ANNOUNCEMENTS: Announcement[] = [
       "If you still need to rent a locker in the future, you are welcome to pay the LISSA fee to enjoy free locker rental, student lounge reservations, department apparel, small trophies, and discounts for various events!",
     ],
     image: lockerclearance,
+    links: [
+      { label: "關於系櫃租借", labelEn: "About Locker Rental", href: "#/service/locker" },
+    ],
   },
   {
     slug: "ooty-2026-27",
@@ -263,6 +293,10 @@ export const ANNOUNCEMENTS: Announcement[] = [
     image: ooty2027,
     imageCaption: "2026-27 系服徵稿開始（圖／形宣部 杜芸非）",
     imageCaptionEn: "Call for OOTY 2026-27 Designs (Image: Image & Publicity dept.)",
+    links: [
+      { label: "立即報名", labelEn: "Submit Your Design", href: "https://reurl.cc/GgqKgy" },
+      { label: "關於系服訂購", labelEn: "About OOTY LIS", href: "#/service/ooty" }
+    ],
   },
   {
     slug: "lounge-night-usage",
@@ -282,6 +316,10 @@ export const ANNOUNCEMENTS: Announcement[] = [
       "We've secured extended evening access to the student lounge from the department office for the weeks before midterms (10/19–10/30) and finals (12/14–12/25), Monday to Friday, 7–10 p.m. This is a members-only benefit: members can apply alone or in groups of up to 5, and non-members may join as group members as long as a member is the main applicant. Please book through the form by 12:00 noon the day before. To cancel, email ntulissa1060@gmail.com by 12:00 noon on the day. Make the most of this space — we're here to help you ace your exams!",
     ],
     image: loungeNightUsage,
+    links: [
+      { label: "立即申請", labelEn: "Apply Now", href: "https://stitch-antler-b46.notion.site/17353c4e8df1837b835381775fff75a5" },
+      { label: "關於學輔室夜間使用", labelEn: "About Lounge Night Use", href: "#/service/lounge" }
+    ]
   },
   {
     slug: "recruitment-2026",
@@ -325,6 +363,9 @@ export const ANNOUNCEMENTS: Announcement[] = [
     image: recruit2026,
     imageCaption: "第 53 屆系學會招募中（圖／形宣部 石馨予）",
     imageCaptionEn: "The 53rd LISSA is recruiting (Design: Image & Publicity dept.)",
+    links: [
+      { label: "進一步了解", labelEn: "Learn More", href: "#/join" },
+    ]
   },
   {
     slug: "welcome2026",

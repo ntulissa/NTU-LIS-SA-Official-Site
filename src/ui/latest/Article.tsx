@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Reveal, useIsDesktop } from "../general/shared";
 import { getAnnouncement } from "./news.ts";
+import { DEPT_COLORS, serviceBySlug, type Dept } from "../services/servicesData";
 import { defineText, useI18n } from "../i18n";
 // 背景浮水印圖：先沿用現有的建築圖（很淡）。想換成臺大校徽等，改這行 import 即可。
 import watermark from "@/imports/latest/newsbackground.png";
@@ -9,9 +10,10 @@ import watermark from "@/imports/latest/newsbackground.png";
 // 畫面文字（中英兩份）。公告內容本身的英文寫在 news.ts 的 titleEn / paragraphsEn…
 // byline：作者掛名的前綴，{author} 會換成作者名
 // zhOnly：英文版時，若這篇公告還沒有英文內文，會在內文上方顯示這句提示
+// links ：相關連結區塊的無障礙名稱（螢幕閱讀器會念出來，畫面上看不到）
 const TEXT = defineText({
-  zh: { back: "回上頁", notFound: "找不到這篇公告。", byline: "文／{author}", zhOnly: "" },
-  en: { back: "Back", notFound: "We couldn't find this announcement.", byline: "By {author}", zhOnly: "This announcement is currently available in Chinese only." },
+  zh: { back: "回上頁", notFound: "找不到這篇公告。", byline: "文／{author}", zhOnly: "", links: "相關連結" },
+  en: { back: "Back", notFound: "We couldn't find this announcement.", byline: "By {author}", zhOnly: "This announcement is currently available in Chinese only.", links: "Related links" },
 });
 
 // ── 字型（與全站一致）──
@@ -61,8 +63,46 @@ const BODY    = { size: "clamp(0.95rem, 1.05vw, 1.05rem)", lineHeight: 2.1, line
 const IMAGE   = { x: 0, y: 0 };
 const CAPTION = { size: "0.82rem", x: 3, y: 0, gap: 15 }; // 圖說（與圖片的距離＝gap）
 
+// ★ 相關連結（內文最下方：Glass 毛玻璃框＋膠囊按鈕，依 Figma）
+//   gap      ：與內文最後一段的距離（px）
+//   size     ：按鈕字級
+//   blur     ：玻璃的模糊程度（px），越大越霧
+//   fill     ：玻璃本身的白色濃度（0～1），越大越白
+//   shadow   ：玻璃框的 drop shadow（CSS box-shadow 寫法）
+//   每篇公告要放哪些按鈕，寫在 news.ts 該篇的 links 欄位。
+//
+//   按鈕顏色「自動決定」，不用手動指定（見下方 linkColor）：
+//     連到服務頁（#/service/<slug>）→ 該服務所屬部門的顏色（servicesData.ts 的 DEPT_COLORS）
+//     連到部門頁（#/dept/<slug>）  → 該部門的顏色
+//     其他（報名表單、外部網址…）   → 白色
+const LINKS = {
+  gap: 48,
+  size: "1rem",
+  blur: 18,
+  fill: 0.06,
+  shadow: "0 10px 30px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.25)",
+};
+
 // 位移小工具：把 x/y 轉成 transform（0/0 時不輸出）
 const move = (x: number, y: number): CSSProperties => (x || y ? { transform: `translate(${x}px, ${y}px)` } : {});
+
+// 依連結目的地決定按鈕底色；回傳 null＝白色按鈕。
+//   - 公告裡有填 color 就用 color（特殊情況手動覆蓋）
+//   - #/service/<slug> → 找 servicesData.ts 裡的那項服務 → 它的部門色
+//   - #/dept/<slug>    → 該部門色
+//   - 其他（報名表單等）→ 白色
+// 支援的寫法："#/service/alumni"、"/service/alumni"、"/#/service/alumni"
+function linkColor(link: { href: string; color?: string }): string | null {
+  if (link.color) return link.color;
+  const svc = link.href.match(/^\/?#?\/service\/([^/?#]+)/);
+  if (svc) {
+    const found = serviceBySlug(svc[1]);
+    if (found) return DEPT_COLORS[found.dept];
+  }
+  const dept = link.href.match(/^\/?#?\/dept\/([^/?#]+)/);
+  if (dept && dept[1] in DEPT_COLORS) return DEPT_COLORS[dept[1] as Dept];
+  return null;
+}
 
 // 回上頁：有上一頁就返回，否則退回公告列表。
 function goBack() {
@@ -177,6 +217,8 @@ export default function Article({ slug }: { slug: string }) {
   const lastPara = article.paragraphs.length - 1;
   // 英文版但這篇沒有英文內文 → 顯示提示（內文先用中文）
   const showZhOnlyNotice = isEn && !raw.paragraphsEn?.length && tx.zhOnly;
+  // 相關連結：每顆按鈕的 label 也有英文版（labelEn），一樣用 localize 切換
+  const links = (raw.links ?? []).map((l) => localize(l));
 
   const captionStyle: CSSProperties = {
     fontFamily: zhFont,
@@ -234,7 +276,70 @@ export default function Article({ slug }: { slug: string }) {
     </figure>
   ) : null;
 
-  // 左半（可捲動）內文：回上頁 → 標題 → 作者/日期 →（手機才內嵌的插圖）→ 內文
+  // ── 相關連結：Glass 框＋膠囊按鈕 ──
+  // Glass 由四層組成：
+  //   ① 背後模糊（backdrop-filter）＋ 很淡的白色斜向漸層 → 霧面玻璃本體
+  //   ② 漸層描邊：左上亮、中間淡、右下再微亮 → 玻璃邊緣的反光
+  //   ③ 內側頂部一條細高光（inset shadow）→ 玻璃厚度感
+  //   ④ 外側 drop shadow → 浮起來
+  // 手機：框撐滿寬度、按鈕平分（太窄時自動換行，各佔一整列）；平板以上：框只包住按鈕。
+  const linksBlock =
+    links.length > 0 ? (
+      <nav
+        aria-label={tx.links}
+        className="relative flex flex-wrap gap-3 sm:gap-6 w-full sm:w-fit rounded-3xl p-4 sm:p-5"
+        style={{
+          marginTop: LINKS.gap,
+          background: `linear-gradient(135deg, rgba(255,255,255,${LINKS.fill + 0.04}) 0%, rgba(255,255,255,${LINKS.fill}) 45%, rgba(255,255,255,${Math.max(0, LINKS.fill - 0.03)}) 100%)`,
+          backdropFilter: `blur(${LINKS.blur}px) saturate(140%)`,
+          WebkitBackdropFilter: `blur(${LINKS.blur}px) saturate(140%)`,
+          boxShadow: `${LINKS.shadow}, inset 0 1px 0 rgba(255,255,255,0.14)`,
+        }}
+      >
+        {/* ② 漸層描邊（用遮罩只留下 1px 的邊）*/}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-[inherit]"
+          style={{
+            padding: 1,
+            background: "linear-gradient(160deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.14) 35%, rgba(255,255,255,0.06) 65%, rgba(255,255,255,0.32) 100%)",
+            WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+            WebkitMaskComposite: "xor",
+            mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)",
+          }}
+        />
+
+        {links.map((link, i) => {
+          // 顏色自動決定：服務頁／部門頁＝部門色，其他（報名等）＝白色
+          const color = linkColor(link);
+          const isPrimary = color === null;
+          // 外部網址（http 開頭，例如 Google 表單）開新分頁；站內頁面（#/ 開頭）在原分頁切換
+          const isExternal = /^https?:\/\//.test(link.href);
+          return (
+            <a
+              key={link.href + i}
+              href={link.href}
+              {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              className={`group relative flex-1 sm:flex-none min-w-[9.5rem] inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-2.5 transition-all duration-200 hover:-translate-y-0.5 ${
+                isPrimary ? "bg-white text-black hover:bg-white/90" : "text-white hover:brightness-110"
+              }`}
+              style={{
+                fontFamily: zhFont,
+                fontWeight: 700,
+                fontSize: LINKS.size,
+                letterSpacing: track("0.12em"),
+                ...(isPrimary ? {} : { background: color }),
+              }}
+            >
+              {link.label}
+              <ArrowRight size={18} strokeWidth={2.6} className="shrink-0 group-hover:translate-x-1 transition-transform duration-200" />
+            </a>
+          );
+        })}
+      </nav>
+    ) : null;
+
+  // 左半（可捲動）內文：回上頁 → 標題 → 作者/日期 →（手機才內嵌的插圖）→ 內文 → 相關連結
   const textContent = (
     <>
       {/* 回上頁（白色膠囊，hover 箭頭往左滑）*/}
@@ -300,6 +405,13 @@ export default function Article({ slug }: { slug: string }) {
           ))}
         </div>
       </Reveal>
+
+      {/* 相關連結（沒有 links 的公告不會出現）*/}
+      {linksBlock && (
+        <Reveal delay={130}>
+          <div style={mv(BODY.x, BODY.y)}>{linksBlock}</div>
+        </Reveal>
+      )}
     </>
   );
 
