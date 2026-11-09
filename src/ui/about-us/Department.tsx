@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft } from "lucide-react";
 import { Reveal } from "../general/shared";
 import { DEPARTMENTS, deptHashtags } from "./departments";
@@ -113,6 +113,18 @@ const HEAD_PHOTO = {
   top: 24,         // 頭頂距離照片框上緣幾 px（所有幹部共用；越大＝人越往下）
   threshold: 0.1,  // 偵測靈敏度：某一列「有內容的寬度」超過整張寬度的 10% 才算頭頂。
                    // 這樣幾根翹起來的頭髮（如林榮恩那撮）不會被當成頭頂。一般不用改。
+};
+
+// ⑥ 幹部「姓名＋系級」那一列的寬度
+//    姓名一律不換行，系級膠囊永遠緊貼在名字右邊。
+//    名字太長（如英文名 Ya-Wen, Chuang）時：
+//      1. 先允許這一列比照片框寬一點（往兩側的卡片間距延伸）；
+//      2. 還是放不下，才自動把姓名字級縮小到剛好放得下。
+//    手機上也會自動避免超出螢幕。
+const NAME_ROW = {
+  maxWidth: 1.15, // 這一列最多可以是照片框寬度的幾倍（1 = 不超出框；1.15 = 可多 15%）
+  minScale: 0.6,  // 姓名最多縮小到原本的 60%（避免縮到看不清楚）
+  screenPad: 16,  // 手機上和螢幕左右邊緣至少保留幾 px
 };
 
 // 讀取 imports/about-us/members/ 底下所有「<縮寫>-name.svg」（Vite）。
@@ -360,9 +372,49 @@ function HeadCard({ head, delay }: { head: Head; delay: number }) {
   const offsetY = HEAD_PHOTO.top + (head.photo?.y ?? 0);
   const zoom = head.photo?.zoom ?? 1;
 
+  // ── 姓名太長時自動縮字（見上方 NAME_ROW）──
+  const cardRef = useRef<HTMLDivElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLParagraphElement>(null);
+  const [nameScale, setNameScale] = useState(1);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card || typeof window === "undefined") return;
+    let frame = 0;
+    const fit = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const row = rowRef.current;
+        const nameEl = nameRef.current;
+        if (!row || !nameEl) return;
+        // 目前畫面上的寬度 → 換算回「沒縮字」時姓名的原始寬度
+        const cur = parseFloat(nameEl.dataset.scale || "1");
+        const nameW = nameEl.offsetWidth / cur;
+        const others = row.offsetWidth - nameEl.offsetWidth; // 系級膠囊 + 間距（不隨姓名縮放）
+        // 可用寬度：照片框 × maxWidth，但不能超出螢幕
+        const rect = card.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const toScreenEdge = Math.min(centerX, window.innerWidth - centerX) - NAME_ROW.screenPad;
+        const allowed = Math.min(rect.width * NAME_ROW.maxWidth, toScreenEdge * 2);
+        const next = Math.max(NAME_ROW.minScale, Math.min(1, (allowed - others) / nameW));
+        if (Math.abs(next - cur) > 0.005) {
+          nameEl.dataset.scale = String(next);
+          setNameScale(next);
+        }
+      });
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(card);
+    // 字型載入完成後寬度會變，再量一次
+    document.fonts?.ready.then(fit).catch(() => {});
+    return () => { ro.disconnect(); cancelAnimationFrame(frame); };
+  }, [head.name, head.cls]);
+
   return (
     <Reveal delay={delay}>
-      <div className="flex flex-col items-center text-center">
+      <div ref={cardRef} className="flex flex-col items-center text-center">
         {/* 照片框：超出框的部分裁掉；下緣淡出的漸層套在框上（不管照片多高，淡出位置都固定） */}
         <div
           className="relative w-full overflow-hidden"
@@ -397,11 +449,12 @@ function HeadCard({ head, delay }: { head: Head; delay: number }) {
           )}
         </div>
 
-        <div className="flex items-end justify-center gap-3 mt-4">
-          <p className="text-white leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1.8rem,3vw,2.8rem)", letterSpacing: track("0.06em", "0"), transform: `translate(${HEAD_POS.name.x}px, ${HEAD_POS.name.y}px)` }}>
+        {/* 姓名＋系級：寬度跟著內容（w-max），不被照片框寬度限制，也不換行；置中後往兩側延伸 */}
+        <div ref={rowRef} className="flex items-end justify-center gap-3 mt-4 w-max whitespace-nowrap">
+          <p ref={nameRef} className="text-white leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: `calc(clamp(1.8rem,3vw,2.8rem) * ${nameScale})`, letterSpacing: track("0.06em", "0"), transform: `translate(${HEAD_POS.name.x}px, ${HEAD_POS.name.y}px)` }}>
             {head.name}
           </p>
-          <span className="mb-1 rounded-[6px] px-2.5 py-1" style={{ background: "linear-gradient(90deg,#FFF 0%,#B3B3B3 100%)", color: "#000", fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.8rem,1.1vw,1.05rem)", transform: `translate(${HEAD_POS.cls.x}px, ${HEAD_POS.cls.y}px)` }}>
+          <span className="shrink-0 mb-1 rounded-[6px] px-2.5 py-1" style={{ background: "linear-gradient(90deg,#FFF 0%,#B3B3B3 100%)", color: "#000", fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.8rem,1.1vw,1.05rem)", transform: `translate(${HEAD_POS.cls.x}px, ${HEAD_POS.cls.y}px)` }}>
             {head.cls}
           </span>
         </div>
@@ -410,6 +463,37 @@ function HeadCard({ head, delay }: { head: Head; delay: number }) {
         </p>
       </div>
     </Reveal>
+  );
+}
+
+// ── 部員姓名：手機版英文名一律縮寫姓氏 ──
+// 英文名格式為「名, 姓」（例：Wei-Ting, Ou）。
+//   手機版（螢幕寬度 < 640px）：一律顯示 Wei-Ting, O.
+//   平板／電腦（≥ 640px）：顯示全名 Wei-Ting, Ou
+// 想改切換的寬度：把下方 MemberName 裡的 sm:hidden / sm:inline 換成 md:（768px）或 lg:（1024px）。
+// 中文名（沒有逗號）不受影響。縮寫後還是太長，才會用「…」截斷。
+function shortEnName(n: string): string | null {
+  const i = n.lastIndexOf(",");
+  if (i < 0) return null;
+  const given = n.slice(0, i).trim();
+  const surname = n.slice(i + 1).trim();
+  if (!given || !surname) return null;
+  return `${given}, ${surname[0].toUpperCase()}.`;
+}
+
+function MemberName({ name, style }: { name: string; style: CSSProperties }) {
+  const short = shortEnName(name);
+  return (
+    <span className="text-white truncate min-w-0" style={style} title={name}>
+      {short ? (
+        <>
+          <span className="sm:hidden">{short}</span>
+          <span className="hidden sm:inline">{name}</span>
+        </>
+      ) : (
+        name
+      )}
+    </span>
   );
 }
 
@@ -633,9 +717,7 @@ export default function Department({ slug }: { slug: string }) {
                     <span className="shrink-0 text-white/70 rounded-[4px] px-1.5 py-0.5" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.62rem", background: "rgba(255,255,255,0.12)", letterSpacing: "0.04em" }}>
                       {m.c}
                     </span>
-                    <span className="text-white truncate" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.1em") }}>
-                      {m.n}
-                    </span>
+                    <MemberName name={m.n} style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.1em") }} />
                   </div>
                 ))}
               </div>

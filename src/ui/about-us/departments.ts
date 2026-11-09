@@ -46,7 +46,7 @@ export const DEPARTMENTS: Record<string, DeptData> = {
       "Join Events and plan the department's biggest events yourself — from proposals and on-site coordination to sponsorship negotiations. It's more than running events: it's a stage to create memories with your teammates and fire up the whole department. Help light up LIS life — we just need you!",
     heads: [
       { name: "蕭忻緹", nameEn: "Hsin-Ti, Hsiao", cls: "B14", title: "部長", titleEn: "Head", img: memImg("eve1"), photo: { zoom: 0.75 } },
-      { name: "莊雅雯", nameEn: "Ya-Wen, Zhuang", cls: "B14", title: "部長", titleEn: "Head", img: memImg("eve2"), photo: { zoom: 0.95 } },
+      { name: "莊雅雯", nameEn: "Ya-Wen, Zhuang", cls: "B14", title: "部長", titleEn: "Head", img: memImg("eve2"), photo: { zoom: 0.75 } },
     ],
     members: [
       { n: "張瑄予", nEn: "Hsuan-Yu, Chang", c: "B14" },
