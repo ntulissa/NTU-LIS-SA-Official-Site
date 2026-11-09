@@ -136,7 +136,7 @@ export const ANNOUNCEMENTS: Announcement[] = [
     category: "學術部",
     categoryEn: "Academic Affairs",
     title: "115-1 系友講座",
-    titleEn: "LIS Talk, Fall 2026",
+    titleEn: "LIS Talks, Fall 2026",
     author: "臺大圖資系學會",
     authorEn: "NTU LIS Student Association",
     date: "2026.11.07",

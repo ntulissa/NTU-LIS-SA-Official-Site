@@ -149,8 +149,8 @@ export const EVENTS: CalEvent[] = [
     signupUrl: "https://forms.gle/nBQ2AgeNh6chaeQ8A",
   },
   {
-    title: "LIS Talk: 系友講座",
-    titleEn: "LIS Talk",
+    title: "LIS Talks: 系友講座",
+    titleEn: "LIS Talks: 2026 Fall",
     date: "2026-11-17",
     time: "18:30",
     depts: ["aca"],
