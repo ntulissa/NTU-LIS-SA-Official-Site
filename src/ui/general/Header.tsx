@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
-import imgLissaLogo from "@/imports/Header/NTULISSAlogo.svg";
+import imgLissaLogo from "@/imports/general/header/NTULISSAlogo.svg";
 import { useIsDesktop } from "./shared";
 import { useI18n, type Lang } from "../i18n";
 import LanguageSwitcher from "../i18n/LanguageSwitcher";

@@ -25,13 +25,13 @@ import {
 } from "./events";
 
 // ── Presented by NTU LIS SA 圖片 ──────────────────────────────────
-// 你放在 src/imports/Calendar/ 底下的 SVG。用 "@" 別名（＝src），跟 HeroSection
-// 的 `@/imports/HomePage-1/...` 同一種寫法，才不會因為檔案層級不同而算錯相對路徑。
+// 你放在 src/imports/latest/calendar/ 底下的 SVG。用 "@" 別名（＝src），
+// 跟 HeroSection 的 imports 寫法相同，才不會因為檔案層級不同而算錯相對路徑。
 // ★ 若你的檔名不是「Presented by NTU LISSA.svg」，把下面這行的檔名改成你實際的即可。
 //   （若 TS 報「找不到模組」，在 vite-env.d.ts 補一行 declare module "*.svg"; 即可。）
-import presentedBySrc from "@/imports/Calendar/Presented by NTU LISSA.svg";
+import presentedBySrc from "@/imports/latest/calendar/Presented by NTU LISSA.svg";
 // Google Maps 官方 logo（請自行從 Google 官方品牌資源下載後放到這個位置）
-import googleMapsLogoSrc from "@/imports/Calendar/google-maps.svg";
+import googleMapsLogoSrc from "@/imports/latest/calendar/google-maps.svg";
 
 /**
  * 系學會行事曆頁（CALENDAR）── 版型／呈現邏輯
@@ -174,7 +174,7 @@ const LOC_PILL_SHADOW = "0 6px 14px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.25)
 const LOC_PILL_SHADOW_HOVER = "0 10px 22px rgba(0,0,0,0.42), 0 3px 6px rgba(0,0,0,0.28)"; // 滑上去時陰影加深
 // 註：有膠囊時，LOC_X＝膠囊左緣；高度會自動算，讓膠囊裡的文字跟左邊時間那行上下對齊（LOC_Y 一樣用來調上下）。
 // ── Google Maps 官方 logo 圖檔 ──
-// ★ 請到 Google 官方品牌資源下載 Google Maps 圖示（建議 SVG），放到 src/imports/Calendar/，
+// ★ 請到 Google 官方品牌資源下載 Google Maps 圖示（建議 SVG），放到 src/imports/latest/calendar/，
 //   檔名改成「google-maps.svg」（或改下面 import 那行的檔名）。
 const MAPS_LOGO_SIZE = 26;     // logo 高度（px）
 // ★ 不相連多天活動（日期比較長）時，地點會自動排在「時間右邊 LOC_AFTER_TIME_GAP px」的位置，

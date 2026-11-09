@@ -32,7 +32,7 @@
 //             azalea 杜鵑花節       lis-cup 小圖盃    ooty 系服訂購    textbook 教科書代訂
 //   image?  ★ 這場活動「專屬」的首頁卡片圖片（可省略）。
 //           ▸ 沒填 → 用 service 對應的服務圖（跟以前一樣）。
-//           ▸ 有填 → 以這張為主。把圖檔放到 src/imports/Events/，這裡只要寫檔名：
+//           ▸ 有填 → 以這張為主。把圖檔放到 src/imports/home-page/events/，這裡只要寫檔名：
 //               image: "lis-cup-badminton.png"   （副檔名可省略："lis-cup-badminton"）
 //             也可以直接貼完整網址：image: "https://...."
 //           ▸ 支援 png / jpg / jpeg / webp / svg。檔名打錯找不到時，會自動退回服務圖。
@@ -104,7 +104,7 @@ export type CalEvent = {
   time?: string;  // "HH:mm"（可省略）
   depts: DeptKey[]; // 一或多個部門；跨多部門會自動用正副會長黃
   service?: string; // 對應 servicesData.ts 的服務 slug（決定首頁卡片的顏色／預設圖片／標語）
-  image?: string;   // 專屬圖片檔名（放 src/imports/Events/）或完整網址；有填就優先用這張
+  image?: string;   // 專屬圖片檔名（放 src/imports/home-page/events/）或完整網址；有填就優先用這張
 
   // ── 展開版活動資訊（點開卡片後顯示；皆可省略）──
   location?: string;  // 地點文字
@@ -124,7 +124,7 @@ export type CalEvent = {
 //   ▸ 全部門活動 → depts 填多個（如發表會）；月曆該日與卡片外框會變黃。
 //   ▸ 學校日程   → depts: ["school"]，只在月曆顯示、不進上方卡片（不用填 service）。
 //   ▸ 不相連的多天 → date 填第一天、moreDates 填其他天（例：moreDates: ["2026-12-07"]）。
-//   ▸ 想換首頁卡片的圖 → 圖檔放 src/imports/Events/，加 image: "檔名.png"。
+//   ▸ 想換首頁卡片的圖 → 圖檔放 src/imports/home-page/events/，加 image: "檔名.png"。
 //   ▸ 想讓卡片「點得開」有完整資訊 → 補上 location / desc / signup 等欄位。
 export const EVENTS: CalEvent[] = [
   {

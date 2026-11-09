@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
-import imgBuildingResources from "@/imports/AcademicResources/de7749452570d864c1f5c584765f093ab16a6d89.png";
-import imgRect7 from "@/imports/AcademicResources/aeb41d7034b1b48d5fc9df0a580281ac376ad0f1.png";
-import imgRect8 from "@/imports/AcademicResources/1f59199eb1196007561b8c8c386714d53fbb3e21.png";
+import imgBuildingResources from "@/imports/services/resources/de7749452570d864c1f5c584765f093ab16a6d89.png";
+import imgRect7 from "@/imports/services/resources/aeb41d7034b1b48d5fc9df0a580281ac376ad0f1.png";
+import imgRect8 from "@/imports/services/resources/1f59199eb1196007561b8c8c386714d53fbb3e21.png";
 import { PageEyebrow, Reveal } from "../general/shared";
 import { defineText, useI18n } from "../i18n";
 

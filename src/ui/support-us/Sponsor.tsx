@@ -89,7 +89,7 @@ const THANKS_LAYOUT = {
   sub:    { size: 20, x: 0, y: 0 },             // 副標
   button: { size: 17, x: 0, y: 40 },            // 按鈕文字
 };
-// 背景：散布多個箭頭圖（imports/Sponsor/arrow.svg），各自「閃動」（淡入淡出）。
+// 背景：散布多個箭頭圖（imports/support-us/sponsor/arrow.svg），各自「閃動」（淡入淡出）。
 // 每個箭頭：x/y = 相對畫面中心的位移(px，負=左/上、正=右/下)；size = 寬度(px，可省略用預設)；delay = 閃動起始錯開(秒)。
 // (0,0) = 畫面正中心。想加減幾個 → 增刪 THANKS_ARROWS 的項目。
 const THANKS_ARROW = { w: 300 };                       // 箭頭圖預設寬度(px)
@@ -101,20 +101,20 @@ const THANKS_ARROWS: ThanksArrow[] = [
   { x: -540, y:  240, delay: 1.8 },
   { x:  540, y:  240, delay: 2.6 },
 ];
-// ── imports/Sponsor/*.svg 自動讀取（缺檔不會壞，會顯示佔位框） ──
+// ── imports/support-us/sponsor/*.svg 自動讀取（缺檔不會壞，會顯示佔位框） ──
 // 若原始碼不在 /src 底下，改下面的 glob 路徑字串即可；
 // 舊版 Vite 請把 `query:"?url", import:"default"` 換成 `as:"url"`。
-const SPONSOR_SVGS = import.meta.glob("/src/**/Sponsor/*.svg", {
+const SPONSOR_SVGS = import.meta.glob("/src/imports/support-us/sponsor/*.svg", {
   eager: true,
   query: "?url",
   import: "default",
 }) as Record<string, string>;
 function sponsorSvg(file: string): string | undefined {
-  const hit = Object.keys(SPONSOR_SVGS).find((p) => p.endsWith(`/Sponsor/${file}`));
+  const hit = Object.keys(SPONSOR_SVGS).find((p) => p.endsWith(`/support-us/sponsor/${file}`));
   return hit ? SPONSOR_SVGS[hit] : undefined;
 }
 
-// ── 三個贊助方案（svg 放 imports/Sponsor/；名稱用 mono）──
+// ── 三個贊助方案（svg 放 imports/support-us/sponsor/；名稱用 mono）──
 //   nameEn / descEn ＝英文版
 const PLANS = [
   { key: "basic",   svg: "basic.svg",   name: "BASIC  基礎曝光",  desc: "最輕量的支持方式，在系學會官網與年度感謝中露出品牌，適合想先試水溫的夥伴。",
@@ -293,7 +293,7 @@ export default function Sponsor() {
           </div>
         </div>
 
-        {/* 底部置中：Sponsor LISSA logo（imports/Sponsor/sponsorLISSA.svg） */}
+        {/* 底部置中：Sponsor LISSA logo（imports/support-us/sponsor/sponsorLISSA.svg） */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center justify-center">
           {heroLogo ? (
             <img src={heroLogo} alt="Sponsor — NTU LIS SA" className="select-none" style={{ height: `${isDesktop ? HERO_LOGO.h : 44}px`, width: "auto", objectFit: "contain", ...moveIf(isDesktop, HERO_LOGO) }} />

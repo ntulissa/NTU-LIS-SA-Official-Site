@@ -2,8 +2,8 @@
 // 歷任會長「資料」（內容）。要新增／修改某一屆，只要改這支檔案就好，畫面會自動生效。
 // 放置位置：src/ui/about-us/presidents.ts
 //   （呈現邏輯／版型在同資料夾的 Presidents.tsx，一般不用動。）
-import president52Photo from "@/imports/Presidents/52.jpg";
-import president53Photo from "@/imports/Presidents/53.png";
+import president52Photo from "@/imports/about-us/presidents/52pres.png";
+import president53Photo from "@/imports/about-us/presidents/53pres.png";
 //
 // 每一屆 = 一個 President 物件，欄位說明：
 //   gen       第幾屆（數字，如 52）。
@@ -20,7 +20,7 @@ import president53Photo from "@/imports/Presidents/53.png";
 // ★ 陣列 PRESIDENTS 請由「新 → 舊」排序（畫面預設顯示第一個＝現任）。任期由屆數自動推算。
 //
 // ── 照片怎麼放 ─────────────────────────────────────────────
-//   把照片放到 src/imports/Presidents/，再於本檔匯入並指定給對應屆數的 img。
+//   把照片放到 src/imports/about-us/presidents/，再於本檔匯入並指定給對應屆數的 img。
 // ══════════════════════════════════════════════════════════════════════════
 
 // ── 資料型別 ────────────────────────────────────────────────

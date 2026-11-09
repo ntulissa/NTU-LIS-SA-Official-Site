@@ -14,7 +14,7 @@ import { defineText, useI18n } from "../i18n";
  * ● 點卡片 →「系學會行事曆」頁，並直接打開那場活動的資訊框（網址 /calendar?event=<編號>）。
  * ● 每場活動會對應到 servicesData.ts 的某項服務（只用來決定外觀）：
  *     - 卡片底色＝該服務的部門色
- *     - 圖片：events.ts 有填 image → 用那張（src/imports/Events/ 裡的檔案或網址）；
+ *     - 圖片：events.ts 有填 image → 用那張（src/imports/home-page/events/ 裡的檔案或網址）；
  *             沒填（或檔名找不到）→ services/ 裡以該服務 slug 命名的圖（例：bbq.png）
  * ● 對應方式（依序，先對到的就用）：
  *     1) events.ts 該活動的 service 欄位（★ 建議一律填這個，最準）
@@ -112,9 +112,9 @@ function assetBySlug(slug: string): string | undefined {
   return hit ? SERVICE_ASSETS[hit] : undefined;
 }
 
-// 讀 src/imports/Events/ 裡的「活動專屬圖」（events.ts 的 image 欄位用）
+// 讀 src/imports/home-page/events/ 裡的「活動專屬圖」（events.ts 的 image 欄位用）
 // ★ 資料夾名稱要一致；想換資料夾，改下面這行的路徑即可。
-const EVENT_ASSETS = import.meta.glob("/src/imports/Events/**/*.{svg,png,jpg,jpeg,webp}", {
+const EVENT_ASSETS = import.meta.glob("/src/imports/home-page/events/**/*.{svg,png,jpg,jpeg,webp}", {
   eager: true,
   query: "?url",
   import: "default",
@@ -132,7 +132,7 @@ function eventImage(e: CalEvent): string | undefined {
     return f === want || f.replace(/\.[^.]+$/, "") === want;
   });
   if (!hit && import.meta.env.DEV) {
-    console.warn(`[Upcoming] 「${e.title}」的 image: "${e.image}" 在 src/imports/Events/ 找不到，先改用服務圖。`);
+    console.warn(`[Upcoming] 「${e.title}」的 image: "${e.image}" 在 src/imports/home-page/events/ 找不到，先改用服務圖。`);
   }
   return hit ? EVENT_ASSETS[hit] : undefined;
 }

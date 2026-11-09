@@ -7,7 +7,7 @@ import { defineText, useI18n } from "../i18n";
 // 加入我們（Join Us · Apple 式捲動頁）
 // A. Hero：左標題文案 ＋ 右「火鍋店飲料機」（五部門色飲料、波動動畫）
 //          底下五顆 PRESS：「按住」飲料往下流、放開就停；流乾後放開會自動補滿。
-//          機台上方 ntulissa 草寫字、畫面底部 Recruit 字 → 讀 imports/JoinUs/ 的圖檔。
+//          機台上方 ntulissa 草寫字、畫面底部 Recruit 字 → 讀 imports/join-us/ 的圖檔。
 // B. 音樂播放器 UI（介紹加入的好處）。正方形專輯（紅藍漸層外框）、上一首／播放／下一首、
 //          進度條（每首 10 秒自動切下一首）、右上角 COVER / CAPTION 切換 → 專輯翻面到說明。
 // C. 部門招募：五顆部門色球並排，左右黑色漸層遮罩，
@@ -29,17 +29,17 @@ const mono   = "'Ubuntu Sans Mono','Noto Sans TC', monospace";     // 英文小�
 const latin  = "'Josefin Sans', sans-serif";                        // PRESS / COVER / CAPTION
 const serif  = "'Noto Serif TC', serif";                            // 專輯封面直排大字（請確認已載入 Noto Serif TC 900）
 
-// ── imports/JoinUs/*.svg|png 自動讀取（缺檔不會壞，會顯示佔位文字） ──
+// ── imports/join-us/*.svg|png 自動讀取（缺檔不會壞，會顯示佔位文字） ──
 // 若原始碼不在 /src 底下，改下面的 glob 路徑字串即可；
 // 舊版 Vite 請把 `query:"?url", import:"default"` 換成 `as:"url"`。
-const JOIN_ASSETS = import.meta.glob("/src/**/JoinUs/*.{svg,png,webp}", {
+const JOIN_ASSETS = import.meta.glob("/src/imports/join-us/*.{svg,png,webp}", {
   eager: true,
   query: "?url",
   import: "default",
 }) as Record<string, string>;
 function joinAsset(...files: string[]): string | undefined {
   for (const f of files) {
-    const hit = Object.keys(JOIN_ASSETS).find((p) => p.endsWith(`/JoinUs/${f}`));
+    const hit = Object.keys(JOIN_ASSETS).find((p) => p.endsWith(`/join-us/${f}`));
     if (hit) return JOIN_ASSETS[hit];
   }
   return undefined;
@@ -122,7 +122,7 @@ const RECRUIT = { h: 44, x: 0, y: 0 }; // 底部 Recruit 圖高度與位移
 const PLAYER_LAYOUT = {
   album:   "min(80vw, 520px, 50vh)",   // 專輯邊長
   coverChar: "calc(min(80vw, 520px, 50vh) * 0.125)", // 封面直排字大小（找不到 coverN.svg 時的備用文字才會用到）
-  coverSvg: "54%",                       // 封面 SVG（imports/JoinUs/cover1.svg…）最大寬高，佔專輯邊長比例
+  coverSvg: "54%",                       // 封面 SVG（imports/join-us/cover1.svg…）最大寬高，佔專輯邊長比例
   toggle: {                              // 專輯右上角 COVER / CAPTION 切換鈕
     w: "clamp(84px, calc(min(80vw, 520px, 50vh) * 0.26), 136px)", // 寬度（高度自動 = 寬 × 0.3）
     inset: "4.5%",                       // 距離專輯上緣、右緣
@@ -318,7 +318,7 @@ function DrinkMachine() {
         {logo ? (
           <img src={logo} alt="ntu lis sa" className="h-[58%] w-auto object-contain" draggable={false} />
         ) : (
-          <span className="text-white/30" style={{ fontFamily: mono, fontSize: "0.75rem", letterSpacing: "0.2em" }}>JoinUs/ntulissa.svg</span>
+          <span className="text-white/30" style={{ fontFamily: mono, fontSize: "0.75rem", letterSpacing: "0.2em" }}>join-us/ntulissa.svg</span>
         )}
       </div>
 
@@ -513,7 +513,7 @@ function AlbumPlayer() {
         >
           <AlbumFace bg="#000">
             {coverSvg ? (
-              // imports/JoinUs/cover{N}.svg（N = 第幾首，從 1 開始）
+              // imports/join-us/cover{N}.svg（N = 第幾首，從 1 開始）
               <img
                 key={`c${idx}`}
                 src={coverSvg}
@@ -989,7 +989,7 @@ function Pachinko() {
         {logo ? (
           <image href={logo} x="130" y="482" width="220" height="52" preserveAspectRatio="xMidYMid meet" />
         ) : (
-          <text x="240" y="515" textAnchor="middle" fill="rgba(255,255,255,0.3)" style={{ fontFamily: mono, fontSize: 13, letterSpacing: "0.2em" }}>JoinUs/ntulissa.svg</text>
+          <text x="240" y="515" textAnchor="middle" fill="rgba(255,255,255,0.3)" style={{ fontFamily: mono, fontSize: 13, letterSpacing: "0.2em" }}>join-us/ntulissa.svg</text>
         )}
         {/* 彈珠 */}
         <circle ref={ballRef} cx="240" cy="40" r={PB.ballR + 3} fill="#fff" />
@@ -1050,7 +1050,7 @@ function Certificate() {
           {logo ? (
             <image href={logo} x="150" y="55" width="300" height="100" preserveAspectRatio="xMidYMid meet" />
           ) : (
-            <text x="300" y="115" textAnchor="middle" fill="rgba(255,255,255,0.3)" style={{ fontFamily: mono, fontSize: 16, letterSpacing: "0.2em" }}>JoinUs/ntulissa.svg</text>
+            <text x="300" y="115" textAnchor="middle" fill="rgba(255,255,255,0.3)" style={{ fontFamily: mono, fontSize: 16, letterSpacing: "0.2em" }}>join-us/ntulissa.svg</text>
           )}
         </g>
 
@@ -1227,12 +1227,12 @@ export default function Recruit() {
           </Reveal>
         </div>
 
-        {/* 底部置中：Recruit（imports/JoinUs/recruit.svg） */}
+        {/* 底部置中：Recruit（imports/join-us/recruit.svg） */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
           {recruit ? (
             <img src={recruit} alt="Recruit — NTU LIS SA" className="select-none" draggable={false} style={{ height: `${isDesktop ? RECRUIT.h : 34}px`, width: "auto", ...moveIf(isDesktop, RECRUIT) }} />
           ) : (
-            <span className="text-white/30" style={{ fontFamily: mono, fontSize: "0.8rem", letterSpacing: "0.2em", ...move(RECRUIT) }}>Recruit · JoinUs/recruit.svg</span>
+            <span className="text-white/30" style={{ fontFamily: mono, fontSize: "0.8rem", letterSpacing: "0.2em", ...move(RECRUIT) }}>Recruit · join-us/recruit.svg</span>
           )}
         </div>
       </section>

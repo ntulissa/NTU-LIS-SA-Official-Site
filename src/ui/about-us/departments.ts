@@ -1,6 +1,7 @@
 // ── 部門資料 ────────────────────────────────────────────────
 // 新增或調整部門資料時，直接編輯下方對應的 slug。
-// 英文版：nameEn / introEn / joinBlurbEn；幹部 titleEn（職稱）、nameEn（英文名，沒填就顯示中文名）。
+// 英文版：nameEn / introEn / joinBlurbEn；nameEn / nEn 使用威妥瑪拼音（如 "Po-Han, Tseng"）。
+// 幹部 titleEn 為英文職稱；姓名欄位未填時會顯示中文名。
 import { memImg, type DeptData } from "./deptShared";
 import type { Lang } from "../i18n";
 
@@ -20,10 +21,14 @@ export const DEPARTMENTS: Record<string, DeptData> = {
     joinBlurbEn:
       "Join General Affairs and become the force behind everything in the department — managing spaces, finances and administrative decisions. It's more than paperwork: it's real organizational experience and real impact. Help us build a better LIS — we just need you!",
     heads: [
-      { name: "林榮恩", cls: "B14", title: "部長", titleEn: "Head", img: memImg("gen2") },
-      { name: "劉以寬", cls: "B14", title: "部長", titleEn: "Head", img: memImg("gen3") },
+      { name: "林榮恩", nameEn: "Rong-En, Lin", cls: "B14", title: "部長", titleEn: "Head", img: memImg("gen1"), photo: { zoom: 1.1 } },
+      { name: "劉以寬", nameEn: "Yi-Kuan, Liu", cls: "B14", title: "部長", titleEn: "Head", img: memImg("gen2"), photo: { zoom: 1.1 } },
     ],
-    members: [],
+    members: [
+      { n: "歐威霆", nEn: "Wei-Ting, Ou", c: "B14" },
+      { n: "龔林輝", nEn: "Lin-Hui, Kung", c: "B14" },
+      { n: "楊子嫻", nEn: "Tzu-Hsien, Yang", c: "B15" },
+    ],
   },
   eve: {
     slug: "eve",
@@ -40,13 +45,19 @@ export const DEPARTMENTS: Record<string, DeptData> = {
     joinBlurbEn:
       "Join Events and plan the department's biggest events yourself — from proposals and on-site coordination to sponsorship negotiations. It's more than running events: it's a stage to create memories with your teammates and fire up the whole department. Help light up LIS life — we just need you!",
     heads: [
-      { name: "蕭忻緹", cls: "B14", title: "部長", titleEn: "Head", img: memImg("eve1") },
-      { name: "莊雅雯", cls: "B14", title: "部長", titleEn: "Head", img: memImg("eve2") },
+      { name: "蕭忻緹", nameEn: "Hsin-Ti, Hsiao", cls: "B14", title: "部長", titleEn: "Head", img: memImg("eve1"), photo: { zoom: 0.75 } },
+      { name: "莊雅雯", nameEn: "Ya-Wen, Zhuang", cls: "B14", title: "部長", titleEn: "Head", img: memImg("eve2"), photo: { zoom: 0.95 } },
     ],
     members: [
-      { n: "張瑄予", c: "B14" },
-      { n: "葛家妤", c: "B14" },
-      { n: "呂程琳", c: "B14" },
+      { n: "張瑄予", nEn: "Hsuan-Yu, Chang", c: "B14" },
+      { n: "葛家妤", nEn: "Chia-Yu, Ko", c: "B14" },
+      { n: "呂程琳", nEn: "Cheng-Lin, Lu", c: "B14" },
+      { n: "劉子平", nEn: "Tzu-Ping, Liu", c: "B15" },
+      { n: "黃金淳", nEn: "Chin-Chun, Huang", c: "B15" },
+      { n: "許家千", nEn: "Chia-Chien, Hsu", c: "B15" },
+      { n: "高梓洋", nEn: "Tzu-Yang, Kao", c: "B15" },
+      { n: "王薇喬", nEn: "Wei-Chiao, Wang", c: "B15" },
+      { n: "董繼澤", nEn: "Chi-Tse, Tung", c: "B15" },
     ],
   },
   aca: {
@@ -64,12 +75,17 @@ export const DEPARTMENTS: Record<string, DeptData> = {
     joinBlurbEn:
       "Join Academic Affairs to work on the course guide, alumni talks, the Azalea Festival exhibition and the department magazine — real skills from content planning to sharing knowledge. It's more than organizing resources: you'll help everyone find their way in study and career. Help define what LIS stands for — we just need you!",
     heads: [
-      { name: "周家禾", cls: "B14", title: "部長", titleEn: "Head", img: memImg("aca1") },
+      { name: "周家禾", nameEn: "Chia-Ho, Chou", cls: "B14", title: "部長", titleEn: "Head", img: memImg("aca1"), photo: { zoom: 0.8 } },
     ],
     members: [
-      { n: "許瑞米", c: "B14" },
-      { n: "郭庭妤", c: "B14" },
-      { n: "陳明鈺", c: "B14" },
+      { n: "許瑞米", nEn: "Jui-Mi, Hsu", c: "B14" },
+      { n: "郭庭妤", nEn: "Ting-Yu, Kuo", c: "B14" },
+      { n: "陳明鈺", nEn: "Ming-Yu, Chen", c: "B14" },
+      { n: "曾涵榆", nEn: "Han-Yu, Tseng", c: "B14" },
+      { n: "徐子涵", nEn: "Tzu-Han, Hsu", c: "B15" },
+      { n: "林柏儀", nEn: "Po-I, Lin", c: "B15" },
+      { n: "周芯宇", nEn: "Hsin-Yu, Chou", c: "B15" },
+      { n: "劉喬恩", nEn: "Chiao-En, Liu", c: "B15" },
     ],
   },
   ima: {
@@ -87,11 +103,14 @@ export const DEPARTMENTS: Record<string, DeptData> = {
     joinBlurbEn:
       "Join Image & Publicity to run social media, create visuals, shoot events and handle public relations — building real skills in branding and multimedia. It's more than posting and designing: your eye and your words will define the association's look and voice. Help build the most eye-catching brand in LIS — we just need you!",
     heads: [
-      { name: "葉家米", cls: "B14", title: "部長", titleEn: "Head", img: memImg("ima1") },
+      { name: "葉家米", nameEn: "Chia-Mi, Yeh", cls: "B14", title: "部長", titleEn: "Head", img: memImg("ima1"), photo: { zoom: 0.9 }, },
     ],
     members: [
-      { n: "戴愷昀", c: "B14" },
-      { n: "石馨予", c: "B14" },
+      { n: "戴愷昀", nEn: "Kai-Yun, Tai", c: "B14" },
+      { n: "石馨予", nEn: "Hsin-Yu, Shih", c: "B14" },
+      { n: "成書宇", nEn: "Shu-Yu, Cheng", c: "B15" },
+      { n: "楊蕎憶", nEn: "Chiao-I, Yang", c: "B15" },
+      { n: "廖立媞", nEn: "Li-Ti, Liao", c: "B15" },
     ],
   },
   sp: {
@@ -109,10 +128,14 @@ export const DEPARTMENTS: Record<string, DeptData> = {
     joinBlurbEn:
       "Join Sports and become the strongest support for our teams — organizing tournaments and managing team funding yourself. It's more than sports admin: you'll drive the department's sporting spirit and create memories on and off the court. Help ignite the LIS team spirit — we just need you!",
     heads: [
-      { name: "葛家妤", cls: "B14", title: "部長", titleEn: "Head", img: memImg("sp1") },
-      { name: "張毓琳", cls: "B14", title: "部長", titleEn: "Head", img: memImg("sp2") },
+      { name: "葛家妤", nameEn: "Chia-Yu, Ko", cls: "B14", title: "部長", titleEn: "Head", img: memImg("sp1"), photo: { zoom: 1.1 } },
+      { name: "張毓琳", nameEn: "Yu-Lin, Chang", cls: "B14", title: "部長", titleEn: "Head", img: memImg("sp2"), photo: { zoom: 1.1 } },
     ],
-    members: [{ n: "劉以寬", c: "B14" }],
+    members: [
+      { n: "劉以寬", nEn: "Yi-Kuan, Liu", c: "B14" },
+      { n: "于立恩", nEn: "Li-En, Yu", c: "B15" },
+      { n: "黃致綺", nEn: "Chih-Chi, Huang", c: "B15" },
+    ],
   },
 };
 

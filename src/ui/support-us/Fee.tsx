@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 
-// 圖片：全部放在 @/imports/Fee/ 資料夾（路徑已先寫好，之後把圖檔放進去即可）
-import benefit1 from "@/imports/Fee/benefit1.png";
-import benefit2 from "@/imports/Fee/benefit2.svg";
-import benefit3 from "@/imports/Fee/benefit3.png";
-import benefit4 from "@/imports/Fee/benefit4.jpg";
-import benefit5 from "@/imports/Fee/benefit5.jpg";
-import lockerImg from "@/imports/Fee/locker.png";
-import logoSvg from "@/imports/Fee/NTULISSAlogo.svg";
-import feelissaSvg from "@/imports/Fee/feelissa.svg";
+// 圖片：全部放在 @/imports/support-us/fee/ 資料夾（路徑已先寫好，之後把圖檔放進去即可）
+import benefit1 from "@/imports/support-us/fee/benefit1.png";
+import benefit2 from "@/imports/support-us/fee/benefit2.svg";
+import benefit3 from "@/imports/support-us/fee/benefit3.png";
+import benefit4 from "@/imports/support-us/fee/benefit4.jpg";
+import benefit5 from "@/imports/support-us/fee/benefit5.jpg";
+import lockerImg from "@/imports/support-us/fee/locker.png";
+import logoSvg from "@/imports/support-us/fee/NTULISSAlogo.svg";
+import feelissaSvg from "@/imports/support-us/fee/feelissa.svg";
 import { PageEyebrow, useIsDesktop, fitLine, textUnits } from "../general/shared";
 import { defineText, useI18n } from "../i18n";
 
@@ -865,7 +865,7 @@ function LockerScene() {
   );
 }
 
-// ── 背景「fee lissa.」：使用自製 SVG（imports/Fee/feelissa.svg），無動畫 ─────
+// ── 背景「fee lissa.」：使用自製 SVG（imports/support-us/fee/feelissa.svg），無動畫 ─────
 // 位置：改 FEE_X / FEE_Y（px；正 X=右、正 Y=下）。
 // 大小：改 FEE_WIDTH（可用 px 或 vw，如 "1400px" 或 "120vw"）。
 // 明暗：改 FEE_OPACITY（0～1）。

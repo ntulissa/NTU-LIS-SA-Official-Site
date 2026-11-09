@@ -14,8 +14,8 @@ import { defineText, useI18n } from "../i18n";
 //   ⑥ 連結              ：認識現任團隊／認識歷屆團隊／加入我們
 //
 // 素材（缺檔不會壞，會顯示替代圖）：
-//   src/imports/AboutUs/since1974.svg、ntulissaport.svg、玩.svg
-//   src/imports/JoinUs/ntulissa.svg
+//   src/imports/about-us/since1974.svg、ntulissaport.svg、玩.svg
+//   src/imports/join-us/ntulissa.svg
 // ★ 尺寸、動畫速度都集中在《版面常數區》；文字（中英）集中在 TEXT。
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -75,7 +75,7 @@ const TEXT = defineText({
 });
 
 // ── 素材自動讀取（舊版 Vite 請把 query/import 換成 as:"url"）──
-const ASSETS = import.meta.glob(["/src/**/AboutUs/*.{svg,png,webp}"], {
+const ASSETS = import.meta.glob(["/src/imports/about-us/*.{svg,png,webp}"], {
   eager: true,
   query: "?url",
   import: "default",
@@ -162,7 +162,7 @@ function Card({ visual, text, bleed = false }: { visual: ReactNode; text?: React
 function SinceVisual() {
   const { pick } = useI18n();
   const tx = pick(TEXT);
-  const src = asset("AboutUs", "since1974.svg", "since1974.png");
+  const src = asset("about-us", "since1974.svg", "since1974.png");
   if (src) return <img src={src} alt={tx.sinceAlt} className="ab-rise w-[62%] h-auto select-none" draggable={false} />;
   return (
     <div className="ab-rise text-black text-center select-none">
@@ -187,7 +187,7 @@ function wavePath(y: number, x0: number, x1: number, amp = 13) {
 
 function HarborVisual() {
   const { pick } = useI18n();
-  const port = asset("AboutUs", "ntulissaport.svg", "ntulissaport.png");
+  const port = asset("about-us", "ntulissaport.svg", "ntulissaport.png");
   const W1 = 205, W2 = 300, X0 = 418, X1 = 955;
   return (
     <svg viewBox="0 0 1000 400" className="w-full h-auto overflow-visible" aria-label={pick(TEXT).harborLabel}>
@@ -234,7 +234,7 @@ function HarborVisual() {
 // ══════════════════════════════════════════════════════════════
 function OrbitVisual() {
   const { pick } = useI18n();
-  const logo = asset("AboutUs", "ntulissa.svg");
+  const logo = asset("about-us", "ntulissa.svg");
   const R = 190;
   return (
     <svg viewBox="0 0 600 600" className="w-[88%] h-auto" aria-label={pick(TEXT).orbitLabel}>
@@ -343,7 +343,7 @@ function BridgeVisual() {
 // ══════════════════════════════════════════════════════════════
 function PlayVisual() {
   const { pick } = useI18n();
-  const src = asset("AboutUs", "玩.svg", "play.svg", "玩.png");
+  const src = asset("about-us", "玩.svg", "play.svg", "玩.png");
   return (
     <div className="flex items-end justify-center select-none" style={{ gap: "4%" }}>
       {src ? (

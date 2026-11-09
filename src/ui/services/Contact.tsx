@@ -1,15 +1,15 @@
 import { type ReactNode, type CSSProperties } from "react";
 import { Mail } from "lucide-react";
-import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
+import svgPaths from "@/imports/general/svg-lp3prmbugu";
 import { PageEyebrow, Reveal } from "../general/shared";
 import { defineText, useI18n } from "../i18n";
 
-// ★ 品牌 wordmark SVG（放在 src/imports/contact/ 底下）
+// ★ 品牌 wordmark SVG（放在 src/imports/services/contact/ 底下）
 //   IG / FB 用 filter 強制白色；交流版右下小 facebook 重用同一個 facebook.svg。
 //   Email 用你原設計轉出的 NTU LIS SA.svg（保留原色，不套白色 filter）。
-import igWordmark from "@/imports/contact/instagram.svg";
-import fbWordmark from "@/imports/contact/facebook.svg";
-import emailLogo from "@/imports/contact/NTU LIS SA.svg";
+import igWordmark from "@/imports/services/contact/instagram.svg";
+import fbWordmark from "@/imports/services/contact/facebook.svg";
+import emailLogo from "@/imports/services/contact/NTU LIS SA.svg";
 
 void Reveal; // 目前沒用到（保留 import，之後想加進場動畫比較方便）
 
@@ -20,7 +20,7 @@ void Reveal; // 目前沒用到（保留 import，之後想加進場動畫比較
  *
  * ★ 要貼網址的地方都集中在下方 LINKS；已知的我先填好，未知的留空字串。
  * ★ 卡片上的中英文字都在下方 TEXT。
- * 社群 icon 沿用全站同一組（@/imports/BentoGrid-1，與 Footer / Bento 一致）。
+ * 社群 icon 沿用全站同一組（@/imports/general，與 Footer / Bento 一致）。
  */
 
 // ── 要貼的網址都在這裡 ────────────────────────────────────────

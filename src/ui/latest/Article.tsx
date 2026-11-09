@@ -4,7 +4,7 @@ import { Reveal, useIsDesktop } from "../general/shared";
 import { getAnnouncement } from "./news.ts";
 import { defineText, useI18n } from "../i18n";
 // 背景浮水印圖：先沿用現有的建築圖（很淡）。想換成臺大校徽等，改這行 import 即可。
-import watermark from "@/imports/LatestUpdates/newsbackground.png";
+import watermark from "@/imports/latest/newsbackground.png";
 
 // 畫面文字（中英兩份）。公告內容本身的英文寫在 news.ts 的 titleEn / paragraphsEn…
 // byline：作者掛名的前綴，{author} 會換成作者名

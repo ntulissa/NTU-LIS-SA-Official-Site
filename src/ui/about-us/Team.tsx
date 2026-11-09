@@ -1,7 +1,7 @@
 import { useState } from "react";
-import imgBuildingHistory from "@/imports/AboutUs/de7749452570d864c1f5c584765f093ab16a6d89.png";
-import imgMeiji from "@/imports/Presidents/53.png";
-import imgHongLingYa from "@/imports/CurrentTeam/53vp.png";
+import imgBuildingHistory from "@/imports/about-us/de7749452570d864c1f5c584765f093ab16a6d89.png";
+import imgMeiji from "@/imports/about-us/presidents/53pres.png";
+import imgHongLingYa from "@/imports/about-us/current-team/53vp.png";
 import { PageEyebrow, Reveal, useIsDesktop } from "../general/shared";
 import { defineText, useI18n } from "../i18n";
 
@@ -15,8 +15,8 @@ const TEXT_ZH = {
   depts: ["行政部", "活動部", "學術部", "形象宣傳部", "體育部"],
   termLabel: "第 53 屆{title}",
   leaders: [
-    { title: "會長", name: "黃子芸", year: "圖資三" },
-    { title: "副會長", name: "洪聆雅", year: "圖資三" },
+    { title: "會長", name: "黃子芸", year: "B13" },
+    { title: "副會長", name: "洪聆雅", year: "B13" },
   ],
 };
 
@@ -27,8 +27,8 @@ const TEXT = defineText({
     depts: ["General Affairs", "Events", "Academic", "Image & Publicity", "Sports"],
     termLabel: "53rd {title}",
     leaders: [
-      { title: "President", name: "Tzu-Yun Huang", year: "LIS Junior" },
-      { title: "Vice President", name: "Ling-Ya Hung", year: "LIS Junior" },
+      { title: "President", name: "Tzu-Yun Huang", year: "B13" },
+      { title: "Vice President", name: "Ling-Ya Hung", year: "B13" },
     ],
   },
 });
@@ -50,7 +50,7 @@ const ICON_SIZE: React.CSSProperties = { width: "clamp(64px,6.6vw,104px)", heigh
 const FIGURE_ADJUST = {
   會長: {
     size: "clamp(280px, 70vh, 620px)",
-    x: "-55px",
+    x: "45px",
     y: "-8vh",
   },
   副會長: {
@@ -62,6 +62,16 @@ const FIGURE_ADJUST = {
 // 手機／平板（< 1024px）的人像大小與位置（電腦版仍用上面的 FIGURE_ADJUST，不受影響）
 //   size 用百分比＝佔人像區塊高度的比例；人像靠右，左上角留給姓名資訊。
 const FIGURE_ADJUST_MOBILE = { size: "94%", x: "0px", y: "0px" };
+
+// ── 人像底部黑色漸層遮罩 ★可手動調 ★──────────────────────────────────────
+// 讓人形立牌的底部慢慢淡出、融進背景，不會有一條生硬的切邊。
+//   FIGURE_FADE_START：從人像「頂端」往下算，到哪裡開始變淡（百分比）。
+//     ▸ 數字越小 → 淡出的範圍越長、越早開始變淡（例如 "60%"）。
+//     ▸ 數字越大 → 只有最底部一小段淡出（例如 "85%"）。
+//   FIGURE_FADE_END：到哪裡完全消失（通常維持 "100%"＝圖片最底）。
+const FIGURE_FADE_START = "72%";
+const FIGURE_FADE_END = "100%";
+const FIGURE_FADE_MASK = `linear-gradient(to bottom, #000 0%, #000 ${FIGURE_FADE_START}, transparent ${FIGURE_FADE_END})`;
 const ROLE_FONT_SIZE = "clamp(0.72rem, 2.4vw, 1.3vw)";
 const NAME_FONT_SIZE = "clamp(2rem, 8vw, 5vw)";
 const NAME_FONT_SIZE_EN = "clamp(1.6rem, 6vw, 3.4vw)"; // 英文姓名比較長，字級縮小一點
@@ -495,7 +505,13 @@ export default function Team({ standalone = false }: { standalone?: boolean } = 
                           src={leader.img}
                           alt={tx.leaders[i]?.name ?? ""}
                           className="w-auto max-w-[70%] lg:max-w-full object-contain object-bottom"
-                          style={{ height: adj.size, opacity: isActive ? 1 : 0 }}
+                          style={{
+                            height: adj.size,
+                            opacity: isActive ? 1 : 0,
+                            // 底部漸層遮罩（調整區在檔案上方 FIGURE_FADE_START / FIGURE_FADE_END）
+                            WebkitMaskImage: FIGURE_FADE_MASK,
+                            maskImage: FIGURE_FADE_MASK,
+                          }}
                         />
                       </div>
                     </div>

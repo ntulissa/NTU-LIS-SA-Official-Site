@@ -1,6 +1,6 @@
 import { Mail } from "lucide-react";
-import imgLissaLogo from "@/imports/Footer/NTULISSAlogo.svg";
-import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
+import imgLissaLogo from "@/imports/general/footer/NTULISSAlogo.svg";
+import svgPaths from "@/imports/general/svg-lp3prmbugu";
 import { useIsDesktop } from "./shared";
 import { useI18n } from "../i18n";
 import type { Messages } from "../i18n/locales/zh-TW";

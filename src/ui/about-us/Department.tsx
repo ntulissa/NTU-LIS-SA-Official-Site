@@ -30,9 +30,8 @@ const TEXT = defineText({
     notFound: "此部門頁面尚未建立。",
     back: "回上頁",
     teamMembers: "團隊成員",
-    membersLabel: "-部員  MEMBERS-",
-    noMembers: "目前無成員",
-    headSuffix: " HEAD", // 職稱後面接的英文（例：-部長 HEAD-）
+    membersLabel: "-部員  MEMBERS-",
+    headSuffix: " HEAD", // 職稱後面接的英文（例：-部長 HEAD-）
     becomePre: "成為",
     becomePost: "的一員",
     join: "加入我們",
@@ -48,7 +47,6 @@ const TEXT = defineText({
     back: "Back",
     teamMembers: "Our Team",
     membersLabel: "-MEMBERS-",
-    noMembers: "No members at the moment",
     headSuffix: "",
     becomePre: "Become part of",
     becomePost: "",
@@ -87,7 +85,7 @@ const HASHTAG = {
   radius: 6, // 圓角（px）
 };
 
-// ③ 背景「超大草寫部門名稱」SVG（放 imports/members/<slug>-name.svg，例：gen-name.svg）
+// ③ 背景「超大草寫部門名稱」SVG（放 imports/about-us/members/<slug>-name.svg，例：gen-name.svg）
 //    整頁只有一個，固定在畫面正中央，捲動時不會移動。
 //    x/y = 相對畫面中心的微調（px）；width = 大小（px）。
 const NAME_BG = {
@@ -107,10 +105,20 @@ const SERVICE_IMG = {
   fadeOnCover: true,                      // 底部漸層：只有 cover（照片）預設套用；contain（logo）不套，避免字下緣被削掉
 };
 
-// 讀取 imports/members/ 底下所有「<縮寫>-name.svg」（Vite）。
+// ⑤ 幹部照片「頭頂自動對齊」
+//    程式會自動找出去背照片（透明背景 PNG）裡人物的頭頂，讓每張卡的頭頂都切齊在同一條線，
+//    不管原圖上方留了多少空白、照片是全身還是半身。
+//    個別照片想再微調：到 departments.ts 該幹部加 photo: { y, zoom }（說明見 deptShared.tsx）。
+const HEAD_PHOTO = {
+  top: 24,         // 頭頂距離照片框上緣幾 px（所有幹部共用；越大＝人越往下）
+  threshold: 0.1,  // 偵測靈敏度：某一列「有內容的寬度」超過整張寬度的 10% 才算頭頂。
+                   // 這樣幾根翹起來的頭髮（如林榮恩那撮）不會被當成頭頂。一般不用改。
+};
+
+// 讀取 imports/about-us/members/ 底下所有「<縮寫>-name.svg」（Vite）。
 // 若原始碼不在 /src 底下、或用其他打包工具，改下面這行的路徑字串即可；
 // 舊版 Vite 請把 `query:"?url", import:"default"` 換成 `as:"url"`。
-const NAME_SVG_FILES = import.meta.glob("/src/**/*-name.svg", {
+const NAME_SVG_FILES = import.meta.glob("/src/imports/about-us/members/*-name.svg", {
   eager: true,
   query: "?url",
   import: "default",
@@ -138,6 +146,60 @@ function hexToRgba(hex: string, a: number): string {
   const g = parseInt(h.slice(2, 4), 16);
   const b = parseInt(h.slice(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
+// ── 偵測照片中人物的頭頂位置 ──
+// 把照片縮小畫到看不見的 canvas 上，由上往下逐列掃描透明度，
+// 找到第一列「不透明的寬度 ≥ threshold」的位置，回傳它佔整張高度的比例（0 = 最上面）。
+// 沒有透明背景的照片（JPG）會回傳 0，等於維持原本「靠上對齊」。
+// 偵測結果會快取，同一張圖只算一次。偵測完成前照片先隱藏，避免跳動。
+const subjectTopCache = new Map<string, number>();
+
+function useSubjectTop(src: string): number | null {
+  const [top, setTop] = useState<number | null>(() => (src ? subjectTopCache.get(src) ?? null : 0));
+
+  useEffect(() => {
+    if (!src) { setTop(0); return; }
+    const cached = subjectTopCache.get(src);
+    if (cached !== undefined) { setTop(cached); return; }
+
+    let alive = true;
+    const finish = (v: number) => {
+      subjectTopCache.set(src, v);
+      if (alive) setTop(v);
+    };
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      let frac = 0;
+      try {
+        const w = 160;
+        const h = Math.max(1, Math.round((img.naturalHeight / img.naturalWidth) * w));
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, w, h);
+          const px = ctx.getImageData(0, 0, w, h).data;
+          const need = w * HEAD_PHOTO.threshold;
+          for (let y = 0; y < h; y++) {
+            let n = 0;
+            for (let x = 0; x < w; x++) if (px[(y * w + x) * 4 + 3] > 128) n++;
+            if (n >= need) { frac = y / h; break; }
+          }
+        }
+      } catch {
+        frac = 0;
+      }
+      finish(frac);
+    };
+    img.onerror = () => finish(0);
+    img.src = src;
+    return () => { alive = false; };
+  }, [src]);
+
+  return top;
 }
 
 // ── 服務切換用的「點 → 箭頭」按鈕（與歷任會長頁同一套設計）──
@@ -170,7 +232,7 @@ function NavArrow({ dir, color, disabled, onClick, label }: { dir: "prev" | "nex
   );
 }
 
-// ── 背景：超大草寫部門名稱（SVG 由 imports/members/<slug>-name.svg 提供）──
+// ── 背景：超大草寫部門名稱（SVG 由 imports/about-us/members/<slug>-name.svg 提供）──
 // 整頁只有一個，固定（fixed）在畫面正中央；從最上捲到最下都停在視窗中間。
 // 位置與大小改上面的 NAME_BG。尚未放入該部門 SVG 時自動留空、不影響版面。
 export function NameBackdrop({ slug }: { slug: string }) {
@@ -293,20 +355,38 @@ function ServiceCarousel({ dept }: { dept: string }) {
 function HeadCard({ head, delay }: { head: Head; delay: number }) {
   const { pick, track, isEn } = useI18n();
   const tx = pick(TEXT);
+  // 人物頭頂在原圖中的位置（比例）；null = 還在偵測中
+  const subjectTop = useSubjectTop(head.img);
+  const offsetY = HEAD_PHOTO.top + (head.photo?.y ?? 0);
+  const zoom = head.photo?.zoom ?? 1;
+
   return (
     <Reveal delay={delay}>
       <div className="flex flex-col items-center text-center">
-        <div className="relative w-full" style={{ height: "clamp(240px, 32vh, 380px)" }}>
+        {/* 照片框：超出框的部分裁掉；下緣淡出的漸層套在框上（不管照片多高，淡出位置都固定） */}
+        <div
+          className="relative w-full overflow-hidden"
+          style={{ height: "clamp(240px, 32vh, 380px)", WebkitMaskImage: PHOTO_FADE, maskImage: PHOTO_FADE }}
+        >
           {head.img ? (
+            // 照片寬度撐滿框、高度依比例。由右往左讀 transform：
+            //   ① 先往上移「頭頂位置」→ 頭頂貼齊照片最上緣
+            //   ② 以頭頂為中心縮放（photo.zoom），頭頂高度不變
+            //   ③ 再整張往下移 HEAD_PHOTO.top（＋ photo.y）→ 每張卡的頭頂都切齊同一條線
             <img
               src={head.img}
               alt={head.name}
-              className="absolute inset-0 w-full h-full object-cover object-top select-none pointer-events-none"
-              style={{ WebkitMaskImage: PHOTO_FADE, maskImage: PHOTO_FADE }}
+              className="absolute left-0 top-0 w-full h-auto max-w-none select-none pointer-events-none"
+              style={{
+                transformOrigin: "50% 0",
+                transform: `translateY(${offsetY}px) scale(${zoom}) translateY(${-(subjectTop ?? 0) * 100}%)`,
+                opacity: subjectTop === null ? 0 : 1,
+                transition: "opacity .3s ease",
+              }}
             />
           ) : (
             <div className="absolute inset-0 flex items-end justify-center">
-              <div className="flex flex-col items-center justify-center gap-2 text-white/20" style={{ fontFamily: monoFont, letterSpacing: "0.2em", height: "88%", width: "72%", WebkitMaskImage: PHOTO_FADE, maskImage: PHOTO_FADE, background: "rgba(255,255,255,0.03)", borderRadius: "16px" }}>
+              <div className="flex flex-col items-center justify-center gap-2 text-white/20" style={{ fontFamily: monoFont, letterSpacing: "0.2em", height: "88%", width: "72%", background: "rgba(255,255,255,0.03)", borderRadius: "16px" }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="w-14 h-14">
                   <circle cx="12" cy="8" r="4" />
                   <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" strokeLinecap="round" />
@@ -547,24 +627,18 @@ export default function Department({ slug }: { slug: string }) {
               <p className="mb-6" style={{ fontFamily: monoFont, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)" }}>
                 {tx.membersLabel}
               </p>
-              {data.members.length > 0 ? (
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                  {data.members.map((m, i) => (
-                    <div key={`${m.n}-${i}`} className="flex items-center gap-3 min-w-0">
-                      <span className="shrink-0 text-white/70 rounded-[4px] px-1.5 py-0.5" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.62rem", background: "rgba(255,255,255,0.12)", letterSpacing: "0.04em" }}>
-                        {m.c}
-                      </span>
-                      <span className="text-white truncate" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.1em") }}>
-                        {m.n}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-white/50" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.95rem" }}>
-                  {tx.noMembers}
-                </p>
-              )}
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                {data.members.map((m, i) => (
+                  <div key={`${m.n}-${i}`} className="flex items-center gap-3 min-w-0">
+                    <span className="shrink-0 text-white/70 rounded-[4px] px-1.5 py-0.5" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.62rem", background: "rgba(255,255,255,0.12)", letterSpacing: "0.04em" }}>
+                      {m.c}
+                    </span>
+                    <span className="text-white truncate" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.1em") }}>
+                      {m.n}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </Reveal>
 

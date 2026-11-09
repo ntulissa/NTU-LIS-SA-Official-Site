@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { PiggyBank } from "lucide-react";
-import svgPaths from "@/imports/BentoGrid-1/svg-lp3prmbugu";
+import svgPaths from "@/imports/general/svg-lp3prmbugu";
 // ── NEWS 卡（最新動態）：App 圖示中央改放單純「NTU LIS SA」字樣的 SVG（清晰不糊）。
-//   放到 src/imports/BentoGrid/NTULISSAlogo2.svg（檔名需一致；若用別的檔名，改這行路徑即可）。
-import newsLogo from "@/imports/BentoGrid/NTULISSAlogo2.svg";
+//   放到 src/imports/about-us/overview/NTULISSAlogo2.svg（檔名需一致；若用別的檔名，改這行路徑即可）。
+import newsLogo from "@/imports/about-us/overview/NTULISSAlogo2.svg";
 // ── ABOUT 卡（第 53 屆）：中間直接放新版系學會 Logo 的 SVG（清晰不糊）。
-//   放到 src/imports/BentoGrid/NTULISSAlogo.svg（檔名需一致；若用別的檔名，改下面這行的路徑即可）。
-import aboutLogo from "@/imports/BentoGrid/NTULISSAlogo.svg";
+//   放到 src/imports/about-us/overview/NTULISSAlogo.svg（檔名需一致；若用別的檔名，改下面這行的路徑即可）。
+import aboutLogo from "@/imports/about-us/overview/NTULISSAlogo.svg";
 import { Reveal, monoBold, monoSemi, useIsDesktop } from "../general/shared";
 import { ANNOUNCEMENTS } from "../latest/news.ts"; // NEWS 卡右上角紅點＝公告則數，跟公告列表自動對上
 import { EVENTS, eventStart, isSchoolOnly, type CalEvent } from "../latest/events"; // 「下一場活動」倒數＝行事曆同一份資料
@@ -175,11 +175,11 @@ const TEAM_ROWS = 4; // 幾排（10×4＝40）
 const TEAM_EMPTY_COLOR = "#2E2E2E"; // 未填滿的空位（深灰）
 const TEAM_DEPTS = [
   { name: "正副會長", color: "#A27F00", count: 2 },
-  { name: "行政部", color: "#915E3E", count: 2 },
-  { name: "活動部", color: "#9F353A", count: 7 },
-  { name: "學術部", color: "#42602D", count: 5 },
-  { name: "形象宣傳部", color: "#572A3F", count: 4 },
-  { name: "體育部", color: "#23658A", count: 3 },
+  { name: "行政部", color: "#915E3E", count: 5 },
+  { name: "活動部", color: "#9F353A", count: 11 },
+  { name: "學術部", color: "#42602D", count: 9 },
+  { name: "形象宣傳部", color: "#572A3F", count: 6 },
+  { name: "體育部", color: "#23658A", count: 5 },
 ];
 // 圓點大小與間距（覺得太大就把 TEAM_DOT_SIZE 的最大值調小）。
 const TEAM_DOT_SIZE = "clamp(13px, 1.9vw, 24px)";

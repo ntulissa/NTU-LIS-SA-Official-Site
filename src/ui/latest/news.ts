@@ -19,22 +19,22 @@
 // ══════════════════════════════════════════════════════════════════════════
 
 // 範例文章的照片：先「暫時借用」現有的建築圖當佔位，確保專案能編譯、也能直接看到「有圖版型」。
-// 換成真的照片：把照片放到 src/imports/LatestUpdates/ 後，改成 import 你的檔案即可，例如：
-//   import inaugurationPhoto from "@/imports/LatestUpdates/53-inauguration.jpg";
-import inaugurationPhoto from "@/imports/LatestUpdates/inaugurationPhoto.svg";
-import farewell52image from "@/imports/LatestUpdates/farewell52.png";
-import election2026 from "@/imports/LatestUpdates/election2026.png";
-import welcome2026 from "@/imports/LatestUpdates/welcome2026.png";
-import ooty2027 from "@/imports/LatestUpdates/ooty2027.png";
-import loungeNightUsage from "@/imports/LatestUpdates/lounge night.svg";
-import recruit2026 from "@/imports/LatestUpdates/recruit2026.png";
-import lockerclearance from "@/imports/LatestUpdates/lockerclearance.svg";
-import airconRules from "@/imports/LatestUpdates/airconRules.svg";
-import welcomeLISSA2026 from "@/imports/LatestUpdates/welcomeLISSA2026.svg";
-import listalk2026fall from "@/imports/LatestUpdates/listalk2026fall.png";
-import battleLA2026 from "@/imports/LatestUpdates/battleLA2026.png";
-import lisCup2026badminton from "@/imports/LatestUpdates/lisCup2026badminton.png";
-import LISSAofficialsite from "@/imports/LatestUpdates/LISSAofficialsite.svg";
+// 換成真的照片：把照片放到 src/imports/latest/ 後，改成 import 你的檔案即可，例如：
+//   import inaugurationPhoto from "@/imports/latest/53-inauguration.jpg";
+import inaugurationPhoto from "@/imports/latest/inaugurationPhoto.svg";
+import farewell52image from "@/imports/latest/farewell52.png";
+import election2026 from "@/imports/latest/election2026.png";
+import welcome2026 from "@/imports/latest/welcome2026.png";
+import ooty2027 from "@/imports/latest/ooty2027.png";
+import loungeNightUsage from "@/imports/latest/lounge night.svg";
+import recruit2026 from "@/imports/latest/recruit2026.png";
+import lockerclearance from "@/imports/latest/lockerclearance.svg";
+import airconRules from "@/imports/latest/airconRules.svg";
+import welcomeLISSA2026 from "@/imports/latest/welcomeLISSA2026.svg";
+import listalk2026fall from "@/imports/latest/listalk2026fall.png";
+import battleLA2026 from "@/imports/latest/battleLA2026.png";
+import lisCup2026badminton from "@/imports/latest/lisCup2026badminton.png";
+import LISSAofficialsite from "@/imports/latest/LISSAofficialsite.svg";
 
 export type Announcement = {
   slug: string;

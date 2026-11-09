@@ -48,7 +48,7 @@ const TEXT = defineText({
     present: "present",
     introPending: "We're still writing up this term's story — stay tuned.",
     currentTeam: "Current Team",
-    teamMembers: "Team Roster",
+    teamMembers: "Our Team",
     photoPending: "Photo coming soon",
     older: "Previous term (older)",
     newer: "Next term (newer)",
@@ -73,11 +73,11 @@ function ordinal(n: number): string {
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
-// 威妥瑪拼音「TZU-YUN, HUANG」→ 英文版顯示用的「Tzu-Yun Huang」
+// 威妥瑪拼音「TZU-YUN, HUANG」→ 英文版顯示用的「Tzu-Yun, Huang」
 function romanToDisplay(roman: string): string {
   const [given, surname] = roman.split(",").map((s) => s.trim());
   const cap = (w: string) => w.toLowerCase().replace(/(^|-)([a-z])/g, (_, p, c) => p + c.toUpperCase());
-  return surname ? `${cap(given)} ${cap(surname)}` : cap(given);
+  return surname ? `${cap(given)}, ${cap(surname)}` : cap(given);
 }
 
 // ── 字型（與全站一致；Chiron Hei HK 為商用字體，退回 Noto Sans TC）──
@@ -327,15 +327,17 @@ function ProfilePanel({
       {/* 會長照片（交叉淡入；縮小、完整顯示人物；頭頂大致與左側 ABOUT US 齊高）*/}
       <PhotoStage src={photo} name={displayName} />
 
-      {/* 姓名 + 系級徽章（置中） */}
-      <div className="flex items-end justify-center gap-3 mt-7">
+      {/* 姓名 + 系級徽章（置中）
+          徽章與姓名「垂直置中」對齊（items-center），而不是貼底（舊版 items-end 會讓徽章看起來偏高）。
+          英文姓名的大寫字母重心比中文略低，所以英文版徽章再往下微移 0.12em，讓它對準字母的中線。 */}
+      <div className="flex items-center justify-center gap-3 mt-7">
         <p className="text-white leading-none" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: isEn ? "clamp(1.8rem,3vw,2.8rem)" : "clamp(2.2rem,4vw,3.6rem)", letterSpacing: track("0.08em", "0"), whiteSpace: "nowrap" }}>
           {displayName}
         </p>
         {cls && (
           <span
-            className="mb-1.5 rounded-[6px] px-3 py-1"
-            style={{ background: "linear-gradient(90deg,#FFF 0%,#B3B3B3 100%)", color: "#000", fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.85rem,1.2vw,1.15rem)", letterSpacing: "0.06em" }}
+            className="shrink-0 rounded-[6px] px-3 py-1 leading-tight"
+            style={{ background: "linear-gradient(90deg,#FFF 0%,#B3B3B3 100%)", color: "#000", fontFamily: monoFont, fontWeight: 700, fontSize: "clamp(0.85rem,1.2vw,1.15rem)", letterSpacing: "0.06em", transform: isEn ? "translateY(0.12em)" : undefined }}
           >
             {cls}
           </span>
