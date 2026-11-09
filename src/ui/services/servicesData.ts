@@ -158,7 +158,6 @@ export const BENTO: Cell[] = [
       "Need somewhere to study, work on a group report or finish a project? Under department rules, everyone must leave the building after 7 p.m. During midterm and final exam weeks, the association applies to the department office on your behalf for extended evening use of the student lounge — no paperwork for you, just a familiar space to focus.",
     note: "線上預約",
     noteEn: "Book online",
-    href: "https://stitch-antler-b46.notion.site/17353c4e8df1837b835381775fff75a5",
     dest: "學輔室夜間預約表單",
     destEn: "Lounge booking form",
     guide: [
@@ -335,7 +334,7 @@ export const BENTO: Cell[] = [
       "想知道圖資系畢業後能走入哪些多元領域嗎？系學會定期舉辦「系友講座（LIS Talks）」，特別邀請來自軟體科技、數據分析、數位行銷、學術研究、出版策展及文化機構等不同產業的學長姐重返母校，親自拆解求職心路歷程、職場實戰經驗與行業趨勢；透過近距離的對談交流與提問互動，不僅能打破你的職涯迷惘、看見跨領域發展的各種可能，更是提早拓展人脈網絡、為未來的實習與就業做好準備的最佳契機！",
     introEn:
       "Where can an LIS degree take you? Our LIS Talks invite alumni from software, data analytics, digital marketing, research, publishing, curation and cultural institutions to share their job-hunting stories, real-world experience and industry trends. Ask questions, find direction and start building your network for internships and jobs.",
-    note: false,
+    note: "11/11 報名截止",
     href: "https://reurl.cc/MWKeKX",
     dest: "系友講座報名表單",
     destEn: "LIS Talks registration form",

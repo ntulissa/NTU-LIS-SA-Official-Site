@@ -170,8 +170,7 @@ export const EVENTS: CalEvent[] = [
   {
     title: "LIS Cup 小圖盃：羽球",
     titleEn: "LIS Cup: Badminton",
-    date: "2026-11-10",
-    moreDates: ["2026-11-17"],
+    date: "2026-11-17",
     time: "16:00",
     depts: ["sp"],
     service: "lis-cup",
