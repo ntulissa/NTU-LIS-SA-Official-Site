@@ -103,7 +103,7 @@ export const DEPARTMENTS: Record<string, DeptData> = {
     joinBlurbEn:
       "Join Image & Publicity to run social media, create visuals, shoot events and handle public relations — building real skills in branding and multimedia. It's more than posting and designing: your eye and your words will define the association's look and voice. Help build the most eye-catching brand in LIS — we just need you!",
     heads: [
-      { name: "葉家米", nameEn: "Chia-Mi, Yeh", cls: "B14", title: "部長", titleEn: "Head", img: memImg("ima1"), photo: { zoom: 0.9 }, },
+      { name: "葉家米", nameEn: "Chia-Mi, Yeh", cls: "B14", title: "部長", titleEn: "Head", img: memImg("ima1"), photo: { zoom: 0.8 }, },
     ],
     members: [
       { n: "戴愷昀", nEn: "Kai-Yun, Tai", c: "B14" },
