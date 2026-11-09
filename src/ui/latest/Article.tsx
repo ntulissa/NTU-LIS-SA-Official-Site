@@ -282,12 +282,15 @@ export default function Article({ slug }: { slug: string }) {
   //   ② 漸層描邊：左上亮、中間淡、右下再微亮 → 玻璃邊緣的反光
   //   ③ 內側頂部一條細高光（inset shadow）→ 玻璃厚度感
   //   ④ 外側 drop shadow → 浮起來
-  // 手機：框撐滿寬度、按鈕平分（太窄時自動換行，各佔一整列）；平板以上：框只包住按鈕。
+  // 手機（< 640px）：框撐滿寬度，按鈕「一排一個」由上往下排、每顆都撐滿寬度。
+  // 平板以上：按鈕橫排，框只包住按鈕；橫排放不下時自動換到下一排。
+  // 所有尺寸：按鈕文字永遠只有一行，太長就在尾端顯示「…」（不會再撐成氣球）；
+  //           滑鼠停在按鈕上會顯示完整文字。
   const linksBlock =
     links.length > 0 ? (
       <nav
         aria-label={tx.links}
-        className="relative flex flex-wrap gap-3 sm:gap-6 w-full sm:w-fit rounded-3xl p-4 sm:p-5"
+        className="relative flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 w-full sm:w-fit sm:max-w-full rounded-3xl p-4 sm:p-5"
         style={{
           marginTop: LINKS.gap,
           background: `linear-gradient(135deg, rgba(255,255,255,${LINKS.fill + 0.04}) 0%, rgba(255,255,255,${LINKS.fill}) 45%, rgba(255,255,255,${Math.max(0, LINKS.fill - 0.03)}) 100%)`,
@@ -320,7 +323,8 @@ export default function Article({ slug }: { slug: string }) {
               key={link.href + i}
               href={link.href}
               {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              className={`group relative flex-1 sm:flex-none min-w-[9.5rem] inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-2.5 transition-all duration-200 hover:-translate-y-0.5 ${
+              title={link.label}
+              className={`group relative w-full sm:w-auto sm:min-w-[9.5rem] max-w-full min-w-0 whitespace-nowrap inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-2.5 transition-all duration-200 hover:-translate-y-0.5 ${
                 isPrimary ? "bg-white text-black hover:bg-white/90" : "text-white hover:brightness-110"
               }`}
               style={{
@@ -331,7 +335,8 @@ export default function Article({ slug }: { slug: string }) {
                 ...(isPrimary ? {} : { background: color }),
               }}
             >
-              {link.label}
+              {/* min-w-0 + truncate：文字太長時只縮文字、尾端變「…」，箭頭永遠保留 */}
+              <span className="min-w-0 truncate">{link.label}</span>
               <ArrowRight size={18} strokeWidth={2.6} className="shrink-0 group-hover:translate-x-1 transition-transform duration-200" />
             </a>
           );
