@@ -464,9 +464,9 @@ export const BENTO: Cell[] = [
     gc: "12 / span 1", gr: "5 / span 2", vertical: true,
     en: "LIS CUP",
     intro:
-      "闊別多年、自前年強勢重啟復辦的「小圖盃」，是圖資系一年一度最熱血的全民體育盛會！這場賽事完全打破系所與身分界線，不僅歡迎系胞組隊同樂，更熱烈邀請外系好友以及系上教授一同走進球場切磋切磋；過去賽程涵蓋了籃球、羽球與排球三大經典球類項目，未來更持續朝著新增多元運動項目的方向邁進，無論你是想在場上爭奪榮耀、享受師生趣味對決，還是單純來為身邊好友熱血應援，都絕對不能錯過這場凝聚力爆棚的年度運動盛典！",
+      "闊別多年、自 2024 年強勢重啟的「小圖盃」，是圖資系一年一度最熱血的全民體育盛會！這場賽事完全打破系所與身分界線，不僅歡迎系上同學組隊同樂，更熱烈邀請外系好友以及系上教授一同走進球場切磋；過去賽程涵蓋了籃球、羽球與排球三大經典球類項目，未來更持續朝著新增多元運動項目的方向邁進，無論你是想在場上爭奪榮耀、享受師生趣味對決，還是單純來為身邊好友熱血應援，都絕對不能錯過這場凝聚力爆棚的年度運動盛典！",
     introEn:
-      "Revived two years ago after a long break, the LIS Cup is our biggest sports event of the year. It's open to everyone — LIS students, friends from other departments and even our professors. Past tournaments featured basketball, badminton and volleyball, with more sports to come. Compete for glory, enjoy student-vs-professor matches or just come and cheer.",
+      "Revived in 2024 after a long break, the LIS Cup is our biggest sports event of the year. It's open to everyone — LIS students, friends from other departments and even our professors. Past tournaments featured basketball, badminton and volleyball, with more sports to come. Compete for glory, enjoy student-vs-professor matches or just come and cheer.",
     note: "羽球、排球兩地開打",
     href: "#/lis-cup",
     dest: "小圖盃 2026 賽程資訊",
