@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent } from "react";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
 import { useIsDesktop } from "../general/shared";
 import { defineText, useI18n } from "../i18n";
 
@@ -28,6 +28,7 @@ const TOGGLE_ORDER: Sport[] = ["badminton", "volleyball"];
 const DEFAULT_SPORT: Sport = "badminton"; // 一進來先顯示哪一項
 
 const PAGE_BG = "#661A1A"; // 紅土球場底色
+const VOLLEYBALL_SIGNUP_URL = "https://forms.gle/3PZHTAE8fRHx4vgg6";
 
 // 隊伍：單打直接寫名字；雙打寫 { name: 隊名, members: "隊員 & 隊員" }
 type Team = string | { name: string; members?: string };
@@ -103,7 +104,7 @@ const SPORTS: Record<Sport, SportInfo> = {
   volleyball: {
     icon: "lis-cup-volleyball.svg",
     date: "2026-11-29",
-    time: "13:00",
+    time: "8:30",
     place: { zh: "臺大排球場", en: "NTU Volleyball Courts" },
     mapQuery: "臺灣大學 排球場",
     open: false,
@@ -120,7 +121,8 @@ const TEXT = defineText({
     categorySuffix: "賽事",
     group: (g: string) => `${g} 組`,
     weekdays: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
-    notOpen: "排球賽尚未開放報名，敬請期待",
+    notOpen: "排球賽報名中，敬請踴躍參加！",
+    signup: "立即報名",
     tbd: "對戰組合即將公布",
     champion: "冠軍",
     vs: "VS",
@@ -134,7 +136,8 @@ const TEXT = defineText({
     categorySuffix: "",
     group: (g: string) => `Group ${g}`,
     weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-    notOpen: "Volleyball sign-ups aren't open yet. Stay tuned!",
+    notOpen: "Volleyball sign-ups are open! Sign up now!",
+    signup: "Sign Up",
     tbd: "Matchups coming soon",
     champion: "Champion",
     vs: "VS",
@@ -355,12 +358,23 @@ function MatchList({ category, tx }: { category: Category; tx: Tx }) {
   );
 }
 
-function Message({ text }: { text: string }) {
+function Message({ text, actionHref, actionLabel }: { text: string; actionHref?: string; actionLabel?: string }) {
   return (
-    <div className="h-full min-h-[220px] flex items-center justify-center text-center px-6">
+    <div className="h-full min-h-[220px] flex flex-col items-center justify-center gap-6 text-center px-6">
       <p className="text-white" style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "clamp(1.05rem, 2vw, 1.8rem)", letterSpacing: "0.12em", lineHeight: 1.6 }}>
         {text}
       </p>
+      {actionHref && actionLabel ? (
+        <a
+          href={actionHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group inline-flex items-center gap-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors px-5 py-2"
+          style={{ fontFamily: zhFont, fontWeight: 700, fontSize: BACK.size, letterSpacing: "0.12em" }}
+        >
+          {actionLabel} <ArrowRight size={16} strokeWidth={2.4} className="group-hover:translate-x-1 transition-transform duration-200" />
+        </a>
+      ) : null}
     </div>
   );
 }
@@ -582,7 +596,7 @@ export default function LIScup() {
           style={GLASS}
         >
           {!info.open ? (
-            <Message text={tx.notOpen} />
+            <Message text={tx.notOpen} actionHref={VOLLEYBALL_SIGNUP_URL} actionLabel={tx.signup} />
           ) : !category ? (
             <Message text={tx.tbd} />
           ) : (

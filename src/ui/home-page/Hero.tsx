@@ -43,7 +43,7 @@ const LINKS = {
   officialMore: "#/news/official-site", // 全新官網「深入了解」→ 官網上線公告
   talksMore: "#/news/lis-talk-2026-fall", // 系友講座「深入了解」→ 系友講座公告
   talksSignup: "#/calendar?event=1",      // 系友講座「報名參加」→ 行事曆活動展開畫面
-  liscupMore: "#/news/lis-cup-2026-badminton", // 小圖盃「深入了解」→ 小圖盃羽球公告
+  liscupSignup: "https://forms.gle/3PZHTAE8fRHx4vgg6", // 小圖盃排球賽報名表單
   liscupSchedule: "#/lis-cup",                 // 小圖盃「完整賽程」→ 賽程頁（LIScup.tsx）
   battleMore: "#/news/battle-la-2026",  // 籃球賽「深入了解」→ Battle LA 公告
   battleTeam: "#/service/basketball",  // 「關於系籃」
@@ -123,6 +123,7 @@ const TEXT = defineText({
       title: "No excuses, just move.",
       subtitle: "2026 小圖盃",
       info: "羽球、排球 兩地開打",
+      signup: "排球賽報名中",
       schedule: "完整賽程",
     },
     battle: {
@@ -164,6 +165,7 @@ const TEXT = defineText({
       title: "No excuses, just move.",
       subtitle: "LIS Cup 2026",
       info: "Badminton & Volleyball · Split courts, single trophy.",
+      signup: "Volleyball Registration",
       schedule: "Full schedule",
     },
     battle: {
@@ -195,10 +197,11 @@ type Tx = (typeof TEXT)["zh"];
 type Track = (zh: string, en?: string) => string;
 
 // ── 共用：白色實心 / 白框按鈕 ──
-function HeroButton({ href, children, outline, track }: { href: string; children: ReactNode; outline?: boolean; track: Track }) {
+function HeroButton({ href, children, outline, track, target }: { href: string; children: ReactNode; outline?: boolean; track: Track; target?: "_blank" }) {
   return (
     <a
       href={href}
+      {...(target ? { target, rel: "noopener noreferrer" } : {})}
       className={`inline-flex items-center justify-center gap-2 sm:gap-3 rounded-full px-4 sm:px-6 py-2 sm:py-2.5 active:scale-95 transition-all duration-200 group whitespace-nowrap ${
         outline ? "border-2 border-white text-white hover:bg-white/10" : "bg-white text-black border-2 border-white hover:bg-white/90"
       }`}
@@ -420,7 +423,7 @@ function LiscupSlide({ tx, track }: { tx: Tx; track: Track }) {
         <p className="text-white mt-3 sm:mt-5" style={subStyle(track)}>{tx.liscup.subtitle}</p>
         <p className="text-white mt-14 sm:mt-[16vh] mb-6 sm:mb-8" style={infoStyle(track)}>{tx.liscup.info}</p>
         <ButtonRow>
-          <HeroButton href={LINKS.liscupMore} track={track}>{tx.learnMore}</HeroButton>
+          <HeroButton href={LINKS.liscupSignup} track={track} target="_blank">{tx.liscup.signup}</HeroButton>
           <HeroButton href={LINKS.liscupSchedule} track={track} outline>{tx.liscup.schedule}</HeroButton>
         </ButtonRow>
       </div>

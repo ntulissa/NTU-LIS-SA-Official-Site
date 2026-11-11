@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { PageEyebrow, Reveal } from "../general/shared";
-import { PRESIDENTS, DEPT_FULL_EN, type Dept, type Election } from "./presidents";
+import { PRESIDENTS, DEPT_FULL_EN, type Dept, type Election, type Candidate } from "./presidents";
 import { defineText, useI18n } from "../i18n";
 
 /**
@@ -12,6 +12,8 @@ import { defineText, useI18n } from "../i18n";
  * ● 切換器：中間是紅→藍漸層的屆數數字；左邊紅點、右邊藍點。
  *          電腦：滑鼠移到左紅點 → 放大成紅色「<」＝上一屆（較早）；右藍點 → 藍色「>」＝下一屆（較新）。
  *          手機／平板：直接顯示箭頭圓鈕（觸控沒有 hover）。端點自動停用。
+ * ● 選舉結果：有票數 → 完整面板（長條＋投票率環＋參選人）；
+ *              只填參選人、沒填票數 → 簡化面板（虛線空環「查無票數」＋說明＋參選人）。
  *
  * ★ 要新增／修改某一屆的「內容」（姓名、簡介、團隊名單、選舉結果…），
  *   請改同資料夾的 presidents.ts，這支檔案（版型）通常不用動。
@@ -41,6 +43,8 @@ const TEXT = defineText({
     invalid: "無效票",
     electorate: "選舉人數",
     candidates: "參選人 ①",
+    noVotes: "查無票數",
+    noVotesNote: "本屆選舉的開票數據目前查無紀錄，僅保留參選人名單；如有相關資料，歡迎與系學會聯繫補齊。",
   },
   en: {
     genTitle: "The {gen} LISSA",
@@ -63,6 +67,8 @@ const TEXT = defineText({
     invalid: "Invalid votes",
     electorate: "Eligible voters",
     candidates: "Candidates ①",
+    noVotes: "No data",
+    noVotesNote: "Vote counts for this election are no longer on record — only the candidate list survives. If you have the results, please get in touch with the association.",
   },
 });
 
@@ -384,19 +390,127 @@ function ProfilePanel({
 // ● 標題徽章：與「團隊成員」完全同款（同字型 zhFont、同尺寸、同內距）。
 // ● 長條：滿格基準＝有效票（同意＋不同意）；所以同意 68/68＝填滿，不同意 0＝只剩紅藍漸層外框。
 // ● 投票率 Donut：大而細的紅藍漸層整圈；中央百分比＝有效票÷選舉人數（自動計算）。
+// ● 查無票數（presidents.ts 只填 candidates）：改顯示 ElectionNoData 簡化面板。
 // 數字（票數、屆數、百分比）用 Josefin Sans（enDisplay）；中文標題用 Chiron Hei（zhDisplay/zhFont）。
 const ELECTION_GRAD = "linear-gradient(90deg, #D14B4B 0%, #2F9EBD 100%)"; // 全站紅→藍
+const DONUT_W = "clamp(180px,15vw,220px)"; // 投票率環（與查無票數的虛線空環）尺寸
+
+// 標題列：選舉結果徽章（＝團隊成員同款）＋ 投票日期（沒填日期就不顯示）
+function ElectionHeader({ date }: { date?: string }) {
+  const { pick, track } = useI18n();
+  const tx = pick(TEXT);
+  return (
+    <div className="flex items-center gap-4 mb-10 flex-wrap">
+      <div className="inline-flex rounded-full" style={{ padding: "1.5px", background: ELECTION_GRAD }}>
+        <div className="rounded-full bg-black px-6 py-2">
+          <span className="text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.24em", "0.06em"), paddingLeft: track("0.24em", "0.06em") }}>
+            {tx.election}
+          </span>
+        </div>
+      </div>
+      {date && (
+        <span className="text-white/40" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.8rem", letterSpacing: "0.12em", color: "#ffffff", opacity: 0.8 }}>
+          {tx.voteDate}{date}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// 參選人方塊（紅藍漸層外框）；ml-auto 把方塊推到最右
+function CandidatesBox({ candidates }: { candidates: Candidate[] }) {
+  const { pick, track } = useI18n();
+  const tx = pick(TEXT);
+  return (
+    <div className="rounded-2xl self-end ml-auto" style={{ padding: "1.5px", background: ELECTION_GRAD }}>
+      <div className="rounded-2xl px-6 py-5" style={{ background: "#0a0a0a" }}>
+        <p className="text-white/60 text-center mb-4" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: track("0.24em", "0.06em"), paddingLeft: track("0.24em", "0.06em") }}>
+          {tx.candidates}
+        </p>
+        <div className="space-y-3">
+          {candidates.map((cd, i) => (
+            <div key={`${cd.n}-${i}`} className="flex items-center gap-2.5">
+              <span
+                className="shrink-0 text-white/70 rounded-[4px] px-1.5 py-0.5"
+                style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.62rem", background: "rgba(255,255,255,0.12)", letterSpacing: "0.04em" }}
+              >
+                {cd.c}
+              </span>
+              <span className="text-white" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1rem,1.3vw,1.2rem)", letterSpacing: "0.14em" }}>
+                {cd.n}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── 查無票數：簡化面板 ─────────────────────────────────────
+// 左：虛線空環（中央「—」＋「查無票數」），表示資料缺漏而非 0%；中：說明文字；右下：參選人。
+// 有填 source 才顯示資料來源（沒有票數，就不掛預設的選委會來源）。
+function ElectionNoData({ e }: { e: Election }) {
+  const { pick, isEn, track } = useI18n();
+  const tx = pick(TEXT);
+  const source = isEn ? e.sourceEn ?? e.source : e.source;
+  return (
+    <div className="w-full">
+      <ElectionHeader date={e.date} />
+      <div className="flex flex-wrap items-start gap-x-10 sm:gap-x-12 gap-y-8">
+        {/* 左：虛線空環 */}
+        <div className="flex flex-col shrink-0" style={{ width: DONUT_W }}>
+          <div className="relative" style={{ width: "100%", aspectRatio: "1" }}>
+            <div className="absolute inset-0 rounded-full" style={{ border: "2px dashed rgba(255,255,255,0.22)" }} />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <span className="text-white/35 leading-none" style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(2.6rem,4vw,3.4rem)" }}>
+                —
+              </span>
+              <span className="text-white/55" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.85rem", letterSpacing: track("0.2em", "0.06em"), paddingLeft: track("0.2em", "0.06em") }}>
+                {tx.noVotes}
+              </span>
+            </div>
+          </div>
+          {source && (
+            <p className="mt-4 text-center" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.72rem", letterSpacing: track("0.08em"), color: "#ffffff", opacity: 0.6 }}>
+              {tx.source}{source}
+            </p>
+          )}
+        </div>
+
+        {/* 中：說明文字（垂直置中對齊空環） */}
+        <div className="flex items-center self-stretch" style={{ minHeight: DONUT_W, maxWidth: "260px" }}>
+          <p className="text-white/50" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", lineHeight: 1.9, letterSpacing: track("0.06em", "0.01em") }}>
+            {tx.noVotesNote}
+          </p>
+        </div>
+
+        {/* 右下：參選人 */}
+        <CandidatesBox candidates={e.candidates} />
+      </div>
+    </div>
+  );
+}
 
 function ElectionResult({ e }: { e: Election }) {
   const { pick, isEn, track } = useI18n();
   const tx = pick(TEXT);
-  const valid = e.agree + e.disagree; // 有效票
+
+  // 沒填票數（同意／不同意／選舉人數任一缺）→ 顯示「參選人＋查無票數」簡化面板
+  if (e.agree == null || e.disagree == null || e.electorate == null) {
+    return <ElectionNoData e={e} />;
+  }
+  const agree = e.agree;
+  const disagree = e.disagree;
+  const electorate = e.electorate;
+
+  const valid = agree + disagree; // 有效票
   const invalid = e.invalid ?? 0; // 廢票（預設 0）
-  const turnout = e.electorate > 0 ? Math.round(((valid + invalid) / e.electorate) * 100) : 0; // 投票率 %＝(有效票＋無效票)÷選舉人數（四捨五入）
+  const turnout = electorate > 0 ? Math.round(((valid + invalid) / electorate) * 100) : 0; // 投票率 %＝(有效票＋無效票)÷選舉人數（四捨五入）
   const base = Math.max(valid, 1); // 長條滿格＝有效票總數（同意＋不同意）
   const bars = [
-    { label: tx.agree, value: e.agree, pct: Math.min(100, (e.agree / base) * 100) },
-    { label: tx.disagree, value: e.disagree, pct: Math.min(100, (e.disagree / base) * 100) },
+    { label: tx.agree, value: agree, pct: Math.min(100, (agree / base) * 100) },
+    { label: tx.disagree, value: disagree, pct: Math.min(100, (disagree / base) * 100) },
   ];
   const source = (isEn ? e.sourceEn : e.source) ?? tx.defaultSource;
   const labelTrack = track("0.16em", "0.02em");
@@ -407,8 +521,8 @@ function ElectionResult({ e }: { e: Election }) {
   const GREY = "#C9C9C9"; // 廢票的淺灰色（想更淺/更深改這裡）
   const GREY_MIN = 3.5; // 廢票在環上的最小顯示寬度（%）；設 0 則完全照實際比例（1 票會非常細）
   const D = 1.2; // 交界柔化寬度（%）
-  const validPct = e.electorate > 0 ? (valid / e.electorate) * 100 : 0;
-  const invalidPct = e.electorate > 0 ? (invalid / e.electorate) * 100 : 0;
+  const validPct = electorate > 0 ? (valid / electorate) * 100 : 0;
+  const invalidPct = electorate > 0 ? (invalid / electorate) * 100 : 0;
   const greyPct = invalid > 0 ? Math.max(invalidPct, GREY_MIN) : 0;
   const ringBg =
     greyPct === 0
@@ -420,18 +534,7 @@ function ElectionResult({ e }: { e: Election }) {
   return (
     <div className="w-full">
       {/* 標題列：選舉結果徽章（＝團隊成員同款）＋ 投票日期 */}
-      <div className="flex items-center gap-4 mb-10 flex-wrap">
-        <div className="inline-flex rounded-full" style={{ padding: "1.5px", background: ELECTION_GRAD }}>
-          <div className="rounded-full bg-black px-6 py-2">
-            <span className="text-white" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "clamp(0.9rem,1.1vw,1.05rem)", letterSpacing: track("0.24em", "0.06em"), paddingLeft: track("0.24em", "0.06em") }}>
-              {tx.election}
-            </span>
-          </div>
-        </div>
-        <span className="text-white/40" style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.8rem", letterSpacing: "0.12em", color: "#ffffff", opacity: 0.8 }}>
-          {tx.voteDate}{e.date}
-        </span>
-      </div>
+      <ElectionHeader date={e.date} />
 
       {/* 同意 / 不同意 長條：外框紅藍漸層（1.5px）；填滿部分為紅藍漸層 */}
       <div className="space-y-7 mb-14">
@@ -463,7 +566,7 @@ function ElectionResult({ e }: { e: Election }) {
       {/* Donut（左，資料來源接在其下）＋ 中：有效票／選舉人數 ＋ 右下：參選人 */}
       <div className="flex flex-wrap items-start gap-x-10 sm:gap-x-12 gap-y-8">
         {/* 左：Donut ＋ 資料來源（緊貼 Donut 下方，版面不再拉長）*/}
-        <div className="flex flex-col shrink-0" style={{ width: "clamp(180px,15vw,220px)" }}>
+        <div className="flex flex-col shrink-0" style={{ width: DONUT_W }}>
           <div className="relative" style={{ width: "100%", aspectRatio: "1" }}>
             {/* 投票率環：紅＝有效票（投票率）、淺灰＝廢票、藍＝其餘；比例自動跟著資料走。
                 環的漸層字串在上方 ringBg 組好；想調環粗細改兩處的 9px。 */}
@@ -488,7 +591,7 @@ function ElectionResult({ e }: { e: Election }) {
         </div>
 
         {/* 中：有效票（紅）／無效票（淺灰，有廢票才顯示）／選舉人數（藍），上下分開貼齊環的上下緣 */}
-        <div className="flex flex-col justify-between self-start py-3" style={{ minHeight: "clamp(180px,15vw,220px)" }}>
+        <div className="flex flex-col justify-between self-start py-3" style={{ minHeight: DONUT_W }}>
           <div>
             <p style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.6rem,2.4vw,2.1rem)", color: "#D14B4B", lineHeight: 1, letterSpacing: "0.06em" }}>{valid}</p>
             <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: track("0.1em") }}>{tx.valid}</p>
@@ -500,34 +603,13 @@ function ElectionResult({ e }: { e: Election }) {
             </div>
           )}
           <div>
-            <p style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.6rem,2.4vw,2.1rem)", color: "#2F9EBD", lineHeight: 1, letterSpacing: "0.06em" }}>{e.electorate}</p>
+            <p style={{ fontFamily: enDisplay, fontWeight: 700, fontSize: "clamp(1.6rem,2.4vw,2.1rem)", color: "#2F9EBD", lineHeight: 1, letterSpacing: "0.06em" }}>{electorate}</p>
             <p className="text-white/45 mt-1" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: track("0.1em") }}>{tx.electorate}</p>
           </div>
         </div>
 
-        {/* 右下：參選人（紅藍漸層外框）；ml-auto 把方塊推到最右，右緣對齊上方票數的個位數 */}
-        <div className="rounded-2xl self-end ml-auto" style={{ padding: "1.5px", background: ELECTION_GRAD }}>
-          <div className="rounded-2xl px-6 py-5" style={{ background: "#0a0a0a" }}>
-            <p className="text-white/60 text-center mb-4" style={{ fontFamily: zhFont, fontWeight: 500, fontSize: "0.85rem", letterSpacing: track("0.24em", "0.06em"), paddingLeft: track("0.24em", "0.06em") }}>
-              {tx.candidates}
-            </p>
-            <div className="space-y-3">
-              {e.candidates.map((cd, i) => (
-                <div key={`${cd.n}-${i}`} className="flex items-center gap-2.5">
-                  <span
-                    className="shrink-0 text-white/70 rounded-[4px] px-1.5 py-0.5"
-                    style={{ fontFamily: monoFont, fontWeight: 500, fontSize: "0.62rem", background: "rgba(255,255,255,0.12)", letterSpacing: "0.04em" }}
-                  >
-                    {cd.c}
-                  </span>
-                  <span className="text-white" style={{ fontFamily: zhDisplay, fontWeight: 900, fontSize: "clamp(1rem,1.3vw,1.2rem)", letterSpacing: "0.14em" }}>
-                    {cd.n}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* 右下：參選人（右緣對齊上方票數的個位數） */}
+        <CandidatesBox candidates={e.candidates} />
       </div>
     </div>
   );
@@ -786,9 +868,16 @@ export default function Presidents() {
           </div>
         )}
 
-        {/* 選舉結果：該屆有填 election 才顯示，接在「團隊成員」下方；右側會長面板維持不變 */}
+        {/* 選舉結果：該屆有填 election 才顯示，接在「團隊成員」下方；右側會長面板維持不變。
+            沒有票數的屆數會自動改顯示「參選人＋查無票數」簡化面板，版面較矮，所以不撐滿一屏。 */}
         {p.election && (
-          <div className="max-w-[720px] pb-20 lg:pb-28 lg:min-h-screen lg:flex lg:flex-col lg:justify-center">
+          <div
+            className={`max-w-[720px] pb-20 lg:pb-28 ${
+              p.election.agree != null && p.election.disagree != null && p.election.electorate != null
+                ? "lg:min-h-screen lg:flex lg:flex-col lg:justify-center"
+                : ""
+            }`}
+          >
             {/* key 帶屆數：切屆時重新掛載，讓進場動畫每次重播 */}
             <Reveal key={`election-${p.gen}`}>
               <ElectionResult e={p.election} />

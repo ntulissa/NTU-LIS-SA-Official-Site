@@ -36,11 +36,17 @@ import battleLA2026 from "@/imports/latest/battleLA2026.png";
 import lisCup2026badminton from "@/imports/latest/lisCup2026badminton.png";
 import LISSAofficialsite from "@/imports/latest/LISSAofficialsite.svg";
 
+const lisCupVolleyballRulesPdf = new URL(
+  "../../imports/latest/2026 小圖盃排球規章.pdf",
+  import.meta.url,
+).href;
+
 // 相關連結按鈕（文章內文最下方的玻璃框）
 export type AnnouncementLink = {
   label: string;                // 按鈕文字
   labelEn?: string;             // 英文版按鈕文字
   href: string;                 // https:// 開頭＝外部網址（開新分頁）；#/ 開頭＝站內頁面
+  target?: "_blank";            // 指定在新分頁／視窗開啟
   style?: "primary" | "accent"; // 白色或綠色；不填＝第一顆白、其餘綠
   color?: string;               // 綠色按鈕想換顏色才填，例如體育部藍 "#23658A"
 };
@@ -66,6 +72,30 @@ export type Announcement = {
 };
 
 export const ANNOUNCEMENTS: Announcement[] = [
+  {
+    slug: "lis-cup-2026-volleyball",
+    category: "體育部",
+    categoryEn: "Sports",
+    title: "2026 小圖盃排球賽報名中",
+    titleEn: "LIS Cup Volleyball 2026 Registration Open",
+    author: "臺大圖資系學會",
+    authorEn: "NTU LIS Student Association",
+    date: "2026.11.11",
+    excerpt: "2026 小圖盃男女混排賽報名開跑！為推展系上排球運動風氣、增進圖資系同學與三校球友間的情誼，一年一度的小圖盃排球項目正式登場！",
+    excerptEn: "LIS Cup Volleyball 2026 registration is now open! To promote volleyball culture within the department and foster camaraderie among LIS students and friends from three universities, the annual LIS Cup Volleyball Tournament is officially underway!",
+    paragraphs: [
+      "【熱血開扣｜2026 小圖盃男女混排賽報名開跑！】為推展系上排球運動風氣、增進圖資系同學與三校球友間的情誼，一年一度的小圖盃排球項目正式登場！比賽採男女混排三局兩勝單淘汰制，將於 11/29（日）上午 8:30 在舊體南側室外排球場（室外七）準時開賽（8:20 開始檢錄）。",
+      "本次比賽完全免費，參賽資格面向臺大、臺師大、臺科大三校聯盟在學學生，每隊 6 至 8 人且須至少包含 3 位圖資系同學（含雙主修、輔系與博碩士生）及 3 名女性球員，報名截止至 11/20（五）23:59 止（若未滿四隊則取消辦理），歡迎熱愛排球的系胞與球友們火速組隊，立即點擊下方連結完成報名，一起上場享受最純粹的排球熱血！",
+    ],
+    paragraphsEn: [
+      "LIS Cup Volleyball 2026 registration is now open! To promote volleyball culture within the department and foster camaraderie among LIS students and friends from three universities, the annual LIS Cup Volleyball Tournament is officially underway! The competition will follow a best-of-three, single-elimination format with mixed-gender teams, and will take place on Nov. 29 (Sun) at 8:30 a.m. at the outdoor volleyball court on the south side of the old gymnasium (Outdoor Court 7), with check-in starting at 8:20 a.m.",
+      "This tournament is completely free of charge and open to currently enrolled students from NTU, NTNU, and NTUST. Each team must consist of 6 to 8 players, including at least 3 LIS students (including double majors, minors, and graduate students) and 3 female players. Registration will close on Nov. 20 (Fri) at 11:59 p.m. (the event will be canceled if fewer than four teams register). We encourage all volleyball enthusiasts from the department and our friends to quickly form teams and click the link below to register. Let's hit the court and enjoy the pure excitement of volleyball together!",
+    ],
+    links: [
+      { label: "立即報名", labelEn: "Sign Up", href: "https://forms.gle/3PZHTAE8fRHx4vgg6" },
+      { label: "小圖盃排球賽章程", labelEn: "Volleyball Rules", href: lisCupVolleyballRulesPdf, target: "_blank" },
+    ],
+  },
   {
     slug: "official-site",
     category: "學會公告",
@@ -148,7 +178,7 @@ export const ANNOUNCEMENTS: Announcement[] = [
     ],
     image: lisCup2026badminton,
     links: [
-      { label: "羽球賽程", labelEn: "Badminton Schedule", href: "#/lis-cup" },
+      { label: "小圖盃賽程", labelEn: "Tournament Schedule", href: "#/lis-cup" },
       { label: "關於小圖盃", labelEn: "About LIS Cup", href: "#/service/lis-cup" },
     ],
   },

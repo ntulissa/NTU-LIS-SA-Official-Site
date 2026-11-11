@@ -232,7 +232,7 @@ export const EVENTS: CalEvent[] = [
     title: "LIS Cup 小圖盃：排球",
     titleEn: "LIS Cup: Volleyball",
     date: "2026-11-29",
-    time: "13:00",
+    time: "8:30",
     depts: ["sp"],
     service: "lis-cup",
     image: "lis-cup-volleyball.svg",
@@ -245,7 +245,8 @@ export const EVENTS: CalEvent[] = [
     descEn:
       "Our annual department sports tournament.\n" +
       "Form a team for basketball, volleyball or badminton and compete for glory!",
-    signup: false
+    signup: true,
+    signupUrl: "https://forms.gle/3PZHTAE8fRHx4vgg6",
   },
   {
     title: "杜鵑花節 2027",

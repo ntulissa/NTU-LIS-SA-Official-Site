@@ -318,11 +318,13 @@ export default function Article({ slug }: { slug: string }) {
           const isPrimary = color === null;
           // 外部網址（http 開頭，例如 Google 表單）開新分頁；站內頁面（#/ 開頭）在原分頁切換
           const isExternal = /^https?:\/\//.test(link.href);
+          const target = link.target ?? (isExternal ? "_blank" : undefined);
           return (
             <a
               key={link.href + i}
               href={link.href}
-              {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              {...(target ? { target, rel: "noopener noreferrer" } : {})}
+              data-open-new-tab={target ? "true" : undefined}
               title={link.label}
               className={`group relative w-full sm:w-auto sm:min-w-[9.5rem] max-w-full min-w-0 whitespace-nowrap inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-2.5 transition-all duration-200 hover:-translate-y-0.5 ${
                 isPrimary ? "bg-white text-black hover:bg-white/90" : "text-white hover:brightness-110"
