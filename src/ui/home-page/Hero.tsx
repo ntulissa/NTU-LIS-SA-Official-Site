@@ -14,7 +14,7 @@ import { defineText, useI18n } from "../i18n";
 /**
  * 首頁 Hero（可左右切換的輪播）
  * ─────────────────────────────────────────────────────────────
- * ● 四頁：系學會招募（recruit）、全新官網（official）、系友講座（talks）、文學院籃球賽（battle）
+ * ● 五頁：全新官網（official）、系友講座（talks）、小圖盃（liscup）、文學院籃球賽（battle）、系學會招募（recruit）
  * ● 切換方式（任何裝置都能用）：
  *     - 點底部圓點
  *     - 鍵盤 ← →（Hero 在畫面上就有效，不用先點）；Tab 也能移到按鈕上按 Enter
@@ -22,16 +22,16 @@ import { defineText, useI18n } from "../i18n";
  *   也會自動輪播（滑鼠停在上面、或用鍵盤操作 Hero 時會暫停）
  * ● 只有「系學會招募」那頁，點畫面空白處會跳出 Hashtag
  * ● 圖片：放在 src/imports/ 底下任何資料夾都可以（建議 src/imports/home-page/），程式用「檔名」找
- *     officialsite.svg、speaker1.svg、speaker2.svg、battleLA.svg
+ *     officialsite.svg、speaker1.png、speaker2.png、battleLA.svg、badminton.svg、volleyball.svg
  */
 
 // ══════════════════════════════════════════════════════════════════
 // ✏️ 手動調整區
 // ══════════════════════════════════════════════════════════════════
 
-// ── 輪播順序：調換這四個的順序即可；不想顯示某一頁就把它刪掉 ──
-type SlideId = "official" | "talks" | "battle" | "recruit";
-const SLIDE_ORDER: SlideId[] = ["official", "talks", "battle", "recruit"];
+// ── 輪播順序：調換這幾個的順序即可；不想顯示某一頁就把它刪掉 ──
+type SlideId = "official" | "talks" | "liscup" | "battle" | "recruit";
+const SLIDE_ORDER: SlideId[] = ["official", "talks", "liscup", "battle", "recruit"];
 
 const AUTOPLAY_MS = 8000; // 自動切換間隔（毫秒）；設 0＝不自動切換
 const SLIDE_MS = 700;     // 切換動畫時間（毫秒）
@@ -43,6 +43,8 @@ const LINKS = {
   officialMore: "#/news/official-site", // 全新官網「深入了解」→ 官網上線公告
   talksMore: "#/news/lis-talk-2026-fall", // 系友講座「深入了解」→ 系友講座公告
   talksSignup: "#/calendar?event=1",      // 系友講座「報名參加」→ 行事曆活動展開畫面
+  liscupMore: "#/news/lis-cup-2026-badminton", // 小圖盃「深入了解」→ 小圖盃羽球公告
+  liscupSchedule: "#/lis-cup",                 // 小圖盃「完整賽程」→ 賽程頁（LIScup.tsx）
   battleMore: "#/news/battle-la-2026",  // 籃球賽「深入了解」→ Battle LA 公告
   battleTeam: "#/service/basketball",  // 「關於系籃」
 };
@@ -53,6 +55,8 @@ const IMG = {
   speaker1: "speaker1.png",
   speaker2: "speaker2.png",
   battle: "battleLA.svg",
+  courtLeft: "badminton.svg",   // 小圖盃：左邊羽球場
+  courtRight: "volleyball.svg", // 小圖盃：右邊排球場
 };
 
 // 全新官網頁：背景 icon 上的黑色漸層遮罩（0~1；越大越暗）
@@ -60,10 +64,14 @@ const IMG = {
 //   手機：由上往下漸層（文字在下方，所以下方最暗）
 const OFFICIAL_OVERLAY = { start: 0.55, end: 0.92 };
 
-const BATTLE_OVERLAY = 0.55;
+const BATTLE_OVERLAY = 0.55; // 籃球賽背景圖上的黑色遮罩（0~1；越大越暗、字越清楚）
 
-// 「系學會招募」和「Battle LA」兩頁的按鈕列，固定在「距離畫面底部」同一個高度，
-// 所以兩頁按鈕位置永遠對齊（不管螢幕多高）。數字越大＝整塊內容越往上。
+// 小圖盃頁：紅土球場底色＋球場線往中間淡出的漸層
+const LISCUP_BG = "#661A1A";
+const COURT_FADE = { solid: "35%", clear: "100%" }; // 球場線從 solid 開始變淡，到 clear 完全透明（數字越小＝越早開始淡）
+
+// 「系學會招募」「小圖盃」「Battle LA」的按鈕列，固定在「距離畫面底部」同一個高度，
+// 所以按鈕位置永遠對齊（不管螢幕多高）。數字越大＝整塊內容越往上。
 const BUTTONS_FROM_BOTTOM = "clamp(7.5rem, 25svh, 18rem)";
 
 // ── 字級（clamp(手機最小, 隨螢幕寬度縮放, 大螢幕最大)）想再大／小改這裡 ──
@@ -74,7 +82,7 @@ const SIZE = {
   button: "clamp(0.8rem, 1.05vw, 1.05rem)",      // 所有按鈕
   recruitTitle: "clamp(4.2rem, 12.5vw, 11.5rem)",      // 招募頁「系學會」
   recruitSubtitle: "clamp(1.6rem, 4.4vw, 4rem)", // 招募頁「可以這樣「玩」」
-}; // 籃球賽背景圖上的黑色遮罩（0~1；越大越暗、字越清楚）
+};
 
 // ── Hashtag（只在「系學會招募」頁）──
 const MAX_TAGS = 10;      // 畫面上最多同時幾個
@@ -84,7 +92,7 @@ const EXIT_MS = 350;       // 淡出動畫長度（毫秒）
 // ── 所有文字（中英兩份；英文結構要和中文一樣）──
 const TEXT = defineText({
   zh: {
-    slideNames: { recruit: "系學會招募", official: "全新官方網站", talks: "系友講座", battle: "文學院籃球賽" },
+    slideNames: { recruit: "系學會招募", official: "全新官方網站", talks: "系友講座", liscup: "小圖盃", battle: "文學院籃球賽" },
     goTo: "前往",
     nowShowing: "目前顯示",
     learnMore: "深入了解",
@@ -107,9 +115,15 @@ const TEXT = defineText({
       info: "11/17 經驗傳承・跨界對話",
       signup: "報名參加",
       speakers: [
-        { name: "傅嬿羽", year: "B04", role: "Micron Technology -\nFull stack AI engineer" },
-        { name: "陳庭姍", year: "B04", role: "IBM Consulting" },
+        { name: "傅嬿羽", year: "B04", role: "Micron Technology -\n全端 AI 工程師" },
+        { name: "陳庭姍", year: "B04", role: "IBM Consulting -\n企業轉型顧問" },
       ],
+    },
+    liscup: {
+      title: "No excuses, just move.",
+      subtitle: "2026 小圖盃",
+      info: "羽球、排球 兩地開打",
+      schedule: "完整賽程",
     },
     battle: {
       title: "Battle LA.",
@@ -119,7 +133,7 @@ const TEXT = defineText({
     },
   },
   en: {
-    slideNames: { recruit: "Join LISSA", official: "New Official Site", talks: "LIS Talks", battle: "Battle LA" },
+    slideNames: { recruit: "Join LISSA", official: "New Official Site", talks: "LIS Talks", liscup: "LIS Cup", battle: "Battle LA" },
     goTo: "Go to",
     nowShowing: "Now showing",
     learnMore: "Learn more",
@@ -142,9 +156,15 @@ const TEXT = defineText({
       info: "Nov 17 · Mentorship · Cross-Field Exchange",
       signup: "Sign up",
       speakers: [
-        { name: "傅嬿羽", year: "B04", role: "Micron Technology -\nFull stack AI engineer" },
-        { name: "陳庭姍", year: "B04", role: "IBM Consulting" },
+        { name: "Y.Y. Fu", year: "B04", role: "Micron Technology -\nFull stack AI engineer" },
+        { name: "T.S. Chen", year: "B04", role: "IBM Consulting -\nBusiness Transformation" },
       ],
+    },
+    liscup: {
+      title: "No excuses, just move.",
+      subtitle: "LIS Cup 2026",
+      info: "Badminton & Volleyball · Split courts, single trophy.",
+      schedule: "Full schedule",
     },
     battle: {
       title: "Battle LA.",
@@ -214,7 +234,7 @@ const infoStyle = (track: Track) => ({
   letterSpacing: track("0.18em", "0.04em"),
 });
 
-// ══════════════════ 第 1 頁：系學會招募 ══════════════════
+// ══════════════════ 系學會招募 ══════════════════
 function RecruitSlide({ tx, track, isClone }: { tx: Tx; track: Track; isClone?: boolean }) {
   const [displayText, setDisplayText] = useState("");
   const Heading = isClone ? "p" : "h1"; // 分身不要重複 <h1>（對 Google 比較好）
@@ -272,7 +292,7 @@ function RecruitSlide({ tx, track, isClone }: { tx: Tx; track: Track; isClone?: 
   );
 }
 
-// ══════════════════ 第 2 頁：全新官方網站 ══════════════════
+// ══════════════════ 全新官方網站 ══════════════════
 function OfficialSlide({ tx, track }: { tx: Tx; track: Track }) {
   const bg = asset(IMG.official);
   return (
@@ -304,7 +324,7 @@ function OfficialSlide({ tx, track }: { tx: Tx; track: Track }) {
   );
 }
 
-// ══════════════════ 第 3 頁：系友講座 ══════════════════
+// ══════════════════ 系友講座 ══════════════════
 function SpeakerCard({ name, year, role, track }: { name: string; year: string; role: string; track: Track }) {
   return (
     <div className="bg-white text-black rounded-md shadow-xl px-3 sm:px-4 py-2.5 sm:py-3.5 w-[min(100%,300px)]">
@@ -365,7 +385,50 @@ function TalksSlide({ tx, track }: { tx: Tx; track: Track }) {
   );
 }
 
-// ══════════════════ 第 4 頁：文學院籃球賽 ══════════════════
+// ══════════════════ 小圖盃 ══════════════════
+// 紅土底色；左羽球場、右排球場，球場線往畫面中間漸漸淡出（不會跟中間的字打架）
+function LiscupSlide({ tx, track }: { tx: Tx; track: Track }) {
+  const left = asset(IMG.courtLeft);
+  const right = asset(IMG.courtRight);
+  const fade = (dir: "right" | "left") => {
+    const g = `linear-gradient(to ${dir}, #000 ${COURT_FADE.solid}, transparent ${COURT_FADE.clear})`;
+    return { maskImage: g, WebkitMaskImage: g };
+  };
+  return (
+    <>
+      <div className="absolute inset-0 pointer-events-none" style={{ background: LISCUP_BG }} />
+      {left && (
+        <img
+          src={left}
+          alt=""
+          draggable={false}
+          className="absolute top-[24%] left-[3%] w-[44%] lg:w-[38%] h-[60%] object-contain object-left select-none pointer-events-none opacity-60 lg:opacity-100"
+          style={fade("right")}
+        />
+      )}
+      {right && (
+        <img
+          src={right}
+          alt=""
+          draggable={false}
+          className="absolute top-[24%] right-[3%] w-[44%] lg:w-[34%] h-[60%] object-contain object-right select-none pointer-events-none opacity-60 lg:opacity-100"
+          style={fade("left")}
+        />
+      )}
+      <div className="hero-content relative z-10 flex flex-col items-center text-center px-5 sm:px-8 self-end" style={{ marginBottom: BUTTONS_FROM_BOTTOM }}>
+        <h2 className="text-white" style={titleStyle(track)}>{tx.liscup.title}</h2>
+        <p className="text-white mt-3 sm:mt-5" style={subStyle(track)}>{tx.liscup.subtitle}</p>
+        <p className="text-white mt-14 sm:mt-[16vh] mb-6 sm:mb-8" style={infoStyle(track)}>{tx.liscup.info}</p>
+        <ButtonRow>
+          <HeroButton href={LINKS.liscupMore} track={track}>{tx.learnMore}</HeroButton>
+          <HeroButton href={LINKS.liscupSchedule} track={track} outline>{tx.liscup.schedule}</HeroButton>
+        </ButtonRow>
+      </div>
+    </>
+  );
+}
+
+// ══════════════════ 文學院籃球賽 ══════════════════
 function BattleSlide({ tx, track }: { tx: Tx; track: Track }) {
   const bg = asset(IMG.battle);
   return (
@@ -703,6 +766,7 @@ export default function Hero() {
       case "recruit": return <RecruitSlide tx={tx} track={track} isClone={isClone} />;
       case "official": return <OfficialSlide tx={tx} track={track} />;
       case "talks": return <TalksSlide tx={tx} track={track} />;
+      case "liscup": return <LiscupSlide tx={tx} track={track} />;
       case "battle": return <BattleSlide tx={tx} track={track} />;
     }
   };

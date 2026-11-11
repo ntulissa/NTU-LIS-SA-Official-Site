@@ -148,6 +148,7 @@ export const ANNOUNCEMENTS: Announcement[] = [
     ],
     image: lisCup2026badminton,
     links: [
+      { label: "羽球賽程", labelEn: "Badminton Schedule", href: "#/lis-cup" },
       { label: "關於小圖盃", labelEn: "About LIS Cup", href: "#/service/lis-cup" },
     ],
   },

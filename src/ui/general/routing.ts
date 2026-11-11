@@ -20,6 +20,7 @@
 //   /news             → 公告列表
 //   /news/<slug>      → 單篇公告（slug 同 news.ts）
 //   /calendar         → 系學會行事曆
+//   /lis-cup          → 小圖盃完整賽程（?sport=volleyball 直接打開排球）
 //   /services         → 各部業務 Bento 總覽
 //   /service/<slug>   → 單一服務（slug 同 servicesData.ts）
 //   /dept/<slug>      → 部門頁（例：/dept/gen ＝行政部）
@@ -46,6 +47,7 @@ export type Route =
   | { name: "news" }
   | { name: "article"; slug: string }
   | { name: "calendar" }
+  | { name: "lis-cup" }
   | { name: "fees" }
   | { name: "sponsor" }
   | { name: "dept"; slug: string }
@@ -60,6 +62,7 @@ export const STATIC_ROUTE_NAMES = [
   "presidents",
   "news",
   "calendar",
+  "lis-cup",
   "services",
   "resources",
   "contact",

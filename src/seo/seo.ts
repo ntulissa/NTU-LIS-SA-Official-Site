@@ -15,7 +15,7 @@ import zhTW from "../ui/i18n/locales/zh-TW";
 import en from "../ui/i18n/locales/en";
 import { ANNOUNCEMENTS, getAnnouncement } from "../ui/latest/news.ts"; // 寫明 .ts：同資料夾還有 News.tsx，避免 Mac（不分大小寫）抓錯檔案
 import { BENTO, DEPT_NAMES, serviceBySlug, type Dept } from "../ui/services/servicesData";
-import { routeToPath, withLang, type Route, type RouteLang } from "../ui/general/routing.ts";
+import { routeToPath, withLang, type Route, type RouteLang } from "../ui/general/routing";
 
 /** 正式網址（不要加結尾斜線）。換網域時只要改這裡。 */
 export const SITE_URL = "https://www.ntulissa.com";
@@ -47,6 +47,7 @@ const PAGE_TEXT = {
       presidents: { title: zhTW.nav.presidents, description: "國立臺灣大學圖書資訊學系系學會歷屆會長名單與傳承。" },
       news: { title: zhTW.nav.announcements, description: "臺大圖資系學會最新公告：招募、選舉、交接、學輔室與各項系上活動消息。" },
       calendar: { title: zhTW.nav.calendar, description: "臺大圖資系學會行事曆：迎新、系烤、聖誕大會、圖資之夜、小圖盃等系上活動時間與地點。" },
+      "lis-cup": { title: "2026 小圖盃完整賽程", description: "2026 臺大圖資系小圖盃：羽球（11/17 臺大新體 1F 多功能球場）與排球（11/29 臺大排球場）比賽時間、地點與各組對戰表。" },
       services: { title: zhTW.nav.departments, description: "臺大圖資系學會提供的各項服務：系櫃租借、學輔室、教科書代訂、系服、系隊補助、迎新與各類活動。" },
       resources: { title: zhTW.nav.resources, description: "臺大圖資系學會整理的學習資源：選課攻略、課程地圖與圖資系相關學術資源。" },
       contact: { title: zhTW.nav.contact, description: "聯絡臺大圖資系學會：官方信箱、Instagram、Facebook 與 Threads。" },
@@ -70,6 +71,7 @@ const PAGE_TEXT = {
       presidents: { title: en.nav.presidents, description: "Past presidents of the NTU LIS Student Association." },
       news: { title: en.nav.announcements, description: "Latest announcements from the NTU LIS Student Association: recruitment, elections, handovers and department events." },
       calendar: { title: en.nav.calendar, description: "NTU LIS Student Association event calendar: orientation, BBQ, Christmas party, LIS Night, LIS Cup and more." },
+      "lis-cup": { title: "LIS Cup 2026 Full Schedule", description: "LIS Cup 2026 at NTU LIS: badminton (Nov 17, NTU Sports Center) and volleyball (Nov 29, NTU Volleyball Courts) — times, venues and brackets." },
       services: { title: en.nav.departments, description: "Services from the NTU LIS Student Association: lockers, lounge access, textbook orders, department apparel, team funding and events." },
       resources: { title: en.nav.resources, description: "Learning resources from the NTU LIS Student Association: course guides, course maps and LIS academic resources." },
       contact: { title: en.nav.contact, description: "Contact the NTU LIS Student Association by email, Instagram, Facebook or Threads." },
@@ -209,7 +211,7 @@ export function buildHead(route: Route, lang: RouteLang): HeadData {
 export function allRoutes(): Route[] {
   const routes: Route[] = [{ name: "home" }];
   const fixed: Route["name"][] = [
-    "about", "overview", "current-team", "presidents", "news", "calendar",
+    "about", "overview", "current-team", "presidents", "news", "calendar", "lis-cup",
     "services", "resources", "contact", "fees", "sponsor", "join", "dept-quiz",
   ];
   for (const name of fixed) routes.push({ name } as Route);

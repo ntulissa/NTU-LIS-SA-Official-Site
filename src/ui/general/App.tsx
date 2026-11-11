@@ -17,6 +17,7 @@ import Survey from "../join-us/Survey";
 import Contact from "../services/Contact";
 import Presidents from "../about-us/Presidents.tsx";
 import Calendar from "../latest/Calendar";
+import LIScup from "../latest/LIScup";
 import Fee from "../support-us/Fee";
 import Sponsor from "../support-us/Sponsor";
 import Department from "../about-us/Department";
@@ -212,6 +213,9 @@ function AppContent() {
       ) : route.name === "calendar" ? (
         // 獨立頁：系學會行事曆（Header/Footer 在最外層一定會出現）。
         <Calendar />
+      ) : route.name === "lis-cup" ? (
+        // 獨立頁：小圖盃完整賽程（羽球 ⇄ 排球）。
+        <LIScup />
       ) : route.name === "fees" ? (
         // 系學會費專區（捲動式；Header 於最上方為透明疊在 Hero 上）。
         <Fee />

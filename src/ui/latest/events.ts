@@ -232,7 +232,7 @@ export const EVENTS: CalEvent[] = [
   {
     title: "LIS Cup 小圖盃：排球",
     titleEn: "LIS Cup: Volleyball",
-    date: "2026-11-28",
+    date: "2026-11-29",
     time: "13:00",
     depts: ["sp"],
     service: "lis-cup",
