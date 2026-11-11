@@ -203,8 +203,7 @@ export default function Footer() {
                   letterSpacing: "0.07em",
                 }}
               >
-                {/* 英文版只顯示英文標題，避免「ABOUT About」重複 */}
-                {isEn ? col.en : isDesktop ? <>{col.en}&nbsp;&nbsp;{col.zh}</> : <>{col.en}<br />{col.zh}</>}
+                {isEn ? col.en : col.zh}
               </p>
               <ul className="space-y-3 lg:space-y-4">
                 {col.links.map((link) => (
