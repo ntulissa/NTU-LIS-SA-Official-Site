@@ -13,9 +13,9 @@ const LOGO_SIZE = 180;
 const LOGO_OFFSET_X = -55;
 const LOGO_OFFSET_Y = 0;
 
-// ── 右側四個選單欄微調（新增類別後標題被擠到換行時調這裡）──────────────
-// NAV_COL_GAP：四欄之間的水平間距（px），調小 → 每欄更寬、標題更不會換行
-// NAV_SHIFT_X：四欄「整體」水平位移（px，負=往左、正=往右）
+// ── 右側五個選單欄微調（新增類別後標題被擠到換行時調這裡）──────────────
+// NAV_COL_GAP：欄位之間的水平間距（px），調小 → 每欄更寬、標題更不會換行
+// NAV_SHIFT_X：選單欄「整體」水平位移（px，負=往左、正=往右）
 const NAV_COL_GAP = 20;
 const NAV_SHIFT_X = 100;
 
@@ -66,6 +66,14 @@ function getNavCols(t: Messages) {
       links: [
         { label: t.nav.fees, href: "#/fees" },
         { label: t.nav.sponsor, href: "#/sponsor" },
+      ],
+    },
+    {
+      en: "LIS CUP 2026",
+      zh: t.nav.lisCup2026,
+      links: [
+        { label: t.nav.aboutLisCup, href: "#/service/lis-cup" },
+        { label: t.nav.lisCupSchedule, href: "#/lis-cup" },
       ],
     },
   ];
@@ -141,7 +149,7 @@ export default function Footer() {
       `}</style>
       <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-14">
         <div
-          className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto_repeat(4,minmax(0,1fr))] gap-y-10 lg:gap-y-8 mb-10"
+          className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto_repeat(5,minmax(0,1fr))] gap-y-10 lg:gap-y-8 mb-10"
           style={{ columnGap: isDesktop ? `${NAV_COL_GAP}px` : "24px" }}
         >
           {/* 欄距改上方常數 NAV_COL_GAP；選單整體左右位移改 NAV_SHIFT_X */}

@@ -40,6 +40,10 @@ const zhTW = {
     fees: "系學會費",
     sponsor: "贊助我們",
 
+    lisCup2026: "小圖盃 2026",
+    aboutLisCup: "關於小圖盃",
+    lisCupSchedule: "賽程",
+
     join: "加入我們",
 
     openMenu: "開啟選單",

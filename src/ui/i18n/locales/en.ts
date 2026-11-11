@@ -40,6 +40,10 @@ const en: Messages = {
     fees: "Membership Fee",
     sponsor: "Sponsor Us",
 
+    lisCup2026: "LIS Cup 2026",
+    aboutLisCup: "About LIS Cup",
+    lisCupSchedule: "Schedule",
+
     join: "Join Us",
 
     openMenu: "Open menu",

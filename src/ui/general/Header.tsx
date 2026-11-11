@@ -68,6 +68,14 @@ function getNavItems(t: Messages) {
         { label: t.nav.sponsor, href: "#/sponsor" },
       ],
     },
+    {
+      label: t.nav.lisCup2026,
+      labelEn: "LIS CUP 2026",
+      sub: [
+        { label: t.nav.aboutLisCup, href: "#/service/lis-cup" },
+        { label: t.nav.lisCupSchedule, href: "#/lis-cup" },
+      ],
+    },
   ];
 }
 

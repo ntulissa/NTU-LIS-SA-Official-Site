@@ -65,7 +65,7 @@ const SPORTS: Record<Sport, SportInfo> = {
     icon: "lis-cup-badminton.svg",
     date: "2026-11-17",
     time: "16:00",
-    place: { zh: "臺大新體 1F 多功能球場", en: "NTU Sports Center 1F, Multi-purpose Court" },
+    place: { zh: "臺大新體 1F 多功能球場", en: "1F, NTU Sports Center" },
     mapQuery: "臺大綜合體育館",
     open: true,
     categories: [

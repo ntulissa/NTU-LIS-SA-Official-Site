@@ -184,8 +184,7 @@ export const EVENTS: CalEvent[] = [
     descEn:
       "Our annual department sports tournament.\n" +
       "Form a team for basketball, volleyball or badminton and compete for glory!",
-    signup: true,
-    signupUrl: "https://forms.gle/A4LBeSZaAyt7LBfH8",
+    signup: false,
   },
   {
     title: "三系聯合系烤 2026",
