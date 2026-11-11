@@ -165,7 +165,7 @@ const TEXT = defineText({
       title: "No excuses, just move.",
       subtitle: "LIS Cup 2026",
       info: "Badminton & Volleyball · Split courts, single trophy.",
-      signup: "Volleyball Registration",
+      signup: "Volleyball Signup",
       schedule: "Full schedule",
     },
     battle: {
