@@ -67,7 +67,8 @@ const PAGE_TEXT = {
     pages: {
       about: { title: en.nav.intro, description: "Meet the NTU LIS Student Association — the student-run association of the Department of Library and Information Science at National Taiwan University." },
       overview: { title: en.nav.overview, description: "NTU LIS Student Association at a glance: membership, team size, events and services." },
-      "current-team": { title: en.nav.team, description: "The current NTU LIS Student Association team: presidents and the five departments — General Affairs, Events, Academic Affairs, Media & Design and Sports." },
+      // ★ 形象宣傳部英文名稱全站統一為「Image & Publicity」
+      "current-team": { title: en.nav.team, description: "The current NTU LIS Student Association team: presidents and the five departments — General Affairs, Events, Academic Affairs, Image & Publicity and Sports." },
       presidents: { title: en.nav.presidents, description: "Past presidents of the NTU LIS Student Association." },
       news: { title: en.nav.announcements, description: "Latest announcements from the NTU LIS Student Association: recruitment, elections, handovers and department events." },
       calendar: { title: en.nav.calendar, description: "NTU LIS Student Association event calendar: orientation, BBQ, Christmas party, LIS Night, LIS Cup and more." },
@@ -77,7 +78,7 @@ const PAGE_TEXT = {
       contact: { title: en.nav.contact, description: "Contact the NTU LIS Student Association by email, Instagram, Facebook or Threads." },
       fees: { title: en.nav.fees, description: "NTU LIS Student Association membership fee: how to pay and the five member benefits." },
       sponsor: { title: en.nav.sponsor, description: "Sponsor the NTU LIS Student Association and partner with LIS students at National Taiwan University." },
-      join: { title: en.nav.join, description: "Join the NTU LIS Student Association: recruitment for General Affairs, Events, Academic Affairs, Media & Design and Sports." },
+      join: { title: en.nav.join, description: "Join the NTU LIS Student Association: recruitment for General Affairs, Events, Academic Affairs, Image & Publicity and Sports." },
       "dept-quiz": { title: "Department Quiz", description: "Answer a few quick questions to find the NTU LIS Student Association department that fits you best." },
     },
     article: "Announcements",

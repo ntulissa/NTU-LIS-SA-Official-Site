@@ -102,9 +102,9 @@ const P53: President = {
   cls: "B13",
   img: president53Photo,
   intro:
-    "第 53 屆系學會由會長黃子芸領軍，於 2025 年 7 月 30 日完成交接正式上任。本屆正副會長先前皆曾任第 52 屆系學會幹部，具備實務運作經驗；新團隊期望承接上一屆的基礎，推出讓系上同學更有感的活動與服務，成為圖資系學生大學四年最安心的避風港。本屆除了將持續舉辦各種活動、學術講座外，亦會做各大系隊最堅實的後盾，扮演學生、系辦與教師間的溝通橋樑，為系上帶來「看得見」的改變。",
+    "第 53 屆系學會由會長黃子芸領軍，於 2026 年 7 月 30 日完成交接正式上任。本屆正副會長先前皆曾任第 52 屆系學會幹部，具備實務運作經驗；新團隊期望承接上一屆的基礎，推出讓系上同學更有感的活動與服務，成為圖資系學生大學四年最安心的避風港。本屆除了將持續舉辦各種活動、學術講座外，亦會做各大系隊最堅實的後盾，扮演學生、系辦與教師間的溝通橋樑，為系上帶來「看得見」的改變。",
   introEn:
-    "The 53rd association, led by President Tzu-Yun Huang, officially took office after the handover on July 30, 2025. Both the President and Vice President served on the 52nd association and bring hands-on experience. Building on the previous term, the new team aims to offer events and services students can really feel, and to be the safest harbor for LIS students throughout university. Beyond events and academic talks, this term will stand firmly behind our sports teams and act as a bridge between students, the department office and faculty — bringing visible change to the department.",
+    "The 53rd association, led by President Tzu-Yun Huang, officially took office after the handover on July 30, 2026. Both the President and Vice President served on the 52nd association and bring hands-on experience. Building on the previous term, the new team aims to offer events and services students can really feel, and to be the safest harbor for LIS students throughout university. Beyond events and academic talks, this term will stand firmly behind our sports teams and act as a bridge between students, the department office and faculty — bringing visible change to the department.",
   depts: [],
 
   election: {
