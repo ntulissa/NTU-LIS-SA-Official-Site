@@ -88,9 +88,7 @@ const SPORTS: Record<Sport, SportInfo> = {
         // 三隊循環賽
         id: "md", zh: "男雙", en: "Men's Doubles", format: "list",
         matches: [
-          { group: "A", a: { name: "羅司家", members: "邱奕懷 & 成書宇" }, b: { name: "已報名", members: "陳昫翰 & 陳品元" } },
-          { group: "B", a: { name: "羅司家", members: "邱奕懷 & 成書宇" }, b: { name: "啊～是 Hung-You, LEE 來了", members: "曾柏翰 & 陳秉逸" } },
-          { group: "C", a: { name: "已報名", members: "陳昫翰 & 陳品元" }, b: { name: "啊～是 Hung-You, LEE 來了", members: "曾柏翰 & 陳秉逸" } },
+          { group: "A", a: { name: "已報名", members: "陳昫翰 & 陳品元" }, b: { name: "啊～是 Hung-You, LEE 來了", members: "曾柏翰 & 陳秉逸" } },
         ],
       },
       {
