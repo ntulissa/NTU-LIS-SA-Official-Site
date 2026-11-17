@@ -10,12 +10,15 @@ import { defineText, useI18n } from "../i18n";
  * ● 左邊：比賽 icon（src/imports/home-page/events/）＋ 日期、時間、地點（點地點開 Google 地圖）
  * ● 右邊：組別分頁（男單／女單…）＋ 賽程
  *     - 單打（4 人，A、B 組勝者爭冠）→ 左右對稱的對戰表
+ *       勝方的名字框變藍色，兩個名字框中間顯示「XXX 勝」＋比數
  *     - 循環賽、只有一場的組別 → 一場一列的對戰卡
  * ● 底部：羽球 ⇄ 排球 切換開關，大小、位置都跟首頁 Hero 的頁碼一模一樣
  *   （從 Hero 點「完整賽程」進來，開關會剛好出現在頁碼原本的位置）
  *   網址加 ?sport=volleyball 可以直接打開排球
  *
  * ★ 要更新賽程、比賽結果 → 改下面的 SPORTS
+ *   比完一場：在那場填 winner（"a" 或 "b"）＋ score（勝方比數寫前面，例："2:1"）
+ *   決賽比完：在組別填 champion（冠軍名字）＋ finalScore（例："2:0"）
  */
 
 // ══════════════════════════════════════════════════════════════════
@@ -37,7 +40,12 @@ type Match = {
   group?: string;     // 組別代號，例如 "A" → 顯示「A 組」
   a: Team;
   b: Team;
-  winner?: "a" | "b"; // 比完填上，輸的那邊會變淡
+  winner?: "a" | "b"; // 比完填上，贏的那邊會變藍色
+  score?: string;     // 比數，勝方寫前面，例如 "2:1"（會顯示成「2 : 1」）
+  // 打到一半、還沒分出勝負：unfinished: true → 兩邊都變黃色，下面顯示比數＋note
+  unfinished?: boolean;
+  note?: string;      // 補充說明（例：補賽時間）
+  noteEn?: string;
 };
 
 type Category = {
@@ -48,7 +56,8 @@ type Category = {
   // list   ：一場一列（循環賽、或只有一場時用）
   format: "bracket" | "list";
   matches: Match[];
-  champion?: string; // 淘汰賽冠軍（填名字），會顯示在對戰表中間
+  champion?: string;   // 淘汰賽冠軍（填名字），決賽中贏的那邊會變藍色
+  finalScore?: string; // 決賽比數，勝方寫前面，例如 "2:0"（顯示在兩位決賽選手上方）
 };
 
 type SportInfo = {
@@ -74,17 +83,19 @@ const SPORTS: Record<Sport, SportInfo> = {
         // 三人循環賽（成書宇退出，改為循環賽；每人各打兩場）
         id: "ms", zh: "男單", en: "Men's Singles", format: "list",
         matches: [
-          { a: "陳品元", b: "邱奕懷" },
-          { a: "陳品元", b: "陳昫翰" },
-          { a: "邱奕懷", b: "陳昫翰" },
+          { a: "陳品元", b: "邱奕懷", winner: "a", score: "2:1" },
+          { a: "邱奕懷", b: "陳昫翰", winner: "a", score: "2:0" },
+          { a: "陳品元", b: "陳昫翰", winner: "a", score: "2:0" },
         ],
       },
       {
         id: "ws", zh: "女單", en: "Women's Singles", format: "bracket",
         matches: [
-          { group: "A", a: "黃金淳", b: "劉瑩茜" },
-          { group: "B", a: "謝君兒", b: "陳戀芊" },
+          { group: "A", a: "黃金淳", b: "劉瑩茜", winner: "b", score: "2:0" },
+          { group: "B", a: "謝君兒", b: "黃子芸", winner: "b", score: "2:1" },
         ],
+        champion: "劉瑩茜",
+        finalScore: "2:0",
       },
       {
         // 三隊循環賽
@@ -96,7 +107,13 @@ const SPORTS: Record<Sport, SportInfo> = {
       {
         id: "xd", zh: "混雙", en: "Mixed Doubles", format: "list",
         matches: [
-          { group: "A", a: { name: "喬治羽明治", members: "黃子芸 & 曾柏翰" }, b: { name: "資資", members: "蕭忻緹 & 陳品元" } },
+          {
+            group: "A", a: { name: "喬治羽明治", members: "黃子芸 & 曾柏翰" }, b: { name: "資資", members: "蕭忻緹 & 陳品元" },
+            // 只打兩盤 1:1，下週補賽
+            unfinished: true, score: "1:1",
+            note: "未完賽，預計下週二（11/24）進行補賽",
+            noteEn: "Unfinished. Make-up match scheduled for next Tuesday (11/24).",
+          },
         ],
       },
     ],
@@ -125,6 +142,8 @@ const TEXT = defineText({
     signup: "立即報名",
     tbd: "對戰組合即將公布",
     champion: "冠軍",
+    final: "決賽",
+    wins: (name: string) => `${name} 勝`,
     vs: "VS",
     openMap: "在 Google 地圖開啟",
   },
@@ -140,6 +159,8 @@ const TEXT = defineText({
     signup: "Sign Up",
     tbd: "Matchups coming soon",
     champion: "Champion",
+    final: "Final",
+    wins: (name: string) => `${name} won`,
     vs: "VS",
     openMap: "Open in Google Maps",
   },
@@ -172,6 +193,17 @@ const SLOT_W = "clamp(104px, 11vw, 190px)";        // 選手名字框寬
 const SLOT_H = "clamp(42px, 6vh, 68px)";           // 選手名字框高
 const CONN_W = "clamp(28px, 4vw, 72px)";           // 對戰線寬
 const LINE = 3;                                     // 對戰線粗細（px）
+
+// ── 比賽結果 ──
+const WIN_COLOR = "#23658A";                        // 勝方名字框的藍色
+const UNFINISHED_COLOR = "#A27F00";                 // 未完賽：兩邊名字框的黃色
+const RESULT = {
+  size: "clamp(0.8rem, 1vw, 1.05rem)",              // 「XXX 勝」和比數的字級
+  color: "rgba(255,255,255,0.6)",                   // 結果文字顏色（白色 60%）
+  lineGap: "clamp(8px, 2.2vh, 26px)",               // 「XXX 勝」和比數之間的距離
+  finalGap: "clamp(10px, 2vh, 20px)",               // 決賽結果離下面名字框的距離（數字越大越往上）
+  finalSpace: "clamp(40px, 6vw, 140px)",            // 兩位決賽選手之間至少留多寬
+};
 // ══════════════════════════════════════════════════════════════════
 
 const zhDisplay = "'Chiron Hei HK Text', 'Noto Sans TC', sans-serif";
@@ -202,36 +234,53 @@ type Tx = (typeof TEXT)["zh"];
 const teamName = (t: Team) => (typeof t === "string" ? t : t.name);
 const teamMembers = (t: Team) => (typeof t === "string" ? undefined : t.members);
 
+// 比數 "2:1" → 「2 : 1」
+const formatScore = (s: string) => s.split(":").map((x) => x.trim()).join(" : ");
+
 // ── 淘汰賽：對戰組合 → 樹狀結構 ──
-type BNode = { name: string | null; lost?: boolean; children?: [BNode, BNode] };
+//   name＝這一格的人（有 children 時＝這場的勝者）；won＝這一格的人贏了他這場（變藍色）；score＝這場的比數
+type BNode = { name: string | null; won?: boolean; score?: string; children?: [BNode, BNode] };
 
 function buildBracket(cat: Category): BNode | null {
   if (cat.matches.length === 0) return null;
   // 第一輪
   let level: BNode[] = cat.matches.map((m) => {
-    const a: BNode = { name: teamName(m.a) }, b: BNode = { name: teamName(m.b) };
-    if (m.winner === "a") b.lost = true;
-    if (m.winner === "b") a.lost = true;
-    return { name: m.winner ? teamName(m[m.winner]) : null, children: [a, b] };
+    const a: BNode = { name: teamName(m.a), won: m.winner === "a" };
+    const b: BNode = { name: teamName(m.b), won: m.winner === "b" };
+    return { name: m.winner ? teamName(m[m.winner]) : null, score: m.winner ? m.score : undefined, children: [a, b] };
   });
-  // 之後每一輪（目前只用得到冠軍）
+  // 之後每一輪（目前只用得到決賽）
   while (level.length > 1) {
     const next: BNode[] = [];
     for (let i = 0; i < level.length; i += 2) {
-      const a = level[i], b = level[i + 1];
+      const a = level[i], b: BNode = level[i + 1] ?? { name: null };
       const w = level.length === 2 ? cat.champion ?? null : null;
       if (w) {
-        if (a.name && a.name !== w) a.lost = true;
-        if (b?.name && b.name !== w) b.lost = true;
+        if (a.name === w) a.won = true;
+        if (b.name === w) b.won = true;
       }
-      next.push({ name: w, children: [a, b ?? { name: null }] });
+      next.push({ name: w, score: w ? cat.finalScore : undefined, children: [a, b] });
     }
     level = next;
   }
   return level[0];
 }
 
-function Slot({ node, champion }: { node: BNode; champion?: boolean }) {
+// 「XXX 勝」＋ 比數（顯示在兩個名字框中間）
+function ResultLabel({ name, score, tx }: { name: string; score?: string; tx: Tx }) {
+  const { track } = useI18n();
+  return (
+    <div
+      className="flex flex-col items-center whitespace-nowrap pointer-events-none"
+      style={{ gap: RESULT.lineGap, color: RESULT.color, fontFamily: zhFont, fontWeight: 700, fontSize: RESULT.size, letterSpacing: track("0.12em", "0.02em"), lineHeight: 1 }}
+    >
+      <span>{tx.wins(name)}</span>
+      {score && <span className="tabular-nums" style={{ letterSpacing: "0.2em" }}>{formatScore(score)}</span>}
+    </div>
+  );
+}
+
+function Slot({ node }: { node: BNode }) {
   return (
     <div
       className="shrink-0 flex items-center justify-center rounded-xl text-center px-2"
@@ -239,9 +288,8 @@ function Slot({ node, champion }: { node: BNode; champion?: boolean }) {
         width: SLOT_W,
         height: SLOT_H,
         visibility: node.name ? "visible" : "hidden", // 還沒產生的晉級者：留位置但不顯示
-        background: champion ? "#FFFFFF" : "#1B1B1B",
-        color: champion ? "#000" : "#fff",
-        opacity: node.lost ? 0.45 : 1,
+        background: node.won ? WIN_COLOR : "#1B1B1B", // 勝方變藍色
+        color: "#fff",
         boxShadow: "0 8px 18px -6px rgba(0,0,0,0.6)",
         fontFamily: zhDisplay,
         fontWeight: 700,
@@ -275,16 +323,22 @@ function Connector({ side }: { side: "left" | "right" }) {
   );
 }
 
-function Branch({ node, side }: { node: BNode; side: "left" | "right" }) {
+function Branch({ node, side, tx }: { node: BNode; side: "left" | "right"; tx: Tx }) {
   if (!node.children) {
     return <div className="flex-1 flex items-center justify-center"><Slot node={node} /></div>;
   }
   return (
     <div className={`flex-1 flex items-stretch ${side === "right" ? "flex-row-reverse" : ""}`}>
-      <div className="flex flex-col">
+      <div className="relative flex flex-col">
         {node.children.map((c, i) => (
-          <div key={i} className="flex-1 basis-0 flex"><Branch node={c} side={side} /></div>
+          <div key={i} className="flex-1 basis-0 flex"><Branch node={c} side={side} tx={tx} /></div>
         ))}
+        {/* 比完：兩個名字框正中間顯示「XXX 勝」＋比數 */}
+        {node.name && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <ResultLabel name={node.name} score={node.score} tx={tx} />
+          </div>
+        )}
       </div>
       <Connector side={side} />
       <div className="flex items-center"><Slot node={node} /></div>
@@ -301,26 +355,28 @@ function BracketView({ category, tx }: { category: Category; tx: Tx }) {
   return (
     <div className="h-full overflow-x-auto">
       <div className="h-full min-w-[620px] flex items-stretch justify-between px-[clamp(16px,4vw,72px)] py-[clamp(16px,5vh,72px)]">
-        <div className="flex"><Branch node={l} side="left" /></div>
-        <div className="flex flex-col items-center justify-center gap-3">
+        <div className="flex"><Branch node={l} side="left" tx={tx} /></div>
+        {/* 決賽：兩位決賽選手中間，比完在名字框上方顯示「XXX 勝」＋比數 */}
+        <div className="relative shrink-0" style={{ width: RESULT.finalSpace }}>
           {root.name && (
-            <span className="text-white/80" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.2em" }}>{tx.champion}</span>
+            <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: `calc(50% + ${SLOT_H} / 2 + ${RESULT.finalGap})` }}>
+              <ResultLabel name={root.name} score={root.score} tx={tx} />
+            </div>
           )}
-          <Slot node={root} champion />
         </div>
-        <div className="flex"><Branch node={r} side="right" /></div>
+        <div className="flex"><Branch node={r} side="right" tx={tx} /></div>
       </div>
     </div>
   );
 }
 
 // ── 對戰卡：一場一列（循環賽、手機版都用這個）──
-function TeamBox({ team, lost }: { team: Team; lost?: boolean }) {
+function TeamBox({ team, won, unfinished }: { team: Team; won?: boolean; unfinished?: boolean }) {
   const members = teamMembers(team);
   return (
     <div
       className="h-full rounded-xl px-3 py-2.5 lg:py-3 flex flex-col items-center justify-center text-center text-white"
-      style={{ background: "#1B1B1B", opacity: lost ? 0.45 : 1, boxShadow: "0 8px 18px -6px rgba(0,0,0,0.6)" }}
+      style={{ background: unfinished ? UNFINISHED_COLOR : won ? WIN_COLOR : "#1B1B1B", boxShadow: "0 8px 18px -6px rgba(0,0,0,0.6)" }}
     >
       <span style={{ fontFamily: zhDisplay, fontWeight: 700, fontSize: "clamp(0.9rem, 1.3vw, 1.2rem)", letterSpacing: "0.08em", lineHeight: 1.35 }}>{teamName(team)}</span>
       {members && (
@@ -331,23 +387,52 @@ function TeamBox({ team, lost }: { team: Team; lost?: boolean }) {
 }
 
 function MatchList({ category, tx }: { category: Category; tx: Tx }) {
+  const { pick } = useI18n();
   if (category.matches.length === 0) return <Message text={tx.tbd} />;
+  // 每一列：組別標題 ＋ 對戰
+  const rows: (Match & { title?: string })[] = category.matches.map((m) => ({ ...m, title: m.group ? tx.group(m.group) : undefined }));
+  // 淘汰賽（手機版）：兩組都比完 → 多加一列「決賽」
+  let hasFinal = false;
+  if (category.format === "bracket" && category.matches.length === 2) {
+    const [m1, m2] = category.matches;
+    if (m1.winner && m2.winner) {
+      const a = m1[m1.winner], b = m2[m2.winner];
+      const c = category.champion;
+      const winner: Match["winner"] = c && teamName(a) === c ? "a" : c && teamName(b) === c ? "b" : undefined;
+      rows.push({ title: tx.final, a, b, winner, score: winner ? category.finalScore : undefined });
+      hasFinal = true;
+    }
+  }
   return (
     <div className="h-full overflow-y-auto flex">
       <div className="m-auto w-full max-w-[880px] flex flex-col gap-[clamp(10px,2.4vh,26px)] p-[clamp(14px,2.6vw,36px)]">
-        {category.matches.map((m, i) => (
+        {rows.map((m, i) => (
           <div key={i}>
-            {m.group && (
-              <p className="text-white/70 mb-1.5" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.8rem", letterSpacing: "0.2em" }}>{tx.group(m.group)}</p>
+            {m.title && (
+              <p className="text-white/70 mb-1.5" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.8rem", letterSpacing: "0.2em" }}>{m.title}</p>
             )}
             <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-2 sm:gap-4">
-              <TeamBox team={m.a} lost={m.winner === "b"} />
+              <TeamBox team={m.a} won={m.winner === "a"} unfinished={m.unfinished} />
               <span className="self-center text-white/60 px-1" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.8rem", letterSpacing: "0.1em" }}>{tx.vs}</span>
-              <TeamBox team={m.b} lost={m.winner === "a"} />
+              <TeamBox team={m.b} won={m.winner === "b"} unfinished={m.unfinished} />
             </div>
+            {/* 未完賽：下方顯示「1 : 1」＋補充說明 */}
+            {m.unfinished && (
+              <p className="text-center mt-2 tabular-nums" style={{ color: RESULT.color, fontFamily: zhFont, fontWeight: 700, fontSize: "0.8rem", letterSpacing: "0.12em", lineHeight: 1.7 }}>
+                {m.score ? formatScore(m.score) : ""}
+                {m.score && m.note ? "　" : ""}
+                {pick({ zh: m.note ?? "", en: m.noteEn || m.note || "" })}
+              </p>
+            )}
+            {/* 比完：下方顯示「XXX 勝　2 : 1」 */}
+            {m.winner && (
+              <p className="text-center mt-2 tabular-nums" style={{ color: RESULT.color, fontFamily: zhFont, fontWeight: 700, fontSize: "0.8rem", letterSpacing: "0.12em" }}>
+                {tx.wins(teamName(m[m.winner]))}{m.score ? `　${formatScore(m.score)}` : ""}
+              </p>
+            )}
           </div>
         ))}
-        {category.champion && (
+        {category.champion && !hasFinal && (
           <div className="text-center mt-2">
             <p className="text-white/70 mb-2" style={{ fontFamily: zhFont, fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.2em" }}>{tx.champion}</p>
             <div className="inline-block rounded-xl bg-white text-black px-6 py-3" style={{ fontFamily: zhDisplay, fontWeight: 700, letterSpacing: "0.12em" }}>{category.champion}</div>
