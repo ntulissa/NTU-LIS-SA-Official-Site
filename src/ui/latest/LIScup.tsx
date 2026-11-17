@@ -71,10 +71,12 @@ const SPORTS: Record<Sport, SportInfo> = {
     open: true,
     categories: [
       {
-        id: "ms", zh: "男單", en: "Men's Singles", format: "bracket",
+        // 三人循環賽（成書宇退出，改為循環賽；每人各打兩場）
+        id: "ms", zh: "男單", en: "Men's Singles", format: "list",
         matches: [
-          { group: "A", a: "陳品元", b: "邱奕懷" },
-          { group: "B", a: "成書宇", b: "陳昫翰" },
+          { a: "陳品元", b: "邱奕懷" },
+          { a: "陳品元", b: "陳昫翰" },
+          { a: "邱奕懷", b: "陳昫翰" },
         ],
       },
       {
