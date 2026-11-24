@@ -304,7 +304,7 @@ export const BENTO: Cell[] = [
   {
     type: "service", dept: "aca", slug: "textbook", zh: "教科書代訂",
     nameEn: "Textbook Ordering Service",
-    gc: "1 / span 3", gr: "5 / span 2",
+    gc: "1 / span 2", gr: "5 / span 2",
     en: "TEXTBOOK ORDERING SERVICE",
     intro:
       "開學總是為了找原文書四處比價、煩惱運費或買錯版本嗎？圖資系學會每學期初為大家提供專業必修與核心選修的「教科書代訂服務」，不僅能省去自行尋購與國際運送的繁瑣流程，更能享有最划算的團體優惠折扣；大家只需在期限內完成線上登記，開學後就能直接在系館輕鬆取書，省時又省荷包，幫你以最完備的狀態迎接新學期的課業挑戰！",
@@ -365,6 +365,20 @@ export const BENTO: Cell[] = [
       "Every March, when the azaleas bloom, NTU's department fair is the best way for high school students and the public to discover LIS. Our field combines the humanities with information technology — from big data and information retrieval to digital curation and knowledge organization. At our booth, students explain the curriculum and interview tips, with interactive games and limited-edition merch.",
     note: "招生季",
     noteEn: "Admissions season",
+  },
+  {
+    type: "service", dept: "aca", slug: "book-club", zh: "讀書會",
+    nameEn: "Book Club",
+    gc: "3 / span 1", gr: "5 / span 2", vertical: true,
+    en: "BOOK CLUB",
+    intro:
+      "身為圖資人，怎麼能少了和書相處的時光？系學會不定期舉辦「讀書會」，在忙碌的課業與報告之間，替大家留一個安靜、無壓力的角落；這裡沒有指定書目，也不用繳交心得報告，不論是小說、散文、漫畫還是專業書籍，只要帶上一本你想讀的書，就能和同樣熱愛閱讀的系胞們一起沉浸在文字裡，再隨性聊聊書中打動你的片段，交換彼此的閱讀清單，在書頁之間認識更多志同道合的夥伴！",
+    introEn:
+      "What's an LIS student without some quality time with books? Our Book Club offers a quiet, pressure-free corner amid busy coursework. There's no assigned reading and no reports to write. Novels, essays, comics or textbooks, bring whatever you'd like to read, enjoy it alongside fellow book lovers, then chat about the passages that moved you, swap reading lists and make new friends along the way.",
+    note: false,
+    href: "https://forms.gle/Ry3AzP66D1XLTBWC9",
+    dest: "讀書會報名表單",
+    destEn: "Book Club registration form",
   },
 
   // ══ ima 美宣（紫） ══

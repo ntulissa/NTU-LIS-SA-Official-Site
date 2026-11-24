@@ -171,7 +171,7 @@ export const EVENTS: CalEvent[] = [
     title: "LIS Cup 小圖盃：羽球",
     titleEn: "LIS Cup: Badminton",
     date: "2026-11-17",
-    moreDates: ["2026-11-24"],
+    moreDates: ["2026-11-31"],
     time: "16:00",
     depts: ["sp"],
     service: "lis-cup",
@@ -207,6 +207,28 @@ export const EVENTS: CalEvent[] = [
       "Leave the stress behind and enjoy a warm evening around the fire together.",
     signup: true,
     signupUrl: "https://docs.google.com/forms/d/e/1FAIpQLSf4UH065UIlHl3LfcSW9w5KeGxFnmln6pClduJtDN5esNOa2A/viewform",
+  },
+  {
+    title: "期中讀書會",
+    titleEn: "Mid-Term Book Club",
+    date: "2026-11-24",
+    time: "19:00",
+    depts: ["aca"], // TODO: 確認主辦部門（目前先放學術部）
+    // service: 省略也沒關係：標題含「讀書會」，首頁卡片會自動對應到 servicesData.ts 的 book-club
+    // image: "midterm-reading-2026.png", // 想要卡片圖：把圖放到 src/imports/home-page/events/ 再打開這行
+    location: "圖資系館學輔室",
+    locationEn: "Student Lounge, LIS Dept. Building",
+    mapUrl: "https://maps.app.goo.gl/EQhTGVqFgv9bMv2z9", // 沿用系館的地圖連結
+    desc:
+      "帶一本自己喜歡的書，在學輔室度過一段安靜、無壓力的閱讀夜晚。\n" +
+      "沒有指定書目、不用寫報告，和大家隨性聊聊書裡打動你的片段，還有免費小點心！\n" +
+      "限額 20 人，額滿截止，請盡量在 19:00 前抵達系館。",
+    descEn:
+      "Bring a book you love and spend a quiet, pressure-free evening of reading in the Student Lounge.\n" +
+      "No assigned reading, no reports. Just chat about the passages that moved you, with free snacks!\n" +
+      "Limited to 20 people. Please arrive at the department building by 7:00 p.m.",
+    signup: true,
+    signupUrl: "https://forms.gle/Ry3AzP66D1XLTBWC9",
   },
   {
     title: "十三系聯合耶誕舞會 2026",

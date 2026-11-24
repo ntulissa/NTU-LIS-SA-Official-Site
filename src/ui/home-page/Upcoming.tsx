@@ -42,6 +42,7 @@ const TEXT = defineText({
       bbq: "月色下升起的炭火，把秋夜的微風與相遇",
       "lis-cup": "球場上，圖資人盡情揮灑汗水與青春",
       "xmas-ball": "歲末最令人引頸期盼的跨系狂歡派對",
+      "book-club": "帶一本喜歡的書，在字裡行間偷得半日閒",
     } as Record<string, string>,
   },
   en: {
@@ -56,6 +57,7 @@ const TEXT = defineText({
       bbq: "Charcoal glowing under the moon on a breezy autumn night",
       "lis-cup": "LIS students giving it everything on the court",
       "xmas-ball": "The most anticipated cross-department party of the year",
+      "book-club": "Bring a book you love and slow down between the lines",
     },
   },
 });

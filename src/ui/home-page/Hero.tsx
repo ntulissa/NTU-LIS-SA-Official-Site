@@ -31,7 +31,9 @@ import { defineText, useI18n } from "../i18n";
 
 // ── 輪播順序：調換這幾個的順序即可；不想顯示某一頁就把它刪掉 ──
 type SlideId = "official" | "talks" | "liscup" | "battle" | "recruit";
-const SLIDE_ORDER: SlideId[] = ["official", "talks", "liscup", "battle", "recruit"];
+// ★ 2026 秋季系友講座已結束，先從輪播拿掉；版面（TalksSlide）與文字都保留，
+//   下學期要用時把 "talks" 加回下面陣列（原本位置在 "official" 後面）即可
+const SLIDE_ORDER: SlideId[] = ["official", "liscup", "battle", "recruit"];
 
 const AUTOPLAY_MS = 8000; // 自動切換間隔（毫秒）；設 0＝不自動切換
 const SLIDE_MS = 700;     // 切換動畫時間（毫秒）

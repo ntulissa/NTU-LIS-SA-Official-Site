@@ -35,6 +35,7 @@ import listalk2026fall from "@/imports/latest/listalk2026fall.png";
 import battleLA2026 from "@/imports/latest/battleLA2026.png";
 import lisCup2026badminton from "@/imports/latest/lisCup2026badminton.png";
 import LISSAofficialsite from "@/imports/latest/LISSAofficialsite.svg";
+import midtermReading2026 from "@/imports/latest/midtermReading2026.png";
 
 const lisCupVolleyballRulesPdf = new URL(
   "../../imports/latest/2026 小圖盃排球規章.pdf",
@@ -72,6 +73,42 @@ export type Announcement = {
 };
 
 export const ANNOUNCEMENTS: Announcement[] = [
+  {
+    slug: "midterm-reading-2026",
+    category: "學會公告",
+    categoryEn: "Announcement",
+    title: "期中讀書會：帶一本書來學輔室吧",
+    titleEn: "Mid-Term Book Club: Bring a Book to the Lounge",
+    author: "臺大圖資系學會",
+    authorEn: "NTU LIS Student Association",
+    date: "2026.11.22", 
+    excerpt: "想在忙碌的學期中找個安靜、無壓力的角落喘口氣嗎？系學會誠摯邀請大家帶一本自己喜歡的書，一起在學輔室享受一段純粹閱讀與交流的夜晚。",
+    excerptEn: "Looking for a quiet, pressure-free corner to catch your breath in the middle of a busy semester? LISSA invites you to bring a book you love and spend an evening of reading and conversation with us in the Student Lounge.",
+    paragraphs: [
+      "想在忙碌的學期中找個安靜、無壓力的角落喘口氣嗎？系學會誠摯邀請大家帶一本自己喜歡的書，一起在學輔室享受一段純粹閱讀與交流的夜晚。",
+      "這場活動沒有指定書目，也不需要寫艱深的報告，只要帶著想讀的書前來，和大家隨性聊聊書裡打動你的片段即可（還有免費小點心可以吃喔）",
+      "🕒 活動時間：11/24（二）19:00 – 21:00，可以的話請儘量在 19:00 之前到達系館",
+      "🏫 活動地點：圖資系館學輔室",
+      "🍁 參加對象：圖資系在學學生（含雙輔生）",
+      "🥳 報名名額：限額 20 人（額滿截止）",
+      "歡迎大家踴躍報名，揪同學一起來放鬆充電！期待在學輔室見到大家 ✨",
+    ],
+    paragraphsEn: [
+      "Looking for a quiet, pressure-free corner to catch your breath in the middle of a busy semester? LISSA invites you to bring a book you love and spend an evening of reading and conversation with us in the Student Lounge.",
+      "There's no assigned reading and no reports to write. Just bring whatever you'd like to read and chat casually about the passages that moved you. Free snacks included!",
+      "🕒 Time: Nov. 24 (Tue), 7:00 – 9:00 p.m. Please try to arrive at the department building before 7:00 p.m.",
+      "🏫 Location: Student Lounge, LIS Dept. Building",
+      "🍁 Who can join: Current LIS students (including double majors and minors)",
+      "🥳 Capacity: 20 people (first come, first served)",
+      "Sign up, bring a friend, and come recharge with us. See you in the Lounge ✨",
+    ],
+    image: midtermReading2026,
+    imageCaption: "期中讀書會（圖／臺大圖資系學會）",
+    imageCaptionEn: "Mid-Term Book Club (Image: NTU LIS Student Association)",
+    links: [
+      { label: "立即報名", labelEn: "Sign Up", href: "https://forms.gle/Ry3AzP66D1XLTBWC9" },
+    ],
+  },
   {
     slug: "lis-cup-2026-volleyball",
     category: "體育部",
